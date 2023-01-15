@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "662991987486",
+    "project_id": "kspot-002",
+    "storage_bucket": "kspot-002.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:662991987486:android:bbe2d068c8dbef0f6ddf0f",
+        "android_client_info": {
+          "package_name": "com.jhfactory.kspot002.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "662991987486-l55fi8278t6od6hb8oeqv5hmj5v2ppuc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4BgTVRI400uwFkTuH1YvSDfaKtdLpij8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "662991987486-l55fi8278t6od6hb8oeqv5hmj5v2ppuc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

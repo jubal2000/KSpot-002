@@ -6,10 +6,10 @@ import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-import '../core/app_data.dart';
-import '../core/dialogs.dart';
-import '../core/style.dart';
-import '../core/utils.dart';
+import '../data/app_data.dart';
+import '../data/dialogs.dart';
+import '../data/style.dart';
+import '../data/utils.dart';
 import 'card_scroll_viewer.dart';
 
 class ImageScrollViewer extends StatefulWidget {

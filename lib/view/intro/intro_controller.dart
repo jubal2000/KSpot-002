@@ -5,8 +5,8 @@ import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:get/get.dart';
 import 'package:store_redirect/store_redirect.dart';
-import '../../core/app_data.dart';
-import '../../core/utils.dart';
+import '../../data/app_data.dart';
+import '../../data/utils.dart';
 import '../../services/api_service.dart';
 import '../../services/local_service.dart';
 

@@ -1,8 +1,8 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import '../core/common_colors.dart';
-import '../core/common_sizes.dart';
+import '../data/common_colors.dart';
+import '../data/common_sizes.dart';
 
 TextStyle textFieldTextStyle = TextStyle(color: Colors.grey[800]);
 TextStyle tapMenuTitleTextStyle = TextStyle(

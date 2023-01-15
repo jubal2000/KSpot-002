@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:helpers/helpers.dart';
-import 'package:kspot_002/core/style.dart';
 
 import 'common_colors.dart';
+import 'style.dart';
 
 typedef JSON = Map<String, dynamic>;
 typedef SnapShot = QuerySnapshot<Map<String, dynamic>>;

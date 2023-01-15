@@ -10,7 +10,7 @@ import '../widget/main_list_item.dart';
 import 'app_data.dart';
 import 'common_colors.dart';
 import 'utils.dart';
-import '../core/style.dart';
+import '../data/style.dart';
 
 final dialogBgColor = NAVY.shade50;
 BuildContext? dialogContext;

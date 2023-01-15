@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../core/common_colors.dart';
-import '../core/common_sizes.dart';
-import '../core/style.dart';
+import '../data/common_colors.dart';
+import '../data/common_sizes.dart';
+import '../data/style.dart';
 
 class AmountTextField extends StatelessWidget {
   AmountTextField({

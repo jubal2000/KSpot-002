@@ -3,15 +3,15 @@ import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flash/flash.dart';
-import 'package:kspot_002/pages/intro/intro.dart';
-import 'package:kspot_002/pages/intro/intro_controller.dart';
+import '/view/intro/intro.dart';
+import '/view/intro/intro_controller.dart';
 import '/services/api_service.dart';
 import '/services/local_service.dart';
 import '/services/firebase_service.dart';
-import 'core/routes.dart';
-import 'core/themes.dart';
-import 'core/utils.dart';
-import 'core/words.dart';
+import 'data/routes.dart';
+import 'data/themes.dart';
+import 'data/utils.dart';
+import 'data/words.dart';
 
 Future<void> main() async {
   await GetStorage.init();

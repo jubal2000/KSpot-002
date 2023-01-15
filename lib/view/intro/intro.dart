@@ -1,17 +1,16 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
-import '../../core/app_data.dart';
-import '../../core/common_sizes.dart';
-import '../../core/utils.dart';
+import '../../data/app_data.dart';
+import '../../data/common_sizes.dart';
+import '../../data/utils.dart';
 import '../../services/api_service.dart';
 import '../../services/firebase_service.dart';
 import 'intro_controller.dart';
 
 class Intro extends GetView<IntroController> {
   Intro({Key? key}) : super(key: key);
-  final api = Get.find<ApiService>();
-  final firebase = Get.find<FirebaseService>();
+  final api = ApiService();
 
   @override
   Widget build(BuildContext context) {

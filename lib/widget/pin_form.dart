@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../core/common_colors.dart';
-import '../core/common_sizes.dart';
+import '../data/common_colors.dart';
+import '../data/common_sizes.dart';
 
 typedef PinFormCallback = void Function(String pinNum);
 

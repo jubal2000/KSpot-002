@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../core/common_colors.dart';
-import '../core/common_sizes.dart';
-import '../core/style.dart';
-import '../core/utils.dart';
+import '../data/common_colors.dart';
+import '../data/common_sizes.dart';
+import '../data/style.dart';
+import '../data/utils.dart';
 
 Widget mainListItem(JSON itemInfo, [Function()? onSelect]) {
   if (STR(itemInfo['icon']).isEmpty) {

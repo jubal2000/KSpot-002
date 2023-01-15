@@ -2,10 +2,10 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../core/app_data.dart';
-import '../core/dialogs.dart';
-import '../core/style.dart';
-import '../core/utils.dart';
+import '../data/app_data.dart';
+import '../data/dialogs.dart';
+import '../data/style.dart';
+import '../data/utils.dart';
 
 class ImageEditScrollViewer extends CardScrollViewer {
   ImageEditScrollViewer(

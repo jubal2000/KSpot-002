@@ -6,30 +6,24 @@ part of 'user_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-UserModel _$UserModelFromJson(Map<String, dynamic> json) => $checkedCreate(
-      'UserModel',
-      json,
-      ($checkedConvert) {
-        final val = UserModel(
-          userId: $checkedConvert('userId', (v) => v as String),
-          nickName: $checkedConvert('nickName', (v) => v as String),
-          pic: $checkedConvert('pic', (v) => v as String),
-          birthYear: $checkedConvert('birthYear', (v) => v as int),
-          gender: $checkedConvert('gender', (v) => v as String),
-          mobile: $checkedConvert('mobile', (v) => v as String),
-          email: $checkedConvert('email', (v) => v as String),
-          updateTime: $checkedConvert('updateTime', (v) => v as String? ?? ''),
-          createTime: $checkedConvert('createTime', (v) => v as String? ?? ''),
-          mobileCheck:
-              $checkedConvert('mobileCheck', (v) => v as bool? ?? false),
-          emailCheck: $checkedConvert('emailCheck', (v) => v as bool? ?? false),
-        );
-        return val;
-      },
+UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
+      userId: json['userId'] as String,
+      loginId: json['loginId'] as String,
+      nickName: json['nickName'] as String,
+      pic: json['pic'] as String,
+      birthYear: json['birthYear'] as int,
+      gender: json['gender'] as String,
+      mobile: json['mobile'] as String,
+      email: json['email'] as String,
+      updateTime: json['updateTime'] as String? ?? '',
+      createTime: json['createTime'] as String? ?? '',
+      mobileCheck: json['mobileCheck'] as bool? ?? false,
+      emailCheck: json['emailCheck'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'userId': instance.userId,
+      'loginId': instance.loginId,
       'nickName': instance.nickName,
       'pic': instance.pic,
       'birthYear': instance.birthYear,

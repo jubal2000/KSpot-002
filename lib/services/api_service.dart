@@ -43,9 +43,9 @@ class ApiService extends GetxService {
   Future<dynamic> getAppDataAll() async {
     final serverDataVer = AppData.startData!.infoVersion;
     AppData.localDataVer ??= await StorageManager.readData('infoVersion');
-    final mapData = await StorageManager.readData('appData');
-    if (mapData != null) {
-      AppData.localAppData ??= List<String>.from(mapData);
+    final appData = await StorageManager.readData('appData');
+    if (appData != null) {
+      AppData.localAppData ??= List<String>.from(appData);
     }
     LOG('--> getAppDataAll : $serverDataVer / ${AppData.localDataVer} - ${AppData.localAppData}');
     if (AppData.localAppData == null || AppData.localDataVer != serverDataVer) {

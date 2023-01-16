@@ -35,22 +35,26 @@ class _AddressTextFieldState extends State<AddressTextField> {
   }
 
   bool isReadOnly = true;
+  final _buttonHeight  = 45.0;
+  final _buttonRadius  = 8.0;
+  final _buttonPadding = 10.0;
+
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         SizedBox(
-          height: textfield_l_height,
+          height: _buttonHeight,
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(common_m_radius),
-                bottomLeft: Radius.circular(common_m_radius),
+                topLeft: Radius.circular(_buttonRadius),
+                bottomLeft: Radius.circular(_buttonRadius),
               ),
               color: NAVY[50],
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: common_xxs_gap),
+              padding: EdgeInsets.symmetric(horizontal: _buttonPadding),
               child: InkWell(
                   onTap: () {
                     callKeyboard();
@@ -100,13 +104,13 @@ class _AddressTextFieldState extends State<AddressTextField> {
       {required TextEditingController controller, required bool visible}) {
     return Container(
       constraints: BoxConstraints(minWidth: 12),
-      padding: EdgeInsets.only(right: common_xxxs_gap),
-      height: textfield_l_height,
+      padding: EdgeInsets.only(right: _buttonPadding),
+      height: _buttonHeight,
       decoration: BoxDecoration(
         color: NAVY[50],
         borderRadius: BorderRadius.only(
-          topRight: Radius.circular(common_m_radius),
-          bottomRight: Radius.circular(common_m_radius),
+          topRight: Radius.circular(_buttonRadius),
+          bottomRight: Radius.circular(_buttonRadius),
         ),
       ),
       child: Visibility(

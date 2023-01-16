@@ -4,9 +4,7 @@ import '../data/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 part 'start_model.g.dart';
 
-@JsonSerializable(
-  explicitToJson: true,
-)
+@JsonSerializable()
 class StartModel {
   String      id;
   int         infoVersion;

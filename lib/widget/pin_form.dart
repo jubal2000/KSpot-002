@@ -43,12 +43,15 @@ class _PinFormState extends State<PinForm> {
     super.dispose();
   }
 
+  static const itemHeight = 45.0;
+  static const fontSize = 12.0;
+
   List<String> _keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', ''];
   final Color lightdColor = NAVY[100]!;
   final Color greyColor = Colors.grey[300]!;
   final TextStyle keyboardTextStyle = TextStyle(
       color: Colors.grey[800],
-      fontSize: pin_keyboard_font_size,
+      fontSize: fontSize,
       fontWeight: FontWeight.w600);
   String pin = '';
   bool isLoading = false;

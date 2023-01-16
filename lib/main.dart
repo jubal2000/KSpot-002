@@ -3,8 +3,9 @@ import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flash/flash.dart';
+import 'package:kspot_002/view/app/app.dart';
 import '/view/intro/intro.dart';
-import '/view/intro/intro_controller.dart';
+import 'view_model/app_view_model.dart';
 import '/services/api_service.dart';
 import '/services/local_service.dart';
 import '/services/firebase_service.dart';
@@ -43,6 +44,8 @@ class MyApp extends StatelessWidget {
         Locale('en', 'US'),
       ],
       theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: ThemeMode.system,
       builder: (context, _) {
         var child = _!;
         final navigatorKey = GlobalKey<NavigatorState>();
@@ -59,17 +62,11 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: Routes.INTRO,
           page: () => Intro(),
-          binding: BindingsBuilder(
-                () => {Get.put(IntroController())},
-          ),
         ),
-        // GetPage(
-        //   name: Routes.HOME,
-        //   page: () => Home(),
-        //   binding: BindingsBuilder(
-        //         () => {Get.put(HomeController())},
-        //   ),
-        // ),
+        GetPage(
+          name: Routes.APP,
+          page: () => App(),
+        ),
         // GetPage(
         //   name: Routes.MAP_SCREEN,
         //   page: () => MapScreen(),

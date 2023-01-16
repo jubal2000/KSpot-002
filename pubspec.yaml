@@ -146,9 +146,6 @@ flutter:
 
   assets:
     - assets/ui/
-    - assets/ui/intro/
-    - assets/ui/main/
-    - assets/sample/
     - assets/html/
 
   # To add custom fonts to your application, add a fonts section here,

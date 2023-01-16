@@ -4,12 +4,10 @@ import '../data/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 part 'user_model.g.dart';
 
-@JsonSerializable(
-  checked: true,
-  createFactory: true,
-)
+@JsonSerializable()
 class UserModel {
   String    userId;
+  String    loginId;
   String    nickName;
   String    pic;
   int       birthYear;
@@ -22,6 +20,7 @@ class UserModel {
   bool      emailCheck;
   UserModel({
     required this.userId,
+    required this.loginId,
     required this.nickName,
     required this.pic,
     required this.birthYear,

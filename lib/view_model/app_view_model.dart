@@ -5,54 +5,53 @@ import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:get/get.dart';
 import 'package:store_redirect/store_redirect.dart';
-import '../../data/app_data.dart';
-import '../../data/utils.dart';
-import '../../services/api_service.dart';
-import '../../services/local_service.dart';
+import '../data/app_data.dart';
+import '../data/themes.dart';
+import '../data/utils.dart';
+import '../models/start_model.dart';
+import '../services/api_service.dart';
+import '../services/local_service.dart';
 
-class IntroController extends GetxController {
-  final api   = Get.find<ApiService>();
-  final local = Get.find<LocalService>();
+class AppViewModel extends ChangeNotifier {
+  final _api = Get.find<ApiService>();
 
   var isShowDialog = false;
   var isCanStart = false;
+  var mainIndex = 0;
 
-  @override
-  void onInit() async {
-    super.onInit();
+  setCanStart(value) {
+    isCanStart = value;
+    notifyListeners();
   }
 
-  Future<bool> checkAppUpdate(BuildContext context, JSON serverVersionData) async {
-    if (isShowDialog) return false;
+  Future<bool> checkAppUpdate(BuildContext context, StartModel? serverVersionData) async {
+    if (isShowDialog || serverVersionData == null) return false;
     isShowDialog = true;
-    LOG('--> checkAppUpdate : $serverVersionData');
+    LOG('--> checkAppUpdate : ${serverVersionData.toJSON()}');
 
     // check version from server..
-    final versionLocal = await StorageManager.readData('appVersion');
-    final versionData  = serverVersionData['appVersion'];
-    if (versionData != null) {
-      final versionInfo = Platform.isAndroid ? versionData['android'] : versionData['ios'];
-      final isForceUpdate = versionInfo['update'].toLowerCase() == 'y';
-      // final version = ''; // for Dev..
-      LOG('--> version : $isForceUpdate / $versionLocal / ${versionInfo['version']}');
-      if (isForceUpdate || checkVersionString(APP_VERSION, STR(versionInfo['version']), versionLocal ?? '')) {
-        var dlgResult = await showAppUpdateDialog(context,
-          STR(versionInfo['message']),
-          '$APP_VERSION > ${STR(versionInfo['version'])}',
-          isForceUpdate: isForceUpdate,
-        );
-        LOG('--> showAppUpdateDialog result : $dlgResult');
-        switch (dlgResult) {
-          case 1: // move market..
-            StoreRedirect.redirect(
-                androidAppId: "com.jhfactory.tld_info_00",
-                iOSAppId: "1597866658"
-            );
-            return !isForceUpdate;
-          case 2: // never show again..
-            StorageManager.saveData('appVersion', STR(versionInfo['version']));
-            break;
-        }
+    final versionLocal  = await StorageManager.readData('appVersion');
+    final versionServer = Platform.isAndroid ? serverVersionData.androidVersion : serverVersionData.iosVersion;
+    final isForceUpdate = Platform.isAndroid ? serverVersionData.androidUpdate : serverVersionData.iosUpdate;
+    // final version = ''; // for Dev..
+    LOG('--> version : $isForceUpdate / $versionLocal / $versionServer');
+    if (isForceUpdate || checkVersionString(APP_VERSION, versionServer, versionLocal ?? '')) {
+      var dlgResult = await showAppUpdateDialog(context,
+        'New Version',
+        '$APP_VERSION > $versionServer',
+        isForceUpdate: isForceUpdate,
+      );
+      LOG('--> showAppUpdateDialog result : $dlgResult');
+      switch (dlgResult) {
+        case 1: // move market..
+          StoreRedirect.redirect(
+              androidAppId: "com.jhfactory.kspot_002.android",
+              iOSAppId: "1597866658"
+          );
+          return !isForceUpdate;
+        case 2: // never show again..
+          StorageManager.saveData('appVersion', versionServer);
+          break;
       }
     }
     return true;
@@ -111,7 +110,7 @@ class IntroController extends GetxController {
           child: ListView(
             shrinkWrap: true,
             children: [
-              Image(image: AssetImage('assets/icons/app_icon_01.png'), height: 80, fit: BoxFit.fitHeight),
+              Image(image: AssetImage(APP_LOGO_XL), height: 80, fit: BoxFit.fitHeight),
               SizedBox(height: 20),
               Container(
                 width: double.infinity,

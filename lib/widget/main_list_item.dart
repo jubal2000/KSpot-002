@@ -7,6 +7,8 @@ import '../data/style.dart';
 import '../data/utils.dart';
 
 Widget mainListItem(JSON itemInfo, [Function()? onSelect]) {
+  const itemHeight  = 45.0;
+
   if (STR(itemInfo['icon']).isEmpty) {
     itemInfo['icon'] = '107';
   }
@@ -15,7 +17,7 @@ Widget mainListItem(JSON itemInfo, [Function()? onSelect]) {
         if (onSelect != null) onSelect();
       },
       child: Container(
-        height: item_height,
+        height: itemHeight,
         padding: EdgeInsets.fromLTRB(15, 3, 8, 3),
         margin: EdgeInsets.symmetric(vertical: 2),
         decoration: BoxDecoration(

@@ -4,6 +4,16 @@ import 'package:flutter/material.dart';
 import '../data/common_colors.dart';
 import '../data/common_sizes.dart';
 
+const double appbar_title_font_size = 18.0;
+const double main_menu_font_size = 14.0;
+const double dialog_title_font_size = 16.0;
+const double dialog_desc_font_size = 14.0;
+const double dialog_desc_ex_font_size = 12.0;
+const double item_title_font_size = 14.0;
+const double item_title_sub_font_size = 13.0;
+const double item_title_info_font_size = 12.0;
+const double item_desc_font_size = 11.0;
+
 TextStyle textFieldTextStyle = TextStyle(color: Colors.grey[800]);
 TextStyle tapMenuTitleTextStyle = TextStyle(
     fontSize: appbar_title_font_size, color: Colors.black54, fontWeight: FontWeight.w700);
@@ -39,13 +49,6 @@ TextStyle itemDescStyle = TextStyle(
     fontSize: item_desc_font_size, color: Colors.black54, fontWeight: FontWeight.w600);
 TextStyle itemDescLinkStyle = TextStyle(
     fontSize: item_desc_font_size, color: Colors.blue, fontWeight: FontWeight.w400, decoration: TextDecoration.underline);
-
-// pin..
-TextStyle pinTitleStyle = TextStyle(
-    fontSize: pin_title_font_size, color: Colors.black, fontWeight: FontWeight.w600, height: 1.1,
-    shadows: outlinedText(strokeWidth: 0.2, strokeColor: Colors.white));
-TextStyle pinEditTitleStyle = TextStyle(
-    fontSize: pin_edit_title_font_size, color: Colors.white, fontWeight: FontWeight.w600, height: 1.1);
 
 /// Outlines a text using shadows.
 List<Shadow> outlinedText({double strokeWidth = 1, Color strokeColor = Colors.black, int precision = 4}) {

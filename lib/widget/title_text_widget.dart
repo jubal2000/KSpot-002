@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import '../data/common_sizes.dart';
 import '../data/style.dart';
 import '../data/themes.dart';
-import '../data/utils.dart';
+import '../utils/utils.dart';
 
 TitleText(context, title1, title2,
     {double fontSize = UI_FONT_SIZE_LX, var align = MainAxisAlignment.center}) {

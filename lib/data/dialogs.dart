@@ -1,15 +1,19 @@
 
+import 'package:csc_picker/csc_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:kspot_002/data/theme_manager.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
+import '../services/local_service.dart';
+import '../utils/address_utils.dart';
 import '../widget/image_scroll_viewer.dart';
 import '../widget/main_list_item.dart';
 import 'app_data.dart';
 import 'common_colors.dart';
-import 'utils.dart';
+import '../utils/utils.dart';
 import '../data/style.dart';
 
 final dialogBgColor = NAVY.shade50;
@@ -274,6 +278,102 @@ showLoadingDialog(BuildContext context, String message) {
               ],
             ),
           )
+      );
+    },
+  );
+}
+
+Future showCountryLogSelectDialog(BuildContext mainContext, String title, List<JSON> countryLogData) {
+  List<Widget> _countryList = [];
+  BuildContext? _context;
+
+  for (var i=1; i<countryLogData.length; i++) {
+    var item = countryLogData[i];
+    _countryList.add(
+        GestureDetector(
+            onTap: () {
+              AppData.currentCountryFlag  = STR(item['countryFlag']);
+              AppData.currentCountry      = STR(item['country']);
+              AppData.currentState        = STR(item['countryState']);
+              writeCountryLocal();
+              Navigator.of(_context!).pop();
+            },
+            child: Container(
+                height: 40,
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                    children: [
+                      Text(STR(item['countryFlag'])),
+                      Text(' - '),
+                      Text(STR(item['countryState'])),
+                    ]
+                )
+            )
+        )
+    );
+  }
+  return showDialog(
+    context: mainContext,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      _context = context;
+      return PointerInterceptor(
+        child: AlertDialog(
+          title: Text(title, style: DialogTitleStyle(context)),
+          scrollable: true,
+          contentPadding: EdgeInsets.all(20),
+          insetPadding: EdgeInsets.all(0),
+          backgroundColor: DialogBackColor(context),
+          content: SingleChildScrollView(
+              child: Column(
+                  children: [
+                    CSCPicker(
+                      showCities: false,
+                      // layout: Layout.vertical,
+                      currentCountry: AppData.currentCountryFlag,
+                      currentState: AppData.currentState.isNotEmpty ? AppData.currentState : AppData.defaultState,
+                      currentCity: AppData.currentCity,
+                      selectedItemStyle: TextStyle(fontSize: 14),
+                      dropdownItemStyle: TextStyle(fontSize: 14),
+                      dropdownDecoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 2),
+                      ),
+                      disabledDropdownDecoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 2),
+                      ),
+                      onCountryChanged: (value) {
+                        AppData.currentCountryFlag = value;
+                        AppData.currentCountry     = GET_COUNTRY_EXCEPT_FLAG(value);
+                        AppData.currentCountryCode = CountryCodeSmall(value);
+                      },
+                      onStateChanged:(value) {
+                        AppData.currentState = value ?? '';
+                        if (AppData.currentState == 'State') AppData.currentState = '';
+                      },
+                      onCityChanged:(value) {
+                        AppData.currentCity = value ?? '';
+                        if (AppData.currentCity == 'City') AppData.currentCity = '';
+                      },
+                    ),
+                    SubTitle(context, 'SELECT LOG'.tr, 60),
+                    Column(
+                      children: _countryList,
+                    ),
+                  ]
+              )
+          ),
+          actions: [
+            TextButton(
+              child: Text('DONE'),
+              onPressed: () {
+                writeCountryLocal();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
       );
     },
   );

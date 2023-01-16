@@ -2,7 +2,7 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kspot_002/data/style.dart';
-import 'package:kspot_002/data/utils.dart';
+import 'package:kspot_002/utils/utils.dart';
 import 'package:provider/provider.dart';
 
 import '../services/local_service.dart';

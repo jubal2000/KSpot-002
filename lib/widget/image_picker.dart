@@ -4,7 +4,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../data/dialogs.dart';
-import '../data/utils.dart';
+import '../utils/utils.dart';
 import '../services/api_service.dart';
 
 // ignore: non_constant_identifier_names

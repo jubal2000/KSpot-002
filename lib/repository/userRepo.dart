@@ -1,6 +1,6 @@
 import 'package:kspot_002/services/api_service.dart';
 
-import '../data/utils.dart';
+import '../utils/utils.dart';
 import '../models/user_model.dart';
 
 class UserRepo {
@@ -28,5 +28,16 @@ class UserRepo {
       LOG("--> getUserInfo error: $e");
       throw e.toString();
     }
+  }
+
+  Future<bool> setUserInfoJSON(String userId, JSON items) async {
+    LOG('--> setUserInfoJSON : $userId / $items');
+    if (userId.isEmpty) return false;
+    return _apiService.setUserInfoJSON(userId, items);
+  }
+
+  Future<bool> setUserInfoItem(JSON userInfo, String key) async {
+    LOG('--> setUserInfoItem : ${userInfo['id']} - $key / ${userInfo[key]}');
+    return _apiService.setUserInfoItem(userInfo, key);
   }
 }

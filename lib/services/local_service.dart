@@ -7,7 +7,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/app_data.dart';
-import '../data/utils.dart';
+import '../utils/address_utils.dart';
+import '../utils/utils.dart';
 
 const _LocalData = 'local_data.txt';
 File? _LocalDataSet;
@@ -89,3 +90,25 @@ class StorageManager {
     return prefs.remove(key);
   }
 }
+
+readCountryLocal() async {
+  AppData.currentCountryFlag  = STR(await StorageManager.readData('countryFlag'), defaultValue: AppData.defaultCountryFlag);
+  AppData.currentCountry      = STR(await StorageManager.readData('country'), defaultValue: AppData.defaultCountry);
+  AppData.currentState        = STR(await StorageManager.readData('state'), defaultValue: AppData.defaultState);
+  AppData.currentCity         = STR(await StorageManager.readData('city'), defaultValue: AppData.defaultCity);
+  AppData.currentCountryCode  = CountryCodeSmall(AppData.currentCountry);
+  if (AppData.currentState == 'State') AppData.currentState = '';
+  if (AppData.currentCity  == 'City') AppData.currentCity = '';
+  LOG('--> get country info : ${AppData.currentCountryFlag} / ${AppData.currentCountry} / ${AppData.currentCountryCode} / ${AppData.currentState}');
+}
+
+writeCountryLocal() {
+  if (AppData.currentState == 'State') AppData.currentState = '';
+  if (AppData.currentCity  == 'City') AppData.currentCity = '';
+  StorageManager.saveData('countryFlag' , AppData.currentCountryFlag);
+  StorageManager.saveData('country'     , AppData.currentCountry);
+  StorageManager.saveData('state'       , AppData.currentState);
+  StorageManager.saveData('city'        , AppData.currentCity);
+  LOG('--> set country info : ${AppData.currentCountryFlag} / ${AppData.currentCountry} / ${AppData.currentState}');
+}
+

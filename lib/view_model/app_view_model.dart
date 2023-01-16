@@ -1,23 +1,42 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:kspot_002/view_model/user_view_model.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:store_redirect/store_redirect.dart';
 import '../data/app_data.dart';
+import '../data/dialogs.dart';
 import '../data/themes.dart';
-import '../data/utils.dart';
+import '../models/user_model.dart';
+import '../utils/utils.dart';
 import '../models/start_model.dart';
+import '../repository/userRepo.dart';
 import '../services/api_service.dart';
 import '../services/local_service.dart';
 
+class MainMenuID {
+  static int get hide     => 0;
+  static int get back     => 1;
+  static int get event    => 2;
+  static int get story    => 3;
+  static int get my       => 4;
+  static int get max      => 5;
+}
+
+const COUNTRY_LOG_MAX = 5;
+
 class AppViewModel extends ChangeNotifier {
-  final _api = Get.find<ApiService>();
+  final _api = ApiService();
 
   var isShowDialog = false;
   var isCanStart = false;
   var mainMenuIndex = 0;
+
+  // app bar..
+  var appbarMenuMode = MainMenuID.hide;
 
   setCanStart(value) {
     isCanStart = value;
@@ -88,6 +107,33 @@ class AppViewModel extends ChangeNotifier {
       LOG('--> error : $e');
     }
     return false;
+  }
+
+  showCountrySelect(context) {
+    LOG('--> showCountrySelect');
+    AppData.userInfo!.countrySelectList = [];
+    showCountryLogSelectDialog(context, 'COUNTRY SELECT'.tr,
+      List<JSON>.from(AppData.userInfo!.countrySelectList)).then((_) {
+        for (var item in AppData.userInfo!.countrySelectList) {
+          if (item.country == AppData.currentCountry && item.countryState == AppData.currentState) {
+            AppData.userInfo!.countrySelectList.remove(item);
+            break;
+          }
+        }
+        AppData.userInfo!.countrySelectList.insert(0, CountryData(
+            country:      AppData.currentCountry,
+            countryState: AppData.currentState,
+            countryFlag:  AppData.currentCountryFlag,
+            createTime  : CURRENT_SERVER_TIME(),
+        ));
+        if (AppData.userInfo!.countrySelectList.length > COUNTRY_LOG_MAX) {
+          AppData.userInfo!.countrySelectList.removeLast();
+        }
+        LOG('--> showCountrySelectDialog result : ${AppData.userInfo!.countrySelectList.toString()}');
+        // _userRepo.setUserInfoItem(AppData.userInfo, 'countrySelectList');
+        // refreshMainContent();
+      }
+    );
   }
 
   Future<int> showAppUpdateDialog(BuildContext context, String desc, String? msg, {bool isForceUpdate = false }) async {

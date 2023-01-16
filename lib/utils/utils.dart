@@ -8,9 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:helpers/helpers.dart';
+import 'package:kspot_002/data/theme_manager.dart';
 
-import 'common_colors.dart';
-import 'style.dart';
+import '../data/common_colors.dart';
+import '../data/style.dart';
 
 typedef JSON = Map<String, dynamic>;
 typedef SnapShot = QuerySnapshot<Map<String, dynamic>>;
@@ -263,8 +264,21 @@ STR_EMPTY(dynamic data) {
   return !STR_NOT_EMPTY(data);
 }
 
+// ignore: non_constant_identifier_names
 PARAMETER_JSON(String key, dynamic value) {
   return {key: json.encode(value)};
+}
+
+// ignore: non_constant_identifier_names
+GET_COUNTRY_EXCEPT_FLAG(String value) {
+  var result = '';
+  var arr = value.split(' ');
+  for (var i=1; i<arr.length; i++) {
+    var item = arr[i];
+    if (item != ' ' && result.isNotEmpty) result += ' ';
+    result += item;
+  }
+  return result;
 }
 
 Widget showImage(String url, Size size, [Color? color]) {
@@ -481,10 +495,8 @@ enum DropdownItemType {
 
   placeGroup,
   place,
-  placeEvent,
-  placeClass,
-  placeStory,
-  eventStory,
+  event,
+  story,
 
   historyLink,
   goodsLink,
@@ -538,11 +550,11 @@ class DropdownItem {
 }
 
 class DropdownItems {
-  static const List<DropdownItem> homeAddItems    = [placeGroup, place, placeEvent];
-  static const List<DropdownItem> homeAddItem0    = [placeStory, eventStory];
+  static const List<DropdownItem> homeAddItems    = [placeGroup, place, event];
+  static const List<DropdownItem> homeAddItem0    = [event, story];
   static const List<DropdownItem> homeAddItem10   = [place];
   static const List<DropdownItem> homeAddItem11   = [placeGroup, place];
-  static const List<DropdownItem> homeAddItem2    = [placeEvent, placeClass];
+  static const List<DropdownItem> homeAddItem2    = [event];
   static const List<DropdownItem> homeAddItem3    = [talent, goods];
   static const List<DropdownItem> placeItems0     = [disable, edit, delete, promotion];
   static const List<DropdownItem> placeItems1     = [enable, edit, delete];
@@ -569,10 +581,8 @@ class DropdownItems {
 
   static const placeGroup   = DropdownItem(DropdownItemType.placeGroup, text: 'SPOT GROUP +', icon: Icons.map_outlined);
   static const place        = DropdownItem(DropdownItemType.place, text: 'SPOT +', icon: Icons.place_outlined);
-  static const placeEvent   = DropdownItem(DropdownItemType.placeEvent, text: 'EVENT +', icon: Icons.event_available);
-  static const placeClass   = DropdownItem(DropdownItemType.placeClass, text: 'CLASS +', icon: Icons.school_outlined);
-  static const placeStory   = DropdownItem(DropdownItemType.placeStory, text: 'SPOT STORY +', icon: Icons.photo_camera_outlined);
-  static const eventStory   = DropdownItem(DropdownItemType.eventStory, text: 'EVENT STORY +', icon: Icons.photo_camera_outlined);
+  static const event        = DropdownItem(DropdownItemType.event, text: 'EVENT +', icon: Icons.event_available);
+  static const story        = DropdownItem(DropdownItemType.story, text: 'STORY +', icon: Icons.school_outlined);
 
   static const historyLink  = DropdownItem(DropdownItemType.historyLink, text: 'HISTORY LINK', icon: Icons.link);
   static const goodsLink    = DropdownItem(DropdownItemType.goodsLink, text: 'GOODS LINK', icon: Icons.link);
@@ -903,6 +913,42 @@ TextCheckBox(BuildContext context, String title, bool value,
                 ),
               ),
             ]
+          ]
+      )
+  );
+}
+
+// ignore: non_constant_identifier_names
+SubTitle(BuildContext context, String title, [double height = 40, double topPadding = 0, double bottomPadding = 0]) {
+  return Container(
+      height: height,
+      alignment: Alignment.centerLeft,
+      padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+      child: Text(title, style: TextStyle(color: SubTitleColor(context), fontWeight: FontWeight.w800))
+  );
+}
+
+// ignore: non_constant_identifier_names
+SubTitleSmall(BuildContext context, String title, [double height = 30, double topPadding = 0, double bottomPadding = 0]) {
+  return Container(
+      height: height,
+      alignment: Alignment.centerLeft,
+      padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+      child: Text(title, style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontWeight: FontWeight.w500, fontSize: 12))
+  );
+}
+
+// ignore: non_constant_identifier_names
+SubTitleEx(BuildContext context, String text, String desc, [double height = 30, double topPadding = 0, double bottomPadding = 0]) {
+  return Container(
+      height: height,
+      alignment: Alignment.centerLeft,
+      padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+      child: Row(
+          children: [
+            Text(text, style: TextStyle(color: SubTitleColor(context), fontWeight: FontWeight.w800)),
+            SizedBox(width: 5),
+            Text(desc, style: TextStyle(color: DescColor(context), fontWeight: FontWeight.w600, fontSize: 12)),
           ]
       )
   );

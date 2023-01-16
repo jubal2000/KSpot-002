@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:json_annotation/json_annotation.dart';
-import '../data/utils.dart';
+import '../utils/utils.dart';
 part 'story_model.g.dart';
 
 class StoryModel {

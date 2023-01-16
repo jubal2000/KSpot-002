@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import '../data/app_data.dart';
 import '../data/dialogs.dart';
 import '../data/style.dart';
-import '../data/utils.dart';
+import '../utils/utils.dart';
 
 class ImageEditScrollViewer extends CardScrollViewer {
   ImageEditScrollViewer(

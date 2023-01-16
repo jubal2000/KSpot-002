@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import '../data/utils.dart';
+import '../utils/utils.dart';
 
 import 'package:json_annotation/json_annotation.dart';
 part 'start_model.g.dart';

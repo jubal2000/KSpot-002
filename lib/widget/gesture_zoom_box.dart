@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../data/utils.dart';
+import '../utils/utils.dart';
 
 class GestureZoomBox extends StatefulWidget {
   final double maxScale;

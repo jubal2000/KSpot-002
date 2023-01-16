@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../data/common_colors.dart';
 import '../data/common_sizes.dart';
 import '../data/style.dart';
-import '../data/utils.dart';
+import '../utils/utils.dart';
 
 Widget mainListItem(JSON itemInfo, [Function()? onSelect]) {
   const itemHeight  = 45.0;

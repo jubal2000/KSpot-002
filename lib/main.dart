@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
@@ -14,7 +15,7 @@ import '/services/local_service.dart';
 import '/services/firebase_service.dart';
 import 'data/routes.dart';
 import 'data/themes.dart';
-import 'data/utils.dart';
+import 'utils/utils.dart';
 import 'data/words.dart';
 
 Future<void> main() async {
@@ -34,6 +35,14 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    // Make Fullscreen Mode..
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: []);
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.black,
+      statusBarBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.light,/* set Status bar icons color in Android devices.*/
+    ));
+
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,

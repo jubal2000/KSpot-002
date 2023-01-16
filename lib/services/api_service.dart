@@ -6,7 +6,7 @@ import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/app_data.dart';
-import '../data/utils.dart';
+import '../utils/utils.dart';
 import '../models/start_model.dart';
 import 'firebase_service.dart';
 import 'local_service.dart';
@@ -73,9 +73,16 @@ class ApiService extends GetxService {
     LOG('--> getServerAppDataAll [${INT(AppData.startData!.infoVersion)}] : $localDataList');
   }
 
+  //----------------------------------------------------------------------------
+  //
+  //  UserCollection
+  //
+
+  final UserCollection = 'data_user';
+
   Future<dynamic> getStartUserInfo(String loginId) async {
     try {
-      var collectionRef = firebase.firestore!.collection('data_user');
+      var collectionRef = firebase.firestore!.collection(UserCollection);
       var querySnapshot = await collectionRef
           .where('loginId', isEqualTo: loginId)
           .limit(1)
@@ -92,7 +99,7 @@ class ApiService extends GetxService {
 
   Future<dynamic> getUserInfo(String userId) async {
     try {
-      var collectionRef = firebase.firestore!.collection('data_user');
+      var collectionRef = firebase.firestore!.collection(UserCollection);
       var querySnapshot = await collectionRef
           .where('id', isEqualTo: userId)
           .limit(1)
@@ -105,6 +112,32 @@ class ApiService extends GetxService {
       throw e.toString();
     }
     return null;
+  }
+
+  Future<bool> setUserInfoJSON(String userId, JSON items) async {
+    if (userId.isEmpty) return false;
+    var collectionRef = firebase.firestore!.collection(UserCollection);
+    return collectionRef.doc(userId).update(Map<String, dynamic>.from(items)).then((result) {
+      return true;
+    }).onError((e, stackTrace) {
+      LOG('--> setUserInfoJSON error : $userId / $e');
+      return false;
+    });
+  }
+
+  Future<bool> setUserInfoItem(JSON userInfo, String key) async {
+    var collectionRef = firebase.firestore!.collection(UserCollection);
+    return collectionRef.doc(userInfo['id']).update(
+        {
+          key : userInfo[key],
+          'updateTime': CURRENT_SERVER_TIME()
+        }
+    ).then((result) {
+      return true;
+    }).onError((e, stackTrace) {
+      LOG('--> setUserInfo error : ${userInfo['id']} / $e');
+      return false;
+    });
   }
 
   //----------------------------------------------------------------------------------------

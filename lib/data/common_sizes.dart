@@ -1,7 +1,8 @@
 
 const double UI_APPBAR_TOOL_HEIGHT = 60.0;
 const double UI_ITEM_HEIGHT = 60.0;
-const double UI_BOTTOM_HEIGHT = 60.0;
+const double UI_BOTTOM_HEIGHT = 65.0;
+const double UI_BOTTOM_MENU_HEIGHT = 60.0;
 const double UI_ITEM_SPACE_HEIGHT = 5.0;
 const double UI_BUTTON_HEIGHT = 45.0;
 const double UI_ROUND_RADIUS = 12.0;
@@ -40,3 +41,4 @@ const double UI_FONT_SIZE_M = 16.0;
 const double UI_FONT_SIZE_MS = 15.0;
 const double UI_FONT_SIZE_S = 14.0;
 const double UI_FONT_SIZE_SX = 12.0;
+const double UI_FONT_SIZE_SS = 10.0;

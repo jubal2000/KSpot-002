@@ -6,7 +6,7 @@ import '../../data/app_data.dart';
 import '../../data/common_sizes.dart';
 import '../../data/routes.dart';
 import '../../data/themes.dart';
-import '../../data/utils.dart';
+import '../../utils/utils.dart';
 import '../../services/api_service.dart';
 import '../../services/firebase_service.dart';
 import '../../view_model/app_view_model.dart';

@@ -1,23 +1,23 @@
 import 'package:flutter/cupertino.dart';
 
-import '../data/utils.dart';
+import '../utils/utils.dart';
 import '../models/user_model.dart';
 import '../repository/userRepo.dart';
 
 class UserViewModel extends ChangeNotifier {
   final _userRepo = UserRepo();
 
-  UserModel? userModel;
+  UserModel? userInfo;
 
-  void _setUserMain(UserModel? userInfo) {
-    LOG("--> _setUserMain: ${userInfo?.toJSON()}");
-    userModel = userInfo;
+  void _setUserMain(UserModel? user) {
+    LOG("--> _setUserMain: ${user?.toJSON()}");
+    userInfo = user;
     notifyListeners();
   }
 
-  Future<void> getStartUserInfo(String loginId) async {
+  Future<void> getUserInfo(String userId) async {
     _userRepo
-        .getStartUserInfo(loginId)
+        .getUserInfo(userId)
         .then((value) => _setUserMain(value))
         .onError((error, stackTrace) => _setUserMain(null));
   }

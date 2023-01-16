@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/view/main_event/main_event.dart';
 import 'package:kspot_002/view/main_story/main_story.dart';
@@ -43,23 +44,25 @@ class App extends StatelessWidget {
                 child: Text('Ok'.tr),
               )
             ]
-        );
-      }
+          );
+        }
       ),
-      child: ChangeNotifierProvider<AppViewModel>(
-        create: (BuildContext context) => _viewModel,
-        child: Consumer<AppViewModel>(builder: (context, viewModel, _) {
-          return Consumer<ThemeNotifier>(
-            builder: (context, theme, _) => Scaffold(
-              body: IndexedStack(
-                key: ValueKey(_viewModel.mainMenuIndex),
-                index: _viewModel.mainMenuIndex,
-                children: pages,
-              ),
-              floatingActionButton: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  GestureDetector(
+      child: SafeArea(
+        child: ChangeNotifierProvider<AppViewModel>.value(
+        value: _viewModel,
+        child: Consumer<AppViewModel>(
+          builder: (context, viewModel, _) {
+            return Consumer<ThemeNotifier>(
+              builder: (context, theme, _) => Scaffold(
+                body: IndexedStack(
+                  key: ValueKey(_viewModel.mainMenuIndex),
+                  index: _viewModel.mainMenuIndex,
+                  children: pages,
+                ),
+                floatingActionButton: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
                       onTap: () {
                         var mode = theme.toggleSchemeMode();
                         Fluttertoast.showToast(
@@ -97,31 +100,43 @@ class App extends StatelessWidget {
                         width: _height,
                         child: Icon(Icons.color_lens_outlined),
                       )
-                  ),
-                ],
-              ),
-              bottomNavigationBar: Container(
-                height: UI_BOTTOM_HEIGHT,
-                child: BottomNavigationBar(
-                  onTap: (index) {
-                    _viewModel.setMainIndex(index);
-                  },
-                  currentIndex: _viewModel.mainMenuIndex,
-                  items: [
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.event_available_outlined),
-                      label: 'EVENT'.tr,
                     ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.photo_library_outlined),
-                      label: 'STORY'.tr,
-                    ),
-                  ]
+                  ],
                 ),
+                bottomNavigationBar: Container(
+                  height: UI_BOTTOM_HEIGHT,
+                  child: Stack(
+                    children: [
+                      BottomCenterAlign(
+                        child: SizedBox(
+                          height: UI_BOTTOM_MENU_HEIGHT,
+                          child: BottomNavigationBar(
+                            onTap: (index) {
+                              _viewModel.setMainIndex(index);
+                            },
+                            currentIndex: _viewModel.mainMenuIndex,
+                            selectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w600),
+                            unselectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w400),
+                            items: [
+                              BottomNavigationBarItem(
+                                icon: Icon(Icons.event_available_outlined),
+                                label: 'EVENT'.tr,
+                              ),
+                              BottomNavigationBarItem(
+                                icon: Icon(Icons.photo_library_outlined),
+                                label: 'STORY'.tr,
+                              ),
+                            ]
+                          ),
+                        )
+                      )
+                    ]
+                  )
+                )
               )
-            )
-          );
-        }),
+            );
+          }),
+        )
       )
     );
   }

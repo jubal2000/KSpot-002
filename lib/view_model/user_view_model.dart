@@ -21,4 +21,9 @@ class UserViewModel extends ChangeNotifier {
         .then((value) => _setUserMain(value))
         .onError((error, stackTrace) => _setUserMain(null));
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }

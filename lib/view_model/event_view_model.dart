@@ -9,9 +9,14 @@ class EventViewModel extends ChangeNotifier {
     _mainData![mainItem.id] = mainItem;
   }
 
-  showMainList() {
+  showMainList(context) {
     return ListView(
 
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

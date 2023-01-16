@@ -16,4 +16,7 @@ class AppData {
 
   static int? localDataVer;
   static List<String>? localAppData;
+
+  static var currentThemeMode = false;
+  static var currentThemeIndex = 0;
 }

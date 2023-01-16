@@ -93,6 +93,7 @@ dependencies:
   dropdown_button2: ^1.8.9
   flutter_svg: ^0.22.0
   flash: ^2.0.5
+  flutter_screenutil: ^5.6.0
 
   # connection..
   http: ^0.13.4

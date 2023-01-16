@@ -17,10 +17,15 @@ class AppViewModel extends ChangeNotifier {
 
   var isShowDialog = false;
   var isCanStart = false;
-  var mainIndex = 0;
+  var mainMenuIndex = 0;
 
   setCanStart(value) {
     isCanStart = value;
+    notifyListeners();
+  }
+
+  setMainIndex(index) {
+    mainMenuIndex = index;
     notifyListeners();
   }
 
@@ -155,5 +160,10 @@ class AppViewModel extends ChangeNotifier {
         ],
       );
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

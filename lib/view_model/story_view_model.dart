@@ -15,4 +15,9 @@ class StoryViewModel extends ChangeNotifier {
 
     );
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }

@@ -6,8 +6,10 @@ import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flash/flash.dart';
 import 'package:kspot_002/view/app/app.dart';
+import 'package:kspot_002/view/sign_up/sign_up.dart';
 import 'package:provider/provider.dart';
 import '/view/intro/intro.dart';
+import 'data/app_data.dart';
 import 'data/theme_manager.dart';
 import 'view_model/app_view_model.dart';
 import '/services/api_service.dart';
@@ -77,7 +79,8 @@ class MyApp extends StatelessWidget {
               );
               return child;
             },
-            initialRoute: Routes.INTRO,
+            // initialRoute: AppData.loginInfo.loginId.isEmpty ? Routes.INTRO : Routes.APP,
+            initialRoute: Routes.SIGNUP,
             getPages: [
               GetPage(
                 name: Routes.INTRO,
@@ -86,6 +89,10 @@ class MyApp extends StatelessWidget {
               GetPage(
                 name: Routes.APP,
                 page: () => App(),
+              ),
+              GetPage(
+                name: Routes.SIGNUP,
+                page: () => SignUp(),
               ),
               // GetPage(
               //   name: Routes.MAP_SCREEN,

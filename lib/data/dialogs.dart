@@ -543,3 +543,9 @@ Future showButtonDialog(BuildContext context,
     },
   );
 }
+
+hideLoadingDialog() {
+  if (dialogContext == null) return;
+  Navigator.of(dialogContext!).pop();
+  dialogContext = null;
+}

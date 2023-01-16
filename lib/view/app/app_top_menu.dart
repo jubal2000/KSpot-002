@@ -31,16 +31,11 @@ class AppTopMenuBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: ChangeNotifierProvider<AppViewModel>(
+    return ChangeNotifierProvider<AppViewModel>(
         create: (BuildContext context) => _viewModel,
         child: Consumer<AppViewModel>(builder: (context, viewModel, _) {
           viewModel.appbarMenuMode = menuMode;
-          return PointerInterceptor(
-            child: Container(
-              height: _height ,
-              padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-              child: Visibility(
+          return Visibility(
                 visible: viewModel.appbarMenuMode != MainMenuID.hide,
                 child: Stack(
                   children: [
@@ -50,9 +45,6 @@ class AppTopMenuBar extends StatelessWidget {
                           Get.back();
                         },
                         child: Container(
-                          height: _height,
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          color: Colors.grey.withAlpha(0),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -65,17 +57,14 @@ class AppTopMenuBar extends StatelessWidget {
                         )
                       ),
                       if (viewModel.appbarMenuMode != MainMenuID.back)
-                      Container(
-                        height: _height,
-                        alignment: Alignment.topCenter,
-                        child: Row(
+                        Row(
                           children: [
                             if (viewModel.appbarMenuMode == MainMenuID.event || viewModel.appbarMenuMode == MainMenuID.story)...[
-                              InkWell(
+                              GestureDetector(
                                 child: Container(
                                   alignment: Alignment.centerLeft,
                                   constraints: BoxConstraints(
-                                    maxWidth: 200,
+                                    minWidth: 200.w,
                                   ),
                                   child: Row(
                                     children: [
@@ -83,9 +72,10 @@ class AppTopMenuBar extends StatelessWidget {
                                       SizedBox(width: 5),
                                       Text(AppData.currentState, style: SubTitleStyle(context), maxLines: 2),
                                     ]
-                                  ),
+                                  )
                                 ),
                                 onTap: () {
+                                  LOG('--> showCountrySelect');
                                   viewModel.showCountrySelect(context);
                                 },
                               ),
@@ -172,7 +162,7 @@ class AppTopMenuBar extends StatelessWidget {
                                   SizedBox(width: 5),
                                   // ],
                                   SizedBox(
-                                    width: 38,
+                                    width: 35,
                                     child: IconButton(
                                       icon: Icon(Icons.message_outlined, color: Theme.of(context).iconTheme.color!.withOpacity(0.65)),
                                       onPressed: () {
@@ -181,7 +171,7 @@ class AppTopMenuBar extends StatelessWidget {
                                   ),
                                   Badge(
                                     position: BadgePosition(top:-2.5, end:-2.5),
-                                    badgeContent: Text('3', style: TextStyle(fontSize:13, fontWeight: FontWeight.bold, color: Colors.white)),
+                                    badgeContent: Text('3', style: TextStyle(fontSize:10, fontWeight: FontWeight.bold, color: Colors.white)),
                                     showBadge: true,
                                     child: IconButton(
                                       icon: Icon(Icons.event_available, color: Theme.of(context).iconTheme.color!.withOpacity(0.65)),
@@ -194,14 +184,10 @@ class AppTopMenuBar extends StatelessWidget {
                             ),
                           ],
                         )
-                      )
                     ]
                   )
-                )
-              )
             );
           }
-        )
       )
     );
   }

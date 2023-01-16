@@ -10,7 +10,7 @@ class StoryViewModel extends ChangeNotifier {
     _mainData![mainItem.id] = mainItem;
   }
 
-  showMainList() {
+  showMainList(context) {
     return ListView(
 
     );

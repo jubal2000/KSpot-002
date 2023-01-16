@@ -110,7 +110,6 @@ class AppViewModel extends ChangeNotifier {
   }
 
   showCountrySelect(context) {
-    LOG('--> showCountrySelect');
     AppData.userInfo!.countrySelectList = [];
     showCountryLogSelectDialog(context, 'COUNTRY SELECT'.tr,
       List<JSON>.from(AppData.userInfo!.countrySelectList)).then((_) {

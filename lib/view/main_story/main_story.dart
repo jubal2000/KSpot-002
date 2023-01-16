@@ -20,12 +20,12 @@ class MainStory extends StatelessWidget {
       value: _viewModel,
       child: Consumer<StoryViewModel>(builder: (context, viewModel, _) {
         return Scaffold(
-          body: Stack(
-            children: [
-              AppTopMenuBar(MainMenuID.story),
-              _viewModel.showMainList(),
-            ]
-          )
+          appBar: AppBar(
+            title: AppTopMenuBar(MainMenuID.story),
+            automaticallyImplyLeading: false,
+            toolbarHeight: UI_APPBAR_TOOL_HEIGHT.w,
+          ),
+          body: _viewModel.showMainList(context),
         );
       }),
     );

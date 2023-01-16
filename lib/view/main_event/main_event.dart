@@ -19,12 +19,12 @@ class MainEvent extends StatelessWidget {
       value: _viewModel,
       child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
         return Scaffold(
-          body: Stack(
-            children: [
-              AppTopMenuBar(MainMenuID.event),
-              _viewModel.showMainList(context),
-            ]
-          )
+          appBar: AppBar(
+            title: AppTopMenuBar(MainMenuID.event),
+            automaticallyImplyLeading: false,
+            toolbarHeight: UI_APPBAR_TOOL_HEIGHT.w,
+          ),
+          body: _viewModel.showMainList(context),
         );
       }),
     );

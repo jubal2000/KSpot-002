@@ -5,11 +5,14 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:helpers/helpers.dart';
+import 'package:intl/intl.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 
+import '../data/app_data.dart';
 import '../data/common_colors.dart';
 import '../data/style.dart';
 
@@ -216,9 +219,111 @@ DESC(dynamic desc) {
 }
 
 // ignore: non_constant_identifier_names
+SERVER_DATE(DateTime date) {
+  Timestamp currentTime = Timestamp.fromDate(DateTime(date.year, date.month, date.day));
+  return currentTime;
+}
+
+// ignore: non_constant_identifier_names
 CURRENT_SERVER_TIME() {
   Timestamp currentTime = Timestamp.fromDate(DateTime.now());
   return currentTime;
+}
+
+// ignore: non_constant_identifier_names
+OFFSET_CURRENT_SERVER_TIME(Duration duration) {
+  var now = DateTime.now();
+  Timestamp currentTime = Timestamp.fromDate(DateTime(now.year, now.month, now.day).add(duration));
+  return currentTime;
+}
+
+// ignore: non_constant_identifier_names
+CURRENT_SERVER_TIME_JSON() {
+  Timestamp currentTime = Timestamp.fromDate(DateTime.now());
+  return {
+    '_seconds' : currentTime.seconds,
+    '_nanoseconds' : currentTime.nanoseconds,
+  };
+}
+
+// ignore: non_constant_identifier_names
+CURRENT_SERVER_DATE() {
+  var now = DateTime.now();
+  return SERVER_DATE(now);
+}
+
+// ignore: non_constant_identifier_names
+DATE_STR(DateTime date) {
+  var format = DateFormat('yyyy-MM-dd');
+  return format.format(date).toString();
+}
+
+// ignore: non_constant_identifier_names
+TIME_STR(DateTime date) {
+  var format = DateFormat('HH:mm');
+  return format.format(date).toString();
+}
+
+// ignore: non_constant_identifier_names
+PRICE_STR(price) {
+  if (price == null || price.toString().isEmpty) return '0';
+  var value = 0.0;
+  if (price is String) {
+    value = double.parse(price);
+  } else {
+    value = double.parse('$price');
+  }
+  var priceFormat = NumberFormat('###,###,###,###.##');
+  return priceFormat.format(value).toString();
+}
+
+// ignore: non_constant_identifier_names
+PRICE_FULL_STR(price, currency, [bool isShowEx = true]) {
+  var priceStr = PRICE_STR(price);
+  return '${CURRENCY_STR(currency)}$priceStr ${isShowEx?'($currency)':''}';
+}
+
+// ignore: non_constant_identifier_names
+SALE_STR(value) {
+  if (value == null) return '';
+  double tmpNum = value;
+  var format1 = NumberFormat('###,###,###,###.##');
+  var format2 = NumberFormat('###,###,###,###');
+  return tmpNum - tmpNum.floor() > 0 ? format1.format(tmpNum).toString() : format2.format(tmpNum).toString();
+}
+
+// ignore: non_constant_identifier_names
+REMAIN_DATETIME(dynamic dateTime) {
+  if (dateTime == null) {
+    LOG('---> REMAIN_DATETIME is Zero');
+    return 0;
+  }
+  var format = DateFormat('yyyy-MM-dd');
+  var dateStr = '';
+  try {
+    if (dateTime is Map && dateTime['_seconds'] != null) {
+      var date = TME(dateTime);
+      dateStr = format.format(date).toString();
+      LOG('---> REMAIN_DATETIME dateStr : $dateStr');
+    } else {
+      dateStr = dateTime;
+    }
+    DateTime date = format.parse(dateStr);
+    LOG('---> REMAIN_DATETIME : $dateStr / ${date.difference(DateTime.now()).inDays} / ${date.difference(DateTime.now()).inHours}');
+    return date.difference(DateTime.now()).inDays + (date.difference(DateTime.now()).inHours > 0 ? 1 : 0);
+  } catch (e) {
+    LOG('---> REMAIN_DATETIME Error : $e / $dateStr');
+    return 0;
+  }
+}
+
+CURRENCY_STR(String key) {
+  return AppData.INFO_CURRENCY.containsKey(key) ? AppData.INFO_CURRENCY[key]['currency'] : '';
+}
+
+CURRENCY_SELECT_LIST() {
+  List<JSON> _currencyList = List<JSON>.from(AppData.INFO_CURRENCY.entries.map((item) => {'key': item.key, 'title': '${item.key} ${item.value['currency']}'}).toList());
+  return _currencyList;
 }
 
 colorToHexString(Color color) {
@@ -483,6 +588,22 @@ inputLabelSuffix(BuildContext context, String label, String hint, {String suffix
       borderSide: BorderSide(width: width, color: Colors.grey.withOpacity(0.5)),
     ),
   );
+}
+
+ShowToast(text, [Color backColor = Colors.black45, Color textColor = Colors.white]) {
+  Fluttertoast.showToast(
+      msg: text,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: backColor,
+      textColor: textColor,
+      fontSize: 14.0
+  );
+}
+
+ShowErrorToast(text)  {
+  ShowToast(text, Colors.black45, Colors.deepPurpleAccent);
 }
 
 enum DropdownItemType {
@@ -951,5 +1072,55 @@ SubTitleEx(BuildContext context, String text, String desc, [double height = 30, 
             Text(desc, style: TextStyle(color: DescColor(context), fontWeight: FontWeight.w600, fontSize: 12)),
           ]
       )
+  );
+}
+
+
+// ignore: non_constant_identifier_names
+RoundRectButton(String title, double? height, Function()? onPressed) {
+  final _titleStyle  = TextStyle(color: Colors.black, fontWeight: FontWeight.w800, fontSize: 16);
+  return SizedBox(
+    height: height ?? 40,
+    child: ElevatedButton(
+      onPressed: () {
+        if (onPressed != null) onPressed();
+      },
+      child: Text(title, style: _titleStyle),
+      style: ElevatedButton.styleFrom(
+          primary: Colors.white,
+          minimumSize: Size.zero, // Set this
+          padding: EdgeInsets.symmetric(horizontal: 15), // and this
+          shadowColor: Colors.transparent,
+          alignment: Alignment.center,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(color: Colors.grey, width: 2)
+          )
+      ),
+    ),
+  );
+}
+
+// ignore: non_constant_identifier_names
+RoundRectButtonEx(BuildContext context, String title, {double height = 40, bool isEnabled = true, Function()? onPressed}) {
+  return SizedBox(
+    height: height,
+    child: ElevatedButton(
+      onPressed: () {
+        if (isEnabled && onPressed != null) onPressed();
+      },
+      child: Text(title, style: isEnabled ? ItemButtonNormalStyle(context) : ItemButtonDisableStyle(context)),
+      style: ElevatedButton.styleFrom(
+          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.25),
+          minimumSize: Size.zero, // Set this
+          padding: EdgeInsets.symmetric(horizontal: 15), // and this
+          shadowColor: Colors.transparent,
+          alignment: Alignment.center,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(color: Theme.of(context).primaryColor.withOpacity(isEnabled ? 0.5 : 0.2), width: 2)
+          )
+      ),
+    ),
   );
 }

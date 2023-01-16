@@ -8,19 +8,36 @@ part of 'user_model.dart';
 
 UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       userId: json['userId'] as String,
-      loginId: json['loginId'] as String,
-      nickName: json['nickName'] as String,
-      pic: json['pic'] as String,
-      birthYear: json['birthYear'] as int,
-      gender: json['gender'] as String,
-      mobile: json['mobile'] as String,
-      email: json['email'] as String,
-      country: json['country'] as String,
-      countryState: json['countryState'] as String,
+      status: json['status'] as int? ?? 0,
+      loginId: json['loginId'] as String? ?? '',
+      loginType: json['loginType'] as String? ?? '',
+      nickName: json['nickName'] as String? ?? '',
+      pic: json['pic'] as String? ?? '',
+      birthYear: json['birthYear'] as int? ?? 0,
+      gender: json['gender'] as String? ?? '',
+      mobile: json['mobile'] as String? ?? '',
+      mobileIntl: json['mobileIntl'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      country: json['country'] as String? ?? '',
+      countryState: json['countryState'] as String? ?? '',
+      pushToken: json['pushToken'] as String? ?? '',
+      deviceType: json['deviceType'] as String? ?? '',
       updateTime: json['updateTime'] as String? ?? '',
       createTime: json['createTime'] as String? ?? '',
-      mobileCheck: json['mobileCheck'] as bool? ?? false,
-      emailCheck: json['emailCheck'] as bool? ?? false,
+      mobileVerifyTime: json['mobileVerifyTime'] as String? ?? '',
+      emailVerifyTime: json['emailVerifyTime'] as String? ?? '',
+      mobileVerified: json['mobileVerified'] as bool? ?? false,
+      emailVerified: json['emailVerified'] as bool? ?? false,
+      optionData: (json['optionData'] as Map<String, dynamic>?)?.map(
+            (k, e) =>
+                MapEntry(k, OptionData.fromJson(e as Map<String, dynamic>)),
+          ) ??
+          const {},
+      optionPush: (json['optionPush'] as Map<String, dynamic>?)?.map(
+            (k, e) =>
+                MapEntry(k, OptionData.fromJson(e as Map<String, dynamic>)),
+          ) ??
+          const {},
       countrySelectList: (json['countrySelectList'] as List<dynamic>?)
               ?.map((e) => CountryData.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -29,19 +46,28 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'userId': instance.userId,
+      'status': instance.status,
       'loginId': instance.loginId,
+      'loginType': instance.loginType,
       'nickName': instance.nickName,
       'pic': instance.pic,
       'birthYear': instance.birthYear,
       'gender': instance.gender,
       'mobile': instance.mobile,
+      'mobileIntl': instance.mobileIntl,
       'email': instance.email,
       'country': instance.country,
       'countryState': instance.countryState,
+      'pushToken': instance.pushToken,
+      'deviceType': instance.deviceType,
       'updateTime': instance.updateTime,
       'createTime': instance.createTime,
-      'mobileCheck': instance.mobileCheck,
-      'emailCheck': instance.emailCheck,
+      'mobileVerifyTime': instance.mobileVerifyTime,
+      'emailVerifyTime': instance.emailVerifyTime,
+      'mobileVerified': instance.mobileVerified,
+      'emailVerified': instance.emailVerified,
+      'optionData': instance.optionData,
+      'optionPush': instance.optionPush,
       'countrySelectList': instance.countrySelectList,
     };
 
@@ -58,4 +84,15 @@ Map<String, dynamic> _$CountryDataToJson(CountryData instance) =>
       'countryState': instance.countryState,
       'countryFlag': instance.countryFlag,
       'createTime': instance.createTime,
+    };
+
+OptionData _$OptionDataFromJson(Map<String, dynamic> json) => OptionData(
+      id: json['id'],
+      value: json['value'],
+    );
+
+Map<String, dynamic> _$OptionDataToJson(OptionData instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'value': instance.value,
     };

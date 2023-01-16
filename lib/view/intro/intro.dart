@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +24,7 @@ class Intro extends StatelessWidget {
         body: SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+            padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
             child: FutureBuilder(
             future: _api.getAppStartInfo(),
             builder: (context, snapshot) {
@@ -51,29 +53,47 @@ class Intro extends StatelessWidget {
                               width: MediaQuery.of(context).size.width * 0.5,
                             )
                         ),
-                        Align(
-                          alignment: Alignment(0, 0.65),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            // crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Container(
-                                width: MediaQuery.of(context).size.width,
-                                height: UI_BUTTON_HEIGHT,
-                                padding: EdgeInsets.symmetric(horizontal: 20),
-                                child: Visibility(
-                                  visible: _viewModel.isCanStart,
+                        Visibility(
+                          visible: _viewModel.isCanStart,
+                          child: Align(
+                            alignment: Alignment(0, 0.65),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (AppData.loginInfo.loginType.isEmpty)...[
+                                Container(
+                                  width: Get.size.width,
+                                  height: UI_BUTTON_HEIGHT,
+                                  padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
                                   child: ElevatedButton(
-                                    onPressed: () {
-                                      Get.toNamed(Routes.APP);
+                                    onPressed: () async {
                                     },
                                     child: Text(
-                                      'START'.tr,
+                                      'SIGN UP'.tr,
                                     )
                                   ),
+                                ),
+                                  SizedBox(height: UI_ITEM_SPACE.w),
+                                ],
+                                Container(
+                                  width: Get.size.width,
+                                  height: UI_BUTTON_HEIGHT,
+                                  padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
+                                  child: ElevatedButton(
+                                      onPressed: () async {
+                                        if (AppData.loginInfo.loginId.isEmpty) {
+                                          final userCredential = await FirebaseAuth.instance.signInAnonymously();
+                                          LOG('--> userCredential : $userCredential');
+                                        }
+                                        Get.toNamed(Routes.APP);
+                                      },
+                                      child: Text(
+                                        'START'.tr,
+                                      )
+                                  ),
                                 )
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                         Align(

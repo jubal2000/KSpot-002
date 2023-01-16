@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 import 'package:package_info/package_info.dart';
@@ -20,7 +21,6 @@ class ApiService extends GetxService {
   var firebase = Get.find<FirebaseService>();
 
   void initService() {
-
   }
 
   Future<dynamic> getAppStartInfo() async {
@@ -138,31 +138,6 @@ class ApiService extends GetxService {
       LOG('--> setUserInfo error : ${userInfo['id']} / $e');
       return false;
     });
-  }
-
-  //----------------------------------------------------------------------------------------
-  //
-  //    upload file..
-  //
-
-  Future? uploadImageData(JSON imageInfo, String path) async {
-    if (imageInfo['image'] != null) {
-      try {
-        final ref = firebase.firesStorage!.ref().child('$path/${imageInfo['id']}');
-        var uploadTask = ref.putData(imageInfo['image']);
-        var snapshot = await uploadTask;
-        if (snapshot.state == TaskState.success) {
-          var imageUrl = await snapshot.ref.getDownloadURL();
-          LOG('--> uploadImageData done : $imageUrl');
-          return imageUrl;
-        } else {
-          return null;
-        }
-      } catch (e) {
-        LOG('--> uploadImageData error : $e');
-      }
-    }
-    return null;
   }
 }
 

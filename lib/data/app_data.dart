@@ -8,6 +8,9 @@ const SCROLL_SPEED = 250;
 const APP_VERSION = '0.0.1';
 const ORG_SCREEN_WITH = 411;
 const NICKNAME_LENGTH = 12;
+const TITLE_LENGTH = 24;
+const DESC_LENGTH = 999;
+const IMAGE_SIZE_MAX = 512.0;
 const GOOGLE_MAP_KEY = 'AIzaSyD4ESmTaou10BumFoJ7DQ7jkTI7emh4Hvo';
 
 class AppData {

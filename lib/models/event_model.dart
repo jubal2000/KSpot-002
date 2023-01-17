@@ -1,8 +1,71 @@
+import 'dart:typed_data';
+
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../utils/utils.dart';
 part 'event_model.g.dart';
 
+class EventModeEx extends EventModel {
+  EventModeEx.empty(
+      String id,
+      {
+        int    status = 0,
+        String title = '',
+        String desc = '',
+        String pic = '',
+        String groupId = '',
+        String placeId = '',
+        double enterFee = 0,
+        String reserveFee = '',
+        String currency = '',
+        String country = '',
+        String countryState = '',
+        String userId = '',
+        int reservePeriod = 0,
+        int likeCount = 0,
+        int voteCount = 0,
+        String updateTime = '',
+        String createTime = '',
+
+        List<String> tagData = const [],
+        List<String> managerData = const [],
+        List<String> searchData = const [],
+        List<PicData> picData = const [],
+        List<TimeData> timeData = const [],
+        List<OptionData> optionData = const [],
+        List<PromotionData> promotionData = const [],
+      }) : super(
+        id: id,
+        status: status,
+        title: title,
+        desc: desc,
+        pic: pic,
+        groupId: groupId,
+        placeId: placeId,
+        enterFee: enterFee,
+        reserveFee: reserveFee,
+        currency: currency,
+        country: country,
+        countryState: countryState,
+        userId: userId,
+        reservePeriod: reservePeriod,
+        likeCount: likeCount,
+        voteCount: voteCount,
+        updateTime: updateTime,
+        createTime: createTime,
+
+        tagData: tagData,
+        managerData: managerData,
+        searchData: searchData,
+        picData: picData,
+        timeData: timeData,
+        optionData: optionData,
+        promotionData: promotionData,
+      );
+}
+
+@JsonSerializable()
 class EventModel {
   String  id;
   int     status;         // 상태 (0:removed, 1:active, 2:disable, 3:ready)
@@ -27,7 +90,7 @@ class EventModel {
   List<String>        managerData;    // 관리자 ID 목록
   List<String>        searchData;     // 검색어 목록
   List<PicData>       picData;        // 메인 이미지 목록
-  List<TimeData>      eventTime;      // 시간 정보 목록
+  List<TimeData>      timeData;      // 시간 정보 목록
   List<OptionData>    optionData;     // 옵션 정보
   List<PromotionData> promotionData;  // 광고설정 정보
 
@@ -55,71 +118,12 @@ class EventModel {
     required this.picData,
     required this.managerData,
     required this.searchData,
-    required this.eventTime,
+    required this.timeData,
     required this.optionData,
     required this.promotionData,
   });
-
-  factory EventModel.fromJson(JSON json) => EventModel(
-    id:         json['id'] as String,
-    status:     json['status'] as int,
-    title:      json['title'] as String,
-    desc:       json['desc'] as String,
-    pic:        json['pic'] as String,
-    groupId:    json['groupId'] as String,
-    placeId:    json['placeId'] as String,
-    enterFee:   (json['enterFee'] as num).toDouble(),
-    reserveFee: json['reserveFee'] as String,
-    currency:   json['currency'] as String,
-    country:    json['country'] as String,
-    countryState: json['countryState'] as String,
-    userId:     json['userId'] as String,
-    reservePeriod: json['reservePeriod'] as int,
-    likeCount:  json['likeCount'] as int,
-    voteCount:  json['voteCount'] as int,
-    updateTime: json['updateTime'] as String,
-    createTime: json['createTime'] as String,
-
-    tagData: (json['tagData'] as List<dynamic>)
-        .map((e) => e as String).toList(),
-    managerData: (json['managerData'] as List<dynamic>)
-        .map((e) => e as String).toList(),
-    searchData: (json['searchData'] as List<dynamic>)
-        .map((e) => e as String).toList(),
-    picData: (json['picData'] as List<dynamic>)
-        .map((e) => PicData.fromJson(e)).toList(),
-    eventTime: (json['eventTime'] as List<dynamic>)
-        .map((e) => TimeData.fromJson(e)).toList(),
-    optionData: (json['optionData'] as List<dynamic>)
-        .map((e) => OptionData.fromJson(e)).toList(),
-    promotionData: (json['promotionData'] as List<dynamic>)
-        .map((e) => PromotionData.fromJson(e)).toList(),
-  );
-
-  JSON toJSON() => <String, dynamic> {
-        'id':           id,
-        'status':       status,
-        'title':        title,
-        'desc':         desc,
-        'pic':          pic,
-        'groupId':      groupId,
-        'placeId':      placeId,
-        'enterFee':     enterFee,
-        'reserveFee':   reserveFee,
-        'currency':     currency,
-        'country':      country,
-        'countryState': countryState,
-        'userId':       userId,
-        'reservePeriod': reservePeriod,
-        'likeCount':    likeCount,
-        'voteCount':    voteCount,
-        'updateTime':   updateTime,
-        'createTime':   createTime,
-        'tagData':      tagData,
-        'picData':      picData.map((e) => e.toJSON()).toList(),
-        'managerData':  managerData,
-        'searchData':   searchData,
-      };
+  factory EventModel.fromJson(JSON json) => _$EventModelFromJson(json);
+  JSON toJSON() => _$EventModelToJson(this);
 }
 
 @JsonSerializable()
@@ -190,13 +194,15 @@ class OptionData {
 
 @JsonSerializable()
 class PicData {
-  String id = '';
-  int    type = 0; // 이미지 종류 (0:photo, 1:movie..)
-  String url = '';
+  String id;
+  int    type; // 이미지 종류 (0:photo, 1:movie..)
+  String url;
+  Uint8List? data;
   PicData({
-    id,
-    type,
-    url,
+    required this.id,
+    required this.type,
+    required this.url,
+    required this.data,
   });
   factory PicData.fromJson(JSON json) => _$PicDataFromJson(json);
   JSON toJSON() => _$PicDataToJson(this);

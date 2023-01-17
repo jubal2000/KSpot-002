@@ -47,7 +47,7 @@ TitleColorText(context, title, List<String> colorText,
 }
 
 TopTitleText(context, title,
-    {double fontSize = UI_FONT_SIZE_LT,
+    {double fontSize = UI_FONT_SIZE_L,
     var align = MainAxisAlignment.start,
     var showBack = false,
     Function()? onAction}) {
@@ -58,7 +58,6 @@ TopTitleText(context, title,
       child:  Row(
         mainAxisAlignment: align,
         children: [
-          SizedBox(width: UI_HORIZONTAL_SPACE),
           if (showBack) ...[
             Icon(Icons.arrow_back_ios,
                 size: 28.h, color: Theme.of(context).primaryColor),

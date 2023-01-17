@@ -53,6 +53,13 @@ class Words extends Translations {
       'Enabled': '활성화됨',
       'Disabled': '비활성화됨',
       'RESERVATION LIST': '예약 목록',
+      'Event Add': '이벤트 추가',
+      'Event Edit': '이벤트 수정',
+      'Please enter event title..': '이벤트 제목을 입력해 주세요..',
+      'Please enter event description..': '이벤트 내용을 입력해 주세요..',
+      'TITLE': '제목',
+      'IMAGE': '사진',
+      '[first]': '[대표이미지]',
 
       // main_event
       'There are no events': '이벤트가 없습니다',

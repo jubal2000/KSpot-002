@@ -5,20 +5,24 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:helpers/helpers.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:intl/intl.dart';
 import 'package:kspot_002/data/theme_manager.dart';
+import 'package:image/image.dart' as IMG;
 
 import '../data/app_data.dart';
 import '../data/common_colors.dart';
+import '../data/common_sizes.dart';
 import '../data/style.dart';
 
 typedef JSON = Map<String, dynamic>;
 typedef SnapShot = QuerySnapshot<Map<String, dynamic>>;
-const String NO_IMAGE = 'assets/icons/app_icon_01.png';
+const String NO_IMAGE = 'assets/ui/no_image_00.png';
 
 // ignore: non_constant_identifier_names
 LOG(String msg) {
@@ -1068,4 +1072,125 @@ RoundRectButtonEx(BuildContext context, String title, {double height = 40, bool 
       ),
     ),
   );
+}
+
+EditTextField(
+    BuildContext context,
+    String title,
+    String text,
+    { int? maxLines = 1,
+      var maxLength = 99,
+      var keyboardType = TextInputType.text,
+      var hint = '',
+      var topSpace = 0.0,
+      Function(String)? onChanged
+    })
+{
+  final controller = TextEditingController(text: text);
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SizedBox(height: topSpace),
+      Text(
+        title,
+        style: DescTitleStyle(context),
+      ),
+      SizedBox(height: UI_ITEM_SPACE.w),
+      TextFormField(
+        controller: controller,
+        decoration: inputLabel(context, hint, ''),
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        maxLength: maxLength,
+        validator: (value) {
+          if (value == null || value.length < 2) return 'Please enter nickname'.tr;
+          return null;
+        },
+        onChanged: onChanged,
+      ),
+    ],
+  );
+}
+
+// ignore: non_constant_identifier_names
+ShowImageCroper(String imageFilePath) async {
+  var preset = [
+    CropAspectRatioPreset.square,
+    CropAspectRatioPreset.ratio3x2,
+    CropAspectRatioPreset.original,
+    CropAspectRatioPreset.ratio4x3,
+    CropAspectRatioPreset.ratio16x9
+  ];
+  return await startImageCroper(imageFilePath, CropStyle.rectangle, preset, CropAspectRatioPreset.original, false);
+}
+
+// ignore: non_constant_identifier_names
+ShowUserPicCroper(String imageFilePath) async {
+  var preset = [
+    CropAspectRatioPreset.square,
+  ];
+  return await startImageCroper(imageFilePath, CropStyle.circle, preset, CropAspectRatioPreset.square, false);
+}
+
+// ignore: non_constant_identifier_names
+ShowBannerImageCroper(String imageFilePath) async {
+  var preset = [
+    CropAspectRatioPreset.ratio16x9
+  ];
+  return await startImageCroper(imageFilePath, CropStyle.rectangle, preset, CropAspectRatioPreset.ratio16x9, false);
+}
+
+startImageCroper(String imageFilePath, CropStyle cropStyle, List<CropAspectRatioPreset> preset, CropAspectRatioPreset initPreset, bool lockAspectRatio) async {
+  CroppedFile? croppedFile = await ImageCropper().cropImage(
+    cropStyle: cropStyle,
+    sourcePath: imageFilePath,
+    aspectRatioPresets: preset,
+    maxWidth: 1024,
+    uiSettings: [
+      AndroidUiSettings(
+          toolbarTitle: 'Image size edit'.tr,
+          toolbarColor: Colors.purple,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: initPreset,
+          lockAspectRatio: lockAspectRatio),
+      IOSUiSettings(
+        title: 'Image size edit'.tr,
+      ),
+    ],
+  );
+  return croppedFile?.path;
+}
+
+Future resizeImage(Uint8List data, double maxSize) async {
+  Uint8List? resizedData = data;
+  try {
+    var img = IMG.decodeImage(data);
+    bool isResized = false;
+    if (img != null) {
+      var nWidth  = img.width.toDouble();
+      var nHeight = img.height.toDouble();
+      if (nWidth > nHeight) {
+        if (nWidth > maxSize) {
+          nWidth = maxSize;
+          nHeight *= nWidth / img.width;
+          isResized = true;
+        }
+      } else {
+        if (nHeight > maxSize) {
+          nHeight = maxSize;
+          nWidth *= nHeight / img.height;
+          isResized = true;
+        }
+      }
+      if (isResized) {
+        LOG('--> resize : ${img.width} x ${img.height} => $nWidth x $nHeight');
+        img = IMG.copyResize(img, width: nWidth.toInt(), height: nHeight.toInt());
+      }
+      resizedData = IMG.encodeJpg(img, quality: 100) as Uint8List?;
+      return resizedData;
+    }
+  } catch (e) {
+    LOG('--> resize error : $e');
+    return resizedData;
+  }
 }

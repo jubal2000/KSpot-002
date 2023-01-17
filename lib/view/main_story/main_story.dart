@@ -12,12 +12,11 @@ import '../app/app_top_menu.dart';
 
 class MainStory extends StatelessWidget {
   MainStory({Key? key}) : super(key: key);
-  final _viewModel = StoryViewModel();
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<StoryViewModel>.value(
-      value: _viewModel,
+      value: StoryViewModel(),
       child: Consumer<StoryViewModel>(builder: (context, viewModel, _) {
         return Scaffold(
           appBar: AppBar(
@@ -25,7 +24,7 @@ class MainStory extends StatelessWidget {
             automaticallyImplyLeading: false,
             toolbarHeight: UI_APPBAR_TOOL_HEIGHT.w,
           ),
-          body: _viewModel.showMainList(context),
+          body: viewModel.showMainList(context),
         );
       }),
     );

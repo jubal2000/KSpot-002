@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
@@ -14,7 +15,7 @@ import '../../view_model/app_view_model.dart';
 class App extends StatelessWidget {
   App({Key? key}) : super(key: key);
   final _viewModel = AppViewModel();
-  final _height = 40.0;
+  final _height = 40.0.w;
 
   List<Widget> pages = [
     MainEvent(),
@@ -60,8 +61,9 @@ class App extends StatelessWidget {
                   children: pages,
                 ),
                 floatingActionButton: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
+                    SizedBox(width: 30.w),
                     GestureDetector(
                       onTap: () {
                         var mode = theme.toggleSchemeMode();
@@ -72,7 +74,7 @@ class App extends StatelessWidget {
                             timeInSecForIosWeb: 1,
                             backgroundColor: theme.getMode() ? Colors.white : Colors.black,
                             textColor: theme.getMode() ? Colors.black : Colors.white,
-                            fontSize: 16.0
+                            fontSize: 16.0.sp
                         );
                       },
                       child: SizedBox(
@@ -81,7 +83,7 @@ class App extends StatelessWidget {
                         child: Icon(Icons.visibility_outlined),
                       )
                   ),
-                  SizedBox(width: 10),
+                  SizedBox(width: 5.w),
                   GestureDetector(
                       onTap: () {
                         var mode = theme.setFlexSchemeRotate();
@@ -92,7 +94,7 @@ class App extends StatelessWidget {
                             timeInSecForIosWeb: 1,
                             backgroundColor: theme.getMode() ? Colors.white : Colors.black,
                             textColor: theme.getMode() ? Colors.black : Colors.white,
-                            fontSize: 16.0
+                            fontSize: 16.0.sp
                         );
                       },
                       child: SizedBox(

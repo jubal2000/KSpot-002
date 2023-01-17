@@ -101,65 +101,65 @@ class AppTopMenuBar extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   // if (widget.currentMenu == MainMenuID.home || widget.currentMenu == MainMenuID.my)...[
-                                  DropdownButtonHideUnderline(
-                                    child: DropdownButton2(
-                                      customButton: Center(
-                                        child: Icon(Icons.add, color: Theme.of(context).iconTheme.color!.withOpacity(0.65)),
-                                      ),
-                                      items: [
-                                        if (viewModel.appbarMenuMode == MainMenuID.story)
-                                          ...DropdownItems.homeAddItem0.map(
-                                                (item) =>
-                                                DropdownMenuItem<DropdownItem>(
-                                                  value: item,
-                                                  child: DropdownItems.buildItem(context, item),
-                                                ),
-                                          ),
-                                        if (viewModel.appbarMenuMode == MainMenuID.event)
-                                          ...DropdownItems.homeAddItem2.map(
-                                                (item) =>
-                                                DropdownMenuItem<DropdownItem>(
-                                                  value: item,
-                                                  child: DropdownItems.buildItem(context, item),
-                                                ),
-                                          ),
-                                        if (viewModel.appbarMenuMode == MainMenuID.my)
-                                          ...DropdownItems.homeAddItems.map(
-                                                (item) =>
-                                                DropdownMenuItem<DropdownItem>(
-                                                  value: item,
-                                                  child: DropdownItems.buildItem(context, item),
-                                                ),
-                                          ),
-                                      ],
-                                      onChanged: (value) {
-                                        // if (!isCreatorMode()) {
-                                        //   showAlertYesNoDialog(context, 'CREATOR MODE', 'You need creator mode ON', 'Move to setting screen?', 'No', 'Yes').then((result) {
-                                        //     if (result == 1) {
-                                        //       Navigator.of(AppData.topMenuContext!).popUntil((r) => r.isFirst);
-                                        //       Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupScreen(moveTo: 'creator')));
-                                        //     }
-                                        //   });
-                                        //   return;
-                                        // }
-                                        var selected = value as DropdownItem;
-                                        LOG("--> selected.index : ${selected.type}");
-                                        switch (selected.type) {
-                                          case DropdownItemType.event:
-                                            break;
-                                          case DropdownItemType.story:
-                                            break;
-                                        }
-                                      },
-                                      itemHeight: 45,
-                                      dropdownWidth: 190,
-                                      buttonHeight: _iconSize,
-                                      buttonWidth: _iconSize,
-                                      itemPadding: const EdgeInsets.all(10),
-                                      offset: const Offset(0, 5),
-                                    ),
-                                  ),
-                                  SizedBox(width: 5),
+                                  // DropdownButtonHideUnderline(
+                                  //   child: DropdownButton2(
+                                  //     customButton: Center(
+                                  //       child: Icon(Icons.add, color: Theme.of(context).iconTheme.color!.withOpacity(0.65)),
+                                  //     ),
+                                  //     items: [
+                                  //       if (viewModel.appbarMenuMode == MainMenuID.story)
+                                  //         ...DropdownItems.homeAddItem0.map(
+                                  //               (item) =>
+                                  //               DropdownMenuItem<DropdownItem>(
+                                  //                 value: item,
+                                  //                 child: DropdownItems.buildItem(context, item),
+                                  //               ),
+                                  //         ),
+                                  //       if (viewModel.appbarMenuMode == MainMenuID.event)
+                                  //         ...DropdownItems.homeAddItem2.map(
+                                  //               (item) =>
+                                  //               DropdownMenuItem<DropdownItem>(
+                                  //                 value: item,
+                                  //                 child: DropdownItems.buildItem(context, item),
+                                  //               ),
+                                  //         ),
+                                  //       if (viewModel.appbarMenuMode == MainMenuID.my)
+                                  //         ...DropdownItems.homeAddItems.map(
+                                  //               (item) =>
+                                  //               DropdownMenuItem<DropdownItem>(
+                                  //                 value: item,
+                                  //                 child: DropdownItems.buildItem(context, item),
+                                  //               ),
+                                  //         ),
+                                  //     ],
+                                  //     onChanged: (value) {
+                                  //       // if (!isCreatorMode()) {
+                                  //       //   showAlertYesNoDialog(context, 'CREATOR MODE', 'You need creator mode ON', 'Move to setting screen?', 'No', 'Yes').then((result) {
+                                  //       //     if (result == 1) {
+                                  //       //       Navigator.of(AppData.topMenuContext!).popUntil((r) => r.isFirst);
+                                  //       //       Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupScreen(moveTo: 'creator')));
+                                  //       //     }
+                                  //       //   });
+                                  //       //   return;
+                                  //       // }
+                                  //       var selected = value as DropdownItem;
+                                  //       LOG("--> selected.index : ${selected.type}");
+                                  //       switch (selected.type) {
+                                  //         case DropdownItemType.event:
+                                  //           break;
+                                  //         case DropdownItemType.story:
+                                  //           break;
+                                  //       }
+                                  //     },
+                                  //     itemHeight: 45,
+                                  //     dropdownWidth: 190,
+                                  //     buttonHeight: _iconSize,
+                                  //     buttonWidth: _iconSize,
+                                  //     itemPadding: const EdgeInsets.all(10),
+                                  //     offset: const Offset(0, 5),
+                                  //   ),
+                                  // ),
+                                  // SizedBox(width: 5),
                                   // ],
                                   SizedBox(
                                     width: 35,

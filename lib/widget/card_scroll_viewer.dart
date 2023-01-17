@@ -1,10 +1,13 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../data/app_data.dart';
+import '../data/common_sizes.dart';
 import '../data/dialogs.dart';
 import '../data/style.dart';
+import '../data/theme_manager.dart';
 import '../utils/utils.dart';
 
 class ImageEditScrollViewer extends CardScrollViewer {
@@ -20,6 +23,7 @@ class ImageEditScrollViewer extends CardScrollViewer {
         int imageMax = 9,
         backFit = BoxFit.fill,
         isEditable = true,
+        isCanAdd = true,
         isShowMenu = false,
         isVerticalScroll = false,
         selectedId = '',
@@ -38,6 +42,7 @@ class ImageEditScrollViewer extends CardScrollViewer {
     imageMax: imageMax,
     backFit: backFit,
     isEditable: isEditable,
+    isCanAdd: isCanAdd,
     isShowMenu: isShowMenu,
     isVerticalScroll: isVerticalScroll,
     selectedId: selectedId,
@@ -64,13 +69,13 @@ class CardScrollViewer extends StatefulWidget {
         this.isShowMenu = false,
         this.isVerticalScroll = false,
         this.isImageExView = false,
-        this.isAddButtonShow = false,
+        this.isCanAdd = false,
         this.isThumbShow = true,
         this.isCanDownload = false,
         this.selectText = '',
         this.selectedId = '',
-        this.backgroundColor = Colors.blueGrey,
-        this.selectTextStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white),
+        this.backgroundColor = Colors.transparent,
+        this.selectTextStyle = const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
         this.imageColor,
         this.onActionCallback
       }) : super(key: key);
@@ -92,7 +97,7 @@ class CardScrollViewer extends StatefulWidget {
   TextStyle selectTextStyle;
 
   bool   isEditable;
-  bool   isAddButtonShow;
+  bool   isCanAdd;
   bool   isShowMenu;
   bool   isVerticalScroll;
   bool   isImageExView;
@@ -202,7 +207,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                             color: Colors.transparent,
                             child: Column(
                                 children: [
-                                  if (item.value['image'] != null || (widget.isThumbShow && item.value['thumb'] != null) || item.value['backPic'] != null || item.value['icon'] != null)
+                                  if (item.value['data'] != null || item.value['url'] != null || (widget.isThumbShow && item.value['thumb'] != null) || item.value['icon'] != null)
                                     SizedBox(
                                       width: widget.itemWidth,
                                       height: widget.itemHeight,
@@ -210,9 +215,9 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                                         borderRadius: BorderRadius.circular(widget.itemRound),
                                         child: widget.isThumbShow && item.value['thumb'] != null
                                             ? Image.memory(item.value['thumb'], fit: widget.backFit) :
-                                        item.value['image'] != null
-                                            ? Image.memory(item.value['image'], fit: widget.backFit) :
-                                        showImageWidget(item.value['backPic'], widget.backFit, color: widget.imageColor),
+                                        item.value['data'] != null
+                                            ? Image.memory(item.value['data'], fit: widget.backFit) :
+                                        showImageWidget(item.value['url'], widget.backFit, color: widget.imageColor),
                                       ),
                                     ),
                                   if (item.value['title'] != null)
@@ -364,7 +369,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
           )
       ).toList();
 
-      if (widget.isEditable && widget.isAddButtonShow && widget.itemList.length < widget.imageMax) {
+      if (widget.isEditable && widget.isCanAdd && widget.itemList.length < widget.imageMax) {
         _cardList.add(Container(
             width: widget.itemWidth,
             height: widget.isVerticalScroll ? widget.itemHeight * 0.5 : widget.itemHeight,
@@ -411,8 +416,8 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                   alignment: Alignment.centerLeft,
                   margin: EdgeInsets.symmetric(horizontal: widget.sidePadding),
                   child: Text(
-                      widget.title,
-                      style: TextStyle(color: Theme.of(context).primaryColor.withOpacity(0.5), fontWeight: FontWeight.w800)
+                    widget.title,
+                    style: DescTitleStyle(context),
                   ),
                 ),
               Container(
@@ -439,10 +444,11 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                   alignment: Alignment.centerLeft,
                   margin: EdgeInsets.symmetric(horizontal: widget.sidePadding),
                   child: Text(
-                      widget.title,
-                      style: TextStyle(color: Theme.of(context).primaryColor.withOpacity(0.5), fontWeight: FontWeight.w800)
+                    widget.title,
+                    style: DescTitleStyle(context),
                   ),
                 ),
+              SizedBox(height: UI_ITEM_SPACE.w),
               Container(
                   height: widget.itemHeight,
                   alignment: Alignment.centerLeft,

@@ -57,7 +57,7 @@ class FirebaseService extends GetxService {
     isInit = true;
 
     await Firebase.initializeApp();
-    // // init firebase..
+    // init firebase..
     // if (defaultTargetPlatform == TargetPlatform.android) {
     //   await Firebase.initializeApp(
     //       options: DefaultFirebaseOptions.currentPlatform

@@ -46,7 +46,7 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const API_KEY = 'AIzaSyDJf1tyznBdHw1cVzCY0WOc5FeuiswL0cM';
+  static const API_KEY = 'AIzaSyB4BgTVRI400uwFkTuH1YvSDfaKtdLpij8';
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: API_KEY,
@@ -60,10 +60,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: API_KEY,
-    appId: '1:691007032710:ios:703f1b82b7d8ed874ab007',
-    messagingSenderId: '691007032710',
-    projectId: 'kspot-001',
-    storageBucket: 'kspot-001.appspot.com',
+    appId: '1:662991987486:android:bbe2d068c8dbef0f6ddf0f',
+    messagingSenderId: '662991987486',
+    projectId: 'kspot-002',
+    storageBucket: 'kspot-002.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

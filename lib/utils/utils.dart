@@ -936,61 +936,6 @@ class ImageTile extends StatelessWidget {
   }
 }
 
-class RoundedButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final double height;
-  final String label;
-  final Color textColor, backgroundColor, borderColor;
-  final bool fullWidth;
-  final EdgeInsets padding;
-  final double? fontSize;
-  const RoundedButton({
-    Key? key,
-    @required this.onPressed,
-    required this.label,
-    this.height = 50,
-    this.textColor = Colors.white,
-    this.backgroundColor = Colors.blue,
-    this.borderColor = Colors.blue,
-    this.fullWidth = true,
-    this.padding = const EdgeInsets.symmetric(vertical: 9, horizontal: 30),
-    this.fontSize,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoButton(
-      minSize: 30,
-      padding: EdgeInsets.zero,
-      onPressed: onPressed,
-      child: Container(
-        width: fullWidth ? double.infinity : null,
-        height: height,
-        padding: padding,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            width: 1.4,
-            color: borderColor,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: textColor,
-              fontSize: fontSize,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 TextCheckBox(BuildContext context, String title, bool value,
     {
       var subTitle = '',

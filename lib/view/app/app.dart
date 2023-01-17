@@ -104,12 +104,12 @@ class App extends StatelessWidget {
                   ],
                 ),
                 bottomNavigationBar: Container(
-                  height: UI_BOTTOM_HEIGHT,
+                  height: UI_MENU_BG_HEIGHT,
                   child: Stack(
                     children: [
                       BottomCenterAlign(
                         child: SizedBox(
-                          height: UI_BOTTOM_MENU_HEIGHT,
+                          height: UI_MENU_HEIGHT,
                           child: BottomNavigationBar(
                             onTap: (index) {
                               _viewModel.setMainIndex(index);

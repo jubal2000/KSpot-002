@@ -7,6 +7,7 @@ import '../utils/utils.dart';
 const SCROLL_SPEED = 250;
 const APP_VERSION = '0.0.1';
 const ORG_SCREEN_WITH = 411;
+const NICKNAME_LENGTH = 12;
 const GOOGLE_MAP_KEY = 'AIzaSyD4ESmTaou10BumFoJ7DQ7jkTI7emh4Hvo';
 
 class AppData {

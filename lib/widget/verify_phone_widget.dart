@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl_phone_field/countries.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:kspot_002/widget/rounded_button.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:get/get.dart';
 
@@ -17,6 +21,15 @@ import '../utils/utils.dart';
 enum SignUpPhoneText {
   phone,
   phoneCheck,
+}
+
+enum VerifyStep {
+  none,
+  sendReady,
+  sendError,
+  checkReady,
+  resendReady,
+  checkDone,
 }
 
 class VerifyPhoneWidget extends StatefulWidget {
@@ -36,6 +49,11 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
   final _verifyFocusNode  = FocusScopeNode();
   final _phoneFormKey     = GlobalKey<FormState>();
 
+  Timer? countTimer;
+  final countTimeValue = 0.obs;
+  final phoneCheckSec = 30;
+  final phoneResendSec = 20;
+
   String _phone       = '';
   String _phoneIntl   = '';
   String _phoneOrg    = '';
@@ -50,12 +68,90 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
   bool _hasError = false;
 
   String phoneVerify  = '';
+  String verifyError  = '';
+  var   currentVerifyStep = VerifyStep.none;
+  final pinFocus = FocusNode();
+  final pinController = TextEditingController();
 
   refreshData() {
     _phone = widget.phoneNumber;
     _phoneCheck = widget.isSignIn;
     _textController[SignUpPhoneText.phone.index].text = widget.phoneNumber;
     _textController[SignUpPhoneText.phoneCheck.index].text = '';
+  }
+
+  sendPhoneVerifyCode() {
+    if (!_phoneFormKey.currentState!.validate()) return;
+    setState(() {
+      currentVerifyStep = VerifyStep.checkReady;
+      countTimeValue.value = phoneCheckSec;
+      verifyError = '';
+      pinController.clear();
+
+      if (countTimer != null) {
+        countTimer!.cancel();
+        countTimer = null;
+      }
+      countTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+        setState(() {
+          countTimeValue.value--;
+          if (countTimeValue.value <= 0) {
+            currentVerifyStep = VerifyStep.sendReady;
+            verifyError = '';
+            pinController.clear();
+            countTimer!.cancel();
+            countTimer = null;
+          } else if (countTimeValue.value < phoneCheckSec - phoneResendSec) {
+            currentVerifyStep = VerifyStep.resendReady;
+          }
+        });
+      });
+    });
+
+    var sendNumber = '$_phoneIntl$_phone';
+    LOG('--> verifyPhoneNumber : $sendNumber');
+    _phoneCodeReady = true;
+    showLoadingDialog(context, 'Waiting send verification code...');
+    try {
+      FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: sendNumber,
+        forceResendingToken: _resendToken,
+        verificationCompleted: (PhoneAuthCredential credential) {
+          LOG('--> onVerificationCompleted: $credential');
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          LOG('--> verificationFailed: ${e.toString()}');
+          hideLoadingDialog();
+          if (e.code.contains('invalid-phone-number')) {
+            showAlertDialog(context, 'Phone verify'.tr, 'Verify code send failed'.tr, 'Phone number is not valid'.tr, 'OK'.tr, true);
+          } else {
+            showAlertDialog(context, 'Phone verify'.tr, 'Verify code send failed'.tr, e.code, 'OK'.tr, true);
+          }
+          _phoneCodeReady = false;
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          setState(() {
+            LOG('--> codeSent: $verificationId / $resendToken');
+            hideLoadingDialog();
+            ShowToast('Verify code sent'.tr);
+            _phoneCheck2 = true;
+            _phoneCodeReady = false;
+            _textController[SignUpPhoneText.phoneCheck.index].text = '';
+            _verificationId = verificationId;
+            _resendToken = resendToken ?? -1;
+            // FocusScope.of(context).requestFocus(_verifyFocusNode);
+            FocusScope.of(context).nextFocus();
+          });
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          // if (_phoneCodeReady) {
+          //   showAlertDialog(context, 'Phone verify'.tr, 'Verify code send failed'.tr, 'Time out'.tr, 'OK'.tr);
+          // }
+        },
+      );
+    } on FirebaseAuthException catch  (e) {
+      LOG('--> Failed with error code: ${e.code} / ${e.message}');
+    }
   }
 
   sendPhoneVerifyError(e) {
@@ -79,6 +175,45 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
         showAlertDialog(context, 'Phone verify'.tr, 'Phone verify error'.tr, error, 'OK'.tr);
       }
     });
+  }
+
+  phoneButtonWidget(context) {
+    switch(currentVerifyStep) {
+      case VerifyStep.none:
+        return RoundedButton.disable(
+          'SEND'.tr,
+          fullWidth: false,
+          minWidth: 100.w,
+          radius: 8.w,
+        );
+      case VerifyStep.sendReady:
+        return RoundedButton.active(
+          'SEND'.tr,
+          fullWidth: false,
+          minWidth: 100.w,
+          radius: 8.w,
+          onPressed: () {
+            sendPhoneVerifyCode();
+          },
+        );
+      case VerifyStep.checkReady:
+        return RoundedButton.disable(
+          '${'RESEND'.tr} ${phoneResendSec - (phoneCheckSec - countTimeValue.value)}',
+          fullWidth: false,
+          minWidth: 100.w,
+          radius: 8.w,
+        );
+      case VerifyStep.resendReady:
+        return RoundedButton.active(
+          onPressed: () {
+            sendPhoneVerifyCode();
+          },
+          'RESEND'.tr,
+          fullWidth: false,
+          minWidth: 100.w,
+          radius: 8.w,
+        );
+    }
   }
 
   initData() {
@@ -136,10 +271,12 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                         _phone        = value.number;
                         _phoneIntl    = value.completeNumber.replaceAll(value.number, '');
                         _phoneCheck   = true;
-                        // _phoneCheck   = _phoneOrg != _phone;
                         _phoneCheck2  = false;
                         _resendToken  = null;
-                        LOG('--> _phone completeNumber : $_phone / $_phoneIntl / ${CountryCodes[AppData.currentCountry]}');
+                        if (_phoneFormKey.currentState!.validate()) {
+                          currentVerifyStep = VerifyStep.sendReady;
+                          LOG('--> _phone completeNumber : $_phone / $_phoneIntl / ${CountryCodes[AppData.currentCountry]}');
+                        }
                       });
                     },
                   )
@@ -147,60 +284,8 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
               )
             ),
             if (_phoneCheck)...[
-              SizedBox(width: 20),
-              RoundRectButtonEx(
-                context,
-                'SEND',
-                height: 44,
-                isEnabled: !_phoneCheck2,
-                onPressed: () {
-                  if (!_phoneFormKey.currentState!.validate()) return;
-                  var sendNumber = '$_phoneIntl$_phone';
-                  LOG('--> verifyPhoneNumber : $sendNumber');
-                  _phoneCodeReady = true;
-                  showLoadingDialog(context, 'Waiting send verification code...');
-                  try {
-                    FirebaseAuth.instance.verifyPhoneNumber(
-                      phoneNumber: sendNumber,
-                      forceResendingToken: _resendToken,
-                      verificationCompleted: (PhoneAuthCredential credential) {
-                        LOG('--> onVerificationCompleted: $credential');
-                      },
-                      verificationFailed: (FirebaseAuthException e) {
-                        LOG('--> verificationFailed: ${e.toString()}');
-                        hideLoadingDialog();
-                        if (e.code.contains('invalid-phone-number')) {
-                          showAlertDialog(context, 'Phone verify'.tr, 'Verify code send failed'.tr, 'Phone number is not valid'.tr, 'OK'.tr, true);
-                        } else {
-                          showAlertDialog(context, 'Phone verify'.tr, 'Verify code send failed'.tr, e.code, 'OK'.tr, true);
-                        }
-                        _phoneCodeReady = false;
-                      },
-                      codeSent: (String verificationId, int? resendToken) {
-                        setState(() {
-                          LOG('--> codeSent: $verificationId / $resendToken');
-                          hideLoadingDialog();
-                          ShowToast('Verify code sent'.tr);
-                          _phoneCheck2 = true;
-                          _phoneCodeReady = false;
-                          _textController[SignUpPhoneText.phoneCheck.index].text = '';
-                          _verificationId = verificationId;
-                          _resendToken = resendToken ?? -1;
-                          // FocusScope.of(context).requestFocus(_verifyFocusNode);
-                          FocusScope.of(context).nextFocus();
-                        });
-                      },
-                      codeAutoRetrievalTimeout: (String verificationId) {
-                        // if (_phoneCodeReady) {
-                        //   showAlertDialog(context, 'Phone verify'.tr, 'Verify code send failed'.tr, 'Time out'.tr, 'OK'.tr);
-                        // }
-                      },
-                    );
-                  } on FirebaseAuthException catch  (e) {
-                    LOG('--> Failed with error code: ${e.code} / ${e.message}');
-                  }
-                }
-              ),
+              SizedBox(width: 10),
+              phoneButtonWidget(context),
             ],
             if (!_phoneCheck)...[
               SizedBox(width: 10),
@@ -223,7 +308,8 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
               Expanded(
                 child: PinCodeTextField(
                   appContext: context,
-                  // focusNode: _verifyFocusNode,
+                  focusNode: pinFocus,
+                  controller: pinController,
                   length: 6,
                   obscureText: false,
                   showCursor: false,

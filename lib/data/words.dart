@@ -81,6 +81,7 @@ class Words extends Translations {
       'Sign out done': '로그아웃 완료',
       'Promotion list': '홍보 기록',
       'Terms': '이용 약관',
+      'Phone number verification': '전화번호 인증',
 
       // target_profile
       'Would you like to follow?': '팔로우 하시겠습니까?',
@@ -211,9 +212,10 @@ class Words extends Translations {
       'Please check text length': '입력한 문자의 길이를 확인해주세요',
       'Please check email': '입력한 이메일을 확인해주세요',
       'Nickname': '닉네임',
+      'NICKNAME': '닉네임',
       'Name': '이름',
-      'Please enter nickname': '닉네임을 입력해 주세요',
-      'Please enter name': '이름을 입력해 주세요',
+      'Please enter nickname': '닉네임을 2자 이상 입력해 주세요',
+      'Please enter name': '이름을 2자 이상 입력해 주세요',
       'GENDER(or PART)': '성별 (혹은 역할)',
       'BIRTH YEAR': '탄생 년도',
       'Consent to use': '사용 동의',
@@ -226,6 +228,11 @@ class Words extends Translations {
       'min': '최소',
       'max': '최대',
       'INPUT TYPE': '입력 형식',
+      'This is the authentication step': '인증 단계입니다',
+      'This is the last step': '마지막 단계입니다',
+      'Experience the many services and benefits of KSpot':
+      'KSpot의 많은 서비스와 혜택을 체험해보세요',
+      'Congratulations on your membership': '회원가입을 축하합니다',
 
       // slide_timepicker_screen
       'Select Time Range': '시간 범위 선택',
@@ -297,6 +304,8 @@ class Words extends Translations {
       'Remove all images?': '모든 사진을 삭제하시겠습니까?',
       'You can\'t add any more': '더 이상 추가할 수 없습니다',
       'Send': '전송',
+      'SEND': '전송',
+      'RESEND': '재전송',
       'READ': '읽음',
 
       // promotion_list_screen

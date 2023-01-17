@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../data/app_data.dart';
 import '../../data/common_sizes.dart';
 import '../../data/routes.dart';
 import '../../data/style.dart';
@@ -31,11 +32,18 @@ class SignupStepDone extends StatelessWidget {
                   SubTitleText('Experience the many services and benefits of KSpot'.tr),
                 ],
               ),
-              RoundedButton.active(
-                onPressed: () {
-                  Get.offAllNamed(Routes.APP);
-                },
-                'Use the service'.tr,
+              Container(
+                width: Get.size.width,
+                height: UI_BUTTON_HEIGHT,
+                margin: EdgeInsets.all(UI_HORIZONTAL_SPACE.w),
+                child: ElevatedButton(
+                    onPressed: () {
+                      Get.toNamed(Routes.APP);
+                    },
+                    child: Text(
+                      'Use the service'.tr,
+                    )
+                ),
               )
             ],
           )

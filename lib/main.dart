@@ -80,7 +80,7 @@ class MyApp extends StatelessWidget {
               return child;
             },
             // initialRoute: AppData.loginInfo.loginId.isEmpty ? Routes.INTRO : Routes.APP,
-            initialRoute: Routes.SIGNUP,
+            initialRoute: Routes.APP,
             getPages: [
               GetPage(
                 name: Routes.INTRO,

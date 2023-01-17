@@ -71,7 +71,7 @@ dependencies:
   address_search_field: ^5.0.3
 
   # editor & picker..
-  csc_picker: ^0.2.6
+#  csc_picker: ^0.2.6
   pointer_interceptor: ^0.9.3
   image_cropper: ^2.0.3
   file_picker: ^4.6.1

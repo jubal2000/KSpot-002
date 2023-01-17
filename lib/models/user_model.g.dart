@@ -38,10 +38,6 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
                 MapEntry(k, OptionData.fromJson(e as Map<String, dynamic>)),
           ) ??
           const {},
-      countrySelectList: (json['countrySelectList'] as List<dynamic>?)
-              ?.map((e) => CountryData.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
     );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
@@ -68,7 +64,6 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'emailVerified': instance.emailVerified,
       'optionData': instance.optionData,
       'optionPush': instance.optionPush,
-      'countrySelectList': instance.countrySelectList,
     };
 
 CountryData _$CountryDataFromJson(Map<String, dynamic> json) => CountryData(

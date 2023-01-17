@@ -30,11 +30,13 @@ class AppData {
   static var defaultCountry     = 'Korea South';
   static var defaultState       = '';
   static var defaultCity        = '';
-  static var currentCountry     = 'Korea South';
-  static var currentCountryFlag = '🇰🇷';
+  static var currentCountryFlag = '';
+  static var currentCountry     = '';
   static var currentCountryCode = '';
-  static var currentState       = 'Seoul';
+  static var currentState       = '';
   static var currentCity        = '';
+  static List<CountryData> countrySelectList = [];
+
   static var currentCurrency    = '';
   static var currentCategory    = '';
   static var dynamicLinkPath    = '';

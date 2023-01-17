@@ -29,7 +29,6 @@ class UserModel {
   bool      emailVerified;
   Map<String, OptionData>  optionData;
   Map<String, OptionData>  optionPush;
-  List<CountryData> countrySelectList;
 
   UserModel({
     required this.userId,
@@ -55,7 +54,6 @@ class UserModel {
     this.emailVerified   = false,
     this.optionData = const {},
     this.optionPush = const {},
-    this.countrySelectList = const [],
   });
 
   factory UserModel.fromJson(JSON json) => _$UserModelFromJson(json);

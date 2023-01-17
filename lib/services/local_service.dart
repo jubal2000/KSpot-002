@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:get/get.dart';
+import 'package:kspot_002/models/user_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,9 +24,11 @@ class LocalService extends GetxService {
 
   Future<void> initService() async {
     await readLocalData();
+    await readCountryLog();
+    await readCountryLocal();
   }
 
-  ////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  LOCAL INFO
 //
@@ -61,6 +64,37 @@ class LocalService extends GetxService {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  COUNTRY SELECT LOG
+//
+
+
+Future<bool> readCountryLog() async {
+  AppData.countrySelectList = [];
+  var localData = await StorageManager.readData('countryLog');
+  LOG('--> readCountryLog : $localData');
+  if (localData == null) return false;
+  for (var item in localData) {
+    AppData.countrySelectList.add(CountryData.fromJson(jsonDecode(item)));
+  }
+  LOG('--> readCountryLog result : ${AppData.countrySelectList.length} / $localData');
+  return true;
+}
+
+writeCountryLog() {
+  List<String> localData = [];
+  for (var item in AppData.countrySelectList ) {
+    localData.add(jsonEncode(item.toJSON()));
+  }
+  StorageManager.saveData('countryLog' , localData);
+  LOG('--> readCountryLog : ${AppData.countrySelectList.length} / $localData');
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  StorageManager
+//
 
 class StorageManager {
   static void saveData(String key, dynamic value) async {
@@ -99,7 +133,7 @@ readCountryLocal() async {
   AppData.currentCountryCode  = CountryCodeSmall(AppData.currentCountry);
   if (AppData.currentState == 'State') AppData.currentState = '';
   if (AppData.currentCity  == 'City') AppData.currentCity = '';
-  LOG('--> get country info : ${AppData.currentCountryFlag} / ${AppData.currentCountry} / ${AppData.currentCountryCode} / ${AppData.currentState}');
+  LOG('--> readCountryLocal : ${AppData.currentCountryFlag} / ${AppData.currentCountry} / ${AppData.currentCountryCode} / ${AppData.currentState}');
 }
 
 writeCountryLocal() {
@@ -109,6 +143,8 @@ writeCountryLocal() {
   StorageManager.saveData('country'     , AppData.currentCountry);
   StorageManager.saveData('state'       , AppData.currentState);
   StorageManager.saveData('city'        , AppData.currentCity);
-  LOG('--> set country info : ${AppData.currentCountryFlag} / ${AppData.currentCountry} / ${AppData.currentState}');
+  LOG('--> writeCountryLocal : ${AppData.currentCountryFlag} / ${AppData.currentCountry} / ${AppData.currentState}');
 }
+
+
 

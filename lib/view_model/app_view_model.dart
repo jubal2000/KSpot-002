@@ -110,27 +110,26 @@ class AppViewModel extends ChangeNotifier {
   }
 
   showCountrySelect(context) {
-    AppData.userInfo.countrySelectList = [];
-    showCountryLogSelectDialog(context, 'COUNTRY SELECT'.tr,
-      List<JSON>.from(AppData.userInfo.countrySelectList)).then((_) {
-        for (var item in AppData.userInfo.countrySelectList) {
+    final List<JSON> logList = AppData.countrySelectList.map((e) => e.toJSON()).toList();
+    showCountryLogSelectDialog(context, 'COUNTRY SELECT'.tr, logList).then((_) {
+        for (var item in AppData.countrySelectList) {
           if (item.country == AppData.currentCountry && item.countryState == AppData.currentState) {
-            AppData.userInfo.countrySelectList.remove(item);
+            AppData.countrySelectList.remove(item);
             break;
           }
         }
-        AppData.userInfo.countrySelectList.insert(0, CountryData(
+        AppData.countrySelectList.insert(0, CountryData(
             country:      AppData.currentCountry,
             countryState: AppData.currentState,
             countryFlag:  AppData.currentCountryFlag,
-            createTime  : CURRENT_SERVER_TIME(),
+            createTime  : CURRENT_SERVER_TIME().toString(),
         ));
-        if (AppData.userInfo.countrySelectList.length > COUNTRY_LOG_MAX) {
-          AppData.userInfo.countrySelectList.removeLast();
+        if (AppData.countrySelectList.length > COUNTRY_LOG_MAX) {
+          AppData.countrySelectList.removeLast();
         }
-        LOG('--> showCountrySelectDialog result : ${AppData.userInfo.countrySelectList.toString()}');
-        // _userRepo.setUserInfoItem(AppData.userInfo, 'countrySelectList');
-        // refreshMainContent();
+        LOG('--> AppData.countrySelectList : ${AppData.countrySelectList.length}');
+        writeCountryLog();
+        notifyListeners();
       }
     );
   }

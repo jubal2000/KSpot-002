@@ -15,6 +15,7 @@ class ImageEditScrollViewer extends CardScrollViewer {
       JSON itemList,
       {Key? key,
         String title = '',
+        String addText = '',
         double textHeight = 30.0,
         double itemWidth  = 80.0,
         double itemHeight = 80.0,
@@ -34,6 +35,7 @@ class ImageEditScrollViewer extends CardScrollViewer {
       : super(itemList,
     key: key,
     title: title,
+    addText: addText,
     textHeight: textHeight,
     itemWidth: itemWidth,
     itemHeight: itemHeight,
@@ -56,6 +58,7 @@ class CardScrollViewer extends StatefulWidget {
   CardScrollViewer(this.itemList,
       {Key? key,
         this.title = '',
+        this.addText = '',
         this.textHeight = 30.0,
         this.itemWidth = 125,
         this.itemHeight = 250,
@@ -82,6 +85,7 @@ class CardScrollViewer extends StatefulWidget {
 
   JSON   itemList;
   String title;
+  String addText;
   String selectText;
   String selectedId;
   double sidePadding;
@@ -373,29 +377,25 @@ class CardScrollViewerState extends State<CardScrollViewer> {
         _cardList.add(Container(
             width: widget.itemWidth,
             height: widget.isVerticalScroll ? widget.itemHeight * 0.5 : widget.itemHeight,
-            margin: EdgeInsets.symmetric(horizontal: widget.isVerticalScroll ? 0 : 2.5, vertical: widget.isVerticalScroll ? 5 : 0),
-            child: ElevatedButton(
-              onPressed: () {
+            margin: EdgeInsets.symmetric(horizontal: widget.isVerticalScroll || widget.itemList.isEmpty ? 0 : 2.5, vertical: widget.isVerticalScroll ? 5 : 0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(10.0.sp)),
+              color: Theme.of(context).primaryColor.withOpacity(0.25),
+            ),
+            child: GestureDetector(
+              onTap: () {
                 onSelected('', 1);
               },
-              style: ElevatedButton.styleFrom(
-                  primary: Theme.of(context).primaryColor.withOpacity(0.25),
-                  minimumSize: Size.zero, // Set this
-                  shadowColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  )
-              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.add_outlined, color: Theme.of(context).primaryColor.withOpacity(0.5)),
                   SizedBox(height: 5),
-                  Text('Add'.tr, style: itemTitleStyle)
+                  Text(widget.addText.isNotEmpty ? widget.addText : 'Add'.tr, style: itemSubTitleStyle)
                 ],
               ),
             )
-        )
+          )
         );
       }
     });

@@ -7,7 +7,7 @@ part of 'user_model.dart';
 // **************************************************************************
 
 UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
-      userId: json['userId'] as String,
+      id: json['id'] as String,
       status: json['status'] as int? ?? 0,
       loginId: json['loginId'] as String? ?? '',
       loginType: json['loginType'] as String? ?? '',
@@ -20,6 +20,8 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       email: json['email'] as String? ?? '',
       country: json['country'] as String? ?? '',
       countryState: json['countryState'] as String? ?? '',
+      followCount: json['followCount'] as int? ?? 0,
+      followerCount: json['followerCount'] as int? ?? 0,
       pushToken: json['pushToken'] as String? ?? '',
       deviceType: json['deviceType'] as String? ?? '',
       updateTime: json['updateTime'] as String? ?? '',
@@ -41,7 +43,7 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
     );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
-      'userId': instance.userId,
+      'id': instance.id,
       'status': instance.status,
       'loginId': instance.loginId,
       'loginType': instance.loginType,
@@ -54,6 +56,8 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'email': instance.email,
       'country': instance.country,
       'countryState': instance.countryState,
+      'followCount': instance.followCount,
+      'followerCount': instance.followerCount,
       'pushToken': instance.pushToken,
       'deviceType': instance.deviceType,
       'updateTime': instance.updateTime,

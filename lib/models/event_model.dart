@@ -25,16 +25,17 @@ class EventModeEx extends EventModel {
         int reservePeriod = 0,
         int likeCount = 0,
         int voteCount = 0,
+        int commentCount = 0,
         String updateTime = '',
         String createTime = '',
 
-        List<String> tagData = const [],
-        List<String> managerData = const [],
-        List<String> searchData = const [],
-        List<PicData> picData = const [],
-        List<TimeData> timeData = const [],
-        List<OptionData> optionData = const [],
-        List<PromotionData> promotionData = const [],
+        List<String>? tagData,
+        List<String>? managerData,
+        List<String>? searchData,
+        List<PicData>? picData,
+        List<TimeData>? timeData,
+        List<OptionData>? optionData,
+        List<PromotionData>? promotionData,
       }) : super(
         id: id,
         status: status,
@@ -52,16 +53,17 @@ class EventModeEx extends EventModel {
         reservePeriod: reservePeriod,
         likeCount: likeCount,
         voteCount: voteCount,
+        commentCount: commentCount,
         updateTime: updateTime,
         createTime: createTime,
 
-        tagData: tagData,
-        managerData: managerData,
-        searchData: searchData,
-        picData: picData,
-        timeData: timeData,
-        optionData: optionData,
-        promotionData: promotionData,
+        tagData: [],
+        managerData: [],
+        searchData: [],
+        picData: [],
+        timeData: [],
+        optionData: [],
+        promotionData: [],
       );
 }
 
@@ -83,6 +85,7 @@ class EventModel {
   int     reservePeriod;  // 예약 기간 (0:예약불가)
   int     likeCount;      // 종아요 횟수
   int     voteCount;      // 추천 횟수
+  int     commentCount;   // 댓글 갯수
   String  updateTime;     // 수정 시간
   String  createTime;     // 생성 시간
 
@@ -90,7 +93,7 @@ class EventModel {
   List<String>        managerData;    // 관리자 ID 목록
   List<String>        searchData;     // 검색어 목록
   List<PicData>       picData;        // 메인 이미지 목록
-  List<TimeData>      timeData;      // 시간 정보 목록
+  List<TimeData>      timeData;       // 시간 정보 목록
   List<OptionData>    optionData;     // 옵션 정보
   List<PromotionData> promotionData;  // 광고설정 정보
 
@@ -111,6 +114,8 @@ class EventModel {
     required this.reservePeriod,
     required this.likeCount,
     required this.voteCount,
+    required this.commentCount,
+
     required this.updateTime,
     required this.createTime,
 
@@ -123,18 +128,39 @@ class EventModel {
     required this.promotionData,
   });
   factory EventModel.fromJson(JSON json) => _$EventModelFromJson(json);
-  JSON toJSON() => _$EventModelToJson(this);
+  JSON toJson() => _$EventModelToJson(this);
+
+  TimeData? getTimeData(String key) {
+    for (var item in timeData) {
+      if (item.id.toLowerCase() == key.toLowerCase()) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  subTimeData(String key) {
+    for (var item in timeData) {
+      if (item.id.toLowerCase() == key.toLowerCase()) {
+        timeData.remove(item);
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 @JsonSerializable()
 class TimeData {
   String      id = '';
   int         status = 0;       // 상태 (0:removed, 1:active, 2:disable, 3:ready)
+  String      title = '';
   String      desc = '';
   String      startDate = '';   // 시작일
   String      endDate = '';     // 종료일
   String      startTime = '';   // 시작시간
   String      endTime = '';     // 종료시간
+  int         index = 0;
   List<String> day = [];        // 특별한 날 선택
   List<String> dayWeek = [];    // 요일 선택 (월, 화..)
   List<String> week = [];       // 주간 선택 (첫째주, 마지막주..)
@@ -142,18 +168,20 @@ class TimeData {
   TimeData({
     id,
     status,
+    title,
     desc,
     startDate,
     endDate,
     startTime,
     endTime,
+    index,
     day,
     dayWeek,
     week,
     exceptDay,
   });
   factory TimeData.fromJson(JSON json) => _$TimeDataFromJson(json);
-  JSON toJSON() => _$TimeDataToJson(this);
+  JSON toJson() => _$TimeDataToJson(this);
 }
 
 @JsonSerializable()
@@ -177,7 +205,7 @@ class PromotionData {
     endTime,
   });
   factory PromotionData.fromJson(JSON json) => _$PromotionDataFromJson(json);
-  JSON toJSON() => _$PromotionDataToJson(this);
+  JSON toJson() => _$PromotionDataToJson(this);
 }
 
 @JsonSerializable()
@@ -189,7 +217,7 @@ class OptionData {
     value,
   });
   factory OptionData.fromJson(JSON json) => _$OptionDataFromJson(json);
-  JSON toJSON() => _$OptionDataToJson(this);
+  JSON toJson() => _$OptionDataToJson(this);
 }
 
 @JsonSerializable()
@@ -197,7 +225,7 @@ class PicData {
   String id;
   int    type; // 이미지 종류 (0:photo, 1:movie..)
   String url;
-  Uint8List? data;
+  String? data;
   PicData({
     required this.id,
     required this.type,
@@ -205,5 +233,5 @@ class PicData {
     required this.data,
   });
   factory PicData.fromJson(JSON json) => _$PicDataFromJson(json);
-  JSON toJSON() => _$PicDataToJson(this);
+  JSON toJson() => _$PicDataToJson(this);
 }

@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:kspot_002/repository/userRepo.dart';
+import 'package:kspot_002/repository/user_repository.dart';
 import 'package:uuid/uuid.dart';
 import '../data/app_data.dart';
 import '../data/firebase_options.dart';
@@ -391,7 +391,7 @@ class FirebaseService extends GetxService {
 
   Future<bool> sendPushMessageFromUser(String userId, String title, String desc, {JSON userData = const {}}) async {
     // send push..
-    final userRepo = UserRepo();
+    final userRepo = UserRepository();
     var targetUserInfo = await userRepo.getUserInfo(userId);
     if (targetUserInfo != null) {
       var pushToken = STR(targetUserInfo.pushToken);

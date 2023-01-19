@@ -82,6 +82,9 @@ dependencies:
   flutter_colorpicker: ^1.0.3
   image_picker: ^0.8.5
   image: ^3.2.1
+  material_tag_editor: ^0.1.2
+  syncfusion_flutter_calendar: ^20.2.36
+  progressive_time_picker: ^0.0.4
 
   # ui..
   cupertino_icons: any

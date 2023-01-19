@@ -6,7 +6,7 @@ part 'user_model.g.dart';
 
 @JsonSerializable()
 class UserModel {
-  String    userId;
+  String    id;
   int       status;
   String    loginId;
   String    loginType;  // 로그인 방식 ('', 'phone'..)
@@ -19,6 +19,8 @@ class UserModel {
   String    email;
   String    country;
   String    countryState;
+  int       followCount;
+  int       followerCount;
   String    pushToken;
   String    deviceType;
   String    updateTime;
@@ -31,7 +33,7 @@ class UserModel {
   Map<String, OptionData>  optionPush;
 
   UserModel({
-    required this.userId,
+    required this.id,
     this.status     = 0,
     this.loginId    = '',
     this.loginType  = '',
@@ -43,15 +45,17 @@ class UserModel {
     this.mobileIntl = '',
     this.email      = '',
     this.country    = '',
-    this.countryState = '',
-    this.pushToken    = '',
-    this.deviceType   = '',
-    this.updateTime   = '',
-    this.createTime   = '',
+    this.countryState   = '',
+    this.followCount    = 0,
+    this.followerCount  = 0,
+    this.pushToken      = '',
+    this.deviceType     = '',
+    this.updateTime     = '',
+    this.createTime     = '',
     this.mobileVerifyTime = '',
     this.emailVerifyTime  = '',
-    this.mobileVerified  = false,
-    this.emailVerified   = false,
+    this.mobileVerified   = false,
+    this.emailVerified    = false,
     this.optionData = const {},
     this.optionPush = const {},
   });

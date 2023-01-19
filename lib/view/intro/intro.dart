@@ -26,7 +26,7 @@ class Intro extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
             child: FutureBuilder(
-            future: _api.getAppStartInfo(),
+            future: _api.getAppStartInfo(AppData.defaultInfoID),
             builder: (context, snapshot) {
               LOG('--> snapshot : ${snapshot.hasData} / ${_viewModel.isCanStart}');
               if (snapshot.hasData) {
@@ -36,7 +36,7 @@ class Intro extends StatelessWidget {
                     if (!_viewModel.isCanStart) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         Future.delayed(const Duration(milliseconds: 500), () async {
-                          var result = await _viewModel.checkAppUpdate(context, AppData.startData);
+                          var result = await _viewModel.checkAppUpdate(context, AppData.startInfo);
                           LOG('--> checkAppUpdate result : $result');
                           if (result) {
                             _viewModel.setCanStart(true);

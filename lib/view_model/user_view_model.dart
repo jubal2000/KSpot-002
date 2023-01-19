@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 
 import '../utils/utils.dart';
 import '../models/user_model.dart';
-import '../repository/userRepo.dart';
+import '../repository/user_repository.dart';
 
 class UserViewModel extends ChangeNotifier {
-  final _userRepo = UserRepo();
+  final _userRepo = UserRepository();
 
   UserModel? userInfo;
 

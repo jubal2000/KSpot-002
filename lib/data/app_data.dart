@@ -6,11 +6,18 @@ import '../utils/utils.dart';
 
 const SCROLL_SPEED = 250;
 const APP_VERSION = '0.0.1';
+
 const ORG_SCREEN_WITH = 411;
 const NICKNAME_LENGTH = 12;
 const TITLE_LENGTH = 24;
 const DESC_LENGTH = 999;
+const COMMENT_LENGTH = 999;
 const IMAGE_SIZE_MAX = 512.0;
+
+const FACE_CIRCLE_SIZE_L = 120.0;
+const FACE_CIRCLE_SIZE_M = 50.0;
+const FACE_CIRCLE_SIZE_S = 40.0;
+
 const GOOGLE_MAP_KEY = 'AIzaSyD4ESmTaou10BumFoJ7DQ7jkTI7emh4Hvo';
 
 class AppData {
@@ -18,9 +25,12 @@ class AppData {
   AppData._internal();
 
   static var isDevMode = true;
-  static StartModel? startData;
-  static UserModel   userInfo  = UserModel(userId: '');
-  static UserModel   loginInfo = UserModel(userId: '');
+
+  static String defaultInfoID = 'info0000';
+
+  static StartModel? startInfo;
+  static UserModel   userInfo  = UserModel(id: '');
+  static UserModel   loginInfo = UserModel(id: '');
 
   static JSON listSelectData = {};
   static int? localDataVer;
@@ -50,8 +60,10 @@ class AppData {
   static JSON currentPlaceGroup = {};
   static JSON selectEventTime = {};
   static JSON messageReadLog = {};
+  static JSON startInfoData = {};
   static JSON localInfo = {};
   static JSON infoData = {};
+  static JSON timeData = {};
 
   static BuildContext? topMenuContext;
 
@@ -78,37 +90,37 @@ class AppData {
 
 
   // ignore: non_constant_identifier_names
-  static String get USER_ID => AppData.userInfo?.userId ?? '';
+  static String get USER_ID => AppData.userInfo.id;
   // ignore: non_constant_identifier_names
-  static int get USER_STATUS => AppData.userInfo?.status ?? 0;
+  static int get USER_STATUS => AppData.userInfo.status;
   // ignore: non_constant_identifier_names
-  static bool get IS_ADMIN => USER_STATUS == 2;
+  static bool get IS_ADMIN => USER_STATUS > 1;
 
   // ignore: non_constant_identifier_names
-  static String get USER_NICKNAME => AppData.userInfo?.nickName ?? '';
+  static String get USER_NICKNAME => AppData.userInfo.nickName;
   // ignore: non_constant_identifier_names
   static set USER_NICKNAME(String value) {
-    AppData.userInfo?.nickName = value;
+    AppData.userInfo.nickName = value;
   }
 
   // ignore: non_constant_identifier_names
-  static String get USER_PIC => AppData.userInfo?.pic ?? '';
+  static String get USER_PIC => AppData.userInfo.pic;
   // ignore: non_constant_identifier_names
   static set USER_PIC(String value) {
-    AppData.userInfo?.pic = value;
+    AppData.userInfo.pic = value;
   }
 
   // ignore: non_constant_identifier_names
-  static String get USER_PHONE => AppData.userInfo?.mobile ?? '';
+  static String get USER_PHONE => AppData.userInfo.mobile;
   // ignore: non_constant_identifier_names
   static set USER_PHONE(String value) {
-    AppData.userInfo?.mobile = value;
+    AppData.userInfo.mobile = value;
   }
 
   // ignore: non_constant_identifier_names
-  static String get USER_EMAIL => AppData.userInfo?.email ?? '';
+  static String get USER_EMAIL => AppData.userInfo.email;
   // ignore: non_constant_identifier_names
   static set USER_EMAIL(String value) {
-    AppData.userInfo?.email = value;
+    AppData.userInfo.email = value;
   }
 }

@@ -13,15 +13,21 @@ import '../../models/event_model.dart';
 import '../../utils/utils.dart';
 import '../../view_model/app_view_model.dart';
 import '../../widget/card_scroll_viewer.dart';
+import '../../widget/edit/edit_component_widget.dart';
+import '../../widget/edit/edit_list_widget.dart';
 import '../../widget/title_text_widget.dart';
 import '../app/app_top_menu.dart';
 
-class MainEventEdit extends StatelessWidget {
+class MainEventEdit extends StatefulWidget {
   MainEventEdit({Key? key, this.eventItem}) : super(key: key);
 
-  final _viewModel = EventViewModel();
   EventModel? eventItem;
 
+  @override
+  _MainEventEditState createState ()=> _MainEventEditState();
+}
+
+class _MainEventEditState extends State<MainEventEdit> {
   // String  id;
   // int     status;         // 상태 (0:removed, 1:active, 2:disable, 3:ready)
   // String  title;
@@ -49,36 +55,43 @@ class MainEventEdit extends StatelessWidget {
   // List<OptionData>    optionData;     // 옵션 정보
   // List<PromotionData> promotionData;  // 광고설정 정보
 
+  final _viewModel = EventViewModel();
+
+  @override
+  void initState () {
+    widget.eventItem ??= EventModeEx.empty('', title: 'test title', desc: 'test desc..');
+    _viewModel.init(context);
+    _viewModel.setEditItem(widget.eventItem!);
+    super.initState ();
+  }
+
   @override
   Widget build(BuildContext context) {
-    eventItem ??= EventModeEx.empty('', title: 'test title', desc: 'test desc..');
-    _viewModel.setEditItem(eventItem!);
-
-    return ChangeNotifierProvider<EventViewModel>.value(
-      value: _viewModel,
-      child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-        return Scaffold(
-          appBar: AppBar(
-            title: TopTitleText(context, eventItem != null ? 'Event Edit'.tr : 'Event Add'.tr),
-            titleSpacing: 0,
-            toolbarHeight: UI_APPBAR_TOOL_HEIGHT.w,
-          ),
-          body: ListView(
+    return Scaffold(
+      appBar: AppBar(
+        title: TopTitleText(context, widget.eventItem != null ? 'Event Edit'.tr : 'Event Add'.tr),
+        titleSpacing: 0,
+        toolbarHeight: UI_APPBAR_TOOL_HEIGHT.w,
+      ),
+      body: ChangeNotifierProvider<EventViewModel>.value(
+        value: _viewModel,
+        child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+          return ListView(
             padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
             children: [
-              SizedBox(height: UI_TOP_SPACE.w),
               viewModel.showImageSelector(),
               SizedBox(height: UI_LIST_TEXT_SPACE.w),
-              EditTextField(context, 'TITLE'.tr, eventItem!.title, hint: 'Please enter event title..'.tr, maxLength: TITLE_LENGTH, onChanged: (value) {
+              EditTextField(context, 'TITLE'.tr, viewModel.editItem!.title, hint: 'TITLE'.tr, maxLength: TITLE_LENGTH, onChanged: (value) {
 
               }),
-              EditTextField(context, 'DESC'.tr, eventItem!.desc, hint: 'Please enter event description..'.tr, maxLength: DESC_LENGTH, maxLines: null, keyboardType: TextInputType.multiline, onChanged: (value) {
+              EditTextField(context, 'DESC'.tr, viewModel.editItem!.desc, hint: 'DESC'.tr, maxLength: DESC_LENGTH, maxLines: null, keyboardType: TextInputType.multiline, onChanged: (value) {
 
               }),
+              EditListSortWidget(viewModel.editEventToJSON, EditListType.timeRange, onAddAction: viewModel.onItemAdd, onSelected: viewModel.onItemSelected),
             ],
-          ),
-        );
-      }),
+          );
+        }),
+      )
     );
   }
 }

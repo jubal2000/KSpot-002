@@ -13,7 +13,7 @@ import '../data/themes.dart';
 import '../models/user_model.dart';
 import '../utils/utils.dart';
 import '../models/start_model.dart';
-import '../repository/userRepo.dart';
+import '../repository/user_repository.dart';
 import '../services/api_service.dart';
 import '../services/local_service.dart';
 

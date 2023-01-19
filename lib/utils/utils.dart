@@ -1,11 +1,10 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -14,6 +13,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:intl/intl.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:image/image.dart' as IMG;
+import 'package:material_tag_editor/tag_editor.dart';
 
 import '../data/app_data.dart';
 import '../data/common_colors.dart';
@@ -118,12 +118,31 @@ TME2(dynamic value, {dynamic defaultValue = '00:00'}) {
 }
 
 // ignore: non_constant_identifier_names
+CURRENT_DATE() {
+  var format = DateFormat('yyyy-MM-dd');
+  var date = DateTime.now();
+  return format.format(date).toString();
+}
+
+// ignore: non_constant_identifier_names
+DATETIME_STR(DateTime date) {
+  var format = DateFormat('yyyy-MM-dd HH:mm');
+  return format.format(date).toString();
+}
+
+// ignore: non_constant_identifier_names
+DATETIME_FULL_STR(DateTime date) {
+  var format = DateFormat('yyyy-MM-dd_HH:mm:ss');
+  return format.format(date).toString();
+}
+
+// ignore: non_constant_identifier_names
 TIME_DATA_DESC(dynamic data, [String defaultValue = '']) {
   var result = '';
   if (data == null || data == 'null') return defaultValue;
-  if (STR(data['dayData']).isNotEmpty) result += data['dayData'].first;
+  if (STR(data['day']).isNotEmpty) result += data['day'].first;
   if (data['startDate'] != null)  result += data['startDate'];
-  if (data['endDate'] != null)    result += '~' + data['endDate'];
+  if (data['endDate'] != null)    result += '~${data['endDate']}';
   var weekStr = '';
   if (data['week'] != null && data['week'].isNotEmpty) {
     if (result.isNotEmpty) result += ' / ';
@@ -135,85 +154,91 @@ TIME_DATA_DESC(dynamic data, [String defaultValue = '']) {
   }
   var timeStr = '';
   if (data['startTime'] != null && data['startTime'].isNotEmpty) timeStr += data['startTime'];
-  if (data['endTime'] != null && data['endTime'].isNotEmpty) timeStr += '~' + data['endTime'];
+  if (data['endTime'] != null && data['endTime'].isNotEmpty) timeStr += '~${data['endTime']}';
   if (result.isNotEmpty && timeStr.isNotEmpty) result += ' / ';
   result += timeStr;
   return result;
 }
 
 // ignore: non_constant_identifier_names
-FROM_SERVER_DATA(data) {
-  return SET_SERVER_TIME_ALL(data);
-}
-
-// ignore: non_constant_identifier_names
-SET_SERVER_TIME_ALL(data) {
-  if (data is Map) {
-    for (var item in data.entries) {
-      data[item.key] = SET_SERVER_TIME_ALL_ITEM(item.value);
-    }
-  } else if (data is List) {
-    data = SET_SERVER_TIME_ALL_ITEM(data);
+String SERVER_TIME_STR(value) {
+  if (value == null) return '';
+  var format = DateFormat('yyyy-MM-dd hh:mm:ss');
+  var date = TME(value);
+  if (date != null) {
+    return format.format(date).toString();
   }
-  return data;
+  return '';
 }
 
 // ignore: non_constant_identifier_names
-SET_SERVER_TIME_ALL_ITEM(data) {
-  if (data is Timestamp) {
-    data = SET_SERVER_TIME(data);
-  } else if (data is Map) {
-    data = SET_SERVER_TIME_ALL(data);
-  } else if (data is List) {
-    for (var i=0; i<data.length; i++) {
-      data[i] = SET_SERVER_TIME_ALL_ITEM(data[i]);
-    }
+String SERVER_TIME_ONE_STR(value) {
+  var timeData = value as JSON;
+  if (JSON_EMPTY(timeData)) return '';
+  return timeData.entries.first.value['title'];
+}
+
+String SERVER_DATE_STR(value) {
+  if (value == null) return '';
+  var format = DateFormat('yyyy-MM-dd');
+  var date = TME(value);
+  if (date != null) {
+    return format.format(date).toString();
   }
-  return data;
+  return '';
 }
 
 // ignore: non_constant_identifier_names
-SET_SERVER_TIME(timestamp) {
-  if (timestamp is Timestamp) {
-    return {
-      '_seconds': timestamp.seconds,
-      '_nanoseconds': timestamp.nanoseconds,
-    };
-  } else {
-    return timestamp;
-  }
-}
-
-// ignore: non_constant_identifier_names
-TO_SERVER_DATA(data) {
-  return SET_TO_SERVER_TIME_ALL(data);
-}
-
-// ignore: non_constant_identifier_names
-SET_TO_SERVER_TIME_ALL(data) {
-  if (data is Map) {
-    if (data['_seconds'] != null) {
-      return Timestamp(data['_seconds'], data['_nanoseconds']);
-    }
-    for (var item in data.entries) {
-      data[item.key] = SET_TO_SERVER_TIME_ALL_ITEM(item.value);
-    }
-  } else if (data is List) {
-    data = SET_TO_SERVER_TIME_ALL_ITEM(data);
-  }
-  return data;
-}
-
-// ignore: non_constant_identifier_names
-SET_TO_SERVER_TIME_ALL_ITEM(data) {
-  if (data is Map) {
-    data = SET_TO_SERVER_TIME_ALL(data);
-  } else if (data is List) {
-    for (var i=0; i<data.length; i++) {
-      data[i] = SET_TO_SERVER_TIME_ALL_ITEM(data[i]);
+String EVENT_TIMEDATA_TITLE_STR(value) {
+  var timeData = value as JSON;
+  if (JSON_EMPTY(timeData)) return '';
+  var result = '';
+  for (var item in timeData.entries) {
+    if (STR(item.value['title']).isNotEmpty) {
+      if (result.isNotEmpty) result += ' / ';
+      result += STR(item.value['title']);
     }
   }
-  return data;
+  return result;
+}
+
+// ignore: non_constant_identifier_names
+String EVENT_TIMEDATA_TIME_STR(value) {
+  var timeData = value as JSON;
+  if (JSON_EMPTY(timeData)) return '';
+  var result = '';
+  for (var item in timeData.entries) {
+    if (result.isNotEmpty) result += ' / ';
+    if (STR(item.value['startTime']).isNotEmpty) {
+      result += STR(item.value['startTime']);
+    }
+    result += '~';
+    if (STR(item.value['endTime']).isNotEmpty) {
+      result += STR(item.value['endTime']);
+    }
+  }
+  return result;
+}
+
+// ignore: non_constant_identifier_names
+String EVENT_TIMEDATA_TITLE_TIME_STR(value) {
+  var timeData = value as JSON;
+  if (JSON_EMPTY(timeData)) return '';
+  var result = '';
+  for (var item in timeData.entries) {
+    if (result.isNotEmpty) result += ' / ';
+    if (STR(item.value['title']).isNotEmpty) {
+      result += STR(item.value['title']) + ': ';
+    }
+    if (STR(item.value['startTime']).isNotEmpty) {
+      result += STR(item.value['startTime']);
+    }
+    result += '~';
+    if (STR(item.value['endTime']).isNotEmpty) {
+      result += STR(item.value['endTime']);
+    }
+  }
+  return result;
 }
 
 // ignore: non_constant_identifier_names
@@ -328,6 +353,169 @@ CURRENCY_STR(String key) {
 CURRENCY_SELECT_LIST() {
   List<JSON> _currencyList = List<JSON>.from(AppData.INFO_CURRENCY.entries.map((item) => {'key': item.key, 'title': '${item.key} ${item.value['currency']}'}).toList());
   return _currencyList;
+}
+
+// ignore: non_constant_identifier_names
+JSON_START_DAY_SORT_DESC(JSON data) {
+  LOG("--> JSON_START_DAY_SORT_DESC : ${data.length}");
+  if (JSON_EMPTY(data)) return {};
+  if (data.length < 2) return data;
+  return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
+    // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
+    return INT(data[a]['startDay']) > INT(data[b]['startDay']) ? -1 : 1;
+  }));
+}
+
+// ignore: non_constant_identifier_names
+JSON_CREATE_TIME_SORT_DESC(JSON data) {
+  LOG("--> JSON_CREATE_TIME_SORT_DESC : ${data.length}");
+  if (JSON_EMPTY(data)) return {};
+  if (data.length < 2) return data;
+  return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
+    // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
+    return data[a]['createTime'] != null && data[b]['createTime'] != null ?
+    data[a]['createTime']['_seconds'] > data[b]['createTime']['_seconds'] ? -1 : 1 : 1;
+  }));
+}
+
+// ignore: non_constant_identifier_names
+JSON_UPDATE_TIME_SORT_DESC(JSON data) {
+  LOG("--> JSON_UPDATE_TIME_SORT_DESC : ${data.length}");
+  if (JSON_EMPTY(data)) return {};
+  if (data.length < 2) return data;
+  return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
+    // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
+    return data[a]['updateTime'] != null && data[b]['updateTime'] != null ?
+    data[a]['updateTime']['_seconds'] > data[b]['updateTime']['_seconds'] ? -1 : 1 : 1;
+  }));
+}
+
+// ignore: non_constant_identifier_names
+JSON_CREATE_TIME_SORT_ASCE(JSON data) {
+  // LOG("--> JSON_CREATE_TIME_SORT_DESC : $data");
+  if (JSON_EMPTY(data)) return {};
+  if (data.length < 2) return data;
+  return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
+    // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
+    return data[a]['createTime'] != null && data[b]['createTime'] != null ?
+    data[a]['createTime']['_seconds'] > data[b]['createTime']['_seconds'] ? 1 : -1 : 1;
+  }));
+}
+
+// ignore: non_constant_identifier_names
+JSON_TARGET_DATE_SORT_ASCE(JSON data) {
+  LOG("--> JSON_TARGET_DATE_SORT_ASCE : $data");
+  try {
+    if (JSON_EMPTY(data)) return {};
+    if (data.length < 2) return data;
+    return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
+      // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
+      return DateTime.parse(STR(data[a]['targetDate'])).compareTo(DateTime.parse(STR(data[b]['targetDate']))).isNegative ? -1 : 1;
+    }));
+  } catch (e) {
+    LOG("--> JSON_TARGET_DATE_SORT_ASCE error : $e");
+  }
+  return data;
+}
+
+// ignore: non_constant_identifier_names
+JSON_INDEX_SORT_ASCE(JSON data) {
+  // LOG("--> JSON_INDEX_SORT_ASCE : $data");
+  if (JSON_EMPTY(data)) return {};
+  if (data.length < 2) return data;
+  return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
+    // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
+    return data[a]['index'] != null && data[b]['index'] != null ?
+    INT(data[a]['index']) > INT(data[b]['index']) ? 1 : -1 : 0;
+  }));
+}
+
+// ignore: non_constant_identifier_names
+LIST_CREATE_TIME_SORT_DESC(List<JSON> data) {
+  if (JSON_EMPTY(data)) return [];
+  if (data.length < 2) return data;
+  data.sort((a, b) => a['createTime'] != null && b['createTime'] != null ?
+  a['createTime']['_seconds'] > b['createTime']['_seconds'] ? -1 : 1 : 1);
+  return data;
+}
+
+// ignore: non_constant_identifier_names
+LIST_CREATE_TIME_SORT_ASCE(List<JSON> data) {
+  if (JSON_EMPTY(data)) return [];
+  if (data.length < 2) return data;
+  data.sort((a, b) => a['createTime'] != null && b['createTime'] != null ?
+  a['createTime']['_seconds'] > b['createTime']['_seconds'] ? 1 : -1 : 1);
+  return data;
+}
+
+// ignore: non_constant_identifier_names
+LIST_START_TIME_SORT(List<JSON> data) {
+  LOG("--> LIST_START_TIME_SORT : $data");
+  if (JSON_EMPTY(data)) return [];
+  if (data.length < 2) return data;
+  data.sort((a, b) => a['startTime'] != null && b['startTime'] != null ?
+  a['startTime']['_seconds'] > b['startTime']['_seconds'] ? 1 : -1 : 1);
+  return data;
+}
+
+// ignore: non_constant_identifier_names
+LIST_LIKES_SORT_DESC(List<JSON> data) {
+  if (JSON_EMPTY(data)) return [];
+  if (data.length < 2) return data;
+  data.sort((a, b) => INT(a['likes']) > INT(b['likes']) ? -1 : 1);
+  return data;
+}
+
+// ignore: non_constant_identifier_names
+JSON_INDEX_SORT(JSON data) {
+  if (JSON_EMPTY(data)) return {};
+  if (data.length < 2) return data;
+  return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) =>
+  INT(data[a]['index']) > INT(data[b]['index']) ? 1 : -1));
+}
+
+// ignore: non_constant_identifier_names
+JSON_LAST_INDEX(JSON data, int offset) {
+  var result = 0;
+  data.forEach((key, value) {
+    var checkIndex = INT(value['index']);
+    if (checkIndex > result) result = checkIndex;
+  });
+  return result + offset;
+}
+
+// ignore: non_constant_identifier_names
+JSON_START_DAY_SORT(JSON data) {
+  if (JSON_EMPTY(data)) return {};
+  if (data.length < 2) return data;
+  return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) =>
+  INT(data[a]['startDay']) > INT(data[b]['startDay']) ? -1 : 1));
+}
+
+
+// ignore: non_constant_identifier_names
+JSON_SEEN_SORT(JSON data) {
+  if (JSON_EMPTY(data)) return {};
+  if (data.length < 2) return data;
+  return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) =>
+  BOL(data[a]['isSeen']) && !BOL(data[b]['isSeen']) ? 1 : -1));
+}
+
+// ignore: non_constant_identifier_names
+LIST_INDEX_SORT(List<JSON> data) {
+  if (JSON_EMPTY(data)) return [];
+  data.sort((a, b) => INT(a['index']) > INT(b['index']) ? 1 : -1);
+  return data;
+}
+
+// ignore: non_constant_identifier_names
+LIST_LAST_INDEX(List<JSON> data, int offset) {
+  var result = 0;
+  for (var item in data) {
+    var checkIndex = INT(item['index']);
+    if (checkIndex > result) result = checkIndex;
+  }
+  return result + offset;
 }
 
 colorToHexString(Color color) {
@@ -448,6 +636,20 @@ Widget showImageWidget(dynamic imagePath, BoxFit fit, {Color? color}) {
   return Image.asset(NO_IMAGE);
 }
 
+Widget showSizedImage(dynamic imagePath, double size) {
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(size / 8),
+    child: SizedBox(
+      width: size,
+      height: size,
+      child: FittedBox(
+        fit: BoxFit.fill,
+        child: showImageFit(imagePath),
+      ),
+    ),
+  );
+}
+
 Widget showLoadingImage() {
   return showLoadingImageSquare(50.0);
 }
@@ -478,6 +680,26 @@ Widget showLoadingImageSquare(double size) {
 
 Widget showLoadingCircleSquare(double size) {
   return Container(
+      child: Center(
+          child: SizedBox(
+              width: size,
+              height: size,
+              child: CircularProgressIndicator(strokeWidth: size >= 50 ? 2 : 1)
+          )
+      )
+  );
+}
+
+Widget showLoadingFullPage(BuildContext context) {
+  return showLoadingPage(context, 150);
+}
+
+Widget showLoadingPage(BuildContext context, int offset) {
+  var size = 50.0;
+  return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height - offset,
+      color: Colors.blueGrey.withOpacity(0.1),
       child: Center(
           child: SizedBox(
               width: size,
@@ -1074,44 +1296,6 @@ RoundRectButtonEx(BuildContext context, String title, {double height = 40, bool 
   );
 }
 
-EditTextField(
-    BuildContext context,
-    String title,
-    String text,
-    { int? maxLines = 1,
-      var maxLength = 99,
-      var keyboardType = TextInputType.text,
-      var hint = '',
-      var topSpace = 0.0,
-      Function(String)? onChanged
-    })
-{
-  final controller = TextEditingController(text: text);
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      SizedBox(height: topSpace),
-      Text(
-        title,
-        style: DescTitleStyle(context),
-      ),
-      SizedBox(height: UI_ITEM_SPACE.w),
-      TextFormField(
-        controller: controller,
-        decoration: inputLabel(context, hint, ''),
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        maxLength: maxLength,
-        validator: (value) {
-          if (value == null || value.length < 2) return 'Please enter nickname'.tr;
-          return null;
-        },
-        onChanged: onChanged,
-      ),
-    ],
-  );
-}
-
 // ignore: non_constant_identifier_names
 ShowImageCroper(String imageFilePath) async {
   var preset = [
@@ -1193,4 +1377,122 @@ Future resizeImage(Uint8List data, double maxSize) async {
     LOG('--> resize error : $e');
     return resizedData;
   }
+}
+
+class _Chip extends StatelessWidget {
+  _Chip({
+    required this.label,
+    required this.onDeleted,
+    required this.index,
+    this.enabled = true,
+    this.headText = '',
+    this.onSelected
+  });
+
+  final String label;
+  final ValueChanged<int> onDeleted;
+  final ValueChanged<int>? onSelected;
+  final int index;
+  String headText;
+  bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    if (enabled) {
+      return Chip(
+        backgroundColor: Theme
+            .of(context)
+            .canvasColor,
+        useDeleteButtonTooltip: false,
+        labelPadding: EdgeInsets.fromLTRB(5, 2, 0, 2),
+        label: Text(label),
+        deleteIcon: Icon(Icons.close, size: 18),
+        deleteIconColor: Colors.grey,
+        onDeleted: () {
+          onDeleted(index);
+        },
+      );
+    } else {
+      return GestureDetector(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+          child: Text('$headText$label'),
+        ),
+        onTap: () {
+          if (onSelected != null) onSelected!(index);
+        },
+      );
+    }
+  }
+}
+
+TagTextField(List<String>? tagList, Function(List<String>)? onChanged) {
+  return TagTextEditField(tagList, 'Tag'.tr, '', true, onChanged);
+}
+
+TagTextEditField(List<String>? tagList, String hintText, String disabledHeadText, bool enabled, Function(List<String>)? onChanged, {Function(int, String)? onSelected}) {
+  tagList ??= [];
+  return StatefulBuilder(
+      builder: (context, setState) {
+        return TagEditor(
+            length: tagList!.length,
+            delimiters: const [',', '/', '#', ' '],
+            hasAddButton: false,
+            enabled: enabled,
+            minTextFieldWidth: enabled ? 160 : 0,
+            inputDecoration: InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.all(5),
+              hintText: hintText,
+              hintStyle: TextStyle(fontSize: 14),
+              hoverColor: Theme.of(context).primaryColor,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                borderSide: BorderSide(color: Colors.transparent),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                borderSide: BorderSide(color: Colors.transparent),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                borderSide: BorderSide(color: Colors.transparent),
+              ),          ),
+            onTagChanged: (newValue) {
+              setState(() {
+                tagList!.add(newValue);
+                if (onChanged != null) onChanged(tagList);
+              });
+            },
+            tagBuilder: (context, index) => _Chip(
+              index: index,
+              label: tagList![index],
+              enabled : enabled,
+              headText: disabledHeadText,
+              onDeleted: (index) {
+                setState(() {
+                  tagList!.removeAt(index);
+                  if (onChanged != null) onChanged(tagList);
+                });
+              },
+              onSelected: (index) {
+                if (onSelected != null) onSelected(index, tagList![index]);
+              },
+            )
+        );
+      }
+  );
+}
+
+unFocusAll(BuildContext context) {
+  FocusScopeNode currentFocus = FocusScope.of(context);
+  if (!currentFocus.hasPrimaryFocus) {
+    currentFocus.unfocus();
+  }
+  // for (var item in AppData.searchWidgetKey) {
+  //   if (item.currentState != null) {
+  //     var state = item.currentState as SearchWidgetState;
+  //     state.clearFocus(false);
+  //   }
+  // }
 }

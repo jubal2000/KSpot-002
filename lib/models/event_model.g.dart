@@ -23,6 +23,7 @@ EventModel _$EventModelFromJson(Map<String, dynamic> json) => EventModel(
       reservePeriod: json['reservePeriod'] as int,
       likeCount: json['likeCount'] as int,
       voteCount: json['voteCount'] as int,
+      commentCount: json['commentCount'] as int,
       updateTime: json['updateTime'] as String,
       createTime: json['createTime'] as String,
       tagData:
@@ -65,6 +66,7 @@ Map<String, dynamic> _$EventModelToJson(EventModel instance) =>
       'reservePeriod': instance.reservePeriod,
       'likeCount': instance.likeCount,
       'voteCount': instance.voteCount,
+      'commentCount': instance.commentCount,
       'updateTime': instance.updateTime,
       'createTime': instance.createTime,
       'tagData': instance.tagData,
@@ -79,11 +81,13 @@ Map<String, dynamic> _$EventModelToJson(EventModel instance) =>
 TimeData _$TimeDataFromJson(Map<String, dynamic> json) => TimeData(
       id: json['id'],
       status: json['status'],
+      title: json['title'],
       desc: json['desc'],
       startDate: json['startDate'],
       endDate: json['endDate'],
       startTime: json['startTime'],
       endTime: json['endTime'],
+      index: json['index'],
       day: json['day'],
       dayWeek: json['dayWeek'],
       week: json['week'],
@@ -93,11 +97,13 @@ TimeData _$TimeDataFromJson(Map<String, dynamic> json) => TimeData(
 Map<String, dynamic> _$TimeDataToJson(TimeData instance) => <String, dynamic>{
       'id': instance.id,
       'status': instance.status,
+      'title': instance.title,
       'desc': instance.desc,
       'startDate': instance.startDate,
       'endDate': instance.endDate,
       'startTime': instance.startTime,
       'endTime': instance.endTime,
+      'index': instance.index,
       'day': instance.day,
       'dayWeek': instance.dayWeek,
       'week': instance.week,
@@ -140,10 +146,10 @@ Map<String, dynamic> _$OptionDataToJson(OptionData instance) =>
     };
 
 PicData _$PicDataFromJson(Map<String, dynamic> json) => PicData(
-      id: json['id'],
-      type: json['type'],
-      url: json['url'],
-      data: json['data'],
+      id: json['id'] as String,
+      type: json['type'] as int,
+      url: json['url'] as String,
+      data: json['data'] as String?,
     );
 
 Map<String, dynamic> _$PicDataToJson(PicData instance) => <String, dynamic>{

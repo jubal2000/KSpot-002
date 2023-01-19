@@ -159,6 +159,7 @@ class Words extends Translations {
       'OPTIONS': '옵션',
       'Do you want to upload now?': '지금 업로드 하시겠습니까?',
       'Do you want to update now?': '지금 수정 하시겠습니까?',
+      'Photo Add': '사진 추가',
 
       // edit_list_widget
       'ADDRESS LINK': '주소 링크',

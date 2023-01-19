@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../utils/utils.dart';
+import 'etc_model.dart';
 part 'story_model.g.dart';
 
 class StoryModelEx extends StoryModel {
@@ -92,18 +93,4 @@ class StoryModel {
 
   factory StoryModel.fromJson(JSON json) => _$StoryModelFromJson(json);
   JSON toJSON() => _$StoryModelToJson(this);
-}
-
-@JsonSerializable()
-class PicData {
-  String id = '';
-  int    type = 0; // 이미지 종류 (0:photo, 1:movie..)
-  String url = '';
-  PicData({
-    id,
-    type,
-    url,
-  });
-  factory PicData.fromJson(JSON json) => _$PicDataFromJson(json);
-  JSON toJSON() => _$PicDataToJson(this);
 }

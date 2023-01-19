@@ -59,7 +59,7 @@ class _MainEventEditState extends State<MainEventEdit> {
 
   @override
   void initState () {
-    widget.eventItem ??= EventModeEx.empty('', title: 'test title', desc: 'test desc..');
+    widget.eventItem ??= EventModelEx.empty('', title: 'test title', desc: 'test desc..');
     _viewModel.init(context);
     _viewModel.setEditItem(widget.eventItem!);
     super.initState ();
@@ -80,14 +80,19 @@ class _MainEventEditState extends State<MainEventEdit> {
             padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
             children: [
               viewModel.showImageSelector(),
-              SizedBox(height: UI_LIST_TEXT_SPACE.w),
-              EditTextField(context, 'TITLE'.tr, viewModel.editItem!.title, hint: 'TITLE'.tr, maxLength: TITLE_LENGTH, onChanged: (value) {
+              SizedBox(height: UI_LIST_TEXT_SPACE_S.w),
+              SubTitle(context, 'INFO'.tr),
+              SizedBox(height: UI_LIST_TEXT_SPACE_S.w),
+              EditTextField(context, 'TITLE'.tr, viewModel.editItem!.title, hint: 'TITLE'.tr, maxLength: TITLE_LENGTH,
+                  onChanged: (value) {
 
               }),
-              EditTextField(context, 'DESC'.tr, viewModel.editItem!.desc, hint: 'DESC'.tr, maxLength: DESC_LENGTH, maxLines: null, keyboardType: TextInputType.multiline, onChanged: (value) {
+              EditTextField(context, 'DESC'.tr, viewModel.editItem!.desc, hint: 'DESC'.tr, maxLength: DESC_LENGTH,
+                  maxLines: null, keyboardType: TextInputType.multiline, onChanged: (value) {
 
               }),
-              EditListSortWidget(viewModel.editEventToJSON, EditListType.timeRange, onAddAction: viewModel.onItemAdd, onSelected: viewModel.onItemSelected),
+              EditListSortWidget(viewModel.editEventToJSON, EditListType.timeRange, onAddAction: viewModel.onItemAdd,
+                  onSelected: viewModel.onItemSelected),
             ],
           );
         }),

@@ -25,10 +25,10 @@ const double UI_TEXT_HEIGHT = 50.0;
 
 const double UI_LIST_BUTTON_SPACE = 10.0;
 const double UI_LIST_TEXT_SPACE = 20.0;
-const double UI_TABLE_ITEM_SPACE = 10.0;
 const double UI_LIST_TEXT_SPACE_S = 12.0;
 const double UI_CHECKBOX_SPACE = 8.0;
 const double UI_PIN_INPUT_SPACE = 16.0;
+const double UI_TABLE_ITEM_SPACE = 10.0;
 
 const double UI_MENU_CIRCLE_SIZE = 52.0;
 const double UI_MENU_ICON_SIZE = 25.0;

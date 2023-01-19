@@ -393,7 +393,7 @@ ItemTitleDisableStyle(BuildContext context) {
 }
 
 ItemTitleHotStyle(BuildContext context) {
-  return TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.tertiary, fontWeight: FontWeight.w600);
+  return TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.tertiary, fontWeight: FontWeight.w800);
 }
 
 ItemTitleAlertStyle(BuildContext context) {

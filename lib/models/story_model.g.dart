@@ -53,15 +53,3 @@ Map<String, dynamic> _$StoryModelToJson(StoryModel instance) =>
       'linkUserData': instance.linkUserData,
       'picData': instance.picData,
     };
-
-PicData _$PicDataFromJson(Map<String, dynamic> json) => PicData(
-      id: json['id'],
-      type: json['type'],
-      url: json['url'],
-    );
-
-Map<String, dynamic> _$PicDataToJson(PicData instance) => <String, dynamic>{
-      'id': instance.id,
-      'type': instance.type,
-      'url': instance.url,
-    };

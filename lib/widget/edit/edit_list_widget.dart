@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -37,9 +38,16 @@ Widget EditListWidget(BuildContext context, JSON? listItem, EditListType type, F
 
 class EditListSortWidget extends StatefulWidget {
   EditListSortWidget(this.listItem, this.type,
-      {Key? key, this.textLine = 1, this.padding = const EdgeInsets.only(top: 20), this.enabled = true, this.onAddAction, this.onSelected, this.onChanged, this.onListItemChanged }) : super(key: key);
+      {Key? key,
+        this.textLine = 1,
+        this.padding = const EdgeInsets.only(top: 0),
+        this.enabled = true,
+        this.onAddAction,
+        this.onSelected,
+        this.onChanged,
+        this.onListItemChanged}) : super(key: key);
 
-  JSON? listItem;
+  JSON listItem;
   EditListType type;
   int textLine;
   EdgeInsets padding;
@@ -77,35 +85,34 @@ class _EditListSortState extends State<EditListSortWidget> {
   refreshData() {
     _listData = [];
     if (JSON_NOT_EMPTY(widget.listItem)) {
-      _listData = List<JSON>.from(widget.listItem!.entries.map((element) => element.value).toList());
+      _listData = List<JSON>.from(widget.listItem.entries.map((element) => element.value).toList());
     }
     refreshList();
   }
 
   refreshList() {
-    // log('----> refreshList length : ${_listData.length}');
     _itemList = [];
     if (_listData.isNotEmpty) {
       _itemList = _listData.map((item) {
+        LOG('----> _itemList item : $item');
         JSON _data = {
-          'image': widget.listItem![item['id']] != null ? STR(widget.listItem![item['id']]['icon']) : '',
+          'image': widget.listItem[item['id']] != null ? STR(widget.listItem[item['id']]['icon']) : '',
           'title': item[showTextField[widget.type.index]] ?? '',
           'desc': item['desc'] ?? item['titleEx'] ?? '',
         };
-        LOG('--> refreshList item : $_data > ${_data.runtimeType}');
         switch (widget.type) {
           case EditListType.reserve:
             break;
         }
         return Container(
           key: GlobalKey(),
-            padding: EdgeInsets.all(5),
-            margin: EdgeInsets.symmetric(vertical: 5),
-            decoration: BoxDecoration(
-              color: Theme.of(context).backgroundColor.withOpacity(0.25),
-                border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 1.0),
-                borderRadius: BorderRadius.all(Radius.circular(8))
-            ),
+          margin: EdgeInsets.symmetric(vertical: 5),
+          // color: Theme.of(context).backgroundColor.withOpacity(0.25),
+            // decoration: BoxDecoration(
+            //   color: Theme.of(context).backgroundColor.withOpacity(0.25),
+            //     border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 1.0),
+            //     borderRadius: BorderRadius.all(Radius.circular(8))
+            // ),
             child: EditListItem(
               context,
               widget.type,
@@ -119,17 +126,17 @@ class _EditListSortState extends State<EditListSortWidget> {
               widget.onChanged != null || widget.onListItemChanged != null,
               BOL(item['disabled']),
               (EditListType type, String key, int status) {
-                LOG('--> EditListItem select : $key / $status');
+                LOG('--> EditListItem select : $type / $key / $status');
                 if (!widget.enabled) return;
                 if (type == EditListType.customField && status == 0) {
-                  var itemKey = widget.listItem![key]['customId'];
+                  var itemKey = widget.listItem[key]['customId'];
                   var infoItem = AppData.INFO_CUSTOMFIELD[itemKey];
                   if (infoItem != null) {
                     switch(STR(infoItem['type'])) {
                       case 'user':
                         AppData.listSelectData = {};
-                        if (widget.listItem![key]['userData'] != null) {
-                          for (var user in widget.listItem![key]['userData']) {
+                        if (widget.listItem[key]['userData'] != null) {
+                          for (var user in widget.listItem[key]['userData']) {
                             AppData.listSelectData[user['userId']] = {'id': user['userId'], 'pic': user['userPic'], 'nickName': user['userName']};
                           }
                         }
@@ -137,24 +144,24 @@ class _EditListSortState extends State<EditListSortWidget> {
                       //   Navigator.push(context, MaterialPageRoute(builder: (context) =>
                       //       FollowScreen(AppData.userInfo, topTitle: 'FOLLOWER SELECT'.tr, isShowMe: true, isSelectable: true))).then((value) {
                       //   setState(() {
-                      //     widget.listItem![key]['desc'] = '';
+                      //     widget.listItem[key]['desc'] = '';
                       //     if (AppData.listSelectData.isNotEmpty) {
-                      //       widget.listItem![key]['userData'] = [];
+                      //       widget.listItem[key]['userData'] = [];
                       //       for (var item in AppData.listSelectData.entries) {
-                      //         widget.listItem![key]['userData'].add({
+                      //         widget.listItem[key]['userData'].add({
                       //           'id': item.key,
                       //           'userId': item.key,
                       //           'userPic': STR(item.value['pic']),
                       //           'userName': STR(item.value['nickName'])
                       //         });
-                      //         if (widget.listItem![key]['desc'].isNotEmpty) widget.listItem![key]['desc'] += ', ';
-                      //         widget.listItem![key]['desc'] += STR(item.value['nickName']);
+                      //         if (widget.listItem[key]['desc'].isNotEmpty) widget.listItem[key]['desc'] += ', ';
+                      //         widget.listItem[key]['desc'] += STR(item.value['nickName']);
                       //       }
                       //     } else {
-                      //       widget.listItem![key].remove('userData');
+                      //       widget.listItem[key].remove('userData');
                       //     }
-                      //     LOG("--> widget.listItem[$key]['userData'] : ${widget.listItem![key]}");
-                      //     if (widget.onListItemChanged != null) widget.onListItemChanged!(widget.type, widget.listItem!);
+                      //     LOG("--> widget.listItem[$key]['userData'] : ${widget.listItem[key]}");
+                      //     if (widget.onListItemChanged != null) widget.onListItemChanged!(widget.type, widget.listItem);
                       //   });
                       // });
                       break;
@@ -172,8 +179,8 @@ class _EditListSortState extends State<EditListSortWidget> {
                           showPriceInputDialog(context, STR(infoItem['title'] ?? 'Price'.tr), STR(infoItem['title']), item['priceData'] ?? {}).then((result) {
                             if (result.isNotEmpty) {
                               setState(() {
-                                widget.listItem![key]['priceData'] = result;
-                                widget.listItem![key]['desc'] = result['desc'];
+                                widget.listItem[key]['priceData'] = result;
+                                widget.listItem[key]['desc'] = result['desc'];
                                 AppData.currentCurrency = result['currency'];
                                 LOG('--> showPriceInputDialog result : $result / ${AppData.currentCurrency}');
                                 AppData.localInfo['currency'] = AppData.currentCurrency;
@@ -183,25 +190,25 @@ class _EditListSortState extends State<EditListSortWidget> {
                           });
                           break;
                         case '2text'  :
-                          widget.listItem![key]['textData'] ??= {'title':'', 'desc':''};
-                          showDoubleTextInputDialog(context, STR(infoItem['title'] ?? 'Text input field'.tr), widget.listItem![key]['textData'], 'Title'.tr, 'Desc'.tr).then((result) {
+                          widget.listItem[key]['textData'] ??= {'title':'', 'desc':''};
+                          showDoubleTextInputDialog(context, STR(infoItem['title'] ?? 'Text input field'.tr), widget.listItem[key]['textData'], 'Title'.tr, 'Desc'.tr).then((result) {
                             if (result.isNotEmpty) {
-                              widget.listItem![key]['textData'] = result;
-                              widget.listItem![key]['title']    = result['title'];
-                              widget.listItem![key]['desc']     = result['desc'];
-                              LOG('--> showDoubleTextInputDialog result : $result / ${widget.listItem![key]['desc']}');
+                              widget.listItem[key]['textData'] = result;
+                              widget.listItem[key]['title']    = result['title'];
+                              widget.listItem[key]['desc']     = result['desc'];
+                              LOG('--> showDoubleTextInputDialog result : $result / ${widget.listItem[key]['desc']}');
                             }
                           });
                           break;
                       }
                       if (textInputType != null) {
-                        showTextInputTypeDialog(context, item['title'], '', STR(widget.listItem![key]['desc']), 1,
+                        showTextInputTypeDialog(context, item['title'], '', STR(widget.listItem[key]['desc']), 1,
                             textInputType == TextInputType.multiline ? 5 : 1,
                             textInputType).then((result) {
                           if (result.isNotEmpty) {
                             setState(() {
-                              widget.listItem![key]['desc'] = result;
-                              if (widget.onListItemChanged != null) widget.onListItemChanged!(widget.type, widget.listItem!);
+                              widget.listItem[key]['desc'] = result;
+                              if (widget.onListItemChanged != null) widget.onListItemChanged!(widget.type, widget.listItem);
                             });
                           }
                         });
@@ -227,7 +234,7 @@ class _EditListSortState extends State<EditListSortWidget> {
       var imageData = await ReadFileByte(imageUrl);
       imageData = await resizeImage(imageData!.buffer.asUint8List(), 512) as Uint8List;
       setState(() {
-        widget.listItem![key]['image'] = imageData;
+        widget.listItem[key]['image'] = imageData;
       });
     }
   }
@@ -243,9 +250,8 @@ class _EditListSortState extends State<EditListSortWidget> {
     return Container(
       padding: widget.padding,
       child: Column(
-      children: [
-        SubTitle(context, titleText[widget.type.index].tr),
-          SizedBox(height: 5),
+        children: [
+          SubTitle(context, titleText[widget.type.index].tr),
           ReorderableListView(
             shrinkWrap: true,
             buildDefaultDragHandles: false,
@@ -253,9 +259,10 @@ class _EditListSortState extends State<EditListSortWidget> {
             physics: NeverScrollableScrollPhysics(),
             proxyDecorator: (Widget child, int index, Animation<double> animation) {
               return Container(
+                padding: EdgeInsets.symmetric(horizontal: 5),
                 decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(8))
+                    borderRadius: BorderRadius.all(Radius.circular(8.sp))
                 ),
                 child: child,
               );
@@ -266,28 +273,37 @@ class _EditListSortState extends State<EditListSortWidget> {
                 var item = _listData.removeAt(oldIndex);
                 _listData.insert(newIndex, item);
                 refreshList();
-                widget.listItem ??= {};
+                widget.listItem = JSON.from({});
                 for (var item in _listData) {
-                  widget.listItem![item['id']] = item;
+                  widget.listItem[item['id']] = item;
                 }
-                if (widget.onListItemChanged != null) widget.onListItemChanged!(widget.type, widget.listItem!);
+                if (widget.onListItemChanged != null) widget.onListItemChanged!(widget.type, widget.listItem);
               });
             },
             children: _itemList,
           ),
-          SizedBox(height: 5),
+          SizedBox(height: 5.w),
           Container(
-            height: descText[widget.type.index].isNotEmpty ? 50 : 40,
+            height: descText[widget.type.index].isNotEmpty ? 50.w : 40.w,
             child: ElevatedButton(
               onPressed: () {
                 if (!widget.enabled) return;
                 if (widget.onAddAction != null) widget.onAddAction!(widget.type, widget.listItem ?? {});
               },
+              style: ElevatedButton.styleFrom(
+                primary: Theme.of(context).splashColor.withOpacity(0.1),
+                shadowColor: Colors.transparent,
+                minimumSize: Size.zero, // Set this
+                padding: EdgeInsets.only(left: 5.w), // and this
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.sp),
+                )
+              ),
               child: Row(
                 children: [
-                  SizedBox(width: 6),
-                  Icon(Icons.add, size: 24, color: Theme.of(context).primaryColor),
-                  SizedBox(width: 5),
+                  SizedBox(width: 6.w),
+                  Icon(Icons.add, size: 24.sp, color: Theme.of(context).hintColor.withOpacity(0.85)),
+                  SizedBox(width: 5.w),
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -303,15 +319,6 @@ class _EditListSortState extends State<EditListSortWidget> {
                   ),
                 ],
               ),
-              style: ElevatedButton.styleFrom(
-                primary: Theme.of(context).splashColor.withOpacity(0.1),
-                shadowColor: Colors.transparent,
-                minimumSize: Size.zero, // Set this
-                padding: EdgeInsets.only(left: 5), // and this
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                )
-              ),
             ),
           )
         ],
@@ -324,7 +331,7 @@ Widget EditListItem(BuildContext context, EditListType type, String key, int ind
     IconData icon, JSON data, dynamic imageData, String? backPic,
     TextStyle style, bool isCanMove, bool isDisabled, Function(EditListType, String, int)? onCallback, {String iconEx = ''}) {
   final _textController = TextEditingController();
-  final _descStype = TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 16);
+  final _descStyle = TextStyle(color: Theme.of(context).hintColor, fontWeight: FontWeight.normal, fontSize: 14);
 
   var _isCustomField = type == EditListType.customField;
   var _height = _isCustomField ? 50.0 : 30.0;
@@ -332,14 +339,11 @@ Widget EditListItem(BuildContext context, EditListType type, String key, int ind
   if (isDisabled) {
     _textStyle = ItemDescStyle(context);
   }
-
   if (type == EditListType.customField) {
     _textController.text = STR(data['desc']);
   }
-  LOG('--> customId : $data');
   return Container(
     // height: _height,
-    padding: EdgeInsets.symmetric(vertical: 5),
       child: GestureDetector(
       onTap: () {
         if (onCallback != null) onCallback(type, key, 0); // select..
@@ -351,12 +355,12 @@ Widget EditListItem(BuildContext context, EditListType type, String key, int ind
           children: [
             if (isCanMove)
               ReorderableDragStartListener(
-                index: index,
-                enabled: isCanMove,
-                child: Container(
-                  padding: EdgeInsets.only(right: 10),
-                  child: Icon(Icons.drag_handle, size: 22, color: Theme.of(context).primaryColor),
-                )
+              index: index,
+              enabled: isCanMove,
+              child: Container(
+                  padding: EdgeInsets.only(right: 5),
+                  child: Icon(Icons.drag_handle, size: 22, color: Theme.of(context).hintColor),
+                ),
               ),
             if (STR(data['pic']).isNotEmpty)...[
               SizedBox(width: 5),
@@ -382,36 +386,49 @@ Widget EditListItem(BuildContext context, EditListType type, String key, int ind
                 child: Row(
                   children: [
                     Container(
+                      padding: EdgeInsets.all(5),
+                      // decoration: BoxDecoration(
+                      //   border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 1.0),
+                      //   borderRadius: BorderRadius.all(Radius.circular(8))
+                      // ),
                       child: Text(STR(data['title']), style: _textStyle),
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 1.0),
-                        borderRadius: BorderRadius.all(Radius.circular(8))
-                      ),
                     ),
                     SizedBox(width: 5),
                     if (backPic != null)
-                      showImageWidget(backPic, BoxFit.fitHeight),
+                      showImage(backPic, Size(_height - 10, _height - 10), fit: BoxFit.fitHeight),
                     if (backPic == null && imageData != null)
-                      Image.memory(imageData as Uint8List, fit: BoxFit.fitHeight),
+                      SizedBox(
+                        height: _height - 10,
+                        child: Image.memory(imageData as Uint8List, fit: BoxFit.fitHeight),
+                      ),
                     if (backPic == null && imageData == null)
                       Expanded(
                         child: Container(
-                          child: Text(DESC(data['desc']), style: _textStyle, maxLines: null),
                           padding: EdgeInsets.all(10),
                           decoration: BoxDecoration(
                             border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 1.0),
                             borderRadius: BorderRadius.all(Radius.circular(8))
                         ),
+                          child: Text(DESC(data['desc']), style: _textStyle, maxLines: null),
                       ),
                     ),
                   ]
                 )
               ),
-            if (!_isCustomField)
+            if (!_isCustomField)...[
               Expanded(
-                child: Text(STR(data['title']), style: _textStyle, maxLines: 2),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(STR(data['title']), style: _textStyle, maxLines: 1),
+                    if (STR(data['desc']).isNotEmpty)...[
+                      SizedBox(height: 5),
+                      Text(DESC(data['desc']), style: _descStyle, maxLines: 2),
+                    ]
+                  ]
+                )
               ),
+            ],
             SizedBox(width: 10),
             GestureDetector(
               child: Icon(
@@ -430,7 +447,7 @@ Widget EditListItem(BuildContext context, EditListType type, String key, int ind
   );
 }
 
-Widget EditFileListSortWidget(BuildContext context, String title, JSON? listItem, Function()? onAddAction, Function(String, int)? onSelected) {
+Widget EditFileListSortWidget(BuildContext context, String title, JSON listItem, Function()? onAddAction, Function(String, int)? onSelected) {
   final _addTextStyle   = TextStyle(color: Colors.purple, fontWeight: FontWeight.bold, fontSize: 15);
   final _itemTextStyle  = TextStyle(color: Colors.black, fontSize: 15);
   final _subTitleStyle  = TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold);
@@ -449,7 +466,7 @@ Widget EditFileListSortWidget(BuildContext context, String title, JSON? listItem
             key: Key(_listData.indexOf(item).toString()),
             child: EditFileListItem(item['id'] ?? '',
                 _listData.indexOf(item),
-                STR(listItem![item['id']]['icon']),
+                STR(listItem[item['id']]['icon']),
                 item['title'],
                 _itemTextStyle,
                 true,
@@ -513,16 +530,6 @@ Widget EditFileListSortWidget(BuildContext context, String title, JSON? listItem
               onAddAction();
             }
           },
-          child: Row(
-            children: [
-              SizedBox(width: 6),
-              Icon(Icons.add, size: 24, color: Colors.purple),
-              SizedBox(width: 5),
-              Expanded(
-                child: Text(title, style: _addTextStyle),
-              ),
-            ],
-          ),
           style: ElevatedButton.styleFrom(
               primary: Colors.white,
               minimumSize: Size.zero, // Set this
@@ -532,6 +539,16 @@ Widget EditFileListSortWidget(BuildContext context, String title, JSON? listItem
                   borderRadius: BorderRadius.circular(10),
                   side: BorderSide(color: Colors.grey)
               )
+          ),
+          child: Row(
+            children: [
+              SizedBox(width: 6),
+              Icon(Icons.add, size: 24, color: _addTextStyle.color),
+              SizedBox(width: 5),
+              Expanded(
+                child: Text(title, style: _addTextStyle),
+              ),
+            ],
           ),
         ),
       )

@@ -33,15 +33,16 @@ class FirebaseService extends GetxService {
     return this;
   }
 
-  FirebaseMessaging? messaging;
   FirebaseFirestore? firestore;
+  FirebaseAuth? fireAuth;
+  FirebaseMessaging? messaging;
   PendingDynamicLinkData? initialLink;
 
   String? token;
   String? recommendCode;
   bool initLink = false;
   bool isInit = false;
-  bool isLoginDone = false;
+  bool isLoginCheckDone = false;
 
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -56,7 +57,12 @@ class FirebaseService extends GetxService {
     if (isInit) return;
     isInit = true;
 
-    await Firebase.initializeApp();
+    final result = await Firebase.initializeApp();
+    firestore = FirebaseFirestore.instance;
+    fireAuth  = FirebaseAuth.instance;
+    messaging = FirebaseMessaging.instance;
+    LOG('--> initService: ${result.toString()} / $firestore');
+
     // init firebase..
     // if (defaultTargetPlatform == TargetPlatform.android) {
     //   await Firebase.initializeApp(
@@ -69,23 +75,21 @@ class FirebaseService extends GetxService {
     //   );
     // }
 
-    FirebaseAuth.instance
-        .authStateChanges()
+    fireAuth!.authStateChanges()
         .listen((User? user) {
       if (user == null) {
         LOG('--> User is currently signed out!');
+        AppData.loginInfo.loginType = '';
+        AppData.loginInfo.loginId = '';
       } else {
         LOG('--> User is signed in!');
         getLoginUserInfo(user);
       }
-      isLoginDone = true;
+      isLoginCheckDone = true;
     });
   }
 
   initMessaging() async {
-    messaging = FirebaseMessaging.instance;
-    firestore = FirebaseFirestore.instance;
-
     // get firebase token..
     token = await messaging!.getToken();
     LOG('--> firebase init token : $token');
@@ -301,7 +305,7 @@ class FirebaseService extends GetxService {
         String targetId = STR(itemData['id']) ?? Uuid().v1();
         switch (STR(customData['type'])) {
           case 'message':
-            isShowPush = AppData.userInfo!.optionPush.isEmpty || BOL(AppData.userInfo!.optionPush['message_on']);
+            // isShowPush = AppData.userInfo.optionPush.isEmpty || BOL(AppData.userInfo!.optionPush['message_on']);
             // AppData.messageData[targetId] = itemData;
             // var state = AppData.messagesListKey.currentState;
             // if (state != null && state.mounted) {
@@ -311,7 +315,7 @@ class FirebaseService extends GetxService {
             // LOG('--> messageData add [$targetId] : ${AppData.messageData}');
             break;
           case 'comment':
-            isShowPush = AppData.userInfo!.optionPush.isEmpty || BOL(AppData.userInfo!.optionPush['comment_on']);
+            // isShowPush = AppData.userInfo!.optionPush.isEmpty || BOL(AppData.userInfo!.optionPush['comment_on']);
             break;
         }
       }
@@ -396,22 +400,22 @@ class FirebaseService extends GetxService {
     if (targetUserInfo != null) {
       var pushToken = STR(targetUserInfo.pushToken);
       LOG('------> send push : ${targetUserInfo.nickName} => ${targetUserInfo.optionPush} / $pushToken');
-      if (pushToken.isNotEmpty && (targetUserInfo.optionPush.isEmpty || BOL(targetUserInfo.optionPush['message_on']))) {
-        try {
-          return sendFcmData(
-              pushToken,
-              title,
-              desc,
-              userData
-            // {
-            //   'type': 'message', // link
-            //   'data': userData.toString(),
-            // }
-          );
-        } catch (e) {
-          LOG('--> sendFcmData error : $e');
-        }
-      }
+      // if (pushToken.isNotEmpty && (targetUserInfo.optionPush.isEmpty || BOL(targetUserInfo.optionPush['message_on']))) {
+      //   try {
+      //     return sendFcmData(
+      //         pushToken,
+      //         title,
+      //         desc,
+      //         userData
+      //       // {
+      //       //   'type': 'message', // link
+      //       //   'data': userData.toString(),
+      //       // }
+      //     );
+      //   } catch (e) {
+      //     LOG('--> sendFcmData error : $e');
+      //   }
+      // }
     }
     return false;
   }

@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/app_data.dart';
+import '../models/etc_model.dart';
 import '../utils/address_utils.dart';
 import '../utils/utils.dart';
 

@@ -7,20 +7,66 @@ part 'start_model.g.dart';
 @JsonSerializable()
 class StartModel {
   String      id;
+  String      title;
+  int         serverStatus;
+  String      serverStatusMsg;
   int         infoVersion;
-  String      androidVersion;
-  bool        androidUpdate;
-  String      iosVersion;
-  bool        iosUpdate;
+  ServiceData promotionInfo;
+  ServiceData serviceInfo;
+  Map<String, VersionData> appVersion;
   StartModel({
     required this.id,
+    required this.title,
+    required this.serverStatus,
+    required this.serverStatusMsg,
     required this.infoVersion,
-    required this.androidVersion,
-    required this.androidUpdate,
-    required this.iosVersion,
-    required this.iosUpdate,
+    required this.promotionInfo,
+    required this.serviceInfo,
+    required this.appVersion,
   });
 
   factory StartModel.fromJson(JSON json) => _$StartModelFromJson(json);
   JSON toJSON() => _$StartModelToJson(this);
+}
+
+@JsonSerializable()
+class VersionData {
+  String      id;
+  int         type;
+  String      message;
+  String      version;
+  VersionData({
+    required this.id,
+    required this.type,
+    required this.message,
+    required this.version,
+  });
+
+  factory VersionData.fromJson(JSON json) => _$VersionDataFromJson(json);
+  JSON toJSON() => _$VersionDataToJson(this);
+}
+
+@JsonSerializable()
+class ServiceData {
+  String      bankAccount;
+  String      bankTitle;
+  String      cancelDesc;
+  String      serviceEmail;
+  String      servicePhone;
+  String      serviceUserId;
+  String      serviceUserName;
+  String      tax;
+  ServiceData({
+    required this.bankAccount,
+    required this.bankTitle,
+    required this.cancelDesc,
+    required this.serviceEmail,
+    required this.servicePhone,
+    required this.serviceUserId,
+    required this.serviceUserName,
+    required this.tax
+  });
+
+  factory ServiceData.fromJson(JSON json) => _$ServiceDataFromJson(json);
+  JSON toJSON() => _$ServiceDataToJson(this);
 }

@@ -365,7 +365,7 @@ Future showCountryLogSelectDialog(BuildContext mainContext, String title, List<J
                       },
                     ),
                     if (_countryList.isNotEmpty)...[
-                      SubTitle(context, 'SELECT LOG'.tr, 40.w, 20.w),
+                      SubTitle(context, 'SELECT LOG'.tr, height: 40.w, topPadding: 20.w),
                       Column(
                         children: _countryList,
                       ),

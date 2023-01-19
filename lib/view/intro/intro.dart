@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -8,6 +10,7 @@ import '../../data/app_data.dart';
 import '../../data/common_sizes.dart';
 import '../../data/routes.dart';
 import '../../data/themes.dart';
+import '../../models/start_model.dart';
 import '../../utils/utils.dart';
 import '../../services/api_service.dart';
 import '../../services/firebase_service.dart';
@@ -15,31 +18,32 @@ import '../../view_model/app_view_model.dart';
 
 class Intro extends StatelessWidget {
   Intro({Key? key}) : super(key: key);
-  final _api = ApiService();
-  final _viewModel = AppViewModel();
+  final _api = Get.find<ApiService>();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: SafeArea(
-          top: false,
-          child: Padding(
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        body: Padding (
             padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
             child: FutureBuilder(
             future: _api.getAppStartInfo(AppData.defaultInfoID),
             builder: (context, snapshot) {
-              LOG('--> snapshot : ${snapshot.hasData} / ${_viewModel.isCanStart}');
               if (snapshot.hasData) {
+                LOG('--> snapshot.data : ${snapshot.data}');
+                final startData = StartModel.fromJson(snapshot.data as JSON);
                 return ChangeNotifierProvider<AppViewModel>(
-                  create: (BuildContext context) => _viewModel,
+                  create: (_) => AppViewModel(),
                   child: Consumer<AppViewModel>(builder: (context, viewModel, _) {
-                    if (!_viewModel.isCanStart) {
+                    if (!viewModel.isCanStart) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         Future.delayed(const Duration(milliseconds: 500), () async {
-                          var result = await _viewModel.checkAppUpdate(context, AppData.startInfo);
+                          var versionInfo = startData.appVersion[Platform.isAndroid ? 'android' : 'ios'];
+                          var result = await viewModel.checkAppUpdate(context, versionInfo!);
                           LOG('--> checkAppUpdate result : $result');
                           if (result) {
-                            _viewModel.setCanStart(true);
+                            viewModel.setCanStart(true);
                           }
                         });
                       });
@@ -54,25 +58,26 @@ class Intro extends StatelessWidget {
                             )
                         ),
                         Visibility(
-                          visible: _viewModel.isCanStart,
+                          visible: viewModel.isCanStart,
                           child: Align(
                             alignment: Alignment(0, 0.65),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 if (AppData.loginInfo.loginType.isEmpty)...[
-                                Container(
-                                  width: Get.size.width,
-                                  height: UI_BUTTON_HEIGHT,
-                                  padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                    },
-                                    child: Text(
-                                      'SIGN UP'.tr,
-                                    )
+                                  Container(
+                                    width: Get.size.width,
+                                    height: UI_BUTTON_HEIGHT,
+                                    padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        Get.toNamed(Routes.SIGNUP);
+                                      },
+                                      child: Text(
+                                        'SIGN UP'.tr,
+                                      )
+                                    ),
                                   ),
-                                ),
                                   SizedBox(height: UI_ITEM_SPACE.w),
                                 ],
                                 Container(
@@ -110,8 +115,8 @@ class Intro extends StatelessWidget {
               }
             }
           )
-        ),
-      ),
+        )
+      )
     );
   }
 }

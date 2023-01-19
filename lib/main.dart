@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flash/flash.dart';
 import 'package:kspot_002/view/app/app.dart';
+import 'package:kspot_002/view/main_event/main_event_edit.dart';
 import 'package:kspot_002/view/sign_up/sign_up.dart';
 import 'package:provider/provider.dart';
 import '/view/intro/intro.dart';
@@ -26,9 +27,23 @@ Future<void> main() async {
   await Get.putAsync(() => ApiService().init());
   await Get.putAsync(() => LocalService().init());
 
+  final api = Get.find<ApiService>();
+
   runApp(ChangeNotifierProvider<ThemeNotifier>(
-      create: (_) => ThemeNotifier(),
-      child: MyApp()));
+    create: (_) => ThemeNotifier(),
+    child: FutureBuilder(
+      future: api.getInfoData(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          AppData.infoData = snapshot.data as JSON;
+          LOG('--> infoData : ${AppData.infoData['customField']}');
+          return MyApp();
+        } else {
+          return showLogoLoadingPage(context);
+        }
+      }
+    )
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -80,7 +95,7 @@ class MyApp extends StatelessWidget {
               return child;
             },
             // initialRoute: AppData.loginInfo.loginId.isEmpty ? Routes.INTRO : Routes.APP,
-            initialRoute: Routes.APP,
+            initialRoute: Routes.EVENT_EDIT,
             getPages: [
               GetPage(
                 name: Routes.INTRO,
@@ -93,6 +108,10 @@ class MyApp extends StatelessWidget {
               GetPage(
                 name: Routes.SIGNUP,
                 page: () => SignUp(),
+              ),
+              GetPage(
+                name: Routes.EVENT_EDIT,
+                page: () => MainEventEdit(),
               ),
               // GetPage(
               //   name: Routes.MAP_SCREEN,

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -78,7 +80,7 @@ class CardScrollViewer extends StatefulWidget {
         this.selectText = '',
         this.selectedId = '',
         this.backgroundColor = Colors.transparent,
-        this.selectTextStyle = const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
+        this.selectTextStyle = const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.white),
         this.imageColor,
         this.onActionCallback
       }) : super(key: key);
@@ -163,11 +165,9 @@ class CardScrollViewerState extends State<CardScrollViewer> {
     setState(() {
       // log('---> widget.itemList: ${widget.itemList}');
       int index = 0;
-      // if (widget.itemList.isNotEmpty && widget.selectText.isNotEmpty) {
-      //   widget.itemList.entries.map((item) {
-      //     if (widget.selectedId.isEmpty) widget.selectedId = item.key;
-      //   });
-      // }
+      if (widget.selectedId.isEmpty && widget.itemList.isNotEmpty && widget.selectText.isNotEmpty) {
+        widget.selectedId = widget.itemList.keys.first;
+      }
       // for (var item in widget.itemList.entries) {
       //   LOG('--> CardScrollViewerState item.value : ${item.value} / ${item.value['backPic'] is String}');
       // }
@@ -195,12 +195,12 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                     if (widget.selectText.isNotEmpty) {
                       setState(() {
                         widget.selectedId = item.key;
-                        onSelected('${item.key}', 0);
+                        onSelected('$item.key', 0);
                       });
                     } else if (widget.isImageExView) {
-                      onSelected('${item.key}', 0);
+                      onSelected('$item.key', 0);
                     } else if (widget.imageMax == 1) {
-                      onSelected('${item.key}', 1);
+                      onSelected('$item.key', 1);
                     }
                   },
                   child: Stack(
@@ -220,7 +220,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                                         child: widget.isThumbShow && item.value['thumb'] != null
                                             ? Image.memory(item.value['thumb'], fit: widget.backFit) :
                                         item.value['data'] != null
-                                            ? Image.memory(item.value['data'], fit: widget.backFit) :
+                                            ? Image.memory(STRING_TO_UINT8LIST(STR(item.value['data'])), fit: widget.backFit) :
                                         showImageWidget(item.value['url'], widget.backFit, color: widget.imageColor),
                                       ),
                                     ),
@@ -236,6 +236,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                         if (widget.selectedId == item.key && widget.selectText.isNotEmpty)...[
                           Container(
                             width: widget.itemWidth,
+                            padding: EdgeInsets.only(bottom: 5),
                             alignment: Alignment.bottomCenter,
                             child: Text(widget.selectText, style: widget.selectTextStyle),
                           )
@@ -411,15 +412,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
           child: Column(
             children: [
               if (widget.title.isNotEmpty)
-                Container(
-                  height: widget.textHeight,
-                  alignment: Alignment.centerLeft,
-                  margin: EdgeInsets.symmetric(horizontal: widget.sidePadding),
-                  child: Text(
-                    widget.title,
-                    style: DescTitleStyle(context),
-                  ),
-                ),
+                SubTitle(context, widget.title),
               Container(
                 alignment: Alignment.center,
                 child: Container(
@@ -439,16 +432,8 @@ class CardScrollViewerState extends State<CardScrollViewer> {
           child: Column(
             children: [
               if (widget.title.isNotEmpty)
-                Container(
-                  height: widget.textHeight,
-                  alignment: Alignment.centerLeft,
-                  margin: EdgeInsets.symmetric(horizontal: widget.sidePadding),
-                  child: Text(
-                    widget.title,
-                    style: DescTitleStyle(context),
-                  ),
-                ),
-              SizedBox(height: UI_ITEM_SPACE.w),
+                SubTitle(context, widget.title),
+              SizedBox(height: 5),
               Container(
                   height: widget.itemHeight,
                   alignment: Alignment.centerLeft,

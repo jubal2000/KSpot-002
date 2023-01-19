@@ -8,38 +8,34 @@ part of 'user_model.dart';
 
 UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       id: json['id'] as String,
-      status: json['status'] as int? ?? 0,
-      loginId: json['loginId'] as String? ?? '',
-      loginType: json['loginType'] as String? ?? '',
-      nickName: json['nickName'] as String? ?? '',
-      pic: json['pic'] as String? ?? '',
-      birthYear: json['birthYear'] as int? ?? 0,
-      gender: json['gender'] as String? ?? '',
-      mobile: json['mobile'] as String? ?? '',
-      mobileIntl: json['mobileIntl'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-      country: json['country'] as String? ?? '',
-      countryState: json['countryState'] as String? ?? '',
-      followCount: json['followCount'] as int? ?? 0,
-      followerCount: json['followerCount'] as int? ?? 0,
-      pushToken: json['pushToken'] as String? ?? '',
-      deviceType: json['deviceType'] as String? ?? '',
-      updateTime: json['updateTime'] as String? ?? '',
-      createTime: json['createTime'] as String? ?? '',
-      mobileVerifyTime: json['mobileVerifyTime'] as String? ?? '',
-      emailVerifyTime: json['emailVerifyTime'] as String? ?? '',
-      mobileVerified: json['mobileVerified'] as bool? ?? false,
-      emailVerified: json['emailVerified'] as bool? ?? false,
-      optionData: (json['optionData'] as Map<String, dynamic>?)?.map(
-            (k, e) =>
-                MapEntry(k, OptionData.fromJson(e as Map<String, dynamic>)),
-          ) ??
-          const {},
-      optionPush: (json['optionPush'] as Map<String, dynamic>?)?.map(
-            (k, e) =>
-                MapEntry(k, OptionData.fromJson(e as Map<String, dynamic>)),
-          ) ??
-          const {},
+      status: json['status'] as int,
+      loginId: json['loginId'] as String,
+      loginType: json['loginType'] as String,
+      nickName: json['nickName'] as String,
+      pic: json['pic'] as String,
+      birthYear: json['birthYear'] as int,
+      gender: json['gender'] as String,
+      mobile: json['mobile'] as String,
+      mobileIntl: json['mobileIntl'] as String,
+      email: json['email'] as String,
+      country: json['country'] as String,
+      countryState: json['countryState'] as String,
+      followCount: json['followCount'] as int,
+      followerCount: json['followerCount'] as int,
+      pushToken: json['pushToken'] as String,
+      deviceType: json['deviceType'] as String,
+      updateTime: json['updateTime'] as String,
+      createTime: json['createTime'] as String,
+      mobileVerifyTime: json['mobileVerifyTime'] as String,
+      emailVerifyTime: json['emailVerifyTime'] as String,
+      mobileVerified: json['mobileVerified'] as bool,
+      emailVerified: json['emailVerified'] as bool,
+      optionData: (json['optionData'] as List<dynamic>?)
+          ?.map((e) => OptionData.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      optionPush: (json['optionPush'] as List<dynamic>?)
+          ?.map((e) => OptionData.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
@@ -68,30 +64,4 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'emailVerified': instance.emailVerified,
       'optionData': instance.optionData,
       'optionPush': instance.optionPush,
-    };
-
-CountryData _$CountryDataFromJson(Map<String, dynamic> json) => CountryData(
-      country: json['country'] as String,
-      countryState: json['countryState'] as String,
-      countryFlag: json['countryFlag'] as String,
-      createTime: json['createTime'] as String,
-    );
-
-Map<String, dynamic> _$CountryDataToJson(CountryData instance) =>
-    <String, dynamic>{
-      'country': instance.country,
-      'countryState': instance.countryState,
-      'countryFlag': instance.countryFlag,
-      'createTime': instance.createTime,
-    };
-
-OptionData _$OptionDataFromJson(Map<String, dynamic> json) => OptionData(
-      id: json['id'],
-      value: json['value'],
-    );
-
-Map<String, dynamic> _$OptionDataToJson(OptionData instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'value': instance.value,
     };

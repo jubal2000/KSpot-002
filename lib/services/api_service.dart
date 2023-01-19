@@ -126,8 +126,9 @@ class ApiService extends GetxService {
   final StartInfoCollection = 'info_start';
 
   Future<JSON?> getAppStartInfo(String infoId) async {
+    LOG('--> getStartInfo [$infoId] : $firestore');
     try {
-      var collectionRef = firebase!.firestore!.collection(StartInfoCollection);
+      var collectionRef = firestore!.collection(StartInfoCollection);
       var querySnapshot = await collectionRef.doc(infoId).get();
       if (querySnapshot.data() != null) {
         LOG('--> getAppStartInfo result : ${FROM_SERVER_DATA(querySnapshot.data())}');
@@ -190,11 +191,9 @@ class ApiService extends GetxService {
         }
         result[outName[i]] = infoData;
         // resultData[outName[i]] = JSON_INDEX_SORT_ASCE(infoData);
-        LOG('--> infoData add [${outName[i]}]: ${result[outName[i]]}');
+        LOG('--> infoData add [${outName[i]}]');
       }
       // var docsData = snapshot.docs.map(doc => doc.data());
-      LOG('----> getInfoDataList result : ${result['categoryGroup']}');
-
       // AppData.infoData = result;
       // AppData.INFO_CURRENCY = JSON_INDEX_SORT_ASCE(AppData.INFO_CURRENCY);
       // // LOG('--> get infoData from SERVER : ${AppData.INFO_EVENT_OPTION}');

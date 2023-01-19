@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../models/etc_model.dart';
 import '../models/start_model.dart';
 import '../models/user_model.dart';
+import '../services/firebase_service.dart';
 import '../utils/utils.dart';
 
 const SCROLL_SPEED = 250;
@@ -24,13 +26,15 @@ class AppData {
   static final AppData _singleton = AppData._internal();
   AppData._internal();
 
+  FirebaseService? firebase;
+
   static var isDevMode = true;
 
-  static String defaultInfoID = 'info0000';
+  static String defaultInfoID = 'info0001';
 
   static StartModel? startInfo;
-  static UserModel   userInfo  = UserModel(id: '');
-  static UserModel   loginInfo = UserModel(id: '');
+  static UserModel   userInfo  = UserModelEx.empty('');
+  static UserModel   loginInfo = UserModelEx.empty('');
 
   static JSON listSelectData = {};
   static int? localDataVer;
@@ -67,26 +71,26 @@ class AppData {
 
   static BuildContext? topMenuContext;
 
-  static JSON INFO_NOTICE         = infoData['notice'       ] ??= {};
-  static JSON INFO_FAQ            = infoData['faq'          ] ??= {};
-  static JSON INFO_CATEGORY_GROUP = infoData['categoryGroup'] ??= {};
-  static JSON INFO_CATEGORY_TYPE  = infoData['categoryType' ] ??= {};
-  static JSON INFO_CATEGORY       = infoData['category'     ] ??= {};
-  static JSON INFO_CONTENT_TYPE   = infoData['contentType'  ] ??= {};
-  static JSON INFO_CONTENT        = infoData['content'      ] ??= {};
-  static JSON INFO_REFUND         = infoData['refund'       ] ??= {};
-  static JSON INFO_DECLAR         = infoData['declar'       ] ??= {};
-  static JSON INFO_CURRENCY       = infoData['currency'     ] ??= {};
-  static JSON INFO_CUSTOMFIELD    = infoData['customField'  ] ??= {};
-  static JSON INFO_PROMOTION      = infoData['promotion'    ] ??= {};
+  static JSON INFO_NOTICE         = JSON.from(infoData['notice'       ] ??= {});
+  static JSON INFO_FAQ            = JSON.from(infoData['faq'          ] ??= {});
+  static JSON INFO_CATEGORY_GROUP = JSON.from(infoData['categoryGroup'] ??= {});
+  static JSON INFO_CATEGORY_TYPE  = JSON.from(infoData['categoryType' ] ??= {});
+  static JSON INFO_CATEGORY       = JSON.from(infoData['category'     ] ??= {});
+  static JSON INFO_CONTENT_TYPE   = JSON.from(infoData['contentType'  ] ??= {});
+  static JSON INFO_CONTENT        = JSON.from(infoData['content'      ] ??= {});
+  static JSON INFO_REFUND         = JSON.from(infoData['refund'       ] ??= {});
+  static JSON INFO_DECLAR         = JSON.from(infoData['declar'       ] ??= {});
+  static JSON INFO_CURRENCY       = JSON.from(infoData['currency'     ] ??= {});
+  static JSON INFO_CUSTOMFIELD    = JSON.from(infoData['customField'  ] ??= {});
+  static JSON INFO_PROMOTION      = JSON.from(infoData['promotion'    ] ??= {});
 
-  static JSON INFO_HISTORY_OPTION = infoData['option'] != null ? infoData['option']['history'] ??= {} : {};
-  static JSON INFO_TALENT_OPTION  = infoData['option'] != null ? infoData['option']['talent'] ??= {} : {};
-  static JSON INFO_GOODS_OPTION   = infoData['option'] != null ? infoData['option']['goods'] ??= {} : {};
-  static JSON INFO_PUSH_OPTION    = infoData['option'] != null ? infoData['option']['push'] ??= {} : {};
-  static JSON INFO_PLAY_OPTION    = infoData['option'] != null ? infoData['option']['autoPlay'] ??= {} : {};
-  static JSON INFO_SHOP_OPTION    = infoData['option'] != null ? infoData['option']['shop'] ??= {} : {};
-  static JSON INFO_EVENT_OPTION   = infoData['option'] != null ? infoData['option']['event'] ??= {} : {};
+  static JSON INFO_HISTORY_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['history'] ??= {}) : {};
+  static JSON INFO_TALENT_OPTION  = infoData['option'] != null ? JSON.from(infoData['option']['talent'] ??= {}) : {};
+  static JSON INFO_GOODS_OPTION   = infoData['option'] != null ? JSON.from(infoData['option']['goods'] ??= {}) : {};
+  static JSON INFO_PUSH_OPTION    = infoData['option'] != null ? JSON.from(infoData['option']['push'] ??= {}) : {};
+  static JSON INFO_PLAY_OPTION    = infoData['option'] != null ? JSON.from(infoData['option']['autoPlay'] ??= {}) : {};
+  static JSON INFO_SHOP_OPTION    = infoData['option'] != null ? JSON.from(infoData['option']['shop'] ??= {}) : {};
+  static JSON INFO_EVENT_OPTION   = infoData['option'] != null ? JSON.from(infoData['option']['event'] ??= {}) : {};
 
 
   // ignore: non_constant_identifier_names

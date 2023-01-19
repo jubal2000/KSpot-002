@@ -26,10 +26,7 @@ EditTextField(
     children: [
       SizedBox(height: topSpace),
       if (isTitleShow)...[
-        Text(
-          title,
-          style: DescTitleStyle(context),
-        ),
+        SubTitle(context, title),
         SizedBox(height: UI_ITEM_SPACE.w),
       ],
       TextFormField(

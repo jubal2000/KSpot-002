@@ -10,6 +10,7 @@ import 'package:store_redirect/store_redirect.dart';
 import '../data/app_data.dart';
 import '../data/dialogs.dart';
 import '../data/themes.dart';
+import '../models/etc_model.dart';
 import '../models/user_model.dart';
 import '../utils/utils.dart';
 import '../models/start_model.dart';
@@ -29,7 +30,7 @@ class MainMenuID {
 const COUNTRY_LOG_MAX = 5;
 
 class AppViewModel extends ChangeNotifier {
-  final _api = ApiService();
+  final _api = Get.find<ApiService>();
 
   var isShowDialog = false;
   var isCanStart = false;
@@ -48,18 +49,18 @@ class AppViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> checkAppUpdate(BuildContext context, StartModel? serverVersionData) async {
-    if (isShowDialog || serverVersionData == null) return false;
+  Future<bool> checkAppUpdate(BuildContext context, VersionData serverVersionData) async {
+    if (isShowDialog) return false;
     isShowDialog = true;
     LOG('--> checkAppUpdate : ${serverVersionData.toJSON()}');
 
     // check version from server..
     final versionLocal  = await StorageManager.readData('appVersion');
-    final versionServer = Platform.isAndroid ? serverVersionData.androidVersion : serverVersionData.iosVersion;
-    final isForceUpdate = Platform.isAndroid ? serverVersionData.androidUpdate : serverVersionData.iosUpdate;
+    final versionServer = serverVersionData.version;
+    final isForceUpdate = serverVersionData.type == 1;
     // final version = ''; // for Dev..
     LOG('--> version : $isForceUpdate / $versionLocal / $versionServer');
-    if (isForceUpdate || checkVersionString(APP_VERSION, versionServer, versionLocal ?? '')) {
+    if (checkVersionString(APP_VERSION, versionServer, versionLocal ?? '')) {
       var dlgResult = await showAppUpdateDialog(context,
         'New Version',
         '$APP_VERSION > $versionServer',
@@ -151,6 +152,8 @@ class AppViewModel extends ChangeNotifier {
         ),
         insetPadding: EdgeInsets.all(40),
         contentPadding: EdgeInsets.all(20),
+        actionsPadding: EdgeInsets.only(right: 20, bottom: 0),
+        actionsAlignment: MainAxisAlignment.center,
         content: Container(
           width: MediaQuery.of(context).size.width,
           constraints: BoxConstraints(

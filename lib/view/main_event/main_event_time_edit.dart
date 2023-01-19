@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:progressive_time_picker/progressive_time_picker.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../data/app_data.dart';
@@ -54,16 +55,19 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
     _timeData.addAll(widget.timeInfo);
 
     _timeData['status'] ??= 1;
+    _timeData['type'] ??= 0;
     _timeData['title'] ??= 'Time 1';
     _timeData['desc'] ??= '';
-    _timeData['startTime'] ??= '12:00';
-    _timeData['endTime'] ??= '24:00';
-    _timeData['exceptDayMap'] ??= {};
+    _timeData['startTime'] ??= '09:00';
+    _timeData['endTime'] ??= '18:00';
+    _timeData['exceptDayMap'] ??= JSON.from({});
     _timeData['exceptDay'] ??= [];
-    _timeData['dayMap'] ??= {};
+    _timeData['dayMap'] ??= JSON.from({});
     _timeData['day'] ??= [];
     _timeData['week'] ??= [];
     _timeData['dayWeek'] ??= [];
+    _timeData['customMap'] ??= JSON.from({});
+    _timeData['customData'] ??= [];
 
     if (_timeData['week'].isEmpty) {
       _timeData['week'].add(weekText.first);
@@ -79,12 +83,16 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
     }
     _textController[TextType.title.index].text = STR(_timeData['title']);
 
-    refreshData();
+    LOG('--> _timeData : ${INT(_timeData['type'])} / $_timeData');
+    _selectTab = INT(_timeData['type']) == 0 ? _tabText.first : _tabText.last;
+
+    refreshTimeData();
     createDayDataMap();
     createExDayDataMap();
+    createCustomMap();
   }
 
-  refreshData() {
+  refreshTimeData() {
     if (_timeData['startDate'] != null) _textController[TextType.startDate.index].text  = STR(_timeData['startDate']);
     if (_timeData['endDate'] != null)   _textController[TextType.endDate.index].text    = STR(_timeData['endDate']);
     if (_timeData['startTime'] != null) _textController[TextType.startTime.index].text  = STR(_timeData['startTime']);
@@ -96,15 +104,15 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
     switch (type) {
       case EditListType.customField:
         showCustomFieldSelectDialog(context).then((customId) {
-          LOG("-->  showCustomFieldSelectDialog result : $customId / ${AppData.INFO_CUSTOMFIELD[customId]}");
           if (customId.isNotEmpty) {
+            LOG("-->  showCustomFieldSelectDialog result : $customId / ${AppData.INFO_CUSTOMFIELD[customId]}");
             setState(() {
               var key = Uuid().v1();
               var customInfo = AppData.INFO_CUSTOMFIELD[customId];
               var title = customInfo['titleEdit'] ?? customInfo['title'];
-              _timeData['customData'] ??= {};
-              _timeData['customData'][key] = {'id':key, 'title':title, 'customId':customId};
-              if (customInfo['titleEx'] != null) _timeData['customData'][key]['titleEx'] = customInfo['titleEx'];
+              _timeData['customMap'][key] = {'id':key, 'title':title, 'customId':customId};
+              if (customInfo['titleEx'] != null) _timeData['customMap'][key]['titleEx'] = customInfo['titleEx'];
+              refreshCustomData();
             });
           }
         });
@@ -113,8 +121,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
         showMultiDatePickerDialog(context, List<String>.from(_timeData['day']))!.then((result) {
           if (result != null) {
             setState(() {
-              _timeData['dayMap'] = {};
-              _timeData['day'] = result;
+              _timeData['day'] = LIST_DATE_SORT_ASCE(List<String>.from(result));
               createDayDataMap();
               _isEdited = true;
             });
@@ -125,8 +132,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
         showMultiDatePickerDialog(context, List<String>.from(_timeData['exceptDay']))!.then((result) {
           if (result != null) {
             setState(() {
-              _timeData['exceptDayMap'] = {};
-              _timeData['exceptDay'] = result;
+              _timeData['exceptDay'] = LIST_DATE_SORT_ASCE(List<String>.from(result));
               createExDayDataMap();
               _isEdited = true;
             });
@@ -138,6 +144,19 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
 
   onItemSelected(EditListType type, String key, int status) {
     switch (type) {
+      case EditListType.customField:
+        if (status == 1) {
+          showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete that field?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+            setState(() {
+              if (result == 1) {
+                _timeData['customMap'].remove(key);
+                refreshCustomData();
+                _isEdited = true;
+              }
+            });
+          });
+        }
+        break;
       case EditListType.day:
         if (status == 1) {
           showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete that date?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
@@ -151,30 +170,30 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
           });
         }
         break;
-      case EditListType.customField:
-        if (status == 1) {
-          showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete that field?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+      case EditListType.exDay:
+        showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete that date?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+          if (result != null) {
             setState(() {
-              if (result == 1) {
-                _timeData['customData'].remove(key);
-                refreshDayData();
-                _isEdited = true;
-              }
+              _timeData['exceptMap'].remove(key);
+              createExDayDataMap();
+              _isEdited = true;
             });
-          });
-        }
+          }
+        });
         break;
     }
   }
 
   onListItemChanged(EditListType type, JSON result) {
-    _timeData['customData'] = result;
     LOG('--> onListItemChanged : $result');
+    _timeData['customMap'] = result;
+    refreshCustomData();
   }
 
   cleanDayData() {
     _timeData.remove('exceptDayMap');
     _timeData.remove('dayMap');
+    _timeData.remove('customMap');
 
     if (_selectTab == _tabText.first) {
       _timeData.remove('startDate');
@@ -199,7 +218,6 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
   refreshExDayData() {
     _timeData['exceptDay'] = [];
     for (var item in _timeData['exceptDayMap'].entries) {
-      var key = Uuid().v1();
       _timeData['exceptDay'].add(STR(item.value['date']));
     }
     LOG('----> refreshExDayData : ${_timeData['exceptDay']}');
@@ -211,7 +229,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
       var key = Uuid().v1();
       _timeData['dayMap'][key] = JSON.from(jsonDecode('{"id": "$key", "date": "$item", "index": 999}'));
     }
-    LOG('----> createDayDataMap : ${_timeData['dayMap']} / ${_timeData.runtimeType}');
+    LOG('----> createDayDataMap : ${_timeData['dayMap']}');
   }
 
   refreshDayData() {
@@ -220,6 +238,25 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
       _timeData['day'].add(STR(item.value['date']));
     }
     LOG('----> refreshDayData : ${_timeData['day']}');
+  }
+
+  createCustomMap() {
+    _timeData['customMap'] = JSON.from(jsonDecode('{}'));
+    for (var item in _timeData['customData']) {
+      LOG('----> customData item : $item');
+      var key = STR(item['id']);
+      _timeData['customMap'][key] = JSON.from(item);
+    }
+    LOG('----> createCustomMap : ${_timeData['customMap']}');
+  }
+
+  refreshCustomData() {
+    _timeData['customData'] = [];
+    for (var item in _timeData['customMap'].entries) {
+      LOG('----> customMap item : $item');
+      _timeData['customData'].add(item.value);
+    }
+    LOG('----> refreshCustomData : ${_timeData['customData']}');
   }
 
   showTimeRangePicker() {
@@ -231,7 +268,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
           LOG('--> SlideTimePickerScreen result: $result');
           _timeData['startTime']  = STR(result['startTime']) == '24:00' ? '00:00' : STR(result['startTime']);
           _timeData['endTime']    = STR(result['endTime'  ]) == '00:00' ? '24:00' : STR(result['endTime'  ]);
-          refreshData();
+          refreshTimeData();
         });
       }
     });
@@ -245,6 +282,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LOG('--> _timeData[customData] : ${_timeData['customMap']}');
     return WillPopScope(
       onWillPop: () async {
         if (_isEdited) {
@@ -265,7 +303,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
           appBar: AppBar(
             title: Text(widget.isEdit ? 'SET TIME'.tr : 'ADD TIME'.tr, style: AppBarTitleStyle(context)),
             titleSpacing: 0,
-            toolbarHeight: 50,
+            toolbarHeight: 50.w,
           ),
           body: Container(
             height: MediaQuery.of(context).size.height - 50.h,
@@ -277,7 +315,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                     child: Form(
                       child: Column(
                         children: [
-                          SubTitle(context, 'INFO'.tr, 40.0),
+                          SubTitle(context, 'INFO'.tr, height: 40.0.w),
                           SizedBox(height: 5),
                           TextFormField(
                             controller: _textController[TextType.title.index],
@@ -290,9 +328,8 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                             },
                           ),
                           SizedBox(height: _lineSpace),
-                          SubTitle(context, 'TYPE SELECT'.tr),
-                          SubTitleSmall(context, 'You can choose only one type'.tr, 15.w),
-                          SizedBox(height: 10),
+                          SubTitle(context, 'TYPE SELECT'.tr, child: SubTitleSmall(context, '(You can choose only one type)'.tr, 15.w)),
+                          SizedBox(height: 10.w),
                           Row(
                             children: _tabText.map((item) => Expanded(
                               child: GestureDetector(
@@ -300,25 +337,28 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                                 setState(() {
                                   _selectTab = item;
                                   _isEdited = true;
+                                  _timeData['type'] = _tabText.indexOf(item);
                                   // initDayData();
-                                  LOG('----> _selectTab : $_selectTab');
+                                  LOG('----> _selectTab : $_selectTab / ${_timeData['type']}');
                                 });
                               },
                               child: Container(
-                                height: 55,
-                                padding: EdgeInsets.symmetric(horizontal: 5),
+                                height: 45.w,
+                                padding: EdgeInsets.symmetric(horizontal: 5.w),
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: _selectTab == item ? Theme.of(context).colorScheme.tertiaryContainer : Theme.of(context).backgroundColor,
+                                  color: _selectTab == item ? Theme.of(context).colorScheme.tertiaryContainer :
+                                    Theme.of(context).colorScheme.primary.withOpacity(0.05),
                                   borderRadius: _tabText.indexOf(item) == 0 ? BorderRadius.only(
-                                      topLeft:Radius.circular(10),
-                                      bottomLeft:Radius.circular(10)
+                                      topLeft:Radius.circular(10.sp),
+                                      bottomLeft:Radius.circular(10.sp)
                                   ) :  BorderRadius.only(
-                                      topRight:Radius.circular(10),
-                                      bottomRight:Radius.circular(10)
+                                      topRight:Radius.circular(10.sp),
+                                      bottomRight:Radius.circular(10.sp)
                                   ),
                                   border: Border.all(
-                                      color: _selectTab == item ? Theme.of(context).colorScheme.tertiary : Colors.white24, width: 2.0),
+                                      color: _selectTab == item ? Theme.of(context).colorScheme.tertiary.withOpacity(0.8) :
+                                        Theme.of(context).colorScheme.primary.withOpacity(0.5), width: _selectTab == item ? 2.0 : 1.0),
                                 ),
                                 child: Text(item,
                                     style: _selectTab == item ? ItemTitleHotStyle(context) : ItemTitleStyle(context),
@@ -329,7 +369,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                         ),
                         if (_selectTab != _tabText.first)...[
                           SizedBox(height: _lineSpaceH),
-                          SubTitle(context, _tabText[1], 60),
+                          SubTitle(context, _tabText[1], height: 60.w),
                           Row(
                             children: [
                               Expanded(
@@ -354,7 +394,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                                 )
                               ),
                               Padding(
-                                padding: EdgeInsets.all(10),
+                                padding: EdgeInsets.all(10.sp),
                                 child: Text(' ~ '),
                               ),
                               Expanded(
@@ -404,8 +444,8 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                                 });
                               },
                               child: Container(
-                                height: 40,
-                                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                                height: 40.w,
+                                padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 10.w),
                                 decoration: BoxDecoration(
                                   color: _timeData['week'].contains(item) ? Theme.of(context).splashColor : Theme.of(context).backgroundColor,
                                   borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -444,7 +484,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                                 },
                                 child: Container(
                                   height: 40,
-                                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                                  padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 10.w),
                                   decoration: BoxDecoration(
                                     color: _timeData['dayWeek'].contains(item) ? Theme.of(context).splashColor : Theme.of(context).backgroundColor,
                                     borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -465,7 +505,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                           EditListWidget(context, _timeData['dayMap'], EditListType.day, onItemAdd, onItemSelected),
                         ],
                         SizedBox(height: _lineSpaceH),
-                        SubTitle(context, 'TIME SELECT'.tr, 60.0),
+                        SubTitle(context, 'TIME SELECT'.tr, height: 60.0.w),
                         Row(
                           children: [
                             Expanded(
@@ -476,12 +516,22 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                                 readOnly: true,
                                 textAlign: TextAlign.center,
                                 onTap: () {
-                                  showTimeRangePicker();
+                                  // showTimeRangePicker();
+                                  final startTime = DateTime.parse('2022-01-01 ${TME2(_timeData['startTime'], defaultValue: '00:00')}:00');
+                                  final start = PickedTime(h: startTime.hour, m: startTime.minute);
+                                  showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(start.datetime)).then((result) {
+                                    if (result != null) {
+                                      setState(() {
+                                        _timeData['startTime'] = '${result.hour}:${result.minute}';
+                                        _textController[TextType.startTime.index].text = TME2(_timeData['startTime']);
+                                      });
+                                    }
+                                  });
                                 },
                               )
                             ),
                             Padding(
-                              padding: EdgeInsets.all(10),
+                              padding: EdgeInsets.all(10.sp),
                               child: Text(' ~ ', style: ItemTitleStyle(context)),
                             ),
                             Expanded(
@@ -492,15 +542,26 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                                 readOnly: true,
                                 textAlign: TextAlign.center,
                                 onTap: () {
-                                  showTimeRangePicker();
+                                  // showTimeRangePicker();
+                                  final startTime = DateTime.parse('2022-01-01 ${TME2(_timeData['endTime'], defaultValue: '00:00')}:00');
+                                  final start = PickedTime(h: startTime.hour, m: startTime.minute);
+                                  showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(start.datetime)).then((result) {
+                                    if (result != null) {
+                                      setState(() {
+                                        _timeData['endTime'] = '${result.hour}:${result.minute}';
+                                        _textController[TextType.endTime.index].text = TME2(_timeData['endTime']);
+                                      });
+                                    }
+                                  });
                                 },
                               )
                             ),
                           ]
                         ),
                         SizedBox(height: _lineSpaceH),
-                        EditListSortWidget(_timeData['customData'], EditListType.customField, onAddAction: onItemAdd, onSelected: onItemSelected, onListItemChanged: onListItemChanged),
-                        SizedBox(height: _bottomHeight + 20),
+                        EditListSortWidget(_timeData['customMap'], EditListType.customField,
+                            onAddAction: onItemAdd, onSelected: onItemSelected, onListItemChanged: onListItemChanged),
+                        SizedBox(height: _bottomHeight.w + 20.w),
                       ]
                     )
                     )
@@ -530,7 +591,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                         //   }
                         }
                         cleanDayData();
-                        LOG('----> WillPopScope : $_timeData');
+                        LOG('----> back : $_timeData');
                         Get.back(result: _timeData);
                       },
                     )

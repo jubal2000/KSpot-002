@@ -2,7 +2,40 @@ import 'package:get/get.dart';
 import '../utils/utils.dart';
 
 import 'package:json_annotation/json_annotation.dart';
+
+import 'etc_model.dart';
 part 'user_model.g.dart';
+
+class UserModelEx extends UserModel {
+  UserModelEx.empty(String id) : super(
+    id: id,
+    status: 0,
+    loginId: '',
+    loginType: '',
+    nickName: '',
+    pic: '',
+    birthYear: 0,
+    gender: '',
+    mobile: '',
+    mobileIntl: '',
+    email: '',
+    country: '',
+    countryState: '',
+    followCount: 0,
+    followerCount: 0,
+    pushToken: '',
+    deviceType: '',
+    updateTime: '',
+    createTime: '',
+    mobileVerifyTime: '',
+    emailVerifyTime: '',
+    mobileVerified: false,
+    emailVerified: false,
+
+    optionData: [],
+    optionPush: [],
+  );
+}
 
 @JsonSerializable()
 class UserModel {
@@ -29,67 +62,39 @@ class UserModel {
   String    emailVerifyTime;
   bool      mobileVerified;
   bool      emailVerified;
-  Map<String, OptionData>  optionData;
-  Map<String, OptionData>  optionPush;
+
+  List<OptionData>?  optionData;
+  List<OptionData>?  optionPush;
 
   UserModel({
     required this.id,
-    this.status     = 0,
-    this.loginId    = '',
-    this.loginType  = '',
-    this.nickName   = '',
-    this.pic        = '',
-    this.birthYear  = 0,
-    this.gender     = '',
-    this.mobile     = '',
-    this.mobileIntl = '',
-    this.email      = '',
-    this.country    = '',
-    this.countryState   = '',
-    this.followCount    = 0,
-    this.followerCount  = 0,
-    this.pushToken      = '',
-    this.deviceType     = '',
-    this.updateTime     = '',
-    this.createTime     = '',
-    this.mobileVerifyTime = '',
-    this.emailVerifyTime  = '',
-    this.mobileVerified   = false,
-    this.emailVerified    = false,
-    this.optionData = const {},
-    this.optionPush = const {},
+    required this.status,
+    required this.loginId,
+    required this.loginType,
+    required this.nickName,
+    required this.pic,
+    required this.birthYear,
+    required this.gender,
+    required this.mobile,
+    required this.mobileIntl,
+    required this.email,
+    required this.country,
+    required this.countryState,
+    required this.followCount,
+    required this.followerCount,
+    required this.pushToken,
+    required this.deviceType,
+    required this.updateTime,
+    required this.createTime,
+    required this.mobileVerifyTime,
+    required this.emailVerifyTime,
+    required this.mobileVerified,
+    required this.emailVerified,
+    this.optionData,
+    this.optionPush,
   });
 
   factory UserModel.fromJson(JSON json) => _$UserModelFromJson(json);
   JSON toJSON() => _$UserModelToJson(this);
-}
-
-@JsonSerializable()
-class CountryData {
-  String    country;
-  String    countryState;
-  String    countryFlag;
-  String    createTime;
-  CountryData({
-    required this.country,
-    required this.countryState,
-    required this.countryFlag,
-    required this.createTime,
-  });
-
-  factory CountryData.fromJson(JSON json) => _$CountryDataFromJson(json);
-  JSON toJSON() => _$CountryDataToJson(this);
-}
-
-@JsonSerializable()
-class OptionData {
-  String id = '';
-  bool   value = false;
-  OptionData({
-    id,
-    value,
-  });
-  factory OptionData.fromJson(JSON json) => _$OptionDataFromJson(json);
-  JSON toJSON() => _$OptionDataToJson(this);
 }
 

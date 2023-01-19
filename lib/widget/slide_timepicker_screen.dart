@@ -43,7 +43,7 @@ class _SlideTimePickerScreenState extends State<SlideTimePickerScreen> {
   @override
   Widget build(BuildContext context) {
     _clockSize = MediaQuery.of(context).size.width * 0.85;
-    LOG('--> onSelectionEnd => start : ${_startTime.h}:${_startTime.m}');
+    LOG('--> SlideTimePickerScreen => start : ${_startTime.h}:${_startTime.m} ~ ${_endTime.h}:${_endTime.m}');
     return SafeArea(
       top: false,
       child: Scaffold(

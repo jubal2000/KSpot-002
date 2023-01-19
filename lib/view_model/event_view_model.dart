@@ -40,14 +40,16 @@ class EventViewModel extends ChangeNotifier {
   setEditItem(EventModel item) {
     editItem = item;
     LOG('----> setEditItem: ${editItem!.toJson()}');
-    for (var item in editItem!.picData) {
-      LOG('  -- ${item.toJson()}');
-    }
-    for (var item in editItem!.picData) {
-      var jsonItem = {'id': item.id, 'type': 0};
-      if (item.url.isNotEmpty) jsonItem['url'] = item.url;
-      if (item.data != null)   jsonItem['data'] = item.data.toString();
-      imageList[item.id] = jsonItem;
+    if (editItem!.picData != null) {
+      for (var item in editItem!.picData!) {
+        LOG('  -- ${item.toJson()}');
+      }
+      for (var item in editItem!.picData!) {
+        var jsonItem = {'id': item.id, 'type': 0};
+        if (item.url.isNotEmpty) jsonItem['url'] = item.url;
+        if (item.data != null) jsonItem['data'] = item.data.toString();
+        imageList[item.id] = jsonItem;
+      }
     }
   }
 
@@ -167,18 +169,19 @@ class EventViewModel extends ChangeNotifier {
   }
 
   addTimeItem() {
-    onEditTime(JSON.from(jsonDecode('{"id":"${Uuid().v1()}", "index":999}')), false);
+    onEditTime(JSON.from(jsonDecode('{"id":"${Uuid().v1()}", "type":0, "index":999}')), false);
   }
 
   onEditTime(JSON editField, [bool isEdit = true]) {
     Get.to(() => EventTimeSelectScreen(editField, isEdit: isEdit))!.then((result) {
-      if (result.isNotEmpty) {
+      if (result != null) {
         try {
           var key = result['id'] ?? Uuid().v1();
           result['id'] = key;
           result['desc'] = TIME_DATA_DESC(result);
           var addItem = TimeData.fromJson(result);
-          editItem!.timeData.add(addItem);
+          editItem!.timeData ??= [];
+          editItem!.timeData!.add(addItem);
           LOG('=======> timeData result : ${addItem.toJson()}');
         } catch (e) {
           LOG('--> timeData error : $e');
@@ -189,8 +192,8 @@ class EventViewModel extends ChangeNotifier {
 
   get editEventToJSON {
     JSON result = {};
-     if (editItem != null) {
-       for (var item in editItem!.timeData) {
+     if (editItem != null && editItem!.timeData != null) {
+       for (var item in editItem!.timeData!) {
          result[item.id] = item.toJson();
        }
      }
@@ -200,7 +203,7 @@ class EventViewModel extends ChangeNotifier {
 
   setImageData() {
     editItem!.picData = imageList.entries.map((item) => PicData.fromJson(item.value)).toList();
-    LOG('----> setImageData: ${editItem!.picData.length}');
+    LOG('----> setImageData: ${editItem!.picData!.length}');
   }
 
   picLocalImage() async {
@@ -210,12 +213,13 @@ class EventViewModel extends ChangeNotifier {
         var image = pickList[i];
         var imageUrl   = await ShowImageCroper(image.path);
         var imageData  = await ReadFileByte(imageUrl);
-        var resizeData = await resizeImage(imageData!.buffer.asUint8List(), IMAGE_SIZE_MAX) as Uint8List;
+        var resizeData = await resizeImage(imageData!, IMAGE_SIZE_MAX) as Uint8List;
         var key = Uuid().v1();
-        imageList[key] = PicData(id: key, type: 0, url: '', data: resizeData.buffer.toString()).toJson();
-        LOG('----> picLocalImage: $key');
+        imageList[key] = PicData(id: key, type: 0, url: '', data: String.fromCharCodes(resizeData)).toJson();
+        LOG('----> picLocalImage: ${imageList[key]}');
         if (editItem!.pic.isEmpty) editItem!.pic = key;
       }
+      notifyListeners();
     }
   }
 
@@ -240,13 +244,13 @@ class EventViewModel extends ChangeNotifier {
             }
             case 2: {
               imageList.remove(key);
+              notifyListeners();
               break;
             }
             default: {
               editItem!.pic = key;
             }
           }
-          notifyListeners();
         }
     );
   }

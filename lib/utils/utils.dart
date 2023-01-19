@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -459,6 +460,14 @@ LIST_START_TIME_SORT(List<JSON> data) {
 }
 
 // ignore: non_constant_identifier_names
+LIST_DATE_SORT_ASCE(List<String> data) {
+  if (JSON_EMPTY(data)) return [];
+  if (data.length < 2) return data;
+  data.sort((a, b) => DateTime.parse(a).day > DateTime.parse(b).day ? 1 : -1);
+  return data;
+}
+
+// ignore: non_constant_identifier_names
 LIST_LIKES_SORT_DESC(List<JSON> data) {
   if (JSON_EMPTY(data)) return [];
   if (data.length < 2) return data;
@@ -576,6 +585,11 @@ GET_COUNTRY_EXCEPT_FLAG(String value) {
     result += item;
   }
   return result;
+}
+
+// ignore: non_constant_identifier_names
+STRING_TO_UINT8LIST(String value) {
+  return Uint8List.fromList(List<int>.from(value.codeUnits));
 }
 
 Widget showImage(String url, Size size, [Color? color]) {
@@ -1211,12 +1225,20 @@ TextCheckBox(BuildContext context, String title, bool value,
 }
 
 // ignore: non_constant_identifier_names
-SubTitle(BuildContext context, String title, [double height = 40, double topPadding = 0, double bottomPadding = 0]) {
+SubTitle(BuildContext context, String title, {double height = 40, double topPadding = 0, double bottomPadding = 0, Widget? child}) {
   return Container(
       height: height,
       alignment: Alignment.centerLeft,
       padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-      child: Text(title, style: TextStyle(color: SubTitleColor(context), fontWeight: FontWeight.w800))
+      child: Row(
+        children: [
+          Text(title, style: TextStyle(color: SubTitleColor(context), fontWeight: FontWeight.w800)),
+          if (child != null)...[
+            SizedBox(width: 10.w),
+            child
+          ]
+        ]
+      )
   );
 }
 

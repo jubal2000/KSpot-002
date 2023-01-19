@@ -138,7 +138,7 @@ class Words extends Translations {
       'End date': '종료일',
       'Start time': '시작시간',
       'End time': '종료시간',
-      'You can choose only one type': '한가지만 선택 가능',
+      '(You can choose only one type)': '(한가지 타입만 선택 가능)',
       'TIME SELECT': '시간 선택',
 
       // place_event_edit_screen

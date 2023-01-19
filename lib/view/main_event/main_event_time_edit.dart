@@ -52,8 +52,8 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
   initData() {
     _timeData = {};
     _timeData.addAll(widget.timeInfo);
-
     _timeData['status'] ??= 1;
+    _timeData['type'] ??= 0;
     _timeData['title'] ??= 'Time 1';
     _timeData['desc'] ??= '';
     _timeData['startTime'] ??= '12:00';
@@ -78,6 +78,9 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
       _timeData['endDate'] = DATE_STR(DateTime.now().add(Duration(days: 365)));
     }
     _textController[TextType.title.index].text = STR(_timeData['title']);
+
+    LOG('--> _timeData : ${INT(_timeData['type'])} / $_timeData');
+    _selectTab = INT(_timeData['type']) == 0 ? _tabText.first : _tabText.last;
 
     refreshData();
     createDayDataMap();
@@ -114,7 +117,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
           if (result != null) {
             setState(() {
               _timeData['dayMap'] = {};
-              _timeData['day'] = result;
+              _timeData['day'] = LIST_DATE_SORT_ASCE(List<String>.from(result));
               createDayDataMap();
               _isEdited = true;
             });
@@ -265,7 +268,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
           appBar: AppBar(
             title: Text(widget.isEdit ? 'SET TIME'.tr : 'ADD TIME'.tr, style: AppBarTitleStyle(context)),
             titleSpacing: 0,
-            toolbarHeight: 50,
+            toolbarHeight: 50.w,
           ),
           body: Container(
             height: MediaQuery.of(context).size.height - 50.h,
@@ -277,7 +280,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                     child: Form(
                       child: Column(
                         children: [
-                          SubTitle(context, 'INFO'.tr, 40.0),
+                          SubTitle(context, 'INFO'.tr, height: 40.0.w),
                           SizedBox(height: 5),
                           TextFormField(
                             controller: _textController[TextType.title.index],
@@ -290,9 +293,8 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                             },
                           ),
                           SizedBox(height: _lineSpace),
-                          SubTitle(context, 'TYPE SELECT'.tr),
-                          SubTitleSmall(context, 'You can choose only one type'.tr, 15.w),
-                          SizedBox(height: 10),
+                          SubTitle(context, 'TYPE SELECT'.tr, child: SubTitleSmall(context, '(You can choose only one type)'.tr, 15.w)),
+                          SizedBox(height: 10.w),
                           Row(
                             children: _tabText.map((item) => Expanded(
                               child: GestureDetector(
@@ -300,25 +302,28 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                                 setState(() {
                                   _selectTab = item;
                                   _isEdited = true;
+                                  _timeData['type'] = _tabText.indexOf(item);
                                   // initDayData();
-                                  LOG('----> _selectTab : $_selectTab');
+                                  LOG('----> _selectTab : $_selectTab / ${_timeData['type']}');
                                 });
                               },
                               child: Container(
-                                height: 55,
-                                padding: EdgeInsets.symmetric(horizontal: 5),
+                                height: 45.w,
+                                padding: EdgeInsets.symmetric(horizontal: 5.w),
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: _selectTab == item ? Theme.of(context).colorScheme.tertiaryContainer : Theme.of(context).backgroundColor,
+                                  color: _selectTab == item ? Theme.of(context).colorScheme.tertiaryContainer :
+                                    Theme.of(context).colorScheme.primary.withOpacity(0.05),
                                   borderRadius: _tabText.indexOf(item) == 0 ? BorderRadius.only(
-                                      topLeft:Radius.circular(10),
-                                      bottomLeft:Radius.circular(10)
+                                      topLeft:Radius.circular(10.sp),
+                                      bottomLeft:Radius.circular(10.sp)
                                   ) :  BorderRadius.only(
-                                      topRight:Radius.circular(10),
-                                      bottomRight:Radius.circular(10)
+                                      topRight:Radius.circular(10.sp),
+                                      bottomRight:Radius.circular(10.sp)
                                   ),
                                   border: Border.all(
-                                      color: _selectTab == item ? Theme.of(context).colorScheme.tertiary : Colors.white24, width: 2.0),
+                                      color: _selectTab == item ? Theme.of(context).colorScheme.tertiary.withOpacity(0.8) :
+                                        Theme.of(context).colorScheme.primary.withOpacity(0.5), width: _selectTab == item ? 2.0 : 1.0),
                                 ),
                                 child: Text(item,
                                     style: _selectTab == item ? ItemTitleHotStyle(context) : ItemTitleStyle(context),
@@ -329,7 +334,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                         ),
                         if (_selectTab != _tabText.first)...[
                           SizedBox(height: _lineSpaceH),
-                          SubTitle(context, _tabText[1], 60),
+                          SubTitle(context, _tabText[1], height: 60.w),
                           Row(
                             children: [
                               Expanded(
@@ -354,7 +359,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                                 )
                               ),
                               Padding(
-                                padding: EdgeInsets.all(10),
+                                padding: EdgeInsets.all(10.sp),
                                 child: Text(' ~ '),
                               ),
                               Expanded(
@@ -404,8 +409,8 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                                 });
                               },
                               child: Container(
-                                height: 40,
-                                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                                height: 40.w,
+                                padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 10.w),
                                 decoration: BoxDecoration(
                                   color: _timeData['week'].contains(item) ? Theme.of(context).splashColor : Theme.of(context).backgroundColor,
                                   borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -444,7 +449,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                                 },
                                 child: Container(
                                   height: 40,
-                                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                                  padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 10.w),
                                   decoration: BoxDecoration(
                                     color: _timeData['dayWeek'].contains(item) ? Theme.of(context).splashColor : Theme.of(context).backgroundColor,
                                     borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -465,7 +470,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                           EditListWidget(context, _timeData['dayMap'], EditListType.day, onItemAdd, onItemSelected),
                         ],
                         SizedBox(height: _lineSpaceH),
-                        SubTitle(context, 'TIME SELECT'.tr, 60.0),
+                        SubTitle(context, 'TIME SELECT'.tr, height: 60.0.w),
                         Row(
                           children: [
                             Expanded(
@@ -481,7 +486,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                               )
                             ),
                             Padding(
-                              padding: EdgeInsets.all(10),
+                              padding: EdgeInsets.all(10.sp),
                               child: Text(' ~ ', style: ItemTitleStyle(context)),
                             ),
                             Expanded(
@@ -500,7 +505,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                         ),
                         SizedBox(height: _lineSpaceH),
                         EditListSortWidget(_timeData['customData'], EditListType.customField, onAddAction: onItemAdd, onSelected: onItemSelected, onListItemChanged: onListItemChanged),
-                        SizedBox(height: _bottomHeight + 20),
+                        SizedBox(height: _bottomHeight.w + 20.w),
                       ]
                     )
                     )

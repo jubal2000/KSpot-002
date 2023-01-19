@@ -48,7 +48,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     return Column(
       children: [
         if (widget.title.isNotEmpty)
-          SubTitle(context, widget.title, 60, 15),
+          SubTitle(context, widget.title, height:60, topPadding: 15),
         Row(
             children: [
               SizedBox(

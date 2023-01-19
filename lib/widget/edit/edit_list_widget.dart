@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -37,7 +38,7 @@ Widget EditListWidget(BuildContext context, JSON? listItem, EditListType type, F
 
 class EditListSortWidget extends StatefulWidget {
   EditListSortWidget(this.listItem, this.type,
-      {Key? key, this.textLine = 1, this.padding = const EdgeInsets.only(top: 20), this.enabled = true, this.onAddAction, this.onSelected, this.onChanged, this.onListItemChanged }) : super(key: key);
+      {Key? key, this.textLine = 1, this.padding = const EdgeInsets.only(top: 0), this.enabled = true, this.onAddAction, this.onSelected, this.onChanged, this.onListItemChanged }) : super(key: key);
 
   JSON? listItem;
   EditListType type;
@@ -243,9 +244,8 @@ class _EditListSortState extends State<EditListSortWidget> {
     return Container(
       padding: widget.padding,
       child: Column(
-      children: [
-        SubTitle(context, titleText[widget.type.index].tr),
-          SizedBox(height: 5),
+        children: [
+          SubTitle(context, titleText[widget.type.index].tr),
           ReorderableListView(
             shrinkWrap: true,
             buildDefaultDragHandles: false,
@@ -255,7 +255,7 @@ class _EditListSortState extends State<EditListSortWidget> {
               return Container(
                 decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(8))
+                    borderRadius: BorderRadius.all(Radius.circular(8.sp))
                 ),
                 child: child,
               );
@@ -275,19 +275,28 @@ class _EditListSortState extends State<EditListSortWidget> {
             },
             children: _itemList,
           ),
-          SizedBox(height: 5),
+          SizedBox(height: 5.w),
           Container(
-            height: descText[widget.type.index].isNotEmpty ? 50 : 40,
+            height: descText[widget.type.index].isNotEmpty ? 50.w : 40.w,
             child: ElevatedButton(
               onPressed: () {
                 if (!widget.enabled) return;
                 if (widget.onAddAction != null) widget.onAddAction!(widget.type, widget.listItem ?? {});
               },
+              style: ElevatedButton.styleFrom(
+                primary: Theme.of(context).splashColor.withOpacity(0.1),
+                shadowColor: Colors.transparent,
+                minimumSize: Size.zero, // Set this
+                padding: EdgeInsets.only(left: 5.w), // and this
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.sp),
+                )
+              ),
               child: Row(
                 children: [
-                  SizedBox(width: 6),
-                  Icon(Icons.add, size: 24, color: Theme.of(context).primaryColor),
-                  SizedBox(width: 5),
+                  SizedBox(width: 6.w),
+                  Icon(Icons.add, size: 24.sp, color: Theme.of(context).hintColor.withOpacity(0.85)),
+                  SizedBox(width: 5.w),
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -303,15 +312,6 @@ class _EditListSortState extends State<EditListSortWidget> {
                   ),
                 ],
               ),
-              style: ElevatedButton.styleFrom(
-                primary: Theme.of(context).splashColor.withOpacity(0.1),
-                shadowColor: Colors.transparent,
-                minimumSize: Size.zero, // Set this
-                padding: EdgeInsets.only(left: 5), // and this
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                )
-              ),
             ),
           )
         ],
@@ -324,7 +324,7 @@ Widget EditListItem(BuildContext context, EditListType type, String key, int ind
     IconData icon, JSON data, dynamic imageData, String? backPic,
     TextStyle style, bool isCanMove, bool isDisabled, Function(EditListType, String, int)? onCallback, {String iconEx = ''}) {
   final _textController = TextEditingController();
-  final _descStype = TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 16);
+  final _descStyle = TextStyle(color: Theme.of(context).hintColor, fontWeight: FontWeight.normal, fontSize: 14);
 
   var _isCustomField = type == EditListType.customField;
   var _height = _isCustomField ? 50.0 : 30.0;
@@ -382,12 +382,12 @@ Widget EditListItem(BuildContext context, EditListType type, String key, int ind
                 child: Row(
                   children: [
                     Container(
-                      child: Text(STR(data['title']), style: _textStyle),
                       padding: EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 1.0),
                         borderRadius: BorderRadius.all(Radius.circular(8))
                       ),
+                      child: Text(STR(data['title']), style: _textStyle),
                     ),
                     SizedBox(width: 5),
                     if (backPic != null)
@@ -397,21 +397,31 @@ Widget EditListItem(BuildContext context, EditListType type, String key, int ind
                     if (backPic == null && imageData == null)
                       Expanded(
                         child: Container(
-                          child: Text(DESC(data['desc']), style: _textStyle, maxLines: null),
                           padding: EdgeInsets.all(10),
                           decoration: BoxDecoration(
                             border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 1.0),
                             borderRadius: BorderRadius.all(Radius.circular(8))
                         ),
+                          child: Text(DESC(data['desc']), style: _textStyle, maxLines: null),
                       ),
                     ),
                   ]
                 )
               ),
-            if (!_isCustomField)
+            if (!_isCustomField)...[
               Expanded(
-                child: Text(STR(data['title']), style: _textStyle, maxLines: 2),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(STR(data['title']), style: _textStyle, maxLines: 1),
+                    if (STR(data['desc']).isNotEmpty)...[
+                      SizedBox(height: 5),
+                      Text(DESC(data['desc']), style: _descStyle, maxLines: 2),
+                    ]
+                  ]
+                )
               ),
+            ],
             SizedBox(width: 10),
             GestureDetector(
               child: Icon(
@@ -513,16 +523,6 @@ Widget EditFileListSortWidget(BuildContext context, String title, JSON? listItem
               onAddAction();
             }
           },
-          child: Row(
-            children: [
-              SizedBox(width: 6),
-              Icon(Icons.add, size: 24, color: Colors.purple),
-              SizedBox(width: 5),
-              Expanded(
-                child: Text(title, style: _addTextStyle),
-              ),
-            ],
-          ),
           style: ElevatedButton.styleFrom(
               primary: Colors.white,
               minimumSize: Size.zero, // Set this
@@ -532,6 +532,16 @@ Widget EditFileListSortWidget(BuildContext context, String title, JSON? listItem
                   borderRadius: BorderRadius.circular(10),
                   side: BorderSide(color: Colors.grey)
               )
+          ),
+          child: Row(
+            children: [
+              SizedBox(width: 6),
+              Icon(Icons.add, size: 24, color: _addTextStyle.color),
+              SizedBox(width: 5),
+              Expanded(
+                child: Text(title, style: _addTextStyle),
+              ),
+            ],
           ),
         ),
       )

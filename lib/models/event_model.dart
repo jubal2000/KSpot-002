@@ -35,6 +35,7 @@ class EventModeEx extends EventModel {
         List<PicData>? picData,
         List<TimeData>? timeData,
         List<OptionData>? optionData,
+        List<CustomData>? customData,
         List<PromotionData>? promotionData,
       }) : super(
         id: id,
@@ -63,6 +64,7 @@ class EventModeEx extends EventModel {
         picData: [],
         timeData: [],
         optionData: [],
+        customData: [],
         promotionData: [],
       );
 }
@@ -89,13 +91,14 @@ class EventModel {
   String  updateTime;     // 수정 시간
   String  createTime;     // 생성 시간
 
-  List<String>        tagData;        // tag
-  List<String>        managerData;    // 관리자 ID 목록
-  List<String>        searchData;     // 검색어 목록
-  List<PicData>       picData;        // 메인 이미지 목록
-  List<TimeData>      timeData;       // 시간 정보 목록
-  List<OptionData>    optionData;     // 옵션 정보
-  List<PromotionData> promotionData;  // 광고설정 정보
+  List<String>?        tagData;        // tag
+  List<String>?        managerData;    // 관리자 ID 목록
+  List<String>?        searchData;     // 검색어 목록
+  List<PicData>?       picData;        // 메인 이미지 목록
+  List<TimeData>?      timeData;       // 시간 정보 목록
+  List<OptionData>?    optionData;     // 옵션 정보
+  List<CustomData>?    customData;     // 사용자 설정 정보
+  List<PromotionData>? promotionData;  // 광고 정보
 
   EventModel({
     required this.id,
@@ -119,31 +122,36 @@ class EventModel {
     required this.updateTime,
     required this.createTime,
 
-    required this.tagData,
-    required this.picData,
-    required this.managerData,
-    required this.searchData,
-    required this.timeData,
-    required this.optionData,
-    required this.promotionData,
+    this.tagData,
+    this.picData,
+    this.managerData,
+    this.searchData,
+    this.timeData,
+    this.optionData,
+    this.customData,
+    this.promotionData,
   });
   factory EventModel.fromJson(JSON json) => _$EventModelFromJson(json);
   JSON toJson() => _$EventModelToJson(this);
 
   TimeData? getTimeData(String key) {
-    for (var item in timeData) {
-      if (item.id.toLowerCase() == key.toLowerCase()) {
-        return item;
+    if (timeData != null) {
+      for (var item in timeData!) {
+        if (item.id.toLowerCase() == key.toLowerCase()) {
+          return item;
+        }
       }
     }
     return null;
   }
 
   subTimeData(String key) {
-    for (var item in timeData) {
-      if (item.id.toLowerCase() == key.toLowerCase()) {
-        timeData.remove(item);
-        return true;
+    if (timeData != null) {
+      for (var item in timeData!) {
+        if (item.id.toLowerCase() == key.toLowerCase()) {
+          timeData!.remove(item);
+          return true;
+        }
       }
     }
     return false;
@@ -152,33 +160,39 @@ class EventModel {
 
 @JsonSerializable()
 class TimeData {
-  String      id = '';
-  int         status = 0;       // 상태 (0:removed, 1:active, 2:disable, 3:ready)
-  String      title = '';
-  String      desc = '';
-  String      startDate = '';   // 시작일
-  String      endDate = '';     // 종료일
-  String      startTime = '';   // 시작시간
-  String      endTime = '';     // 종료시간
-  int         index = 0;
-  List<String> day = [];        // 특별한 날 선택
-  List<String> dayWeek = [];    // 요일 선택 (월, 화..)
-  List<String> week = [];       // 주간 선택 (첫째주, 마지막주..)
-  List<String> exceptDay = [];  // 제외 날 선택
+  String      id;
+  int         status;       // 상태 (0:removed, 1:active, 2:disable, 3:ready)
+  int         type;         // 타입선택 (0:날짜선택, 1:기간선택)
+  String      title;
+  String      desc;
+  String      startTime;   // 시작시간
+  String      endTime;     // 종료시간
+  int         index;
+
+  String?     startDate;   // 시작일
+  String?     endDate;     // 종료일
+
+  List<String>? day;        // 특별한 날 선택
+  List<String>? dayWeek;    // 요일 선택 (월, 화..)
+  List<String>? week;       // 주간 선택 (첫째주, 마지막주..)
+  List<String>? exceptDay;  // 제외 날 선택
   TimeData({
-    id,
-    status,
-    title,
-    desc,
-    startDate,
-    endDate,
-    startTime,
-    endTime,
-    index,
-    day,
-    dayWeek,
-    week,
-    exceptDay,
+    required this.id,
+    required this.status,
+    required this.type,
+    required this.title,
+    required this.desc,
+    required this.startTime,
+    required this.endTime,
+    required this.index,
+
+    this.startDate,
+    this.endDate,
+
+    this.day,
+    this.dayWeek,
+    this.week,
+    this.exceptDay,
   });
   factory TimeData.fromJson(JSON json) => _$TimeDataFromJson(json);
   JSON toJson() => _$TimeDataToJson(this);
@@ -186,23 +200,23 @@ class TimeData {
 
 @JsonSerializable()
 class PromotionData {
-  String id = '';
-  int    status = 0;            // 상태 (0:removed, 1:active, 2:disable, 3:ready)
-  String title = '';
-  String typeId = '';           // 프로모션 type ID
-  String startDate = '';        // 시작일
-  String endDate = '';          // 종료일
-  String startTime = '';        // 시작시간
-  String endTime = '';          // 종료시간
+  String id;
+  int    status;            // 상태 (0:removed, 1:active, 2:disable, 3:ready)
+  String title;
+  String typeId;           // 프로모션 type ID
+  String startDate;        // 시작일
+  String endDate;          // 종료일
+  String startTime;        // 시작시간
+  String endTime;          // 종료시간
   PromotionData({
-    id,
-    status,
-    title,
-    typeId,
-    startDate,
-    endDate,
-    startTime,
-    endTime,
+    required this.id,
+    required this.status,
+    required this.title,
+    required this.typeId,
+    required this.startDate,
+    required this.endDate,
+    required this.startTime,
+    required this.endTime,
   });
   factory PromotionData.fromJson(JSON json) => _$PromotionDataFromJson(json);
   JSON toJson() => _$PromotionDataToJson(this);
@@ -210,21 +224,35 @@ class PromotionData {
 
 @JsonSerializable()
 class OptionData {
-  String id = '';
-  bool   value = false;
+  String id;
+  bool   value;
   OptionData({
-    id,
-    value,
+    required this.id,
+    required this.value,
   });
   factory OptionData.fromJson(JSON json) => _$OptionDataFromJson(json);
   JSON toJson() => _$OptionDataToJson(this);
 }
 
 @JsonSerializable()
-class PicData {
+class CustomData {
   String id;
-  int    type; // 이미지 종류 (0:photo, 1:movie..)
-  String url;
+  String title;
+  String value;
+  CustomData({
+    required this.id,
+    required this.title,
+    required this.value,
+  });
+  factory CustomData.fromJson(JSON json) => _$CustomDataFromJson(json);
+  JSON toJson() => _$CustomDataToJson(this);
+}
+
+@JsonSerializable()
+class PicData {
+  String  id;
+  int     type; // 이미지 종류 (0:photo, 1:movie..)
+  String  url;
   String? data;
   PicData({
     required this.id,

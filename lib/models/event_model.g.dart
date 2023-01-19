@@ -27,24 +27,27 @@ EventModel _$EventModelFromJson(Map<String, dynamic> json) => EventModel(
       updateTime: json['updateTime'] as String,
       createTime: json['createTime'] as String,
       tagData:
-          (json['tagData'] as List<dynamic>).map((e) => e as String).toList(),
-      picData: (json['picData'] as List<dynamic>)
-          .map((e) => PicData.fromJson(e as Map<String, dynamic>))
+          (json['tagData'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      picData: (json['picData'] as List<dynamic>?)
+          ?.map((e) => PicData.fromJson(e as Map<String, dynamic>))
           .toList(),
-      managerData: (json['managerData'] as List<dynamic>)
-          .map((e) => e as String)
+      managerData: (json['managerData'] as List<dynamic>?)
+          ?.map((e) => e as String)
           .toList(),
-      searchData: (json['searchData'] as List<dynamic>)
-          .map((e) => e as String)
+      searchData: (json['searchData'] as List<dynamic>?)
+          ?.map((e) => e as String)
           .toList(),
-      timeData: (json['timeData'] as List<dynamic>)
-          .map((e) => TimeData.fromJson(e as Map<String, dynamic>))
+      timeData: (json['timeData'] as List<dynamic>?)
+          ?.map((e) => TimeData.fromJson(e as Map<String, dynamic>))
           .toList(),
-      optionData: (json['optionData'] as List<dynamic>)
-          .map((e) => OptionData.fromJson(e as Map<String, dynamic>))
+      optionData: (json['optionData'] as List<dynamic>?)
+          ?.map((e) => OptionData.fromJson(e as Map<String, dynamic>))
           .toList(),
-      promotionData: (json['promotionData'] as List<dynamic>)
-          .map((e) => PromotionData.fromJson(e as Map<String, dynamic>))
+      customData: (json['customData'] as List<dynamic>?)
+          ?.map((e) => CustomData.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      promotionData: (json['promotionData'] as List<dynamic>?)
+          ?.map((e) => PromotionData.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -75,35 +78,41 @@ Map<String, dynamic> _$EventModelToJson(EventModel instance) =>
       'picData': instance.picData,
       'timeData': instance.timeData,
       'optionData': instance.optionData,
+      'customData': instance.customData,
       'promotionData': instance.promotionData,
     };
 
 TimeData _$TimeDataFromJson(Map<String, dynamic> json) => TimeData(
-      id: json['id'],
-      status: json['status'],
-      title: json['title'],
-      desc: json['desc'],
-      startDate: json['startDate'],
-      endDate: json['endDate'],
-      startTime: json['startTime'],
-      endTime: json['endTime'],
-      index: json['index'],
-      day: json['day'],
-      dayWeek: json['dayWeek'],
-      week: json['week'],
-      exceptDay: json['exceptDay'],
+      id: json['id'] as String,
+      status: json['status'] as int,
+      type: json['type'] as int,
+      title: json['title'] as String,
+      desc: json['desc'] as String,
+      startTime: json['startTime'] as String,
+      endTime: json['endTime'] as String,
+      index: json['index'] as int,
+      startDate: json['startDate'] as String?,
+      endDate: json['endDate'] as String?,
+      day: (json['day'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      dayWeek:
+          (json['dayWeek'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      week: (json['week'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      exceptDay: (json['exceptDay'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$TimeDataToJson(TimeData instance) => <String, dynamic>{
       'id': instance.id,
       'status': instance.status,
+      'type': instance.type,
       'title': instance.title,
       'desc': instance.desc,
-      'startDate': instance.startDate,
-      'endDate': instance.endDate,
       'startTime': instance.startTime,
       'endTime': instance.endTime,
       'index': instance.index,
+      'startDate': instance.startDate,
+      'endDate': instance.endDate,
       'day': instance.day,
       'dayWeek': instance.dayWeek,
       'week': instance.week,
@@ -112,14 +121,14 @@ Map<String, dynamic> _$TimeDataToJson(TimeData instance) => <String, dynamic>{
 
 PromotionData _$PromotionDataFromJson(Map<String, dynamic> json) =>
     PromotionData(
-      id: json['id'],
-      status: json['status'],
-      title: json['title'],
-      typeId: json['typeId'],
-      startDate: json['startDate'],
-      endDate: json['endDate'],
-      startTime: json['startTime'],
-      endTime: json['endTime'],
+      id: json['id'] as String,
+      status: json['status'] as int,
+      title: json['title'] as String,
+      typeId: json['typeId'] as String,
+      startDate: json['startDate'] as String,
+      endDate: json['endDate'] as String,
+      startTime: json['startTime'] as String,
+      endTime: json['endTime'] as String,
     );
 
 Map<String, dynamic> _$PromotionDataToJson(PromotionData instance) =>
@@ -135,13 +144,26 @@ Map<String, dynamic> _$PromotionDataToJson(PromotionData instance) =>
     };
 
 OptionData _$OptionDataFromJson(Map<String, dynamic> json) => OptionData(
-      id: json['id'],
-      value: json['value'],
+      id: json['id'] as String,
+      value: json['value'] as bool,
     );
 
 Map<String, dynamic> _$OptionDataToJson(OptionData instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'value': instance.value,
+    };
+
+CustomData _$CustomDataFromJson(Map<String, dynamic> json) => CustomData(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      value: json['value'] as String,
+    );
+
+Map<String, dynamic> _$CustomDataToJson(CustomData instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'title': instance.title,
       'value': instance.value,
     };
 

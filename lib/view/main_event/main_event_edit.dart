@@ -81,13 +81,16 @@ class _MainEventEditState extends State<MainEventEdit> {
             children: [
               viewModel.showImageSelector(),
               SizedBox(height: UI_LIST_TEXT_SPACE.w),
-              EditTextField(context, 'TITLE'.tr, viewModel.editItem!.title, hint: 'TITLE'.tr, maxLength: TITLE_LENGTH, onChanged: (value) {
+              EditTextField(context, 'TITLE'.tr, viewModel.editItem!.title, hint: 'TITLE'.tr, maxLength: TITLE_LENGTH,
+                  onChanged: (value) {
 
               }),
-              EditTextField(context, 'DESC'.tr, viewModel.editItem!.desc, hint: 'DESC'.tr, maxLength: DESC_LENGTH, maxLines: null, keyboardType: TextInputType.multiline, onChanged: (value) {
+              EditTextField(context, 'DESC'.tr, viewModel.editItem!.desc, hint: 'DESC'.tr, maxLength: DESC_LENGTH,
+                  maxLines: null, keyboardType: TextInputType.multiline, onChanged: (value) {
 
               }),
-              EditListSortWidget(viewModel.editEventToJSON, EditListType.timeRange, onAddAction: viewModel.onItemAdd, onSelected: viewModel.onItemSelected),
+              EditListSortWidget(viewModel.editEventToJSON, EditListType.timeRange, onAddAction: viewModel.onItemAdd,
+                  onSelected: viewModel.onItemSelected),
             ],
           );
         }),

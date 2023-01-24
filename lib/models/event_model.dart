@@ -15,9 +15,9 @@ class EventModelEx extends EventModel {
     super(
       id: id,
       status: 0,
-      title: '',
+      title: title,
       titleKr: '',
-      desc: '',
+      desc: desc,
       descKr: '',
       pic: '',
       groupId: '',
@@ -46,7 +46,9 @@ class EventModelEx extends EventModel {
     );
 }
 
-@JsonSerializable()
+@JsonSerializable(
+  explicitToJson: true,
+)
 class EventModel {
   String  id;
   int     status;         // 상태 (0:removed, 1:active, 2:disable, 3:ready)

@@ -6,7 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
-import 'package:kspot_002/view/main_event/main_event.dart';
+import 'package:kspot_002/view/main_event/event_list_screen.dart';
 import 'package:kspot_002/view/main_story/main_story.dart';
 import 'package:kspot_002/view_model/signup_view_model.dart';
 import 'package:provider/provider.dart';
@@ -20,8 +20,8 @@ import '../../widget/dropdown_widget.dart';
 import '../../widget/page_dot_widget.dart';
 import '../../widget/verify_phone_widget.dart';
 
-class SignUp extends StatelessWidget {
-  SignUp({Key? key}) : super(key: key);
+class SignUpScreen extends StatelessWidget {
+  SignUpScreen({Key? key}) : super(key: key);
   final _viewModel = SignUpViewModel();
 
   @override
@@ -30,7 +30,7 @@ class SignUp extends StatelessWidget {
       value: _viewModel,
       child: Consumer<SignUpViewModel>(
         builder: (context, viewModel, _) {
-          viewModel.setViewContext(context);
+          viewModel.init(context);
           return WillPopScope(
             onWillPop: () async {
               viewModel.moveBackStep();
@@ -116,7 +116,7 @@ class SignUp extends StatelessWidget {
                 child: SingleChildScrollView(
                   scrollDirection: Axis.vertical,
                   child: FutureBuilder(
-                    future: viewModel.loadTerms(),
+                    future: loadTerms(),
                     builder: (BuildContext context, AsyncSnapshot snapshot) {
                       if (snapshot.hasData) {
                         return Html(
@@ -171,7 +171,7 @@ class SignUp extends StatelessWidget {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
                     child: FutureBuilder(
-                      future: viewModel.loadCondition(),
+                      future: loadCondition(),
                       builder: (BuildContext context, AsyncSnapshot snapshot) {
                         if (snapshot.hasData) {
                           return Html(

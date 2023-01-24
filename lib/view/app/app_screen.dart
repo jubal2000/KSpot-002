@@ -5,20 +5,20 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
-import 'package:kspot_002/view/main_event/main_event.dart';
+import 'package:kspot_002/view/main_event/event_list_screen.dart';
 import 'package:kspot_002/view/main_story/main_story.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/theme_manager.dart';
 import '../../view_model/app_view_model.dart';
 
-class App extends StatelessWidget {
-  App({Key? key}) : super(key: key);
+class AppScreen extends StatelessWidget {
+  AppScreen({Key? key}) : super(key: key);
   final _viewModel = AppViewModel();
   final _height = 40.0.w;
 
   List<Widget> pages = [
-    MainEvent(),
+    EventListScreen(),
     MainStory()
   ];
 

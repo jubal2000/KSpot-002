@@ -51,5 +51,5 @@ Map<String, dynamic> _$StoryModelToJson(StoryModel instance) =>
       'tagData': instance.tagData,
       'searchData': instance.searchData,
       'linkUserData': instance.linkUserData,
-      'picData': instance.picData,
+      'picData': instance.picData.map((e) => e.toJson()).toList(),
     };

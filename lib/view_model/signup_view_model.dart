@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import '../data/app_data.dart';
 import '../data/theme_manager.dart';
 import '../utils/utils.dart';
-import '../view/sign_up/sign_up_done.dart';
+import '../view/sign_up/sign_up_done_screen.dart';
 import '../widget/verify_phone_widget.dart';
 
 enum TextInput {
@@ -33,15 +33,7 @@ class SignUpViewModel extends ChangeNotifier {
     return isSignUpDone;
   }
 
-  Future<String> loadTerms() async {
-    return await rootBundle.loadString('assets/html/terms_0.html');
-  }
-
-  Future<String> loadCondition() async {
-    return await rootBundle.loadString('assets/html/terms_1.html');
-  }
-
-  setViewContext(context) {
+  init(context) {
     viewContext = context;
   }
 
@@ -60,7 +52,7 @@ class SignUpViewModel extends ChangeNotifier {
       stepIndex++;
       notifyListeners();
     } else {
-      Get.to(() => SignupStepDone());
+      Get.to(() => SignupStepDoneScreen());
     }
   }
 

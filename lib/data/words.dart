@@ -100,8 +100,8 @@ class Words extends Translations {
 
       // main_place
       'No events for that day': '선택한 날짜에 이벤트가 없습니다',
-      'No spots to choose': '선택할 스팟이 없습니다',
-      'No spot data': '스팟 데이터가 없습니다',
+      'No place to choose': '선택할 장소가 없습니다',
+      'No place data': '장소 데이터가 없습니다',
       'Don\'t choose now': '지금 선택하지 않습니다',
       '(You can choose later)': '(나중에 선택할 수 있습니다)',
 
@@ -115,8 +115,15 @@ class Words extends Translations {
       'COMMENT': '댓글',
       'SELECT EVENT': '이벤트 선택',
       'EXPIRED': '기간초과',
+      'PLACE SETTING': '장소 설정',
+      'EVENT GROUP SELECT': '이벤트 그룹 선택',
+      'EVENT PLACE SELECT': '이벤트 장소 선택',
+      'PLACE\nSELECT': '이벤트\n장소선택',
+      'GROUP\nSELECT': '이벤트\n그룹선택',
 
-      // screen_edit
+      // place_edit
+      'PLACE INFO': '장소 정보',
+
       'BANNER SETTING': '베너 설정',
 
       // event_time_select_screen
@@ -203,6 +210,9 @@ class Words extends Translations {
       'Email': '이메일',
       'Phone': '전화번호',
       'CONTACT': '연락처',
+
+      // place_list_screen
+      'PLACE LIST': '장소 목록',
 
       // place_group_edit_screen
       'SPOT GROUP ADD': '스팟 그룹 추가',

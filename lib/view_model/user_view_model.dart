@@ -10,7 +10,7 @@ class UserViewModel extends ChangeNotifier {
   UserModel? userInfo;
 
   void _setUserMain(UserModel? user) {
-    LOG("--> _setUserMain: ${user?.toJSON()}");
+    LOG("--> _setUserMain: ${user?.toJson()}");
     userInfo = user;
     notifyListeners();
   }

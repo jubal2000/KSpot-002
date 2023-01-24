@@ -37,7 +37,9 @@ class UserModelEx extends UserModel {
   );
 }
 
-@JsonSerializable()
+@JsonSerializable(
+  explicitToJson: true,
+)
 class UserModel {
   String    id;
   int       status;
@@ -63,8 +65,13 @@ class UserModel {
   bool      mobileVerified;
   bool      emailVerified;
 
-  List<OptionData>?  optionData;
-  List<OptionData>?  optionPush;
+  List<String>?       likeGroup;
+  List<String>?       likePlace;
+  List<String>?       likeEvent;
+  List<String>?       likeUser;
+
+  List<OptionData>?   optionData;
+  List<OptionData>?   optionPush;
 
   UserModel({
     required this.id,
@@ -90,11 +97,17 @@ class UserModel {
     required this.emailVerifyTime,
     required this.mobileVerified,
     required this.emailVerified,
+
+    this.likeGroup,
+    this.likePlace,
+    this.likeEvent,
+    this.likeUser,
+
     this.optionData,
     this.optionPush,
   });
 
   factory UserModel.fromJson(JSON json) => _$UserModelFromJson(json);
-  JSON toJSON() => _$UserModelToJson(this);
+  JSON toJson() => _$UserModelToJson(this);
 }
 

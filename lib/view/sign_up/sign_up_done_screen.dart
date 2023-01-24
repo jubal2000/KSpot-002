@@ -9,8 +9,8 @@ import '../../data/style.dart';
 import '../../utils/utils.dart';
 import '../../widget/rounded_button.dart';
 
-class SignupStepDone extends StatelessWidget {
-  const SignupStepDone({Key? key}) : super(key: key);
+class SignupStepDoneScreen extends StatelessWidget {
+  const SignupStepDoneScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

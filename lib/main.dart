@@ -5,11 +5,13 @@ import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flash/flash.dart';
-import 'package:kspot_002/view/app/app.dart';
-import 'package:kspot_002/view/main_event/main_event_edit.dart';
-import 'package:kspot_002/view/sign_up/sign_up.dart';
+import 'package:kspot_002/view/app/app_screen.dart';
+import 'package:kspot_002/view/main_event/event_edit_input_screen.dart';
+import 'package:kspot_002/view/main_event/event_edit_screen.dart';
+import 'package:kspot_002/view/sign_up/sign_up_screen.dart';
+import 'package:kspot_002/view_model/event_edit_view_model.dart';
 import 'package:provider/provider.dart';
-import '/view/intro/intro.dart';
+import '/view/intro/intro_screen.dart';
 import 'data/app_data.dart';
 import 'data/theme_manager.dart';
 import 'view_model/app_view_model.dart';
@@ -35,7 +37,7 @@ Future<void> main() async {
       future: api.getInfoData(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          AppData.infoData = snapshot.data as JSON;
+          AppData.initStartInfo(snapshot.data as JSON);
           LOG('--> infoData : ${AppData.infoData['customField']}');
           return MyApp();
         } else {
@@ -99,19 +101,19 @@ class MyApp extends StatelessWidget {
             getPages: [
               GetPage(
                 name: Routes.INTRO,
-                page: () => Intro(),
+                page: () => IntroScreen(),
               ),
               GetPage(
                 name: Routes.APP,
-                page: () => App(),
+                page: () => AppScreen(),
               ),
               GetPage(
                 name: Routes.SIGNUP,
-                page: () => SignUp(),
+                page: () => SignUpScreen(),
               ),
               GetPage(
                 name: Routes.EVENT_EDIT,
-                page: () => MainEventEdit(),
+                page: () => EventEditScreen(),
               ),
               // GetPage(
               //   name: Routes.MAP_SCREEN,

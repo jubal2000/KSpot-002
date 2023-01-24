@@ -52,7 +52,7 @@ class AppViewModel extends ChangeNotifier {
   Future<bool> checkAppUpdate(BuildContext context, VersionData serverVersionData) async {
     if (isShowDialog) return false;
     isShowDialog = true;
-    LOG('--> checkAppUpdate : ${serverVersionData.toJSON()}');
+    LOG('--> checkAppUpdate : ${serverVersionData.toJson()}');
 
     // check version from server..
     final versionLocal  = await StorageManager.readData('appVersion');
@@ -111,7 +111,7 @@ class AppViewModel extends ChangeNotifier {
   }
 
   showCountrySelect(context) {
-    final List<JSON> logList = AppData.countrySelectList.map((e) => e.toJSON()).toList();
+    final List<JSON> logList = AppData.countrySelectList.map((e) => e.toJson()).toList();
     showCountryLogSelectDialog(context, 'COUNTRY SELECT'.tr, logList).then((_) {
         for (var item in AppData.countrySelectList) {
           if (item.country == AppData.currentCountry && item.countryState == AppData.currentState) {

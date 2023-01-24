@@ -42,10 +42,10 @@ initLocalData() async {
   await readLocalInfo();
   await readCountryLocal();
 
-  AppData.currentCurrency       = STR(AppData.localInfo['currency']);
-  AppData.isPlaceGroupGridMode  = BOL(AppData.localInfo['placeGroupMode']);
-  AppData.currentPlaceGroup     = AppData.localInfo['placeGroup'] ?? {};
-  AppData.currentCategory       = AppData.localInfo['currentCategory'] ?? '';
+  AppData.currentCurrency       = STR(AppData.localInfo['currentCurrency']);
+  AppData.isEventGroupGridMode  = BOL(AppData.localInfo['isEventGroupGridMode']);
+  AppData.currentEventGroup     = AppData.localInfo['currentEventGroup'] ?? {};
+  AppData.currentContentType    = AppData.localInfo['currentContentType'] ?? '';
   AppData.messageReadLog        = AppData.localInfo['messageReadLog'] ?? {};
   AppData.loginInfo.loginType   = AppData.localInfo['loginType'] ?? '';
   AppData.loginInfo.mobile      = AppData.localInfo['phone'] ?? '';

@@ -85,6 +85,7 @@ dependencies:
   material_tag_editor: ^0.1.2
   syncfusion_flutter_calendar: ^20.2.36
   progressive_time_picker: ^0.0.4
+  image_editor: ^1.0.2
 
   # ui..
   cupertino_icons: any

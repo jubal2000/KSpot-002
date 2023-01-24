@@ -44,7 +44,6 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
   final _selectColor    = Colors.purple;
   final _bottomHeight   = 50.0;
   final _lineSpace      = 30.0;
-  final _lineSpaceH     = 15.0;
   bool _isEdited = false;
   late var _selectTab   = _tabText.first;
 
@@ -368,7 +367,7 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                           )).toList(),
                         ),
                         if (_selectTab != _tabText.first)...[
-                          SizedBox(height: _lineSpaceH),
+                          SizedBox(height: UI_LIST_TEXT_SPACE),
                           SubTitle(context, _tabText[1], height: 60.w),
                           Row(
                             children: [
@@ -497,14 +496,14 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                                 )
                             ))).toList(),
                           ),
-                          SizedBox(height: _lineSpaceH),
-                          EditListWidget(context, _timeData['exceptDayMap'], EditListType.exDay, onItemAdd, onItemSelected),
+                          SizedBox(height: UI_LIST_TEXT_SPACE),
+                          EditListWidget(_timeData['exceptDayMap'], EditListType.exDay, onItemAdd, onItemSelected),
                         ],
                         if (_selectTab == _tabText.first)...[
-                          SizedBox(height: _lineSpaceH),
-                          EditListWidget(context, _timeData['dayMap'], EditListType.day, onItemAdd, onItemSelected),
+                          SizedBox(height: UI_LIST_TEXT_SPACE),
+                          EditListWidget(_timeData['dayMap'], EditListType.day, onItemAdd, onItemSelected),
                         ],
-                        SizedBox(height: _lineSpaceH),
+                        SizedBox(height: UI_LIST_TEXT_SPACE),
                         SubTitle(context, 'TIME SELECT'.tr, height: 60.0.w),
                         Row(
                           children: [
@@ -558,9 +557,9 @@ class _EventTimeSelectState extends State<EventTimeSelectScreen> {
                             ),
                           ]
                         ),
-                        SizedBox(height: _lineSpaceH),
+                        SizedBox(height: UI_LIST_TEXT_SPACE),
                         EditListSortWidget(_timeData['customMap'], EditListType.customField,
-                            onAddAction: onItemAdd, onSelected: onItemSelected, onListItemChanged: onListItemChanged),
+                             onItemAdd, onItemSelected, onListItemChanged: onListItemChanged),
                         SizedBox(height: _bottomHeight.w + 20.w),
                       ]
                     )

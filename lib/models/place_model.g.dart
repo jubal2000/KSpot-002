@@ -18,10 +18,8 @@ PlaceModel _$PlaceModelFromJson(Map<String, dynamic> json) => PlaceModel(
       userId: json['userId'] as String,
       country: json['country'] as String,
       countryState: json['countryState'] as String,
-      address: json['address'] as String,
-      address2: json['address2'] as String,
+      address: AddressData.fromJson(json['address'] as Map<String, dynamic>),
       email: json['email'] as String,
-      mobile: json['mobile'] as String,
       updateTime: json['updateTime'] as String,
       createTime: json['createTime'] as String,
       tagData:
@@ -33,6 +31,9 @@ PlaceModel _$PlaceModelFromJson(Map<String, dynamic> json) => PlaceModel(
           ?.map((e) => e as String)
           .toList(),
       searchData: (json['searchData'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      phoneData: (json['phoneData'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
       optionData: (json['optionData'] as List<dynamic>?)
@@ -56,16 +57,15 @@ Map<String, dynamic> _$PlaceModelToJson(PlaceModel instance) =>
       'userId': instance.userId,
       'country': instance.country,
       'countryState': instance.countryState,
-      'address': instance.address,
-      'address2': instance.address2,
+      'address': instance.address.toJson(),
       'email': instance.email,
-      'mobile': instance.mobile,
       'updateTime': instance.updateTime,
       'createTime': instance.createTime,
       'tagData': instance.tagData,
       'managerData': instance.managerData,
       'searchData': instance.searchData,
-      'picData': instance.picData,
-      'optionData': instance.optionData,
-      'customData': instance.customData,
+      'phoneData': instance.phoneData,
+      'picData': instance.picData?.map((e) => e.toJson()).toList(),
+      'optionData': instance.optionData?.map((e) => e.toJson()).toList(),
+      'customData': instance.customData?.map((e) => e.toJson()).toList(),
     };

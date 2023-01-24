@@ -68,10 +68,11 @@ SET_SERVER_TIME_ALL_ITEM(data) {
 // ignore: non_constant_identifier_names
 SET_SERVER_TIME(timestamp) {
   if (timestamp is Timestamp) {
-    return {
-      '_seconds': timestamp.seconds,
-      '_nanoseconds': timestamp.nanoseconds,
-    };
+    return '${timestamp.seconds}';
+    // return {
+    //   '_seconds': timestamp.seconds,
+    //   '_nanoseconds': timestamp.nanoseconds,
+    // };
   } else {
     return timestamp;
   }
@@ -159,27 +160,25 @@ class ApiService extends GetxService {
         'info_notice',
         'info_faq',
         'info_refund',
-        'info_categoryGroup',
-        'info_categoryType',
+        'info_contentType',
         'info_promotion',
         'info_option',
-        'info_declar',
+        'info_declare',
         'info_currency',
         'info_customField',
-        'data_placeGroup',
+        'data_eventGroup',
       ];
       final outName = [
         'notice',
         'faq',
         'refund',
-        'categoryGroup',
-        'categoryType',
+        'contentType',
         'promotion',
         'option',
-        'declar',
+        'declare',
         'currency',
         'customField',
-        'placeGroup',
+        'eventGroup',
       ];
       for (var i = 0; i < infoDB.length; i++) {
         result[outName[i]] = {};
@@ -193,6 +192,7 @@ class ApiService extends GetxService {
         // resultData[outName[i]] = JSON_INDEX_SORT_ASCE(infoData);
         LOG('--> infoData add [${outName[i]}]');
       }
+
       // var docsData = snapshot.docs.map(doc => doc.data());
       // AppData.infoData = result;
       // AppData.INFO_CURRENCY = JSON_INDEX_SORT_ASCE(AppData.INFO_CURRENCY);
@@ -435,7 +435,7 @@ class ApiService extends GetxService {
     return result;
   }
   
-  Future<JSON?> addPlaceGroupItem(JSON addItem) async {
+  Future<JSON?> addEventGroupItem(JSON addItem) async {
     try {
       var ref = firestore!.collection(EventGroupCollection);
       var key = addItem['id'];
@@ -477,7 +477,7 @@ class ApiService extends GetxService {
   }
   
   Future<JSON> getPlaceListWithCountry(String groupId, String country, [String countryState = '']) async {
-    log('--> getPlaceList : $groupId / $country / $countryState');
+    LOG('--> getPlaceListWithCountry : $groupId / $country / $countryState');
     JSON result = {};
     var ref = firestore!.collection(PlaceCollection);
     var query = ref.where('status', isEqualTo: 1)
@@ -491,9 +491,10 @@ class ApiService extends GetxService {
     }
     var snapshot = await query.get();
     for (var doc in snapshot.docs) {
-      result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
+      var item = doc.data();
+      result[item['id']] = FROM_SERVER_DATA(item);
     }
-    LOG('--> getPlaceList result : ${result.length}');
+    LOG('--> getPlaceListWithCountry result : ${result.length}');
     return result;
   }
 

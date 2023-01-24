@@ -30,6 +30,18 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       emailVerifyTime: json['emailVerifyTime'] as String,
       mobileVerified: json['mobileVerified'] as bool,
       emailVerified: json['emailVerified'] as bool,
+      likeGroup: (json['likeGroup'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      likePlace: (json['likePlace'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      likeEvent: (json['likeEvent'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      likeUser: (json['likeUser'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       optionData: (json['optionData'] as List<dynamic>?)
           ?.map((e) => OptionData.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -62,6 +74,10 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'emailVerifyTime': instance.emailVerifyTime,
       'mobileVerified': instance.mobileVerified,
       'emailVerified': instance.emailVerified,
-      'optionData': instance.optionData,
-      'optionPush': instance.optionPush,
+      'likeGroup': instance.likeGroup,
+      'likePlace': instance.likePlace,
+      'likeEvent': instance.likeEvent,
+      'likeUser': instance.likeUser,
+      'optionData': instance.optionData?.map((e) => e.toJson()).toList(),
+      'optionPush': instance.optionPush?.map((e) => e.toJson()).toList(),
     };

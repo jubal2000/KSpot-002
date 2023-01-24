@@ -4,7 +4,9 @@ import '../utils/utils.dart';
 
 part 'etc_model.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(
+  explicitToJson: true,
+)
 class TimeData {
   String      id;
   int         status;       // 상태 (0:removed, 1:active, 2:disable, 3:ready)
@@ -14,16 +16,13 @@ class TimeData {
   String      startTime;   // 시작시간
   String      endTime;     // 종료시간
   int         index;
-
   String?     startDate;   // 시작일
   String?     endDate;     // 종료일
-
   List<String>? day;        // 특별한 날 선택
   List<String>? dayWeek;    // 요일 선택 (월, 화..)
   List<String>? week;       // 주간 선택 (첫째주, 마지막주..)
   List<String>? exceptDay;  // 제외 날 선택
   List<dynamic>? customData; // 사용자 설정 데이터
-
   TimeData({
     required this.id,
     required this.status,
@@ -33,10 +32,8 @@ class TimeData {
     required this.startTime,
     required this.endTime,
     required this.index,
-
     this.startDate,
     this.endDate,
-
     this.day,
     this.dayWeek,
     this.week,
@@ -115,17 +112,37 @@ class CountryData {
   });
 
   factory CountryData.fromJson(JSON json) => _$CountryDataFromJson(json);
-  JSON toJSON() => _$CountryDataToJson(this);
+  JSON toJson() => _$CountryDataToJson(this);
 }
 
 @JsonSerializable()
 class OptionData {
-  String id = '';
-  bool   value = false;
+  String id;
+  bool   value;
   OptionData({
-    id,
-    value,
+    required this.id,
+    required this.value,
   });
   factory OptionData.fromJson(JSON json) => _$OptionDataFromJson(json);
-  JSON toJSON() => _$OptionDataToJson(this);
+  JSON toJson() => _$OptionDataToJson(this);
+}
+
+@JsonSerializable()
+class AddressData {
+  String address1;
+  String address2;
+  double lat;
+  double lng;
+  AddressData({
+    required this.address1,
+    required this.address2,
+    required this.lat,
+    required this.lng,
+  });
+  factory AddressData.fromJson(JSON json) => _$AddressDataFromJson(json);
+  JSON toJson() => _$AddressDataToJson(this);
+
+  get desc {
+    return '$address1, $address2';
+  }
 }

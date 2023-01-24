@@ -28,9 +28,9 @@ Map<String, dynamic> _$StartModelToJson(StartModel instance) =>
       'serverStatus': instance.serverStatus,
       'serverStatusMsg': instance.serverStatusMsg,
       'infoVersion': instance.infoVersion,
-      'promotionInfo': instance.promotionInfo,
-      'serviceInfo': instance.serviceInfo,
-      'appVersion': instance.appVersion,
+      'promotionInfo': instance.promotionInfo.toJson(),
+      'serviceInfo': instance.serviceInfo.toJson(),
+      'appVersion': instance.appVersion.map((k, e) => MapEntry(k, e.toJson())),
     };
 
 VersionData _$VersionDataFromJson(Map<String, dynamic> json) => VersionData(

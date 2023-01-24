@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:get/get.dart';
+import 'package:kspot_002/models/event_group_model.dart';
 import 'package:kspot_002/models/user_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,6 +62,13 @@ class LocalService extends GetxService {
     if (localInfo == null) return false;
     _localData = jsonDecode(localInfo);
     LOG('--> readLocalData : $_localData');
+
+    if (_localData['currentEventGroup'] != null) {
+      AppData.currentEventGroup = EventGroupModel.fromJson(_localData['currentEventGroup']);
+    }
+    if (_localData['currentContentType'] != null) {
+      AppData.currentContentType = STR(_localData['currentContentType']);
+    }
     return true;
   }
 }
@@ -86,7 +94,7 @@ Future<bool> readCountryLog() async {
 writeCountryLog() {
   List<String> localData = [];
   for (var item in AppData.countrySelectList ) {
-    localData.add(jsonEncode(item.toJSON()));
+    localData.add(jsonEncode(item.toJson()));
   }
   StorageManager.saveData('countryLog' , localData);
   LOG('--> readCountryLog : ${AppData.countrySelectList.length} / $localData');

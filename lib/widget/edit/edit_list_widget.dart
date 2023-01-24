@@ -32,18 +32,29 @@ enum EditListType {
   customField,
 }
 
-Widget EditListWidget(BuildContext context, JSON? listItem, EditListType type, Function(EditListType, JSON)? onAddAction, Function(EditListType, String, int)? onSelected, {bool enabled =  true}) {
-  return EditListSortWidget(listItem ?? {}, type, onAddAction: onAddAction, onSelected: onSelected, enabled: enabled);
+Widget EditListSortWidget(
+    JSON listItem,
+    EditListType type,
+    Function(EditListType, JSON)? onAddAction,
+    Function(EditListType, String, int)? onSelected,
+    {
+      bool enabled =  true,
+      Function(EditListType, JSON)? onListItemChanged
+    }) {
+  return EditListWidget(listItem, type, isCanMove: true, onAddAction, onSelected, enabled: enabled, onListItemChanged: onListItemChanged);
 }
 
-class EditListSortWidget extends StatefulWidget {
-  EditListSortWidget(this.listItem, this.type,
+class EditListWidget extends StatefulWidget {
+  EditListWidget(
+      this.listItem,
+      this.type,
+      this.onAddAction,
+      this.onSelected,
       {Key? key,
         this.textLine = 1,
         this.padding = const EdgeInsets.only(top: 0),
         this.enabled = true,
-        this.onAddAction,
-        this.onSelected,
+        this.isCanMove = false,
         this.onChanged,
         this.onListItemChanged}) : super(key: key);
 
@@ -52,6 +63,7 @@ class EditListSortWidget extends StatefulWidget {
   int textLine;
   EdgeInsets padding;
   bool enabled;
+  bool isCanMove;
   Function(EditListType, JSON)? onAddAction;
   Function(EditListType, String, int)? onSelected;
   Function(EditListType, List<String>)? onChanged;
@@ -61,7 +73,7 @@ class EditListSortWidget extends StatefulWidget {
   _EditListSortState createState() => _EditListSortState();
 }
 
-class _EditListSortState extends State<EditListSortWidget> {
+class _EditListSortState extends State<EditListWidget> {
   var titleText = ['ADDRESS LINK', 'FOLLOW LINK', 'SPOT LINK', 'EVENT LINK', 'GOODS LINK',
     'GOODS DESCRIPTION', 'CATEGORY', 'GOODS INFO', 'SNS LINK', 'MANAGER', 'INSTRUCTOR',
     'EVENT FIELD', 'TIME SETTING', 'DATE SELECT', 'EXCEPT DATE SELECT', 'RESERVATION', 'CUSTOM FIELD'];
@@ -123,7 +135,7 @@ class _EditListSortState extends State<EditListSortWidget> {
               item['image'],
               item['backPic'],
               ItemTitleStyle(context),
-              widget.onChanged != null || widget.onListItemChanged != null,
+              widget.isCanMove,
               BOL(item['disabled']),
               (EditListType type, String key, int status) {
                 LOG('--> EditListItem select : $type / $key / $status');

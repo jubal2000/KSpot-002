@@ -4,7 +4,9 @@ import '../utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 part 'start_model.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(
+  explicitToJson: true,
+)
 class StartModel {
   String      id;
   String      title;
@@ -26,7 +28,7 @@ class StartModel {
   });
 
   factory StartModel.fromJson(JSON json) => _$StartModelFromJson(json);
-  JSON toJSON() => _$StartModelToJson(this);
+  JSON toJson() => _$StartModelToJson(this);
 }
 
 @JsonSerializable()
@@ -43,7 +45,7 @@ class VersionData {
   });
 
   factory VersionData.fromJson(JSON json) => _$VersionDataFromJson(json);
-  JSON toJSON() => _$VersionDataToJson(this);
+  JSON toJson() => _$VersionDataToJson(this);
 }
 
 @JsonSerializable()
@@ -68,5 +70,5 @@ class ServiceData {
   });
 
   factory ServiceData.fromJson(JSON json) => _$ServiceDataFromJson(json);
-  JSON toJSON() => _$ServiceDataToJson(this);
+  JSON toJson() => _$ServiceDataToJson(this);
 }

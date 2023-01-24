@@ -16,8 +16,8 @@ import '../../services/api_service.dart';
 import '../../services/firebase_service.dart';
 import '../../view_model/app_view_model.dart';
 
-class Intro extends StatelessWidget {
-  Intro({Key? key}) : super(key: key);
+class IntroScreen extends StatelessWidget {
+  IntroScreen({Key? key}) : super(key: key);
   final _api = Get.find<ApiService>();
 
   @override

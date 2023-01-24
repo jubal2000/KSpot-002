@@ -5,10 +5,12 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:helpers/helpers.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:intl/intl.dart';
@@ -20,6 +22,9 @@ import '../data/app_data.dart';
 import '../data/common_colors.dart';
 import '../data/common_sizes.dart';
 import '../data/style.dart';
+import '../view/place/place_list_screen.dart';
+import '../widget/event_group_dialog.dart';
+import '../widget/dropdown_widget.dart';
 
 typedef JSON = Map<String, dynamic>;
 typedef SnapShot = QuerySnapshot<Map<String, dynamic>>;
@@ -590,6 +595,35 @@ GET_COUNTRY_EXCEPT_FLAG(String value) {
 // ignore: non_constant_identifier_names
 STRING_TO_UINT8LIST(String value) {
   return Uint8List.fromList(List<int>.from(value.codeUnits));
+}
+
+// ignore: non_constant_identifier_names
+ADDR(dynamic desc) {
+  var tmp = desc != null ? desc['address'] ?? ''  : '';
+  return STR(tmp);
+}
+
+// ignore: non_constant_identifier_names
+LATLNG(dynamic desc) {
+  if (desc == null) return LatLng(0,0);
+  return LatLng(DBL(desc['lat']), DBL(desc['lng']));
+}
+
+// ignore: non_constant_identifier_names
+LAT(dynamic desc) {
+  if (desc == null) return 0;
+  return DBL(desc['lat']);
+}
+
+LNG(dynamic desc) {
+  if (desc == null) return 0;
+  return DBL(desc['lng']);
+}
+
+// ignore: non_constant_identifier_names
+ADDR_GOOGLE(dynamic desc, String title, String pic) {
+  if (desc == null) return null;
+  return {'title': title, 'pic': pic, 'lat': DBL(desc['lat']), 'lng': DBL(desc['lng'])};
 }
 
 Widget showImage(String url, Size size, {Color? color, var fit = BoxFit.cover}) {
@@ -1246,7 +1280,7 @@ TextCheckBox(BuildContext context, String title, bool value,
 }
 
 // ignore: non_constant_identifier_names
-SubTitle(BuildContext context, String title, {double height = 40, double topPadding = 0, double bottomPadding = 0, Widget? child}) {
+SubTitle(BuildContext context, String title, {double height = 30, double topPadding = 0, double bottomPadding = 0, Widget? child}) {
   return Container(
       height: height,
       alignment: Alignment.centerLeft,
@@ -1538,4 +1572,228 @@ unFocusAll(BuildContext context) {
   //     state.clearFocus(false);
   //   }
   // }
+}
+
+// ignore: non_constant_identifier_names
+ShadowIcon(IconData icon, double size, Color color, double x, double y) {
+  var shadowColor = Colors.black;
+  return Container(
+      width: size + 2,
+      height: size + 2,
+      child: Stack(
+          children: [
+            Positioned(
+              top: x-1,
+              left: y-1,
+              child: Icon(icon, size: size, color: shadowColor),
+            ),
+            Positioned(
+              top: x-1,
+              left: y+1,
+              child: Icon(icon, size: size, color: shadowColor),
+            ),
+            Positioned(
+              top: x+1,
+              left: y-1,
+              child: Icon(icon, size: size, color: shadowColor),
+            ),
+            Positioned(
+              top: x+1,
+              left: y+1,
+              child: Icon(icon, size: size, color: shadowColor),
+            ),
+            Positioned(
+              top: x,
+              left: y,
+              child: Icon(icon, size: size, color: color),
+            ),
+          ]
+      )
+  );
+}
+
+Widget showSizedRoundImage(dynamic imagePath, double size, double round) {
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(round),
+    child: SizedBox(
+      width: size,
+      height: size,
+      child: FittedBox(
+        fit: BoxFit.fill,
+        child: showImageFit(imagePath),
+      ),
+    ),
+  );
+}
+
+Widget showPlaceAddButton(BuildContext context, Size size, Function onRefresh) {
+  return Container(
+    width: size.width,
+    height: size.height,
+    decoration: BoxDecoration(
+      color: Theme.of(context).primaryColor.withOpacity(0.25),
+      borderRadius: BorderRadius.all(Radius.circular(8)),
+    ),
+    child: ClipRRect(
+        borderRadius: BorderRadius.circular(8.0),
+        child: GestureDetector(
+          onTap: () {
+            AppData.listSelectData.clear();
+            Get.to(() => PlaceListScreen())!.then((result) {
+
+            });
+              // Navigator.push(context, MaterialPageRoute(
+              //     builder: (context) => EventListScreen(isSelectable: true, topTitle: "EVENT SELECT".tr))).then((result) {
+              //   onRefresh();
+              // });
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.add_outlined, color: Theme.of(context).primaryColor.withOpacity(0.5), size: 18),
+              Text('Select'.tr, style: DescBodyInfoStyle(context, 0.8), textAlign: TextAlign.center)
+            ],
+          ),
+        )
+    ),
+  );
+}
+
+Widget showIconButton(Widget icon, Function()? onTap, [Size? size]) {
+  var _width  = size != null ? size.width   : 40.0;
+  var _height = size != null ? size.height  : 30.0;
+  return GestureDetector(
+    onTap: () {
+      if (onTap != null) onTap();
+    },
+    child: Container(
+      width: _width,
+      height: _height,
+      padding: EdgeInsets.all(5),
+      color: Colors.transparent,
+      child: icon,
+    ),
+  );
+}
+
+checkPromotionDateRangeFromData(JSON item, [String type = 'promotion_listTop']) {
+  if (item[type] == null) return false;
+  return INT(item[type]['status']) > 0 &&
+      checkPromotionDateRange(STR(item[type]['startDate']), STR(item[type]['endDate']));
+}
+
+checkPromotionDateRange(String startDate, String endDate) {
+  LOG('--> checkPromotionDateRange: $startDate / $endDate');
+  try {
+    var start = DateTime.parse(startDate);
+    var end   = DateTime.parse(endDate);
+    var now   = DateTime.now();
+    LOG('--> now.compareTo : ${now.compareTo(start)} / ${now.compareTo(end)}');
+    return now.compareTo(start) > 0 && now.compareTo(end) < 0;
+  } catch (e) {
+    LOG('--> checkPromotionDateRange error: $e');
+  }
+}
+
+Widget ContentTypeSelectWidget(BuildContext context, String selectId, Function(String) onChanged) {
+  if (selectId.isEmpty) selectId = AppData.INFO_CONTENT_TYPE.entries.first.key;
+  List<JSON> itemList = [];
+  // set category group dropdown
+  for (var item in AppData.INFO_CONTENT_TYPE.entries) {
+    itemList.add({
+      'key': item.key,
+      'title': STR(item.value['title']).toString().tr,
+    });
+  }
+  LOG('--> ContentTypeSelectWidget : $selectId - $itemList');
+  return Container(
+      height: 60,
+      child: Row(
+        children: [
+          DropDownMenuWidget(itemList, selectKey: selectId, onSelected: (key) {
+            onChanged(key);
+          }),
+        ],
+      )
+  );
+}
+
+Future<String> loadTerms() async {
+  return await rootBundle.loadString('assets/html/terms_0.html');
+}
+
+Future<String> loadCondition() async {
+  return await rootBundle.loadString('assets/html/terms_1.html');
+}
+
+contentAddButton(context, title, {
+    EdgeInsets padding = EdgeInsets.zero,
+    var icon = Icons.add_outlined,
+    var height = 60.0,
+    Function(String)? onPressed,
+  }) {
+  return Container(
+      padding: padding,
+      constraints: BoxConstraints(
+        minHeight: height,
+      ),
+      child: ElevatedButton(
+        onPressed: () {
+          if (onPressed != null) onPressed(title);
+        },
+        style: ElevatedButton.styleFrom(
+            primary: Theme.of(context).primaryColor.withOpacity(0.25),
+            minimumSize: Size.zero, // Set this
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            )
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Theme.of(context).primaryColor),
+            SizedBox(height: 3),
+            Text(title, style: ItemDescStyle(context), maxLines: 3, textAlign: TextAlign.center)
+          ],
+        ),
+      )
+  );
+}
+
+showGroupTabWidget(context, onUpdate, Widget? child) {
+  return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 40,
+      color: Theme.of(context).primaryColor.withOpacity(0.1),
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                EventGroupSelectDialog(context,
+                    AppData.currentEventGroup!.id,
+                    AppData.currentContentType).then((_) {
+                  onUpdate();
+                });
+              },
+              child: Row(
+                children: [
+                  if (AppData.currentEventGroup!.pic.isNotEmpty)...[
+                    showImage(AppData.currentEventGroup!.pic, Size(30, 30)),
+                    // getCircleImage(AppData.currentPlaceGroup['pic'], 30),
+                    SizedBox(width: 8),
+                  ],
+                  Text(STR(AppData.currentEventGroup!.title).toString().toUpperCase(),
+                      style: AppBarTitleStyle(context)),
+                ],
+              ),
+            ),
+          ),
+          if (child != null)
+            child,
+        ],
+      )
+  );
 }

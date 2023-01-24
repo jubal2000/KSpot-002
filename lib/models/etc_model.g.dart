@@ -112,12 +112,27 @@ Map<String, dynamic> _$CountryDataToJson(CountryData instance) =>
     };
 
 OptionData _$OptionDataFromJson(Map<String, dynamic> json) => OptionData(
-      id: json['id'],
-      value: json['value'],
+      id: json['id'] as String,
+      value: json['value'] as bool,
     );
 
 Map<String, dynamic> _$OptionDataToJson(OptionData instance) =>
     <String, dynamic>{
       'id': instance.id,
       'value': instance.value,
+    };
+
+AddressData _$AddressDataFromJson(Map<String, dynamic> json) => AddressData(
+      address1: json['address1'] as String,
+      address2: json['address2'] as String,
+      lat: (json['lat'] as num).toDouble(),
+      lng: (json['lng'] as num).toDouble(),
+    );
+
+Map<String, dynamic> _$AddressDataToJson(AddressData instance) =>
+    <String, dynamic>{
+      'address1': instance.address1,
+      'address2': instance.address2,
+      'lat': instance.lat,
+      'lng': instance.lng,
     };

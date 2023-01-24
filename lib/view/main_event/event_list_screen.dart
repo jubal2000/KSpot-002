@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:kspot_002/view_model/event_view_model.dart';
+import 'package:kspot_002/view_model/event_edit_view_model.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/common_sizes.dart';
 import '../../view_model/app_view_model.dart';
+import '../../view_model/event_view_model.dart';
 import '../../widget/title_text_widget.dart';
 import '../app/app_top_menu.dart';
-import 'main_event_edit.dart';
+import 'event_edit_screen.dart';
 
-class MainEvent extends StatelessWidget {
-  MainEvent({Key? key}) : super(key: key);
+class EventListScreen extends StatelessWidget {
+  EventListScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +28,7 @@ class MainEvent extends StatelessWidget {
           body: viewModel.showMainList(context),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
-              Get.to(() => MainEventEdit());
+              Get.to(() => EventEditScreen());
             },
             mini: true,
             child: Icon(Icons.add),

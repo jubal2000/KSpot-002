@@ -1,13 +1,17 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/repository/user_repository.dart';
+import 'package:provider/provider.dart';
 
 import '../../data/app_data.dart';
+import '../../data/dialogs.dart';
+import '../../data/theme_manager.dart';
+import '../../models/follow_model.dart';
+import '../../models/user_model.dart';
 import '../../services/api_service.dart';
 import '../../utils/utils.dart';
+import '../../view_model/follow_view_model.dart';
 
 class FollowScreen extends StatefulWidget {
   FollowScreen(this.userInfo, {Key? key,
@@ -15,29 +19,38 @@ class FollowScreen extends StatefulWidget {
     this.isShowAppBar = true,
     this.isShowMe = false,
     this.topTitle = '',
-    this.selectMax = 9}) : super(key: key);
+    this.selectMax = 9,
+    this.selectData,
+  }) : super(key: key);
 
-  JSON userInfo;
+  UserModel userInfo;
   bool isSelectable;
   bool isShowAppBar;
   bool isShowMe;
   String topTitle;
   int  selectMax;
 
+  JSON? selectData;
+
   @override
   FollowScreenState createState() => FollowScreenState();
 }
 
 class FollowScreenState extends State<FollowScreen> {
-  // final _tabTextStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.black);
+  final _viewModel = FollowViewModel();
   List<FollowTab>? _tabList;
 
   refreshTab() {
-    debugPrint('--> refreshTab : ${widget.userInfo['followData'].length} / ${widget.userInfo['followData']}');
+    debugPrint('--> refreshTab : ${AppData.followData}');
     _tabList = [
-      FollowTab(0, "FOLLOW".tr  , widget.userInfo['followData'] ?? {}, isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax),
-      FollowTab(1, "FOLLOWER".tr, widget.userInfo['followData'] ?? {}, isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax),
+      FollowTab(0, "FOLLOW".tr  , AppData.followData, isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
+      FollowTab(1, "FOLLOWER".tr, AppData.followData, isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
     ];
+  }
+
+  onSelected(JSON list) {
+    widget.selectData = {};
+    widget.selectData!.addAll(list);
   }
 
   @override
@@ -47,104 +60,84 @@ class FollowScreenState extends State<FollowScreen> {
 
   @override
   Widget build(BuildContext context) {
-    refreshTab();
-    if (widget.isShowAppBar) {
-      return SafeArea(
-          child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  AppData.setSearchEnable(false);
-                });
-              },
-              child: Scaffold(
-                appBar: AppBar(
-                  title: Text(widget.topTitle.isNotEmpty ? widget.topTitle : 'FOLLOW LIST', style: AppBarTitleStyle(context)),
-                  titleSpacing: 0,
-                  toolbarHeight: 50,
-                  // actions: [
-                  //   if (widget.isShowMe)...[
-                  //     GestureDetector(
-                  //       child: Column(
-                  //         children: [
-                  //           Icon(Icons.account_circle_outlined),
-                  //           SizedBox(height: 2),
-                  //           Text('Can Select Me', style: ItemDescExStyle(context)),
-                  //         ],
-                  //       ),
-                  //     )
-                  //   ]
-                  // ],
-                ),
-                body: DefaultTabController(
-                  length: _tabList!.length,
-                  child: Scaffold(
-                    appBar: AppBar(
-                      toolbarHeight: 0,
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      bottom: TabBar(
-                        padding: EdgeInsets.symmetric(horizontal: 30),
-                        labelColor: Theme.of(context).colorScheme.primary,
-                        indicatorColor: Theme.of(context).colorScheme.primary,
-                        unselectedLabelColor: Theme.of(context).colorScheme.secondary,
-                        tabs: _tabList!.map((item) => item.getTab()).toList(),
+    _viewModel.init(context);
+    return WillPopScope(
+      onWillPop: () async {
+        Get.back(result: widget.selectData);
+        return false;
+      },
+      child: SafeArea(
+        child: Scaffold(
+          appBar: widget.isShowAppBar ? AppBar(
+            title: Text(widget.topTitle.isNotEmpty ? widget.topTitle : 'FOLLOW LIST', style: AppBarTitleStyle(context)),
+            titleSpacing: 0,
+            toolbarHeight: 50,
+            actions: [
+              if (widget.isSelectable)
+                TextButton(
+                  onPressed: () {
+
+                  }, child: Text('Select Done'.tr)
+                )
+            ],
+          ) : null,
+          body: FutureBuilder(
+            future: _viewModel.getFollowList(widget.userInfo.id),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                refreshTab();
+                return ChangeNotifierProvider<FollowViewModel>(
+                  create: (_) => _viewModel,
+                  child: Consumer<FollowViewModel>(builder: (context, viewModel, _) {
+                    return DefaultTabController(
+                      length: _tabList!.length,
+                      child: Scaffold(
+                        appBar: AppBar(
+                          toolbarHeight: 0,
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          bottom: TabBar(
+                            padding: EdgeInsets.symmetric(horizontal: 30),
+                            labelColor: Theme.of(context).colorScheme.primary,
+                            indicatorColor: Theme.of(context).colorScheme.primary,
+                            unselectedLabelColor: Theme.of(context).colorScheme.secondary,
+                            tabs: _tabList!.map((item) => item.getTab()).toList(),
+                          ),
+                        ),
+                        body: TabBarView(
+                          physics: NeverScrollableScrollPhysics(),
+                          children: _tabList!,
+                        )
                       ),
-                    ),
-                    body: TabBarView(
-                      physics: NeverScrollableScrollPhysics(),
-                      children: _tabList!,
-                    )
-                  ),
-                ),
-              )
-          )
-      );
-    } else {
-      return SafeArea(
-        child: GestureDetector(
-          onTap: () {
-            setState(() {
-              AppData.setSearchEnable(false);
-            });
-          },
-          child: Container(
-            padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
-            child: DefaultTabController(
-              length: _tabList!.length,
-              child: Scaffold(
-                appBar: TabBar(
-                  padding: EdgeInsets.symmetric(horizontal: 30),
-                  labelColor: Theme.of(context).colorScheme.primary,
-                  indicatorColor: Theme.of(context).colorScheme.primary,
-                  unselectedLabelColor: Theme.of(context).colorScheme.secondary,
-                  tabs: _tabList!.map((item) => item.getTab()).toList(),
-                  onTap: (value) {
-                    AppData.setSearchEnable(false);
-                  },
-                ),
-                body: TabBarView(
-                    physics: NeverScrollableScrollPhysics(),
-                    children: _tabList!
-                ),
-              ),
-            ),
-          )
-        )
-      );
-    }
+                    );
+                  }
+                )
+              );
+            } else {
+              return showLoadingFullPage(context);
+            }
+          }),
+        ),
+      )
+    );
   }
 }
 
 class FollowTab extends StatefulWidget {
   final api = Get.find<ApiService>();
-  FollowTab(this.selectedTab, this.title, this.followData, { Key? key, this.isSelectable = false, this.isShowMe = false, this.selectMax = 9 }) : super(key: key);
+  FollowTab(this.selectedTab, this.title, this.followData, {
+    Key? key, this.isSelectable = false, this.isShowMe = false, this.selectMax = 9, this.selectData, this.onSelected
+  }) : super(key: key);
 
   int selectedTab;
   String title;
-  JSON followData;
+  Map<String, FollowModel> followData;
   bool isSelectable;
   bool isShowMe;
   int selectMax;
+
+  JSON? selectData;
+  Function(JSON)? onSelected;
 
   Widget getTab() {
     return Tab(text: title, height: 40);
@@ -165,14 +158,14 @@ class FollowTabState extends State<FollowTab> {
       _searchText = text;
       refreshList();
       if (status == 1) {
-        var state = AppData.searchWidgetKey[SearchKeys.follow0.index + widget.selectedTab].currentState as SearchWidgetState;
-        state.clearFocus();
+        // var state = AppData.searchWidgetKey[SearchKeys.follow0.index + widget.selectedTab].currentState as SearchWidgetState;
+        // state.clearFocus();
       }
     });
   }
 
   refreshList() {
-    LOG('--> refreshList : ${widget.isShowMe} / ${widget.followData.entries.length}');
+    LOG('--> refreshList : ${widget.isShowMe} / ${widget.followData.length}');
     _itemList.clear();
     if (widget.isShowMe) {
       _itemList.add({
@@ -184,25 +177,27 @@ class FollowTabState extends State<FollowTab> {
         'targetName': AppData.USER_NICKNAME,
       });
     }
-    for (var item in widget.followData.entries) {
-      var isOwner = CheckOwner(item.value['userId']);
-      if (!AppData.blockList.containsKey(STR(item.value['targetId'])) &&
-          !AppData.blockList.containsKey(STR(item.value['userId']))) {
-        if ((widget.selectedTab == 0 && isOwner) || (widget.selectedTab == 1 && !isOwner)) {
-          LOG('--> _searchText : $_searchText / $isOwner : ${item.value['targetName']}');
-          if (_searchText.isEmpty
-              || (isOwner && STR(item.value['targetName']).toString().toLowerCase().contains(_searchText.toLowerCase()))
-              || (!isOwner && STR(item.value['userName']).toString().toLowerCase().contains(_searchText.toLowerCase()))
-          ) {
-            LOG('--> add : ${item.value}');
-            _itemList.add(item.value);
+    if (widget.followData.isNotEmpty) {
+      for (var item in widget.followData.entries) {
+        var isOwner = AppData.userInfo.checkOwner(item.value.userId);
+        if (!AppData.blockUserData.containsKey(STR(item.value.targetId)) &&
+            !AppData.blockUserData.containsKey(STR(item.value.userId))) {
+          if ((widget.selectedTab == 0 && isOwner) || (widget.selectedTab == 1 && !isOwner)) {
+            LOG('--> _searchText : $_searchText / $isOwner : ${item.value.targetId}');
+            if (_searchText.isEmpty
+                || (isOwner && item.value.targetName.toLowerCase().contains(_searchText.toLowerCase()))
+                || (!isOwner && item.value.userName.toLowerCase().contains(_searchText.toLowerCase()))
+            ) {
+              LOG('--> add : ${item.value}');
+              _itemList.add(item.value.toJson());
+            }
           }
         }
       }
     }
   }
 
-  onMenuSelected(DropdownItemType menu, String id, JSON userInfo) {
+  onMenuSelected(DropdownItemType menu, String id, JSON targetUser) {
     LOG('--> onMenuSelected : $menu');
     switch (menu) {
       case DropdownItemType.message:
@@ -210,16 +205,15 @@ class FollowTabState extends State<FollowTab> {
           "status":       1,
           "desc":         '',
           "imageData":    [],
-          "targetId":     userInfo['id'],
-          "targetName":   userInfo['nickName'],
-          "targetPic":    userInfo['pic'],
-          "senderId":     AppData.userInfo['id'],
-          "senderName":   AppData.userInfo['nickName'],
-          "senderPic":    AppData.userInfo['pic'],
+          "targetId":     targetUser['id'],
+          "targetName":   targetUser['nickName'],
+          "targetPic":    targetUser['pic'],
+          "senderId":     AppData.USER_ID,
+          "senderName":   AppData.USER_NICKNAME,
+          "senderPic":    AppData.USER_PIC,
           "createTime":   CURRENT_SERVER_TIME(),
         };
-        LOG('--> showEditCommentDialog pushToken : ${STR(userInfo['pushToken'])}');
-        showEditCommentDialog(context, CommentType.message, 'To. ${STR(userInfo['nickName'])}', uploadData, userInfo, false, true, false).then((result) {
+        showEditCommentDialog(context, CommentType.message, 'To. ${STR(targetUser['nickName'])}', uploadData, targetUser, false, true, false).then((result) {
           LOG('--> showEditCommentDialog comment result : $result');
           if (result.isNotEmpty) {
             setState(() {
@@ -230,18 +224,29 @@ class FollowTabState extends State<FollowTab> {
         break;
       case DropdownItemType.unfollow:
         showAlertYesNoDialog(context, 'Follow cancel'.tr,
-            'Are you sure you want to unfollow?'.tr, '${userInfo['nickName']}', 'Cancel'.tr, 'OK'.tr).then((value) {
+            'Are you sure you want to unfollow?'.tr, '${targetUser['nickName']}', 'Cancel'.tr, 'OK'.tr).then((value) {
           if (value == 1) {
-            debugPrint('--> AppData.USER_FOLLOW : ${AppData.USER_FOLLOW.length}');
-            api.setFollowStatus(userInfo['id'], 0).then((value) {
+            api.setFollowStatus(AppData.userInfo.toJson(), targetUser['id'], 0).then((value) {
               setState(() {
-                debugPrint('--> AppData.USER_FOLLOW after : ${AppData.USER_FOLLOW.length}');
+                LOG('--> AppData.USER_FOLLOW after : ${AppData.followData.length}');
                 refreshList();
               });
             });
           }
         });
     }
+  }
+
+  onSelected(JSON selectItem, bool status) {
+    LOG('--> tab onSelected [$status] : $selectItem');
+    final key = STR(selectItem['id']);
+    widget.selectData ??= {};
+    if (status) {
+      widget.selectData![key] = selectItem;
+    } else {
+      widget.selectData!.remove(key);
+    }
+    if (widget.onSelected != null) widget.onSelected!(widget.selectData!);
   }
 
   @override
@@ -262,25 +267,30 @@ class FollowTabState extends State<FollowTab> {
             Container(
               width: double.infinity,
               height: 40,
-              color: Theme.of(context).errorColor.withOpacity(0.5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+                color: Theme.of(context).errorColor.withOpacity(0.25),
+              ),
               child: Center(
                 child: Text(widget.selectMax == 1 ? 'Please select a target'.tr : 'Please select targets'.tr, style: ItemTitleAlertStyle(context)),
               )
             )
           ],
-          SearchWidget(
-            key: AppData.searchWidgetKey[SearchKeys.follow0.index + widget.selectedTab],
-            isShowList: false,
-            padding: EdgeInsets.zero,
-            onEdited: onSearchEdited,
-          ),
-          SizedBox(height: 10),
+          // SearchWidget(
+          //   key: AppData.searchWidgetKey[SearchKeys.follow0.index + widget.selectedTab],
+          //   isShowList: false,
+          //   padding: EdgeInsets.zero,
+          //   onEdited: onSearchEdited,
+          // ),
+          SizedBox(height: 5),
           SingleChildScrollView(
             child: Column(
-              children: _itemList.map((item) => FollowListItem(item, isFollowing: CheckOwner(item['userId']),
+              children: _itemList.map((item) => FollowListItem(item, isFollowing: AppData.userInfo.checkOwner(item['userId']),
+                isSelected: widget.selectData != null && widget.selectData!.containsKey(item['targetId']),
                 isSelectable: widget.isSelectable,
                 isShowMenu: widget.selectedTab == 0,
                 selectMax: widget.selectMax,
+                onSelected: onSelected,
                 onMenuSelected: onMenuSelected,
               )).toList(),
             )
@@ -308,20 +318,24 @@ class FollowTabState extends State<FollowTab> {
 
 class FollowListItem extends StatefulWidget {
   FollowListItem(this.followItem, {Key? key,
+    this.isSelected = false,
     this.isSelectable = false,
     this.isFollowing = true,
     this.isShowMenu = false,
     this.selectMax = 99,
     this.height = 70.0,
+    this.onSelected,
     this.onMenuSelected}) : super(key: key);
 
   JSON followItem;
+  bool isSelected;
   bool isSelectable;
   bool isFollowing;
   bool isShowMenu;
   double height;
   int selectMax;
 
+  Function(JSON, bool)? onSelected;
   Function(DropdownItemType, String, JSON)? onMenuSelected;
 
   @override
@@ -329,24 +343,22 @@ class FollowListItem extends StatefulWidget {
 }
 
 class FollowListItemState extends State<FollowListItem> {
-  final api = Get.find<ApiService>();
-  Future<JSON>? _followInit;
-  var _id = '';
-  var _isChecked = false;
-  JSON _userInfo = {};
+  final repo = UserRepository();
+  Future<UserModel?>? _followInit;
+  var userId = '';
+  UserModel? userInfo;
   
-  refreshData(JSON data) {
-    _isChecked = AppData.listSelectData.containsKey(_id);
-    _userInfo = data;
+  refreshData(UserModel user) {
+    userInfo = user;
     if (widget.isFollowing) {
-      widget.followItem['targetName'] = data['nickName'];
-      widget.followItem['targetPic' ] = data['pic'];
+      widget.followItem['targetName'] = user.nickName;
+      widget.followItem['targetPic' ] = user.pic;
     } else {
-      widget.followItem['userName'] = data['nickName'];
-      widget.followItem['userPic' ] = data['pic'];
+      widget.followItem['userName'] = user.nickName;
+      widget.followItem['userPic' ] = user.pic;
     }
-    if (AppData.USER_FOLLOW.containsKey(widget.followItem['id'])) {
-      AppData.USER_FOLLOW[widget.followItem['id']] = widget.followItem;
+    if (AppData.followData.containsKey(widget.followItem['id'])) {
+      AppData.followData[widget.followItem['id']] = FollowModel.fromJson(widget.followItem);
     }
   }
 
@@ -357,20 +369,20 @@ class FollowListItemState extends State<FollowListItem> {
 
   @override
   Widget build(BuildContext context) {
-    _id = STR(widget.isFollowing ? widget.followItem['targetId'] : widget.followItem['userId']);
-    _followInit = api.getUserInfoFromId(_id);
+    userId = STR(widget.isFollowing ? widget.followItem['targetId'] : widget.followItem['userId']);
+    _followInit = repo.getUserInfo(userId);
     return GestureDetector(
         onTap: () {
           if (widget.isSelectable) {
-            if (widget.selectMax == 1) {
-              AppData.listSelectData.clear();
-              AppData.listSelectData[_userInfo['id']] = _userInfo;
-              Navigator.of(context).pop();
-            } else {
-              AppData.listSelectData[_userInfo['id']] = _userInfo;
-            }
+            // if (widget.selectMax == 1) {
+            //   AppData.listSelectData.clear();
+            //   AppData.listSelectData[_userInfo['id']] = _userInfo;
+            //   Navigator.of(context).pop();
+            // } else {
+            //   AppData.listSelectData[_userInfo['id']] = _userInfo;
+            // }
           } else {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => TargetProfileScreen(_userInfo)));
+            // Navigator.push(context, MaterialPageRoute(builder: (context) => TargetProfileScreen(_userInfo)));
           }
         },
         child: Container(
@@ -387,21 +399,22 @@ class FollowListItemState extends State<FollowListItem> {
                       children: [
                         if (widget.isSelectable && widget.selectMax > 1)
                           Checkbox(
-                              value: _isChecked,
+                              value: widget.isSelected,
                               onChanged: (value) {
                                 setState(() {
-                                  _isChecked = value!;
-                                  if (_isChecked) {
-                                    if (widget.selectMax == 1) {
-                                      AppData.listSelectData.clear();
-                                      AppData.listSelectData[_id] = _userInfo;
-                                      Navigator.of(context).pop();
-                                    } else {
-                                      AppData.listSelectData[_id] = _userInfo;
-                                    }
-                                  } else {
-                                    AppData.listSelectData.remove(_id);
-                                  }
+                                  widget.isSelected = value!;
+                                  if (widget.onSelected != null) widget.onSelected!(widget.followItem, value);
+                                  // if (_isChecked) {
+                                  //   if (widget.selectMax == 1) {
+                                  //     AppData.listSelectData.clear();
+                                  //     AppData.listSelectData[userId] = _userInfo;
+                                  //     Navigator.of(context).pop();
+                                  //   } else {
+                                  //     AppData.listSelectData[userId] = _userInfo;
+                                  //   }
+                                  // } else {
+                                  //   AppData.listSelectData.remove(userId);
+                                  // }
                                 });
                               }
                           ),
@@ -411,7 +424,7 @@ class FollowListItemState extends State<FollowListItem> {
                             width: widget.height - 10,
                             height: widget.height - 10,
                             child: ClipOval(
-                                child: showImageFit(_userInfo['pic'] ?? 'assets/ui/main_picture_00.png')
+                                child: showImageFit(userInfo!.pic)
                             )
                         ),
                         SizedBox(width: 10),
@@ -420,10 +433,10 @@ class FollowListItemState extends State<FollowListItem> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('${STR(_userInfo['nickName'])}', style: ItemTitleStyle(context)),
-                              if (STR(_userInfo['message']).isNotEmpty) ...[
+                              Text(userInfo!.nickName, style: ItemTitleStyle(context)),
+                              if (userInfo!.message.isNotEmpty) ...[
                                 SizedBox(height: 5),
-                                Text(DESC(_userInfo['message']), maxLines: 2, style: ItemDescStyle(context)),
+                                Text(DESC(userInfo!.message), maxLines: 2, style: ItemDescStyle(context)),
                               ]
                             ],
                           ),
@@ -450,11 +463,12 @@ class FollowListItemState extends State<FollowListItem> {
                         //     )
                         //   ],
                         // ),
-                        EditMenuWidget,
+                        if (!widget.isSelectable)
+                          EditMenuWidget,
                       ],
                     );
                   } else {
-                    return showLoadingImageSize(Size(double.infinity, widget.height));
+                    return showLoadingFullPage(context);
                   }
                 })
         )
@@ -482,22 +496,53 @@ class FollowListItemState extends State<FollowListItem> {
           if (widget.isShowMenu)
             ...UserMenuItems.followingMenu.map((item) => DropdownMenuItem<DropdownItem>(
               value: item,
-              child: GoodsMenuItems.buildItem(item),
+              child: buildItem(item),
             ),
           ),
           if (!widget.isShowMenu)
             ...UserMenuItems.followerMenu.map((item) => DropdownMenuItem<DropdownItem>(
               value: item,
-              child: GoodsMenuItems.buildItem(item),
+              child: buildItem(item),
             ),
           ),
         ],
         onChanged: (value) {
           var selected = value as DropdownItem;
-          if (widget.onMenuSelected != null) widget.onMenuSelected!(selected.type, widget.followItem['id'], _userInfo);
+          if (widget.onMenuSelected != null) widget.onMenuSelected!(selected.type, widget.followItem['id'], userInfo!.toJson());
         },
       ),
     );
   }
+
+  static Widget buildItem(DropdownItem item) {
+    return Container(
+        child: Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 5),
+                  child: Row(
+                    children: [
+                      Icon(
+                          item.icon,
+                          color: Colors.grey,
+                          size: 20
+                      ),
+                      if (item.text != null)...[
+                        SizedBox(width: 3),
+                        Text(item.text!.tr, style: TextStyle(fontSize: 14), maxLines: 2),
+                      ]
+                    ],
+                  ),
+                ),
+              ),
+              if (item.isLine)
+                showHorizontalDivider(Size(double.infinity, 2), color: Colors.grey),
+            ]
+        )
+    );
+  }
 }
+
+
 

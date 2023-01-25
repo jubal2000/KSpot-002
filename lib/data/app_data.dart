@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../models/etc_model.dart';
 import '../models/event_group_model.dart';
+import '../models/follow_model.dart';
+import '../models/message_model.dart';
 import '../models/place_model.dart';
 import '../models/start_model.dart';
 import '../models/user_model.dart';
@@ -28,6 +30,19 @@ class HomeListType {
   static int get list     => 0;
   static int get map      => 1;
   static int get calendar => 2;
+}
+
+enum CommentType {
+  none,
+  message,
+  comment,
+  qna,
+  history,
+  serviceQnA,
+  placeGroup,
+  place,
+  event,
+  story,
 }
 
 class AppData {
@@ -77,6 +92,10 @@ class AppData {
   static JSON localInfo = {};
   static JSON infoData = {};
   static JSON timeData = {};
+  static JSON blockUserData = {}; // 차단된 유저 목록
+  static JSON serviceQnAData = {};
+  static Map<String, MessageModel> messageData = {};
+  static Map<String, FollowModel> followData = {};
 
   static BuildContext? topMenuContext;
 

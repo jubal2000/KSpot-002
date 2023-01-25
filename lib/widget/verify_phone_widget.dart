@@ -154,6 +154,13 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
     }
   }
 
+  stopCounter() {
+    if (countTimer != null) {
+      countTimer!.cancel();
+      countTimer = null;
+    }
+  }
+
   sendPhoneVerifyError(e) {
     setState(() {
       var error = e.toString();
@@ -387,5 +394,11 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
         ],
       ]
     );
+  }
+
+  @override
+  void dispose() {
+    stopCounter();
+    super.dispose();
   }
 }

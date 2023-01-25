@@ -16,9 +16,8 @@ class EventGroupModelEx extends EventGroupModel {
     desc: desc,
     descKr: '',
     pic: '',
-    contentGroup: '',
     contentType: '',
-    userId: '',
+    updateTime: '',
     createTime: '',
 
     tagData: [],
@@ -36,9 +35,8 @@ class EventGroupModel {
   String      desc;
   String      descKr;
   String      pic;            // title image
-  String      contentGroup;   // content group id
   String      contentType;    // content type id
-  String      userId;         // create user id
+  String      updateTime;     // update time
   String      createTime;     // create time
 
   List<String>? tagData;      // tag
@@ -52,9 +50,8 @@ class EventGroupModel {
     required this.desc,
     required this.descKr,
     required this.pic,
-    required this.contentGroup,
     required this.contentType,
-    required this.userId,
+    required this.updateTime,
     required this.createTime,
 
     this.tagData,

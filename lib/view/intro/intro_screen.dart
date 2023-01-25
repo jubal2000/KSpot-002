@@ -78,7 +78,7 @@ class IntroScreen extends StatelessWidget {
                                       )
                                     ),
                                   ),
-                                  SizedBox(height: UI_ITEM_SPACE.w),
+                                  SizedBox(height: UI_ITEM_SPACE_M.w),
                                 ],
                                 Container(
                                   width: Get.size.width,

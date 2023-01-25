@@ -1,8 +1,12 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
+
+import '../utils/utils.dart';
+import 'common_sizes.dart';
 
 const appbar_title_font_size = 18.0;
 const common_title_font_size = 14.0;
@@ -51,6 +55,61 @@ TextStyle itemDescStyle = TextStyle(
     fontSize: item_desc_font_size, color: Colors.black54, fontWeight: FontWeight.w600);
 TextStyle itemDescLinkStyle = TextStyle(
     fontSize: item_desc_font_size, color: Colors.blue, fontWeight: FontWeight.w400, decoration: TextDecoration.underline);
+
+
+TitleColorText(title, List<String> colorText,
+    {double fontSize = UI_FONT_SIZE_H}) {
+  List<String> showText = title.split(' ');
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: showText
+        .map((item) => TextInterface(
+        title: '$item ',
+        color: colorText.contains(item)
+            ? Colors.blue
+            : Colors.black87,
+        font: TextFont.M,
+        size: fontSize.sp))
+        .toList(),
+  );
+}
+
+SubTitleColorText(title, List<String> colorText,
+    {JSON replaceStr = const {}, double fontSize = UI_FONT_SIZE_S}) {
+  if (replaceStr.isNotEmpty) {
+    for (var key in replaceStr.keys) {
+      title = title.replaceAll(key, replaceStr[key]);
+    }
+  }
+  List<String> showText = title.split(' ');
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: showText
+        .map((item) => TextInterface(
+        title: '$item ',
+        color: colorText.contains(item)
+            ? Colors.blue
+            : Colors.black87,
+        font: TextFont.M,
+        size: fontSize.sp))
+        .toList(),
+  );
+}
+
+SubTitleText(text,
+    {double fontSize = UI_FONT_SIZE_S,
+      int maxLine = 1,
+      double height = 1,
+      Color color = Colors.black87}) {
+  return TextInterface(
+      title: text,
+      color: color,
+      font: TextFont.L,
+      size: fontSize.sp,
+      align: TextAlign.center,
+      lineMax: maxLine,
+      height: height);
+}
 
 /// Outlines a text using shadows.
 List<Shadow> outlinedText({double strokeWidth = 1, Color strokeColor = Colors.black, int precision = 4}) {

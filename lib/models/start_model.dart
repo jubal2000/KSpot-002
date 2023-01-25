@@ -50,23 +50,24 @@ class VersionData {
 
 @JsonSerializable()
 class ServiceData {
-  String      bankAccount;
-  String      bankTitle;
-  String      cancelDesc;
   String      serviceEmail;
   String      servicePhone;
   String      serviceUserId;
   String      serviceUserName;
-  String      tax;
+  String?     bankAccount;
+  String?     bankTitle;
+  String?     cancelDesc;
+  String?     tax;
   ServiceData({
-    required this.bankAccount,
-    required this.bankTitle,
-    required this.cancelDesc,
     required this.serviceEmail,
     required this.servicePhone,
     required this.serviceUserId,
     required this.serviceUserName,
-    required this.tax
+
+    this.bankAccount,
+    this.bankTitle,
+    this.cancelDesc,
+    this.tax
   });
 
   factory ServiceData.fromJson(JSON json) => _$ServiceDataFromJson(json);

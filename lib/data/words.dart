@@ -46,7 +46,6 @@ class Words extends Translations {
       'SIGN UP': '회원가입',
       'START': '시작',
 
-
       // event_screen
       'Enable': '활성화',
       'Disable': '비활성화',
@@ -256,6 +255,7 @@ class Words extends Translations {
       'Experience the many services and benefits of KSpot':
       'KSpot의 많은 서비스와 혜택을 체험해보세요',
       'Congratulations on your membership': '회원가입을 축하합니다',
+      'Select Done': '선택 완료',
 
       // slide_timepicker_screen
       'Select Time Range': '시간 범위 선택',
@@ -265,7 +265,6 @@ class Words extends Translations {
       // story_edit_screen
       'SELECT CONTENT TYPE': '컨텐츠 타입 선택',
       'VIDEO': '비디오',
-      'IMAGE': '사진',
       'Delete completed': '삭제 완료',
       'Delete failed': '삭제 실패',
       'SPOT SELECT': '스팟 선택',
@@ -423,7 +422,6 @@ class Words extends Translations {
       'CANCEL WAITING': '취소 대기중',
 
       // setup_profile_screen
-      'NICKNAME': '닉네임',
       'NAME': '이름',
       'Please check length': '길이를 확인해 주세요',
       'DEPOSIT & REFUND INFO': '입금 & 환불 정보',

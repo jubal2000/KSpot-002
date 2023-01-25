@@ -3,25 +3,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/repository/user_repository.dart';
 
 import '../data/app_data.dart';
+import '../data/dialogs.dart';
 import '../data/theme_manager.dart';
 import '../utils/utils.dart';
 import '../view/sign_up/sign_up_done_screen.dart';
 import '../widget/verify_phone_widget.dart';
 
-enum TextInput {
+enum TextInputId {
   nickname,
 }
 
 class SignUpViewModel extends ChangeNotifier {
+  final repo = UserRepository();
   var stepIndex = 2;
   var stepMax = 3;
   var isShowOnly = false;
   var isChecked = [false, false];
   var isMobileVerified = false;
   var isSignUpDone = false;
-  var textEditController = List.generate(TextInput.values.length, (index) => TextEditingController());
+  var textEditController = List.generate(TextInputId.values.length, (index) => TextEditingController());
 
   BuildContext? viewContext;
 
@@ -52,7 +55,15 @@ class SignUpViewModel extends ChangeNotifier {
       stepIndex++;
       notifyListeners();
     } else {
-      Get.to(() => SignupStepDoneScreen());
+      // user sign up..
+      repo.createNewUser(AppData.loginInfo).then((result) {
+        if (result != null) {
+          AppData.userInfo = result;
+          Get.to(() => SignupStepDoneScreen());
+        } else {
+          showAlertDialog(viewContext!, 'Sign up'.tr, 'Sign up failed', '', 'OK'.tr);
+        }
+      });
     }
   }
 

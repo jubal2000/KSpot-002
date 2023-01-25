@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -265,9 +266,7 @@ class SignUpScreen extends StatelessWidget {
     if (AppData.loginInfo.gender.isEmpty) AppData.loginInfo.gender = 'n';
     if (AppData.loginInfo.birthYear == 0) AppData.loginInfo.birthYear = lastYear;
 
-    final controller = viewModel.textEditController[TextInput.nickname.index];
-    controller.text = AppData.loginInfo.nickName;
-    controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
+    final controller = viewModel.textEditController[TextInputId.nickname.index];
 
     return LayoutBuilder(
       builder: (context, layout) {
@@ -298,6 +297,12 @@ class SignUpScreen extends StatelessWidget {
                     if (value == null || value.length < 2) return 'Please enter nickname'.tr;
                     return null;
                   },
+                  inputFormatters: [
+                    FilteringTextInputFormatter(
+                      RegExp('[a-z A-Z ㄱ-ㅎ|가-힣|·|：]'),
+                      allow: true,
+                    )
+                  ],
                   onChanged: (value) {
                     AppData.loginInfo.nickName = value;
                     viewModel.setSignUpDone(AppData.loginInfo.nickName.length > 1);

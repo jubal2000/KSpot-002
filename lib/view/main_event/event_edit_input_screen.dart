@@ -42,6 +42,10 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
     if (widget.eventItem != null) {
       _viewModel.setEditItem(widget.eventItem!);
     }
+    if (AppData.userInfo.id.isEmpty) { // TODO : for Dev..
+      AppData.userInfo.id = 'lBSiD1qEBhvcPu49W56q';
+      AppData.userInfo.nickName = '주발Tester';
+    }
     super.initState ();
   }
 
@@ -112,7 +116,7 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
 
           }),
           SizedBox(height: UI_LIST_TEXT_SPACE_S),
-          EditListWidget(_viewModel.editEventToJSON, EditListType.manager, _viewModel.onItemAdd,
+          EditListWidget(_viewModel.editManagerToJSON, EditListType.manager, _viewModel.onItemAdd,
               _viewModel.onItemSelected),
           SizedBox(height: UI_LIST_TEXT_SPACE),
           EditListSortWidget(_viewModel.editEventToJSON, EditListType.timeRange, _viewModel.onItemAdd,

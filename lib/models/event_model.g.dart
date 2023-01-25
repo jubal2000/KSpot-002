@@ -33,9 +33,6 @@ EventModel _$EventModelFromJson(Map<String, dynamic> json) => EventModel(
       picData: (json['picData'] as List<dynamic>?)
           ?.map((e) => PicData.fromJson(e as Map<String, dynamic>))
           .toList(),
-      managerData: (json['managerData'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
       searchData: (json['searchData'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
@@ -50,6 +47,9 @@ EventModel _$EventModelFromJson(Map<String, dynamic> json) => EventModel(
           .toList(),
       promotionData: (json['promotionData'] as List<dynamic>?)
           ?.map((e) => PromotionData.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      managerData: (json['managerData'] as List<dynamic>?)
+          ?.map((e) => ManagerData.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -77,11 +77,11 @@ Map<String, dynamic> _$EventModelToJson(EventModel instance) =>
       'updateTime': instance.updateTime,
       'createTime': instance.createTime,
       'tagData': instance.tagData,
-      'managerData': instance.managerData,
       'searchData': instance.searchData,
       'picData': instance.picData?.map((e) => e.toJson()).toList(),
       'timeData': instance.timeData?.map((e) => e.toJson()).toList(),
       'optionData': instance.optionData?.map((e) => e.toJson()).toList(),
       'customData': instance.customData?.map((e) => e.toJson()).toList(),
       'promotionData': instance.promotionData?.map((e) => e.toJson()).toList(),
+      'managerData': instance.managerData?.map((e) => e.toJson()).toList(),
     };

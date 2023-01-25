@@ -42,4 +42,12 @@ class UserRepository {
     LOG('--> setUserInfoItem : ${user.id} - $key / ${userInfo[key]}');
     return api.setUserInfoItem(userInfo, key);
   }
+
+  Future<UserModel?> createNewUser(UserModel user) async {
+    final response = await api.createNewUser(user.toJson());
+    if (response != null) {
+      return UserModel.fromJson(response);
+    }
+    return null;
+  }
 }

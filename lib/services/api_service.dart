@@ -1815,26 +1815,23 @@ class ApiService extends GetxService {
   //
   
   final MessageCollection = 'data_message';
-  
-  
-  Future<JSON?> addMessageItem(JSON addItem) async {
-    LOG('------> addMessageItem : $addItem');
+
+
+  Future<JSON> addMessageItem(JSON addItem, JSON targetUserInfo) async {
+    LOG('------> addMessageItem : $addItem / $targetUserInfo');
     var dataRef = firestore!.collection(MessageCollection);
-    try {
-      var key = STR(addItem['id']).toString();
-      if (key.isEmpty) {
-        key = dataRef.doc().id;
-        addItem['id'] = key;
-        addItem['createTime'] = CURRENT_SERVER_TIME();
-      }
-      addItem['updateTime'] = CURRENT_SERVER_TIME();
-      await dataRef.doc(key).set(addItem);
-      JSON result = FROM_SERVER_DATA(addItem);
-      return result;
-    } catch (e) {
-      LOG('--> addMessageItem error : $e');
+    var key = STR(addItem['id']).toString();
+    if (key.isEmpty) {
+      key = dataRef.doc().id;
+      addItem['id'] = key;
+      addItem['createTime'] = CURRENT_SERVER_TIME();
     }
-    // // send push..
+    addItem['updateTime'] = CURRENT_SERVER_TIME();
+    LOG('--> addMessageItem key : ${addItem['id']}');
+    await dataRef.doc(key).set(Map<String, dynamic>.from(addItem));
+    var result = FROM_SERVER_DATA(addItem);
+
+    // send push..
     // var pushToken = STR(targetUserInfo['pushToken']);
     // LOG('------> send push : ${targetUserInfo['optionPush']} / $pushToken');
     // if (pushToken.isNotEmpty && (targetUserInfo['optionPush'] == null || BOL(targetUserInfo['optionPush']['message_on']))) {
@@ -1848,7 +1845,7 @@ class ApiService extends GetxService {
     //       }
     //   );
     // }
-    return null;
+    return result;
   }
   
   Future<JSON> getMessageData(JSON user, JSON messageData) async {
@@ -2061,8 +2058,8 @@ class ApiService extends GetxService {
   Future<JSON> getQnaFromTargetId(String targetType, String targetId) async {
     JSON result = {};
     try {
-      var dataRef = firestore!.collection(QnACollection);
-      var snapshot = await dataRef.where('status', isEqualTo: 1)
+      var ref = firestore!.collection(QnACollection);
+      var snapshot = await ref.where('status', isEqualTo: 1)
           .where('targetType', isEqualTo: targetType)
           .where('targetId', isEqualTo: targetId)
           .get();
@@ -2081,7 +2078,9 @@ class ApiService extends GetxService {
     return result;
   }
 
-  Future<JSON> addQnAItem(JSON addItem) async {
+  Future<JSON?> addQnAItem(JSON addItem, JSON targetUserInfo) async {
+    LOG('------> addQnAItem : $addItem');
+    try {
     var ref = firestore!.collection(QnACollection);
     var key = STR(addItem['id']).toString();
     if (key.isEmpty) {
@@ -2090,8 +2089,7 @@ class ApiService extends GetxService {
     }
     addItem['id'] = key;
     addItem['updateTime'] = CURRENT_SERVER_TIME();
-
-    return ref.doc(key).set(addItem).then((result) {
+    await ref.doc(key).set(addItem);
       JSON result = FROM_SERVER_DATA(addItem);
       // var pushToken = STR(targetUserInfo['pushToken']);
       // LOG('------> send push : ${targetUserInfo['optionPush']} / $pushToken');
@@ -2107,9 +2105,10 @@ class ApiService extends GetxService {
       //   );
       // }
       return result;
-    }).onError((e, stackTrace) {
-      return {};
-    });
+    } catch (e) {
+      LOG('--> getQnaFromTargetId error: $e');
+    }
+    return null;
   }
   
   Future<bool> setQnAStatus(String targetId, int status) async {

@@ -29,8 +29,8 @@ class EventEditViewModel extends ChangeNotifier {
 
   // for Edit..
   final _imageGalleryKey  = GlobalKey();
-  final JSON imageList = {};
-  final agreeMax = 1;
+  JSON imageList = {};
+  var agreeMax = 1;
   var stepIndex = 1;
   var stepMax = 3;
   var isShowOnly = false;
@@ -79,20 +79,24 @@ class EventEditViewModel extends ChangeNotifier {
         addTimeItem();
         break;
       case EditListType.manager:
-        Get.to(() => FollowScreen(AppData.userInfo, isShowMe: true, isSelectable: true))!.then((value) {
+        Get.to(() => FollowScreen(AppData.userInfo, selectData: editItem!.getManagerDataMap, isShowMe: true, isSelectable: true))!.then((value) {
           LOG("-->  widget.placeInfo['managerData'] Set : ${AppData.listSelectData}");
+          if (value == null) return;
           editItem!.managerData = [];
-          if (AppData.listSelectData.isNotEmpty) {
-            for (var item in AppData.listSelectData.entries) {
-              _eventInfo['managerData'][item.key] = {
+          if (value.isNotEmpty) {
+            for (var item in value.entries) {
+              final addItem = {
+                'status': 1,
                 'userId': item.key,
-                'pic': STR(item.value['pic']),
-                'nickName': STR(item.value['nickName'])
+                'userNickname': STR(item.value['nickName']),
+                'userPic': STR(item.value['pic'])
               };
-              LOG("--> managerData add [${item.key}] : ${_eventInfo['managerData'][item.key]}");
+              editItem!.managerData!.add(ManagerData.fromJson(addItem));
+              LOG("--> managerData add [${item.key}] : ${editItem!.managerData}");
             }
           }
-          LOG("--> managerData list : ${_eventInfo['managerData']}");
+          LOG("--> managerData list : ${editItem!.managerData!}");
+          notifyListeners();
         });
         break;
       case EditListType.customField:
@@ -224,6 +228,14 @@ class EventEditViewModel extends ChangeNotifier {
      }
     LOG('-----> editEventToJSON : ${result.toString()}');
     return result;
+  }
+
+  get editManagerToJSON {
+    if (editItem != null && editItem!.managerData != null) {
+      LOG('-----> editEventToJSON : ${editItem!.getManagerDataMap}');
+      return editItem!.getManagerDataMap;
+    }
+    return {};
   }
 
   setImageData() {

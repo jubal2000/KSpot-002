@@ -58,10 +58,10 @@ class ContentItem extends GoodsItemCard {
         isShowExtra = true,
         outlineWidth = 3.0,
         outlineColor = Colors.white,
+        cartId = '' ,
         onChanged,
         onSelected,
         onShowDetail,
-        cartId,
       }) : super(
     itemData,
     key: key,

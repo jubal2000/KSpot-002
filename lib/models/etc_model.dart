@@ -146,3 +146,19 @@ class AddressData {
     return '$address1, $address2';
   }
 }
+
+@JsonSerializable()
+class ManagerData {
+  int    status;
+  String userId;
+  String userNickname;
+  String userPic;
+  ManagerData({
+    required this.status,
+    required this.userId,
+    required this.userNickname,
+    required this.userPic,
+  });
+  factory ManagerData.fromJson(JSON json) => _$ManagerDataFromJson(json);
+  JSON toJson() => _$ManagerDataToJson(this);
+}

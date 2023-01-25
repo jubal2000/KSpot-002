@@ -31,13 +31,8 @@ class PlaceModelEx extends PlaceModel {
     updateTime: '',
     createTime: '',
 
-    tagData: [],
-    managerData: [],
-    searchData: [],
     phoneData: [],
     picData: [],
-    optionData: [],
-    customData: [],
   );
 }
 
@@ -49,9 +44,9 @@ class PlaceModel {
   String      id;
   int         status;
   String      title;
-  String      titleKr;
+  String?     titleKr;
   String      desc;
-  String      descKr;
+  String?     descKr;
   String      pic;            // title image
   String      groupId;        // group id
   String      userId;         // create user id
@@ -62,21 +57,16 @@ class PlaceModel {
   String      updateTime;     // update time
   String      createTime;     // create time
 
-  List<String>?        tagData;        // tag
-  List<String>?        managerData;    // 관리자 ID 목록
-  List<String>?        searchData;     // 검색어 목록
   List<String>?        phoneData;      // 전화번호 목록
   List<PicData>?       picData;        // 메인 이미지 목록
-  List<OptionData>?    optionData;     // 옵션 정보
-  List<CustomData>?    customData;     // 사용자 설정 정보
 
   PlaceModel({
     required this.id,
     required this.status,
     required this.title,
-    required this.titleKr,
+    this.titleKr,
     required this.desc,
-    required this.descKr,
+    this.descKr,
     required this.pic,
     required this.groupId,
     required this.userId,
@@ -87,13 +77,8 @@ class PlaceModel {
     required this.updateTime,
     required this.createTime,
 
-    this.tagData,
-    this.picData,
-    this.managerData,
-    this.searchData,
     this.phoneData,
-    this.optionData,
-    this.customData,
+    this.picData,
   });
 
   factory PlaceModel.fromJson(JSON json) => _$PlaceModelFromJson(json);

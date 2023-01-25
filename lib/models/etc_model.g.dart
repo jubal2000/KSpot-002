@@ -136,3 +136,18 @@ Map<String, dynamic> _$AddressDataToJson(AddressData instance) =>
       'lat': instance.lat,
       'lng': instance.lng,
     };
+
+ManagerData _$ManagerDataFromJson(Map<String, dynamic> json) => ManagerData(
+      status: json['status'] as int,
+      userId: json['userId'] as String,
+      userNickname: json['userNickname'] as String,
+      userPic: json['userPic'] as String,
+    );
+
+Map<String, dynamic> _$ManagerDataToJson(ManagerData instance) =>
+    <String, dynamic>{
+      'status': instance.status,
+      'userId': instance.userId,
+      'userNickname': instance.userNickname,
+      'userPic': instance.userPic,
+    };

@@ -742,13 +742,13 @@ Widget showLoadingFullPage(BuildContext context) {
   return showLoadingPage(context, 150);
 }
 
-Widget showLoadingPage(BuildContext context, int offset) {
+Widget showLoadingPage(BuildContext context, [int offset = 0]) {
   var size = 50.0;
   return LayoutBuilder(
     builder: (context, layout) {
       return Container(
         width:  layout.maxWidth,
-        height: layout.maxHeight - offset,
+        height: layout.maxHeight > offset ? layout.maxHeight - offset : double.infinity,
         color: Colors.blueGrey.withOpacity(0.1),
         child: Center(
           child: SizedBox(
@@ -1796,4 +1796,49 @@ showGroupTabWidget(context, onUpdate, Widget? child) {
         ],
       )
   );
+}
+
+class UserMenuItems {
+  static const List<DropdownItem> followingMenu = [message, delete];
+  static const List<DropdownItem> followerMenu  = [message];
+  static const List<DropdownItem> messageMenu   = [msgBlock, msgAlarm];
+  static const List<DropdownItem> blockMenu     = [unblock];
+  static const List<DropdownItem> declarMenu    = [showDeclar, reDeclar, unDeclar];
+
+  static const message    = DropdownItem(DropdownItemType.message, text: '메시지보내기' , icon: Icons.mail_outline);
+  static const delete     = DropdownItem(DropdownItemType.unfollow, text: '팔로우 취소'  , icon: Icons.clear);
+  static const msgBlock   = DropdownItem(DropdownItemType.block, text: '차단하기'   , icon: Icons.mic_off);
+  static const msgAlarm   = DropdownItem(DropdownItemType.report, text: '신고하기'   , icon: Icons.notifications);
+  static const unblock    = DropdownItem(DropdownItemType.unblock, text: '차단해제'   , icon: Icons.mic);
+  static const showDeclar = DropdownItem(DropdownItemType.showDeclar, text: '신고내용보기', icon: Icons.announcement_outlined);
+  static const reDeclar   = DropdownItem(DropdownItemType.reDeclar, text: '신고결과보기', icon: Icons.announcement);
+  static const unDeclar   = DropdownItem(DropdownItemType.unDeclar, text: '신고취소'   , icon: Icons.clear);
+  static const line       = DropdownItem(DropdownItemType.none, isLine: true);
+
+  static Widget buildItem(DropdownItem item) {
+    return Column(
+        children: [
+          if (item.text != null)...[
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 5),
+                child: Row(
+                    children: [
+                      Icon(
+                          item.icon,
+                          color: Colors.grey,
+                          size: 20
+                      ),
+                      SizedBox(width: 3),
+                      Text(item.text!.tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    ]
+                ),
+              ),
+            ),
+          ],
+          if (item.isLine)
+            showHorizontalDivider(Size(double.infinity, 2), color: Colors.grey),
+        ]
+    );
+  }
 }

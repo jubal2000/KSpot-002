@@ -49,24 +49,24 @@ Map<String, dynamic> _$VersionDataToJson(VersionData instance) =>
     };
 
 ServiceData _$ServiceDataFromJson(Map<String, dynamic> json) => ServiceData(
-      bankAccount: json['bankAccount'] as String,
-      bankTitle: json['bankTitle'] as String,
-      cancelDesc: json['cancelDesc'] as String,
       serviceEmail: json['serviceEmail'] as String,
       servicePhone: json['servicePhone'] as String,
       serviceUserId: json['serviceUserId'] as String,
       serviceUserName: json['serviceUserName'] as String,
-      tax: json['tax'] as String,
+      bankAccount: json['bankAccount'] as String?,
+      bankTitle: json['bankTitle'] as String?,
+      cancelDesc: json['cancelDesc'] as String?,
+      tax: json['tax'] as String?,
     );
 
 Map<String, dynamic> _$ServiceDataToJson(ServiceData instance) =>
     <String, dynamic>{
-      'bankAccount': instance.bankAccount,
-      'bankTitle': instance.bankTitle,
-      'cancelDesc': instance.cancelDesc,
       'serviceEmail': instance.serviceEmail,
       'servicePhone': instance.servicePhone,
       'serviceUserId': instance.serviceUserId,
       'serviceUserName': instance.serviceUserName,
+      'bankAccount': instance.bankAccount,
+      'bankTitle': instance.bankTitle,
+      'cancelDesc': instance.cancelDesc,
       'tax': instance.tax,
     };

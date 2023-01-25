@@ -14,6 +14,7 @@ class UserModelEx extends UserModel {
     loginType: '',
     nickName: '',
     pic: '',
+    message: '',
     birthYear: 0,
     gender: '',
     mobile: '',
@@ -47,6 +48,7 @@ class UserModel {
   String    loginType;  // 로그인 방식 ('', 'phone'..)
   String    nickName;
   String    pic;
+  String    message;
   int       birthYear;
   String    gender;
   String    mobile;
@@ -80,6 +82,7 @@ class UserModel {
     required this.loginType,
     required this.nickName,
     required this.pic,
+    required this.message,
     required this.birthYear,
     required this.gender,
     required this.mobile,
@@ -109,5 +112,9 @@ class UserModel {
 
   factory UserModel.fromJson(JSON json) => _$UserModelFromJson(json);
   JSON toJson() => _$UserModelToJson(this);
+
+  checkOwner(userId) {
+    return id == userId;
+  }
 }
 

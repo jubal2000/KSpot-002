@@ -13,8 +13,8 @@ class PlaceRepository {
     try {
       final response = await api.getPlaceListWithCountry(groupId, country, countryState);
       for (var item in response.entries) {
+        LOG('--> getPlaceListWithCountry item : ${item.value}');
         result[item.key] = PlaceModel.fromJson(item.value);
-        LOG('--> getPlaceListWithCountry item : ${(result[item.key] as PlaceModel).toJson()}');
       }
       return result;
     } catch (e) {

@@ -39,9 +39,9 @@ class FollowScreen extends StatefulWidget {
 class FollowScreenState extends State<FollowScreen> {
   final _viewModel = FollowViewModel();
   List<FollowTab>? _tabList;
+  JSON selectDataOrg = {};
 
   refreshTab() {
-    debugPrint('--> refreshTab : ${AppData.followData}');
     _tabList = [
       FollowTab(0, "FOLLOW".tr  , AppData.followData, isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
       FollowTab(1, "FOLLOWER".tr, AppData.followData, isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
@@ -55,6 +55,10 @@ class FollowScreenState extends State<FollowScreen> {
 
   @override
   void initState() {
+    if (widget.selectData != null) {
+      selectDataOrg = {};
+      selectDataOrg.addAll(widget.selectData!);
+    }
     super.initState();
   }
 
@@ -63,7 +67,7 @@ class FollowScreenState extends State<FollowScreen> {
     _viewModel.init(context);
     return WillPopScope(
       onWillPop: () async {
-        Get.back(result: widget.selectData);
+        Get.back(result: selectDataOrg);
         return false;
       },
       child: SafeArea(
@@ -76,7 +80,7 @@ class FollowScreenState extends State<FollowScreen> {
               if (widget.isSelectable)
                 TextButton(
                   onPressed: () {
-
+                    Get.back(result: widget.selectData);
                   }, child: Text('Select Done'.tr)
                 )
             ],
@@ -403,7 +407,7 @@ class FollowListItemState extends State<FollowListItem> {
                               onChanged: (value) {
                                 setState(() {
                                   widget.isSelected = value!;
-                                  if (widget.onSelected != null) widget.onSelected!(widget.followItem, value);
+                                  if (widget.onSelected != null) widget.onSelected!(userInfo!.toJson(), value);
                                   // if (_isChecked) {
                                   //   if (widget.selectMax == 1) {
                                   //     AppData.listSelectData.clear();

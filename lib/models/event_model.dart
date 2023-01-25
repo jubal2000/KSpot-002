@@ -117,6 +117,20 @@ class EventModel {
   factory EventModel.fromJson(JSON json) => _$EventModelFromJson(json);
   JSON toJson() => _$EventModelToJson(this);
 
+  //------------------------------------------------------------------------------------------------------
+  //  TimeData
+  //
+
+  get getTimeDataMap {
+    JSON result = {};
+    if (timeData != null) {
+      for (var item in timeData!) {
+        result[item.id] = item.toJson();
+      }
+    }
+    return result;
+  }
+
   addTimeData(TimeData addItem) {
     timeData ??= [];
     LOG('--> addTimeData : ${addItem.toJson()} / ${timeData!.length}');
@@ -143,7 +157,7 @@ class EventModel {
     return null;
   }
 
-  subTimeData(String key) {
+  removeTimeData(String key) {
     if (timeData != null) {
       for (var item in timeData!) {
         if (item.id.toLowerCase() == key.toLowerCase()) {
@@ -155,13 +169,29 @@ class EventModel {
     return false;
   }
 
+  //------------------------------------------------------------------------------------------------------
+  //  TimeData
+  //
+
   get getManagerDataMap {
     JSON result = {};
-    if (managerData != null && managerData!.isNotEmpty) {
+    if (managerData != null) {
       for (var item in managerData!) {
-        result[item.userId] = item;
+        result[item.id] = item.toJson();
       }
     }
     return result;
+  }
+
+  removeManagerData(String key) {
+    if (managerData != null) {
+      for (var item in managerData!) {
+        if (item.id.toLowerCase() == key.toLowerCase()) {
+          managerData!.remove(item);
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

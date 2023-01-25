@@ -50,4 +50,13 @@ class UserRepository {
     }
     return null;
   }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+
+  Future<String?> uploadImageData(JSON imageInfo, String path) async {
+    if (imageInfo['data'] != null) {
+      return await api.uploadImageData(imageInfo, path);
+    }
+    return null;
+  }
 }

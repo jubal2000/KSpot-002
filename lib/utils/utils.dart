@@ -1842,3 +1842,74 @@ class UserMenuItems {
     );
   }
 }
+
+// ignore: must_be_immutable
+class ListItemEx extends StatelessWidget {
+  ListItemEx(this.id, this.title, {Key? key,
+    this.titleEx = '', this.itemHeight = 50, this.isTitle = false, this.isLast = false,
+    this.callback}) : super(key: key);
+  String id;
+  String title;
+  String titleEx;
+  double itemHeight;
+  bool isTitle;
+  bool isLast;
+  Function(String)? callback;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isTitle) {
+      return Container(
+          height: 50,
+          color: Colors.grey.withOpacity(0.1),
+          padding: EdgeInsets.symmetric(horizontal: 25),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(title, style: ItemTitleLargeStyle(context)),
+            ],
+          )
+      );
+    } else {
+      return GestureDetector(
+          onTap: () {
+            LOG("--> ListItemEx onTap : $id -> $title");
+            if (callback != null) callback!(id);
+          },
+          child: Container(
+              height: itemHeight,
+              color: Colors.transparent,
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 25),
+                        child: Row(
+                          children: [
+                            Text(title, style: callback != null ? ItemTitleLargeStyle(context) : ItemTitleLargeDisableStyle(context)),
+                            if (titleEx.isNotEmpty)...[
+                              SizedBox(width: 10),
+                              Text(titleEx, style: ItemTitleStyle(context)),
+                            ],
+                            Expanded(child: SizedBox(height: 1)),
+                            if (callback != null)
+                              Icon(Icons.arrow_forward_ios, color: Theme.of(context).hintColor.withOpacity(0.2)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (!isLast)
+                      Divider(
+                        height: 2,
+                        color: Theme.of(context).dividerColor,
+                        indent: 0,
+                        endIndent: 0,
+                      ),
+                  ]
+              )
+          )
+      );
+    }
+  }
+}

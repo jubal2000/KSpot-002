@@ -33,6 +33,11 @@ class UserModelEx extends UserModel {
     mobileVerified: false,
     emailVerified: false,
 
+    likeGroup: [],
+    likePlace: [],
+    likeEvent: [],
+    likeUser: [],
+    snsData: [],
     optionData: [],
     optionPush: [],
   );
@@ -71,7 +76,7 @@ class UserModel {
   List<String>?       likePlace;
   List<String>?       likeEvent;
   List<String>?       likeUser;
-
+  List<DescData>?     snsData;
   List<OptionData>?   optionData;
   List<OptionData>?   optionPush;
 
@@ -105,7 +110,7 @@ class UserModel {
     this.likePlace,
     this.likeEvent,
     this.likeUser,
-
+    this.snsData,
     this.optionData,
     this.optionPush,
   });
@@ -116,5 +121,20 @@ class UserModel {
   checkOwner(userId) {
     return id == userId;
   }
+
+  //------------------------------------------------------------------------------------------------------
+  //  TimeData
+  //
+
+  get getSnsDataMap {
+    JSON result = {};
+    if (snsData != null) {
+      for (var item in snsData!) {
+        result[item.id] = item.toJson();
+      }
+    }
+    return result;
+  }
+
 }
 

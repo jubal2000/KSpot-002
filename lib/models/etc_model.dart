@@ -149,16 +149,28 @@ class AddressData {
 
 @JsonSerializable()
 class ManagerData {
+  String id;            // user id
   int    status;
-  String userId;
-  String userNickname;
-  String userPic;
+  String nickName;
+  String pic;
   ManagerData({
+    required this.id,
     required this.status,
-    required this.userId,
-    required this.userNickname,
-    required this.userPic,
+    required this.nickName,
+    required this.pic,
   });
   factory ManagerData.fromJson(JSON json) => _$ManagerDataFromJson(json);
   JSON toJson() => _$ManagerDataToJson(this);
+}
+
+@JsonSerializable()
+class DescData {
+  String id;
+  String desc;
+  DescData({
+    required this.id,
+    required this.desc,
+  });
+  factory DescData.fromJson(JSON json) => _$DescDataFromJson(json);
+  JSON toJson() => _$DescDataToJson(this);
 }

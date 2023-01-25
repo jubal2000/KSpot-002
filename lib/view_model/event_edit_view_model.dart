@@ -80,22 +80,21 @@ class EventEditViewModel extends ChangeNotifier {
         break;
       case EditListType.manager:
         Get.to(() => FollowScreen(AppData.userInfo, selectData: editItem!.getManagerDataMap, isShowMe: true, isSelectable: true))!.then((value) {
-          LOG("-->  widget.placeInfo['managerData'] Set : ${AppData.listSelectData}");
+          LOG("-->  FollowScreen result : $value");
           if (value == null) return;
           editItem!.managerData = [];
           if (value.isNotEmpty) {
             for (var item in value.entries) {
               final addItem = {
+                'id': item.key,
                 'status': 1,
-                'userId': item.key,
-                'userNickname': STR(item.value['nickName']),
-                'userPic': STR(item.value['pic'])
+                'nickName': STR(item.value['nickName']),
+                'pic': STR(item.value['pic'])
               };
               editItem!.managerData!.add(ManagerData.fromJson(addItem));
               LOG("--> managerData add [${item.key}] : ${editItem!.managerData}");
             }
           }
-          LOG("--> managerData list : ${editItem!.managerData!}");
           notifyListeners();
         });
         break;
@@ -137,28 +136,28 @@ class EventEditViewModel extends ChangeNotifier {
           onEditTime(editItem!.getTimeData(key)!.toJson());
         } else {
           showAlertYesNoDialog(buildContext!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
-            if (result == 1) editItem!.subTimeData(key);
+            if (result == 1) {
+              editItem!.removeTimeData(key);
+            }
           });
         }
         break;
       case EditListType.manager:
-        // if (status == 0) {
-        //   var userInfo = await api.getUserInfoFromId(_eventInfo['managerData'][key]['userId']);
-        //   if (JSON_NOT_EMPTY(userInfo)) {
-        //     Navigator.push(context, MaterialPageRoute(builder: (context) =>
-        //         TargetProfileScreen(userInfo))).then((value) {});
-        //   } else {
-        //     showUserAlertDialog(context, '${_eventInfo['managerData'][key]['userId']}');
-        //   }
-        // } else {
-        //   showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
-        //     setState(() {
-        //       if (result == 1) {
-        //         _eventInfo['managerData'].remove(key);
-        //       }
-        //     });
-        //   });
-        // }
+        if (status == 0) {
+          // var userInfo = await api.getUserInfoFromId(_eventInfo['managerData'][key]['userId']);
+          // if (JSON_NOT_EMPTY(userInfo)) {
+          //   Navigator.push(context, MaterialPageRoute(builder: (context) =>
+          //       TargetProfileScreen(userInfo))).then((value) {});
+          // } else {
+          //   showUserAlertDialog(context, '${_eventInfo['managerData'][key]['userId']}');
+          // }
+        } else {
+          showAlertYesNoDialog(buildContext!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+            if (result == 1) {
+              editItem!.removeManagerData(key);
+            }
+          });
+        }
         break;
       case EditListType.customField:
       //   if (status == 1) {
@@ -220,19 +219,14 @@ class EventEditViewModel extends ChangeNotifier {
   }
 
   get editEventToJSON {
-    JSON result = {};
-     if (editItem != null && editItem!.timeData != null) {
-       for (var item in editItem!.timeData!) {
-         result[item.id] = item.toJson();
-       }
+     if (editItem != null) {
+       return editItem!.getTimeDataMap;
      }
-    LOG('-----> editEventToJSON : ${result.toString()}');
-    return result;
+    return {};
   }
 
   get editManagerToJSON {
-    if (editItem != null && editItem!.managerData != null) {
-      LOG('-----> editEventToJSON : ${editItem!.getManagerDataMap}');
+    if (editItem != null) {
       return editItem!.getManagerDataMap;
     }
     return {};

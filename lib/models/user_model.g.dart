@@ -43,6 +43,9 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       likeUser: (json['likeUser'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      snsData: (json['snsData'] as List<dynamic>?)
+          ?.map((e) => DescData.fromJson(e as Map<String, dynamic>))
+          .toList(),
       optionData: (json['optionData'] as List<dynamic>?)
           ?.map((e) => OptionData.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -80,6 +83,7 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'likePlace': instance.likePlace,
       'likeEvent': instance.likeEvent,
       'likeUser': instance.likeUser,
+      'snsData': instance.snsData?.map((e) => e.toJson()).toList(),
       'optionData': instance.optionData?.map((e) => e.toJson()).toList(),
       'optionPush': instance.optionPush?.map((e) => e.toJson()).toList(),
     };

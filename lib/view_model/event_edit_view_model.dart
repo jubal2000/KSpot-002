@@ -292,7 +292,7 @@ class EventEditViewModel extends ChangeNotifier {
     return ImageEditScrollViewer(
         imageList,
         key: _imageGalleryKey,
-        title: 'IMAGE'.tr,
+        title: 'EVENT PHOTO *'.tr,
         addText: 'Photo Add'.tr,
         selectText: '[first]'.tr,
         selectTextStyle: TextStyle(fontSize: 11.0, fontWeight: FontWeight.bold, color: Colors.purple,

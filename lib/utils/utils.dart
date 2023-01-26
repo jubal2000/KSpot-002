@@ -920,7 +920,7 @@ inputLabelSuffix(BuildContext context, String label, String hint, {String suffix
     labelText: label,
     enabled: isEnabled,
     contentPadding: EdgeInsets.all(10),
-    hintStyle: TextStyle(color: Theme.of(context).hintColor.withOpacity(0.5), fontSize: 14),
+    hintStyle: TextStyle(color: Theme.of(context).hintColor.withOpacity(0.5), fontSize: 10),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(8.0)),
       borderSide: BorderSide(width: width, color: Colors.yellow),
@@ -1567,7 +1567,7 @@ class _Chip extends StatelessWidget {
 }
 
 TagTextField(List<String>? tagList, Function(List<String>)? onChanged) {
-  return TagTextEditField(tagList, 'Tag'.tr, '', true, onChanged);
+  return TagTextEditField(tagList, 'Search Tag'.tr, '', true, onChanged);
 }
 
 TagTextEditField(List<String>? tagList, String hintText, String disabledHeadText, bool enabled, Function(List<String>)? onChanged, {Function(int, String)? onSelected}) {
@@ -1577,7 +1577,8 @@ TagTextEditField(List<String>? tagList, String hintText, String disabledHeadText
         return TagEditor(
             length: tagList!.length,
             delimiters: const [',', '/', '#', ' '],
-            hasAddButton: false,
+            hasAddButton: true,
+            resetTextOnSubmitted: true,
             enabled: enabled,
             minTextFieldWidth: enabled ? 160 : 0,
             inputDecoration: InputDecoration(

@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import '../../data/common_sizes.dart';
 import '../../data/style.dart';
 import '../../data/theme_manager.dart';
+import '../../models/etc_model.dart';
 import '../../models/event_model.dart';
 import '../../models/place_model.dart';
 import '../../utils/utils.dart';
@@ -57,12 +58,29 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
       _viewModel.editItem  = widget.eventItem;
       _viewModel.placeInfo = widget.placeInfo;
     }
+    // auto add manager..
+    if (_viewModel.editItem!.managerData == null || _viewModel.editItem!.managerData!.isEmpty) {
+      final addItem = ManagerData(
+        id: AppData.userInfo.id,
+        nickName: AppData.userInfo.nickName,
+        pic: AppData.userInfo.pic,
+        status: 1,
+      );
+      _viewModel.editItem!.managerData ??= [];
+      _viewModel.editItem!.managerData!.add(addItem);
+      _viewModel.managerData[addItem.id] = addItem.toJson();
+    }
+    LOG('--> _viewModel.editManagerToJSON : ${_viewModel.editManagerToJSON}');
     return Scaffold(
       appBar: AppBar(
         title: TopTitleText(context, widget.eventItem != null ? 'Event Edit'.tr : 'Event Information'.tr),
         titleSpacing: 0,
         toolbarHeight: UI_APPBAR_TOOL_HEIGHT,
         backgroundColor: Colors.transparent,
+        actions: [
+          InkWell(onTap: () {}, child: Padding(padding:EdgeInsets.all(5), child: Icon(Icons.copy, size: 24))),
+          InkWell(onTap: () {}, child: Padding(padding:EdgeInsets.all(5), child: Icon(Icons.clear, size: 24))),
+        ],
       ),
       body: ListView(
         children: [
@@ -108,11 +126,11 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
           SizedBox(height: UI_LIST_TEXT_SPACE_S),
           SubTitle(context, 'INFO'.tr),
           SizedBox(height: UI_LIST_TEXT_SPACE_S),
-          EditTextField(context, 'TITLE'.tr, _viewModel.editItem!.title, hint: 'TITLE'.tr, maxLength: TITLE_LENGTH,
+          EditTextField(context, 'TITLE'.tr, _viewModel.editItem!.title, hint: 'Event Title *'.tr, maxLength: TITLE_LENGTH,
             onChanged: (value) {
               _viewModel.editItem!.title = value;
           }),
-          EditTextField(context, 'DESC'.tr, _viewModel.editItem!.desc, hint: 'DESC'.tr, maxLength: DESC_LENGTH,
+          EditTextField(context, 'DESC'.tr, _viewModel.editItem!.desc, hint: 'Event Description'.tr, maxLength: DESC_LENGTH,
               maxLines: null, keyboardType: TextInputType.multiline, onChanged: (value) {
               _viewModel.editItem!.desc = value;
           }),
@@ -120,10 +138,10 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
             _viewModel.editItem!.tagData = value;
           }),
           SizedBox(height: UI_LIST_TEXT_SPACE_S),
-          EditListWidget(_viewModel.editManagerToJSON, EditListType.manager, _viewModel.onItemAdd,
+          EditListWidget(_viewModel.editManagerToJSON, title:'MANAGER *', EditListType.manager, _viewModel.onItemAdd,
               _viewModel.onItemSelected),
           SizedBox(height: UI_LIST_TEXT_SPACE),
-          EditListSortWidget(_viewModel.editEventToJSON, EditListType.timeRange, _viewModel.onItemAdd,
+          EditListSortWidget(_viewModel.editEventToJSON, title:'TIME SETTING *', EditListType.timeRange, _viewModel.onItemAdd,
               _viewModel.onItemSelected),
           SizedBox(height: UI_LIST_TEXT_SPACE),
           EditListSortWidget(_viewModel.editCustomToJSON, EditListType.customField, _viewModel.onItemAdd,

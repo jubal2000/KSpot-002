@@ -39,10 +39,11 @@ Widget EditListSortWidget(
     Function(EditListType, JSON)? onAddAction,
     Function(EditListType, String, int)? onSelected,
     {
-      bool enabled =  true,
+      bool enabled = true,
+      var title = '',
       Function(EditListType, JSON)? onListItemChanged
     }) {
-  return EditListWidget(listItem, type, isCanMove: true, onAddAction, onSelected, enabled: enabled, onListItemChanged: onListItemChanged);
+  return EditListWidget(listItem, type, onAddAction, onSelected, title:title, isCanMove: true, enabled: enabled, onListItemChanged: onListItemChanged);
 }
 
 class EditListWidget extends StatefulWidget {
@@ -52,6 +53,7 @@ class EditListWidget extends StatefulWidget {
       this.onAddAction,
       this.onSelected,
       {Key? key,
+        this.title = '',
         this.textLine = 1,
         this.padding = const EdgeInsets.only(top: 0),
         this.enabled = true,
@@ -60,6 +62,7 @@ class EditListWidget extends StatefulWidget {
         this.onListItemChanged}) : super(key: key);
 
   JSON listItem;
+  String title;
   EditListType type;
   int textLine;
   EdgeInsets padding;
@@ -262,11 +265,12 @@ class _EditListSortState extends State<EditListWidget> {
   @override
   Widget build(BuildContext context) {
     refreshData();
+    final title = widget.title.isNotEmpty ? widget.title : titleText[widget.type.index];
     return Container(
       padding: widget.padding,
       child: Column(
         children: [
-          SubTitle(context, titleText[widget.type.index].tr),
+          SubTitle(context, title.tr),
           ReorderableListView(
             shrinkWrap: true,
             buildDefaultDragHandles: false,

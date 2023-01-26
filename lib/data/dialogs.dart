@@ -433,10 +433,11 @@ Future<String> showCustomFieldSelectDialog(BuildContext context) async {
               builder: (context, setState) {
                 return AlertDialog(
                     title: Text('Custom field'.tr),
-                    titlePadding: EdgeInsets.fromLTRB(10, 20, 10, 0),
+                    titlePadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
                     titleTextStyle: Theme.of(context).textTheme.subtitle1!,
                     insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 120),
                     contentPadding: EdgeInsets.symmetric(vertical: 5),
+                    actionsPadding: EdgeInsets.fromLTRB(10, 0, 10, 10),
                     backgroundColor: DialogBackColor(context),
                     content: Container(
                         constraints: BoxConstraints(
@@ -448,10 +449,9 @@ Future<String> showCustomFieldSelectDialog(BuildContext context) async {
                                 children: [
                                   if (_parentId.isNotEmpty)...[
                                     Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 20),
-                                      child: Text(STR(AppData.INFO_CUSTOMFIELD[_parentId]['title']), style: ItemTitleStyle(context)),
+                                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                      child: Text(STR(AppData.INFO_CUSTOMFIELD[_parentId]['title']), style: ItemTitleBoldStyle(context)),
                                     ),
-                                    SizedBox(height: 10),
                                   ],
                                   Column(
                                     mainAxisAlignment: MainAxisAlignment.center,

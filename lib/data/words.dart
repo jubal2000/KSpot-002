@@ -107,6 +107,7 @@ class Words extends Translations {
 
       // place_screen
       'MANAGER': '관리자',
+      'MANAGER *': '관리자 *',
       'ADDRESS': '주소',
       'My Location': '내 위치',
       'PHONE': '전화번호',
@@ -161,17 +162,20 @@ class Words extends Translations {
       'THUMBNAIL IMAGE(Small Size, MAX 1)': '대표 이미지(작은사이즈, 최대 1)',
       'BANNER IMAGES(MAX 9)': '배너 이미지(최대 9)',
       'THEME': '테마',
-      'Event title *': '이벤트 제목*',
+      'Event Title *': '이벤트 제목*',
+      'Event Description': '이벤트 내용',
       'Class title *': '강습 제목*',
       'Please enter a title': '제목을 입력해 주세요',
       'Description': '내용 입력',
       'ENTRANCE FEE(site)': '입장료(현장)',
       'Amount': '수량',
       'SEARCH TAG': '검색 태그',
+      'Search Tag': '검색 태그',
       'OPTIONS': '옵션',
       'Do you want to upload now?': '지금 업로드 하시겠습니까?',
       'Do you want to update now?': '지금 수정 하시겠습니까?',
       'Photo Add': '사진 추가',
+      'Photo add *': '사진 추가 *',
 
       // edit_list_widget
       'ADDRESS LINK': '주소 링크',
@@ -184,6 +188,7 @@ class Words extends Translations {
       'INSTRUCTOR': '강사',
       'EVENT FIELD': '이벤트 내용',
       'TIME SETTING': '시간 설정',
+      'TIME SETTING *': '시간 설정 *',
       'DATE SELECT': '날짜 선택',
       'EXCEPT DATE SELECT': '예외 날짜 선택',
       'RESERVATION': '예약하기',
@@ -196,6 +201,7 @@ class Words extends Translations {
       'Title': '제목',
       'Desc': '내용',
       'File upload': '파일 업로드',
+      'EVENT PHOTO *': '이벤트 사진 *',
 
       // place_edit_screen
       'SPOT ADD': '스팟 추가',

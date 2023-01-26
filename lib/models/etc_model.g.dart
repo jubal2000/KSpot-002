@@ -72,14 +72,16 @@ Map<String, dynamic> _$PromotionDataToJson(PromotionData instance) =>
 CustomData _$CustomDataFromJson(Map<String, dynamic> json) => CustomData(
       id: json['id'] as String,
       title: json['title'] as String,
-      value: json['value'] as String,
+      customId: json['customId'] as String,
+      desc: json['desc'] as String?,
     );
 
 Map<String, dynamic> _$CustomDataToJson(CustomData instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
-      'value': instance.value,
+      'customId': instance.customId,
+      'desc': instance.desc,
     };
 
 PicData _$PicDataFromJson(Map<String, dynamic> json) => PicData(

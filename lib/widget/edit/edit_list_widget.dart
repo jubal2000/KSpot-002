@@ -11,6 +11,7 @@ import '../../data/dialogs.dart';
 import '../../data/theme_manager.dart';
 import '../../utils/local_utils.dart';
 import '../../utils/utils.dart';
+import '../../view/follow/follow_screen.dart';
 
 enum EditListType {
   address,
@@ -107,7 +108,7 @@ class _EditListSortState extends State<EditListWidget> {
     if (_listData.isNotEmpty) {
       _itemList = _listData.map((item) {
         LOG('----> _itemList item : $item');
-        JSON _data = {
+        JSON data = {
           'image': widget.listItem[item['id']] != null ? STR(widget.listItem[item['id']]['icon']) : '',
           'title': item[showTextField[widget.type.index]] ?? '',
           'desc': item['desc'] ?? item['titleEx'] ?? '',
@@ -131,7 +132,7 @@ class _EditListSortState extends State<EditListWidget> {
               item['id'] ?? item['userId'] ??'',
               _listData.indexOf(item),
               itemIcon[widget.type.index],
-              _data,
+              data,
               item['image'],
               item['backPic'],
               ItemTitleStyle(context),
@@ -149,33 +150,32 @@ class _EditListSortState extends State<EditListWidget> {
                         AppData.listSelectData = {};
                         if (widget.listItem[key]['userData'] != null) {
                           for (var user in widget.listItem[key]['userData']) {
-                            AppData.listSelectData[user['userId']] = {'id': user['userId'], 'pic': user['userPic'], 'nickName': user['userName']};
+                            AppData.listSelectData[user['userId']] = {'id': user['id'], 'pic': user['pic'], 'nickName': user['nickName']};
                           }
                         }
-                      //   LOG('--> AppData.listSelectData : ${AppData.listSelectData}');
-                      //   Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                      //       FollowScreen(AppData.userInfo, topTitle: 'FOLLOWER SELECT'.tr, isShowMe: true, isSelectable: true))).then((value) {
-                      //   setState(() {
-                      //     widget.listItem[key]['desc'] = '';
-                      //     if (AppData.listSelectData.isNotEmpty) {
-                      //       widget.listItem[key]['userData'] = [];
-                      //       for (var item in AppData.listSelectData.entries) {
-                      //         widget.listItem[key]['userData'].add({
-                      //           'id': item.key,
-                      //           'userId': item.key,
-                      //           'userPic': STR(item.value['pic']),
-                      //           'userName': STR(item.value['nickName'])
-                      //         });
-                      //         if (widget.listItem[key]['desc'].isNotEmpty) widget.listItem[key]['desc'] += ', ';
-                      //         widget.listItem[key]['desc'] += STR(item.value['nickName']);
-                      //       }
-                      //     } else {
-                      //       widget.listItem[key].remove('userData');
-                      //     }
-                      //     LOG("--> widget.listItem[$key]['userData'] : ${widget.listItem[key]}");
-                      //     if (widget.onListItemChanged != null) widget.onListItemChanged!(widget.type, widget.listItem);
-                      //   });
-                      // });
+                        LOG('--> AppData.listSelectData : ${AppData.listSelectData}');
+                        Get.to(() =>
+                            FollowScreen(AppData.userInfo, topTitle: 'FOLLOWER SELECT'.tr, isShowMe: true, isSelectable: true))!.then((value) {
+                        setState(() {
+                          widget.listItem[key]['desc'] = '';
+                          if (AppData.listSelectData.isNotEmpty) {
+                            widget.listItem[key]['userData'] = [];
+                            for (var item in AppData.listSelectData.entries) {
+                              widget.listItem[key]['userData'].add({
+                                'id': item.key,
+                                'pic': STR(item.value['pic']),
+                                'nickName': STR(item.value['nickName'])
+                              });
+                              if (widget.listItem[key]['desc'].isNotEmpty) widget.listItem[key]['desc'] += ', ';
+                              widget.listItem[key]['desc'] += STR(item.value['nickName']);
+                            }
+                          } else {
+                            widget.listItem[key].remove('userData');
+                          }
+                          LOG("--> widget.listItem[$key]['userData'] : ${widget.listItem[key]}");
+                          if (widget.onListItemChanged != null) widget.onListItemChanged!(widget.type, widget.listItem);
+                        });
+                      });
                       break;
                     case 'image':
                       picLocalImage(key);
@@ -197,6 +197,7 @@ class _EditListSortState extends State<EditListWidget> {
                                 LOG('--> showPriceInputDialog result : $result / ${AppData.currentCurrency}');
                                 AppData.localInfo['currency'] = AppData.currentCurrency;
                                 writeLocalInfo();
+                                if (widget.onListItemChanged != null) widget.onListItemChanged!(widget.type, widget.listItem);
                               });
                             }
                           });
@@ -209,6 +210,7 @@ class _EditListSortState extends State<EditListWidget> {
                               widget.listItem[key]['title']    = result['title'];
                               widget.listItem[key]['desc']     = result['desc'];
                               LOG('--> showDoubleTextInputDialog result : $result / ${widget.listItem[key]['desc']}');
+                              if (widget.onListItemChanged != null) widget.onListItemChanged!(widget.type, widget.listItem);
                             }
                           });
                           break;
@@ -247,6 +249,7 @@ class _EditListSortState extends State<EditListWidget> {
       imageData = await resizeImage(imageData!.buffer.asUint8List(), 512) as Uint8List;
       setState(() {
         widget.listItem[key]['image'] = imageData;
+        if (widget.onListItemChanged != null) widget.onListItemChanged!(widget.type, widget.listItem);
       });
     }
   }

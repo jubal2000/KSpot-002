@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kspot_002/repository/user_repository.dart';
 import 'package:uuid/uuid.dart';
 
 import '../data/app_data.dart';
@@ -18,6 +19,7 @@ import '../models/place_model.dart';
 import '../utils/utils.dart';
 import '../view/follow/follow_screen.dart';
 import '../view/main_event/event_time_edit_screen.dart';
+import '../view/main_my/target_profile.dart';
 import '../widget/card_scroll_viewer.dart';
 import '../widget/edit/edit_list_widget.dart';
 import '../widget/event_group_dialog.dart';
@@ -26,13 +28,18 @@ class EventEditViewModel extends ChangeNotifier {
   EventModel?   editItem;
   PlaceModel?   placeInfo;
   BuildContext? buildContext;
+  final repo = UserRepository();
 
   // for Edit..
   final _imageGalleryKey  = GlobalKey();
   JSON imageList = {};
-  var agreeMax = 1;
-  var stepIndex = 1;
+  JSON managerData = {};
+  JSON customData = {};
+
+  var stepIndex = 2;
   var stepMax = 3;
+  var agreeMax = 1;
+
   var isShowOnly = false;
   var isInputDone = false;
   var agreeChecked = false;
@@ -82,6 +89,7 @@ class EventEditViewModel extends ChangeNotifier {
         Get.to(() => FollowScreen(AppData.userInfo, selectData: editItem!.getManagerDataMap, isShowMe: true, isSelectable: true))!.then((value) {
           LOG("-->  FollowScreen result : $value");
           if (value == null) return;
+          managerData = {};
           editItem!.managerData = [];
           if (value.isNotEmpty) {
             for (var item in value.entries) {
@@ -91,6 +99,7 @@ class EventEditViewModel extends ChangeNotifier {
                 'nickName': STR(item.value['nickName']),
                 'pic': STR(item.value['pic'])
               };
+              managerData[item.key] = addItem;
               editItem!.managerData!.add(ManagerData.fromJson(addItem));
               LOG("--> managerData add [${item.key}] : ${editItem!.managerData}");
             }
@@ -99,17 +108,19 @@ class EventEditViewModel extends ChangeNotifier {
         });
         break;
       case EditListType.customField:
-        // showCustomFieldSelectDialog(buildContext!).then((customId) {
-        //   LOG("-->  showCustomFieldSelectDialog result : $customId / ${AppData.INFO_CUSTOMFIELD[customId]}");
-        //   if (customId.isNotEmpty) {
-        //     var key = Uuid().v1();
-        //     var customInfo = AppData.INFO_CUSTOMFIELD[customId];
-        //     var title = customInfo['titleEdit'] ?? customInfo['title'];
-        //     _eventInfo['customData'] ??= {};
-        //     _eventInfo['customData'][key] = {'id':key, 'title':title, 'customId':customId};
-        //     if (customInfo['titleEx'] != null) _eventInfo['customData'][key]['titleEx'] = customInfo['titleEx'];
-        //   }
-        // });
+        showCustomFieldSelectDialog(buildContext!).then((customId) {
+          if (customId.isNotEmpty) {
+            var key = Uuid().v1();
+            var customInfo = AppData.INFO_CUSTOMFIELD[customId];
+            var title = customInfo['titleEdit'] ?? customInfo['title'];
+            var addItem = {'id':key, 'title':title, 'customId':customId};
+            if (customInfo['titleEx'] != null) addItem['titleEx'] = customInfo['titleEx'];
+            LOG("-->  showCustomFieldSelectDialog result : $customId / $addItem");
+            customData[key] = addItem;
+            editItem!.customData ??= [];
+            editItem!.customData!.add(CustomData.fromJson(addItem));
+          }
+        });
         break;
     }
   }
@@ -125,7 +136,7 @@ class EventEditViewModel extends ChangeNotifier {
         //     setState(() {
         //       if (result == 1)  _eventInfo['reserveData'].remove(key);
         //     });
-        //   });
+        //   });111
         // }
         break;
       case EditListType.timeRange:
@@ -144,46 +155,58 @@ class EventEditViewModel extends ChangeNotifier {
         break;
       case EditListType.manager:
         if (status == 0) {
-          // var userInfo = await api.getUserInfoFromId(_eventInfo['managerData'][key]['userId']);
-          // if (JSON_NOT_EMPTY(userInfo)) {
-          //   Navigator.push(context, MaterialPageRoute(builder: (context) =>
-          //       TargetProfileScreen(userInfo))).then((value) {});
-          // } else {
-          //   showUserAlertDialog(context, '${_eventInfo['managerData'][key]['userId']}');
-          // }
+          var userInfo = await repo.getUserInfo(managerData[key]['id']);
+          if (userInfo != null) {
+            Get.to(() => TargetProfileScreen(userInfo))!.then((result) {
+
+            });
+          } else {
+            showUserAlertDialog(buildContext!, '${managerData[key]['id']}');
+          }
         } else {
           showAlertYesNoDialog(buildContext!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
             if (result == 1) {
-              editItem!.removeManagerData(key);
+              managerData.remove(key);
+              editItem!.setManagerDataMap(managerData);
             }
           });
         }
         break;
       case EditListType.customField:
-      //   if (status == 1) {
-      //     showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
-      //       setState(() {
-      //         if (result == 1)  _eventInfo['customData'].remove(key);
-      //         LOG('--> remove $key -> ${_eventInfo['customData']}');
-      //       });
-      //     });
-      //   }
-      //   break;
+        if (status == 1) {
+          showAlertYesNoDialog(buildContext!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+            if (result == 1) {
+              customData.remove(key);
+              editItem!.setCustomDataMap(customData);
+            }
+          });
+        }
+        break;
       // case EditListType.goods:
       //   if (status == 0) {
       //     var userInfo =  _eventInfo['linkGoodsData'][key];
-      //     Navigator.push(context, MaterialPageRoute(builder: (context) => TargetGoodsScreen(userInfo))).then((value) {
-      //       setState(() {
-      //         _eventInfo['linkGoodsData'] = AppData.listSelectData;
-      //       });
+      //     Navigator.push(buildContext!, MaterialPageRoute(builder: (context) => TargetGoodsScreen(userInfo))).then((value) {
+      //       _eventInfo['linkGoodsData'] = AppData.listSelectData;
       //     });
       //   } else {
-      //     showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
-      //       setState(() {
-      //         if (result == 1)  _eventInfo['linkGoodsData'].remove(key);
-      //       });
+      //     showAlertYesNoDialog(buildContext!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+      //       if (result == 1) {
+      //         customData.remove(key);
+      //         eventInfo['linkGoodsData'].remove(key);
+      //       }
       //     });
       //   }
+    }
+  }
+
+  onItemChanged(EditListType type, JSON listData) {
+    LOG('-----> onItemChanged : $listData');
+    unFocusAll(buildContext!);
+    switch (type) {
+      case EditListType.customField:
+        customData = listData;
+        editItem!.setCustomDataMap(customData);
+        break;
     }
   }
 
@@ -228,6 +251,13 @@ class EventEditViewModel extends ChangeNotifier {
   get editManagerToJSON {
     if (editItem != null) {
       return editItem!.getManagerDataMap;
+    }
+    return {};
+  }
+
+  get editCustomToJSON {
+    if (editItem != null) {
+      return editItem!.getCustomDataMap;
     }
     return {};
   }

@@ -59,7 +59,7 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: TopTitleText(context, widget.eventItem != null ? 'Event Edit'.tr : 'Event Add'.tr),
+        title: TopTitleText(context, widget.eventItem != null ? 'Event Edit'.tr : 'Event Information'.tr),
         titleSpacing: 0,
         toolbarHeight: UI_APPBAR_TOOL_HEIGHT,
         backgroundColor: Colors.transparent,
@@ -69,38 +69,38 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
           if (widget.eventItem != null)...[
             SubTitle(context, 'EVENT PLACE SELECT'.tr),
             Row(
-                children: [
-                  if (_viewModel.placeInfo != null)...[
-                    Expanded(
-                      child: ContentItem(_viewModel.placeInfo!.toJson(),
-                          padding: EdgeInsets.zero,
-                          showType: GoodsItemCardType.normal,
-                          descMaxLine: 2,
-                          isShowExtra: false,
-                          outlineColor: Theme.of(context).colorScheme.tertiary,
-                          titleStyle: ItemTitleLargeStyle(context), descStyle: ItemDescStyle(context)),
-                    ),
-                  ],
-                  contentAddButton(context,
-                      'PLACE\nSELECT'.tr,
-                      icon: Icons.settings,
-                      onPressed: (_) {
-                        Map<String, PlaceModel> list = {};
-                        if (_viewModel.placeInfo != null) {
-                          list[_viewModel.placeInfo!.id] = _viewModel.placeInfo!;
-                        }
-                        Get.to(() => PlaceListScreen(isSelectable: true, listSelectData: list))!.then((result) {
-                          if (result != null && result.isNotEmpty) {
-                            PlaceModel placeInfo = result.entries.first.value;
-                            LOG('--> PlaceListScreen result : ${placeInfo.toJson()}');
-                            _viewModel.setPlaceInfo(placeInfo);
-                          } else {
-                            _viewModel.setPlaceInfo(null);
-                          }
-                        });
-                      }
+              children: [
+                if (_viewModel.placeInfo != null)...[
+                  Expanded(
+                    child: ContentItem(_viewModel.placeInfo!.toJson(),
+                        padding: EdgeInsets.zero,
+                        showType: GoodsItemCardType.normal,
+                        descMaxLine: 2,
+                        isShowExtra: false,
+                        outlineColor: Theme.of(context).colorScheme.tertiary,
+                        titleStyle: ItemTitleLargeStyle(context), descStyle: ItemDescStyle(context)),
                   ),
-                ]
+                ],
+                contentAddButton(context,
+                  'PLACE\nSELECT'.tr,
+                  icon: Icons.settings,
+                  onPressed: (_) {
+                    Map<String, PlaceModel> list = {};
+                    if (_viewModel.placeInfo != null) {
+                      list[_viewModel.placeInfo!.id] = _viewModel.placeInfo!;
+                    }
+                    Get.to(() => PlaceListScreen(isSelectable: true, listSelectData: list))!.then((result) {
+                      if (result != null && result.isNotEmpty) {
+                        PlaceModel placeInfo = result.entries.first.value;
+                        LOG('--> PlaceListScreen result : ${placeInfo.toJson()}');
+                        _viewModel.setPlaceInfo(placeInfo);
+                      } else {
+                        _viewModel.setPlaceInfo(null);
+                      }
+                    });
+                  }
+                ),
+              ]
             ),
             SizedBox(height: UI_LIST_TEXT_SPACE_S),
           ],
@@ -109,12 +109,15 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
           SubTitle(context, 'INFO'.tr),
           SizedBox(height: UI_LIST_TEXT_SPACE_S),
           EditTextField(context, 'TITLE'.tr, _viewModel.editItem!.title, hint: 'TITLE'.tr, maxLength: TITLE_LENGTH,
-              onChanged: (value) {
-
+            onChanged: (value) {
+              _viewModel.editItem!.title = value;
           }),
           EditTextField(context, 'DESC'.tr, _viewModel.editItem!.desc, hint: 'DESC'.tr, maxLength: DESC_LENGTH,
               maxLines: null, keyboardType: TextInputType.multiline, onChanged: (value) {
-
+              _viewModel.editItem!.desc = value;
+          }),
+          TagTextField(_viewModel.editItem!.tagData, (value) {
+            _viewModel.editItem!.tagData = value;
           }),
           SizedBox(height: UI_LIST_TEXT_SPACE_S),
           EditListWidget(_viewModel.editManagerToJSON, EditListType.manager, _viewModel.onItemAdd,
@@ -122,6 +125,10 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
           SizedBox(height: UI_LIST_TEXT_SPACE),
           EditListSortWidget(_viewModel.editEventToJSON, EditListType.timeRange, _viewModel.onItemAdd,
               _viewModel.onItemSelected),
+          SizedBox(height: UI_LIST_TEXT_SPACE),
+          EditListSortWidget(_viewModel.editCustomToJSON, EditListType.customField, _viewModel.onItemAdd,
+              _viewModel.onItemSelected, onListItemChanged: _viewModel.onItemChanged),
+          SizedBox(height: UI_LIST_TEXT_SPACE_L),
         ],
       )
     );

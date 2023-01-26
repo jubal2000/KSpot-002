@@ -59,6 +59,7 @@ class Words extends Translations {
       'RESERVATION LIST': '예약 목록',
       'Event Add': '이벤트 추가',
       'Event Edit': '이벤트 수정',
+      'Event Information': '이벤트 정보',
       'Please enter event title..': '이벤트 제목을 입력해 주세요..',
       'Please enter event description..': '이벤트 내용을 입력해 주세요..',
       'TITLE': '제목',

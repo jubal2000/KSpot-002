@@ -169,6 +169,17 @@ class EventModel {
     return false;
   }
 
+  setTimDataMap(JSON map) {
+    timeData ??= [];
+    timeData!.clear();
+    if (map.isNotEmpty) {
+      for (var item in map.entries) {
+        timeData!.add(item.value);
+      }
+    }
+    return timeData;
+  }
+
   //------------------------------------------------------------------------------------------------------
   //  TimeData
   //
@@ -194,4 +205,55 @@ class EventModel {
     }
     return false;
   }
+
+  setManagerDataMap(JSON map) {
+    managerData ??= [];
+    managerData!.clear();
+    if (map.isNotEmpty) {
+      for (var item in map.entries) {
+        managerData!.add(ManagerData.fromJson(item.value));
+      }
+    }
+    return managerData;
+  }
+
+  //------------------------------------------------------------------------------------------------------
+  //  CustomData
+  //
+
+  get getCustomDataMap {
+    JSON result = {};
+    if (customData != null) {
+      for (var item in customData!) {
+        result[item.id] = item.toJson();
+      }
+    }
+    return result;
+  }
+
+  setCustomDataMap(JSON map) {
+    customData ??= [];
+    customData!.clear();
+    if (map.isNotEmpty) {
+      for (var item in map.entries) {
+        customData!.add(CustomData.fromJson(item.value));
+      }
+    }
+    return customData;
+  }
+
+  //------------------------------------------------------------------------------------------------------
+  //  TagData
+  //
+
+  addTagData(String tag) {
+    tagData ??= [];
+    LOG('--> addTimeData : $tag / $tagData');
+    if (!tagData!.contains(tag)) {
+      tagData!.add(tag);
+    }
+    return tagData!.indexOf(tag);
+  }
+
+
 }

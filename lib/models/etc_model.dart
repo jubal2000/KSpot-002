@@ -72,11 +72,13 @@ class PromotionData {
 class CustomData {
   String id;
   String title;
-  String value;
+  String customId;
+  String? desc;
   CustomData({
     required this.id,
     required this.title,
-    required this.value,
+    required this.customId,
+    this.desc,
   });
   factory CustomData.fromJson(JSON json) => _$CustomDataFromJson(json);
   JSON toJson() => _$CustomDataToJson(this);

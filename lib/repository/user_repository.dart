@@ -1,6 +1,9 @@
 import 'package:get/get.dart';
 import 'package:kspot_002/services/api_service.dart';
 
+import '../data/app_data.dart';
+import '../models/event_model.dart';
+import '../models/story_model.dart';
 import '../utils/utils.dart';
 import '../models/user_model.dart';
 
@@ -49,6 +52,33 @@ class UserRepository {
       return UserModel.fromJson(response);
     }
     return null;
+  }
+
+  Future<Map<String, EventModel>> getEventFromUserId(String userId, [bool addExpired = false]) async {
+    Map<String, EventModel> result = {};
+    final response = await api.getEventFromUserId(userId, addExpired);
+    if (response != null && response.isNotEmpty) {
+      for (var item in response.entries) {
+        result[item.key] = EventModel.fromJson(item.value);
+      }
+    }
+    return result;
+  }
+
+  Future<Map<String, StoryModel>> getStoryFromUserId(String userId) async {
+    Map<String, StoryModel> result = {};
+    final response = await api.getStoryFromUserId(userId);
+    if (response.isNotEmpty) {
+      for (var item in response.entries) {
+        result[item.key] = StoryModel.fromJson(item.value);
+      }
+    }
+    return result;
+  }
+
+  Future<UserModel?> addFollowTarget(UserModel targetInfo) async {
+    final response = await api.addFollowTarget(AppData.userInfo.toJson(), targetInfo.toJson());
+    return response.isNotEmpty ? UserModel.fromJson(response) : null;
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////

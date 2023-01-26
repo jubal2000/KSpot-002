@@ -1,12 +1,14 @@
 
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kspot_002/data/common_sizes.dart';
@@ -231,9 +233,18 @@ startImageCroper(String imageFilePath, CropStyle cropStyle, List<CropAspectRatio
   return croppedFile?.path;
 }
 
-Future showImageSlideDialog(BuildContext context, List<String> imageData, int startIndex) async {
+Future showImageSlideDialog(BuildContext context, List<String> imageData, int startIndex, [bool isCanDownload = false]) async {
   // TextStyle _menuText   = TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.blueAccent);
   LOG('--> showImageSlideDialog : $imageData / $startIndex');
+
+  _saveImage(String fileUrl) async {
+    var response = await Dio().get(fileUrl, options: Options(responseType: ResponseType.bytes));
+    final result = await ImageGallerySaver.saveImage(
+        Uint8List.fromList(response.data),
+        quality: 100,
+        name: "KSpot-download-${Uuid().v1()}-${DATETIME_FULL_STR(DateTime.now())}");
+    LOG('--> _saveImage result : $result');
+  }
 
   return await showDialog(
       context: context,
@@ -245,6 +256,7 @@ Future showImageSlideDialog(BuildContext context, List<String> imageData, int st
               scrollable: true,
               insetPadding: EdgeInsets.all(15),
               contentPadding: EdgeInsets.zero,
+              backgroundColor: DialogBackColor(context),
               content: Container(
                 width: MediaQuery.of(context).size.width,
                 child: ImageScrollViewer(
@@ -258,6 +270,19 @@ Future showImageSlideDialog(BuildContext context, List<String> imageData, int st
                 ),
               ),
               actions: [
+                if (isCanDownload)...[
+                  TextButton(
+                      onPressed: () async {
+                        showLoadingDialog(context, 'image downloading...'.tr);
+                        for (var item in imageData) {
+                          await _saveImage(item);
+                        }
+                        Navigator.of(dialogContext!).pop();
+                        ShowToast('Download complete'.tr);
+                      },
+                      child: Icon(Icons.download, size: 24)
+                  )
+                ],
                 TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
@@ -270,7 +295,6 @@ Future showImageSlideDialog(BuildContext context, List<String> imageData, int st
       }
   ) ?? '';
 }
-
 showLoadingDialog(BuildContext context, String message) {
   showDialog(
     context: context,

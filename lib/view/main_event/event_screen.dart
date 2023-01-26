@@ -11,8 +11,8 @@ import '../../widget/title_text_widget.dart';
 import '../app/app_top_menu.dart';
 import 'event_edit_screen.dart';
 
-class EventListScreen extends StatelessWidget {
-  EventListScreen({Key? key}) : super(key: key);
+class EventScreen extends StatelessWidget {
+  EventScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

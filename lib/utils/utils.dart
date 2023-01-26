@@ -16,12 +16,14 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:intl/intl.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:image/image.dart' as IMG;
+import 'package:kspot_002/services/api_service.dart';
 import 'package:material_tag_editor/tag_editor.dart';
 
 import '../data/app_data.dart';
 import '../data/common_colors.dart';
 import '../data/common_sizes.dart';
 import '../data/style.dart';
+import '../models/user_model.dart';
 import '../view/place/place_list_screen.dart';
 import '../widget/event_group_dialog.dart';
 import '../widget/dropdown_widget.dart';
@@ -121,6 +123,14 @@ TME2(dynamic value, {dynamic defaultValue = '00:00'}) {
   }
   LOG("--> TME2 result : $result");
   return result;
+}
+
+// ignore: non_constant_identifier_names
+COMMENT_DESC(dynamic desc) {
+  if (desc == null) return '';
+  desc = desc.replaceAll('\\n', ' ');
+  desc = desc.replaceAll('\n', ' ');
+  return desc;
 }
 
 // ignore: non_constant_identifier_names
@@ -626,6 +636,73 @@ ADDR_GOOGLE(dynamic desc, String title, String pic) {
   return {'title': title, 'pic': pic, 'lat': DBL(desc['lat']), 'lng': DBL(desc['lng'])};
 }
 
+// ignore: non_constant_identifier_names
+NUMBER_K(int number) {
+  String result = "";
+  if (number > 1000) {
+    var num1 = number / 1000;
+    result = num1.toStringAsFixed(1);
+    result += 'K';
+  } else {
+    result = '$number';
+  }
+  return result;
+}
+
+Widget getCircleImage(String url, double size) {
+  return SizedBox(
+      width: size,
+      height: size,
+      child: ClipRRect(
+          borderRadius: BorderRadius.circular(size),
+          child: showImageWidget(url, BoxFit.cover)
+      )
+  );
+}
+
+Widget showSizedImage(dynamic imagePath, double size) {
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(size / 8),
+    child: SizedBox(
+      width: size,
+      height: size,
+      child: FittedBox(
+        fit: BoxFit.fill,
+        child: showImageFit(imagePath),
+      ),
+    ),
+  );
+}
+
+Widget showCardRoundImage(dynamic imagePath, double size,
+    [BorderRadius radius = const BorderRadius.only(topLeft:Radius.circular(10), bottomLeft:Radius.circular(20))]) {
+  return ClipRRect(
+    borderRadius: radius,
+    child: SizedBox(
+      width: size,
+      height: size,
+      child: FittedBox(
+        fit: BoxFit.fill,
+        child: showImageFit(imagePath),
+      ),
+    ),
+  );
+}
+
+Widget showSizedRoundImage(dynamic imagePath, double size, double round) {
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(round),
+    child: SizedBox(
+      width: size,
+      height: size,
+      child: FittedBox(
+        fit: BoxFit.fill,
+        child: showImageFit(imagePath),
+      ),
+    ),
+  );
+}
+
 Widget showImage(String url, Size size, {Color? color, var fit = BoxFit.cover}) {
   return SizedBox(
       width: size.width,
@@ -682,20 +759,6 @@ Widget showImageWidget(dynamic imagePath, BoxFit fit, {Color? color}) {
     LOG('--> showImage Error : $e');
   }
   return Image.asset(NO_IMAGE);
-}
-
-Widget showSizedImage(dynamic imagePath, double size) {
-  return ClipRRect(
-    borderRadius: BorderRadius.circular(size / 8),
-    child: SizedBox(
-      width: size,
-      height: size,
-      child: FittedBox(
-        fit: BoxFit.fill,
-        child: showImageFit(imagePath),
-      ),
-    ),
-  );
 }
 
 Widget showLoadingImage() {
@@ -1612,18 +1675,48 @@ ShadowIcon(IconData icon, double size, Color color, double x, double y) {
   );
 }
 
-Widget showSizedRoundImage(dynamic imagePath, double size, double round) {
-  return ClipRRect(
-    borderRadius: BorderRadius.circular(round),
-    child: SizedBox(
-      width: size,
-      height: size,
-      child: FittedBox(
-        fit: BoxFit.fill,
-        child: showImageFit(imagePath),
+Widget showSendMessageWidget(BuildContext context, UserModel targetInfo, {double iconSize = 20, String title = '', Function(int)? onChangeCount}) {
+  // LOG('--> ShowBookmarkWidget : $type / $targetId / $targetPic');
+  var _iconColor = Theme.of(context).primaryColor;
+
+  return Container(
+    width: title.isNotEmpty ? 50 : 30,
+    height: title.isNotEmpty ? 60 : 40,
+    child: Center (
+      child: GestureDetector(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.message_outlined, color: _iconColor, size: iconSize),
+              if (title.isNotEmpty)...[
+                Text(title, style: ItemDescExStyle(context))
+              ]
+            ]
+        ),
+        onTap: () {
+          startChattingScreen(context, targetInfo);
+        },
       ),
     ),
   );
+}
+
+startChattingScreen(BuildContext context, UserModel targetInfo) async {
+  final api = Get.find<ApiService>();
+  var searchText = '';
+  // await api.getMessageData();
+  // AppData.refreshMessageGroup(0, _searchText);
+  // var targetId = STR(targetInfo['id']);
+  // LOG('--> AppData.messageGroup [$targetId] : $targetInfo');
+  // Navigator.push(context, MaterialPageRoute(builder: (context) =>
+  //     ChattingScreen(
+  //         0,
+  //         List<JSON>.from(AppData.messageGroup[targetId] ?? {}),
+  //         targetInfo['id'],
+  //         targetInfo['nickName'],
+  //         targetInfo['pic'],
+  //         key: AppData.newMessageKey))).then((value) {
+  // });
 }
 
 Widget showPlaceAddButton(BuildContext context, Size size, Function onRefresh) {
@@ -1912,4 +2005,117 @@ class ListItemEx extends StatelessWidget {
       );
     }
   }
+}
+
+// ignore: non_constant_identifier_names
+RoundRectIconTextButton(BuildContext context, String title, IconData icon, Function()? onPressed) {
+  // final _titleStyle  = TextStyle(color: Colors.black, fontWeight: FontWeight.w800, fontSize: 14);
+  return Container(
+    height: 40,
+    child: ElevatedButton(
+      onPressed: () {
+        if (onPressed != null) onPressed();
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 24, color: Theme.of(context).primaryColor),
+          SizedBox(width: 5),
+          Text(title, style: TextStyle(color: Theme.of(context).primaryColor)),
+        ],
+      ),
+      style: ElevatedButton.styleFrom(
+          minimumSize: Size.zero, // Set this
+          padding: EdgeInsets.symmetric(horizontal: 15), // and this
+          shadowColor: Colors.transparent,
+          primary: Theme.of(context).primaryColor.withOpacity(0.25),
+          alignment: Alignment.center,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(color: Theme.of(context).primaryColor.withOpacity(0.5))
+          )
+      ),
+    ),
+  );
+}
+
+RoundRectIconButton(IconData icon, double height, Function()? onPressed) {
+  return RoundColorRectIconButton(icon, height, Colors.grey, 1, onPressed);
+}
+
+// ignore: non_constant_identifier_names
+RoundColorRectIconButton(IconData icon, double height, Color color, double width, Function()? onPressed) {
+  return Container(
+    height: height,
+    child: ElevatedButton(
+      onPressed: () {
+        if (onPressed != null) onPressed();
+      },
+      child: Icon(icon, size: height * 0.8, color: color),
+      style: ElevatedButton.styleFrom(
+          elevation: 0,
+          primary: Colors.white,
+          minimumSize: Size.zero, // Set this
+          padding: EdgeInsets.symmetric(horizontal: 10), // and this
+          shadowColor: Colors.transparent,
+          alignment: Alignment.center,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(color: color, width: width)
+          )
+      ),
+    ),
+  );
+}
+
+IconButtonWidget(IconData icon, double size, Color color, Function()? onPressed) {
+  return GestureDetector(
+    child: Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      color: Colors.transparent,
+      child: Icon(icon, size: size - 10, color: color),
+    ),
+    onTap: () {
+      if (onPressed != null) onPressed();
+    },
+  );
+}
+
+// ignore: non_constant_identifier_names
+CheckOwner(dynamic userId) {
+  if (userId == null) return false;
+  return AppData.USER_ID == userId;
+}
+
+
+REMIAN_TIME(DateTime dateTime, [String tailText = '']) {
+  if (dateTime.isAfter(DateTime.now())) return '';
+  var remainTime = DateTime.now().difference(dateTime);
+  // LOG('--> remainTime : $dateTime / $remainTime');
+  return remainTime.inDays == 365 ? '1 ${'year'.tr}$tailText' :
+  remainTime.inDays > 365 ? '${(remainTime.inDays / 365).round()} ${'years'.tr}$tailText' :
+  remainTime.inDays == 30 ? '1 ${'month'.tr}$tailText' :
+  remainTime.inDays > 30 ? '${(remainTime.inDays / 30).round()} ${'months'.tr}$tailText' :
+  remainTime.inDays == 1 ? '1 ${'day'.tr}$tailText' :
+  remainTime.inDays > 0 ? '${remainTime.inDays} ${'days'.tr}$tailText' :
+  remainTime.inHours == 1 ? '1 ${'hour'.tr}$tailText' :
+  remainTime.inHours > 0 ? '${remainTime.inHours} ${'hours'.tr}$tailText' :
+  remainTime.inMinutes == 1 ? '1 ${'minute'.tr}$tailText' :
+  remainTime.inMinutes > 0 ? '${remainTime.inMinutes} ${'minutes'.tr}$tailText' :
+  '${remainTime.inSeconds} ${'sec'.tr}';
+}
+
+REMIAN_TIME_STYLE(DateTime dateTime, TextStyle style, TextStyle styleNow) {
+  if (dateTime.isAfter(DateTime.now())) return style;
+  var remainTime = DateTime.now().difference(dateTime);
+  // LOG('--> remainTime : $dateTime / $remainTime');
+  return remainTime.inHours > 0 ? style : styleNow;
+}
+
+REMIAN_TIME_TEXTSPAN(DateTime dateTime, [
+  TextStyle style = const TextStyle(fontSize: 12),
+  TextStyle styleNow = const TextStyle(fontSize: 12), String tailText = '']) {
+  return TextSpan(text: REMIAN_TIME(dateTime, tailText), style: REMIAN_TIME_STYLE(dateTime, style, styleNow));
 }

@@ -43,7 +43,8 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
       _viewModel.setEditItem(widget.eventItem!);
     }
     if (AppData.userInfo.id.isEmpty) { // TODO : for Dev..
-      AppData.userInfo.id = 'lBSiD1qEBhvcPu49W56q';
+      AppData.userInfo.id       = 'lBSiD1qEBhvcPu49W56q';
+      AppData.userInfo.loginId  = 'e0lVUcIw4NV0XM5uX9mDjHdk91m2';
       AppData.userInfo.nickName = '주발Tester';
     }
     super.initState ();

@@ -84,6 +84,7 @@ class AppData {
   static var dynamicLinkPath = '';
 
   static var isEventGroupGridMode = true;
+  static var isMainActive = true;
 
   static DateTime? currentDate;
   static JSON selectEventTime = {};
@@ -127,6 +128,9 @@ class AppData {
 
   // ignore: non_constant_identifier_names
   static int get USER_STATUS => AppData.userInfo.status;
+
+  // ignore: non_constant_identifier_names
+  static int get USER_LEVEL => AppData.userInfo.status;
 
   // ignore: non_constant_identifier_names
   static bool get IS_ADMIN => USER_STATUS > 1;

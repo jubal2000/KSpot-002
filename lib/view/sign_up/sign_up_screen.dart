@@ -7,8 +7,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
-import 'package:kspot_002/view/main_event/event_list_screen.dart';
-import 'package:kspot_002/view/main_story/main_story.dart';
+import 'package:kspot_002/view/main_event/event_screen.dart';
+import 'package:kspot_002/view/main_story/story_screen.dart';
 import 'package:kspot_002/view_model/signup_view_model.dart';
 import 'package:provider/provider.dart';
 

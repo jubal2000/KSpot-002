@@ -875,7 +875,7 @@ class ApiService extends GetxService {
     return result;
   }
 
-  Future<JSON> getStoryFromParentId(String parentID) async {
+  Future<JSON> getStoryFromTargetId(String parentID) async {
     JSON result = {};
 
     var snapshot = await firestore!.collection(StoryCollection)
@@ -1038,7 +1038,7 @@ class ApiService extends GetxService {
     return result;
   }
   
-  Future<JSON?> addFollowTarget(JSON user, JSON targetInfo) async {
+  Future<JSON> addFollowTarget(JSON user, JSON targetInfo) async {
     var ref = firestore!.collection(FollowCollection);
     var key = ref.doc().id;
     var addItem = {
@@ -1059,7 +1059,7 @@ class ApiService extends GetxService {
       return user;
     }).onError((e, stackTrace) {
       LOG('--> addFollowTarget error : $e');
-      return user;
+      return {};
     });
   }
   

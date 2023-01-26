@@ -1,38 +1,40 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:kspot001/app_data.dart';
-import 'package:kspot001/main_my/main_myprofile.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/repository/user_repository.dart';
+import 'package:kspot_002/view/main_my/profile_tab_screen.dart';
 
-import '../service/api_service.dart';
-import '../utils/dialog_utils.dart';
-import '../utils/theme_manager.dart';
-import '../utils/utils.dart';
-import '../widgets/follow_widget.dart';
+import '../../data/app_data.dart';
+import '../../data/dialogs.dart';
+import '../../data/theme_manager.dart';
+import '../../models/user_model.dart';
+import '../../services/api_service.dart';
+import '../../utils/utils.dart';
+import '../../view_model/user_view_model.dart';
+import '../../widget/user_item_widget.dart';
 
 // ignore: must_be_immutable
 class TargetProfileScreen extends StatefulWidget {
   TargetProfileScreen(this.userInfo, {Key? key}) : super(key: key);
 
-  JSON userInfo;
+  UserModel userInfo;
 
   @override
   TargetProfileState createState() => TargetProfileState();
 }
 
 class TargetProfileState extends State<TargetProfileScreen> {
-  final api = Get.find<ApiService>();
+  final repo = UserRepository();
+  final userVewModel = UserViewModel();
   var _followType = 0;
 
   onFollowButton() {
     if (!AppData.isMainActive || _followType == 2) return;
     AppData.isMainActive = false;
     var target = 'Target'.tr;
-    showAlertYesNoDialog(context, 'Follow'.tr, 'Would you like to follow?'.tr, '$target: ${widget.userInfo['nickName']}', 'Cancel'.tr, 'OK'.tr).then((result) async {
+    showAlertYesNoDialog(context, 'Follow'.tr, 'Would you like to follow?'.tr, '$target: ${widget.userInfo.nickName}', 'Cancel'.tr, 'OK'.tr).then((result) async {
       if (result == 1) {
-        var addItem = await api.addFollowTarget(widget.userInfo);
-        if (addItem.isNotEmpty) {
+        var addItem = await repo.addFollowTarget(widget.userInfo);
+        if (addItem != null) {
           setState(() {
             _followType = 2;
           });
@@ -46,7 +48,8 @@ class TargetProfileState extends State<TargetProfileScreen> {
 
   @override
   void initState() {
-    _followType = CheckFollowUser(widget.userInfo['id']);
+    _followType = CheckFollowUser(widget.userInfo.id);
+    userVewModel.initUserModel(widget.userInfo);
     super.initState();
   }
 
@@ -64,7 +67,7 @@ class TargetProfileState extends State<TargetProfileScreen> {
               SizedBox(width: 10),
               showVerticalDivider(Size(5, 12)),
               SizedBox(width: 10),
-              UserFollowWidget(widget.userInfo, fontSize: 16),
+              UserFollowWidget(widget.userInfo.toJson(), fontSize: 16),
               // Text(_followType == 3 || _followType == 2 ? 'Following' : 'Follow+',
               //     style: _followType == 3 || _followType == 2 ? _followTitle1 : _followTitle0),
             ]
@@ -72,31 +75,8 @@ class TargetProfileState extends State<TargetProfileScreen> {
           toolbarHeight: 50,
           titleSpacing: 0,
         ),
-        body: MainMyTab(ProfilMainTab.profile, '', widget.userInfo),
+        body: MainMyTab(ProfileMainTab.profile, '', userVewModel),
         )
-    );
-  }
-}
-
-// ignore: must_be_immutable
-class TargetGoodsScreen extends StatelessWidget {
-  TargetGoodsScreen(this.userInfo, {Key? key}) : super(key: key);
-
-  JSON userInfo;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        primary: false,
-        titleSpacing: 0,
-        elevation: 1,
-        title: Text('GOODS LIST'.tr, style: AppBarTitleStyle(context)),
-        toolbarHeight: 50,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.grey,
-      ),
-      body: MyProfileTab(ProfileContentTab.goods, '', userInfo, isSelectable: true),
     );
   }
 }

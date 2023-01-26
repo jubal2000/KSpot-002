@@ -5,8 +5,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
-import 'package:kspot_002/view/main_event/event_list_screen.dart';
-import 'package:kspot_002/view/main_story/main_story.dart';
+import 'package:kspot_002/view/main_event/event_screen.dart';
+import 'package:kspot_002/view/main_story/story_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/theme_manager.dart';
@@ -18,8 +18,8 @@ class AppScreen extends StatelessWidget {
   final _height = 40.0.w;
 
   List<Widget> pages = [
-    EventListScreen(),
-    MainStory()
+    EventScreen(),
+    StoryScreen()
   ];
 
   @override

@@ -195,7 +195,7 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
             padding: EdgeInsets.symmetric(horizontal: widget.titlePadding),
             child: Row(
               children: [
-                Text(widget.title, style: ItemTitleLargeHotStyle(context)),
+                SubTitle(context, widget.title),
                 if (widget.showAllButton)...[
                   Expanded(
                     child: SizedBox(height: 10),

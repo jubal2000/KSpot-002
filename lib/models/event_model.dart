@@ -255,5 +255,26 @@ class EventModel {
     return tagData!.indexOf(tag);
   }
 
+  //------------------------------------------------------------------------------------------------------
+  //  OptionData
+  //
 
+  get getOptionDataMap {
+    JSON result = {};
+    if (optionData != null) {
+      for (var item in optionData!) {
+        result[item.id] = item.toJson();
+      }
+    }
+    return result;
+  }
+
+  addOptionData(OptionData item) {
+    optionData ??= [];
+    LOG('--> addTimeData : $item / $optionData');
+    if (!optionData!.contains(item)) {
+      optionData!.add(item);
+    }
+    return optionData!.indexOf(item);
+  }
 }

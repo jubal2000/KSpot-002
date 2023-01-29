@@ -18,6 +18,7 @@ import '../../view_model/app_view_model.dart';
 import '../../widget/card_scroll_viewer.dart';
 import '../../widget/edit/edit_component_widget.dart';
 import '../../widget/edit/edit_list_widget.dart';
+import '../../widget/edit/edit_setup_widget.dart';
 import '../../widget/goods_item_card.dart';
 import '../../widget/title_text_widget.dart';
 import '../app/app_top_menu.dart';
@@ -37,6 +38,7 @@ class EventEditInputScreen extends StatefulWidget {
 
 class _EventEditInputScreenState extends State<EventEditInputScreen> {
   late final _viewModel = widget.parentViewModel ?? EventEditViewModel();
+  final _setupKey = GlobalKey();
 
   @override
   void initState () {
@@ -146,6 +148,14 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
           SizedBox(height: UI_LIST_TEXT_SPACE),
           EditListSortWidget(_viewModel.editCustomToJSON, EditListType.customField, _viewModel.onItemAdd,
               _viewModel.onItemSelected, onListItemChanged: _viewModel.onItemChanged),
+          SizedBox(height: UI_LIST_TEXT_SPACE),
+          EditSetupWidget('OPTIONS'.tr, _viewModel.editOptionToJSON, AppData.INFO_EVENT_OPTION,
+              key:_setupKey,
+              customData: _viewModel.editCustomToJSON,
+              showOption: [
+                {'showId': 'reserv' , 'value': _viewModel.editCustomToJSON.isNotEmpty},
+              ],
+              onDataChanged: _viewModel.onSettingChanged),
           SizedBox(height: UI_LIST_TEXT_SPACE_L),
         ],
       )

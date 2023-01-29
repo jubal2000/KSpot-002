@@ -42,10 +42,55 @@ class EventEditViewModel extends ChangeNotifier {
 
   var isShowOnly = false;
   var isInputDone = false;
+  var isEdited = false;
   var agreeChecked = false;
+
+  get isNextEnable {
+    switch(stepIndex) {
+      case 0: return agreeChecked;
+      case 1: return placeInfo != null;
+    }
+    return isInputDone;
+  }
+
+  get editEventToJSON {
+    if (editItem != null) {
+      return editItem!.getTimeDataMap;
+    }
+    return {};
+  }
+
+  get editManagerToJSON {
+    if (editItem != null) {
+      return editItem!.getManagerDataMap;
+    }
+    return {};
+  }
+
+  get editCustomToJSON {
+    if (editItem != null) {
+      return editItem!.getCustomDataMap;
+    }
+    return {};
+  }
+
+  get editOptionToJSON {
+    if (editItem != null) {
+      return editItem!.getOptionDataMap;
+    }
+    return {};
+  }
+
+  get editReserveToJSON {
+    if (editItem != null) {
+      return editItem!.getOptionDataMap;
+    }
+    return {};
+  }
 
   init(BuildContext context) {
     buildContext = context;
+    isEdited = false;
   }
 
   setEditItem(EventModel item) {
@@ -149,6 +194,7 @@ class EventEditViewModel extends ChangeNotifier {
           showAlertYesNoDialog(buildContext!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
             if (result == 1) {
               editItem!.removeTimeData(key);
+              isEdited = true;
             }
           });
         }
@@ -168,6 +214,7 @@ class EventEditViewModel extends ChangeNotifier {
             if (result == 1) {
               managerData.remove(key);
               editItem!.setManagerDataMap(managerData);
+              isEdited = true;
             }
           });
         }
@@ -178,6 +225,7 @@ class EventEditViewModel extends ChangeNotifier {
             if (result == 1) {
               customData.remove(key);
               editItem!.setCustomDataMap(customData);
+              isEdited = true;
             }
           });
         }
@@ -206,8 +254,18 @@ class EventEditViewModel extends ChangeNotifier {
       case EditListType.customField:
         customData = listData;
         editItem!.setCustomDataMap(customData);
+        isEdited = true;
         break;
     }
+  }
+
+  onSettingChanged(String key, String value) {
+    editItem!.optionData ??= [];
+    editItem!.addOptionData(OptionData(
+      id: key,
+      value: BOL(value),
+    ));
+    isEdited = true;
   }
 
   addTimeItem() {
@@ -225,41 +283,13 @@ class EventEditViewModel extends ChangeNotifier {
           var addItem = TimeData.fromJson(result);
           editItem!.timeData ??= [];
           editItem!.addTimeData(addItem);
+          isEdited = true;
           LOG('=======> timeData result : ${addItem.toJson()}');
         } catch (e) {
           LOG('--> timeData error : $e');
         }
       }
     });
-  }
-
-  get isNextEnable {
-    switch(stepIndex) {
-      case 0: return agreeChecked;
-      case 1: return placeInfo != null;
-    }
-    return isInputDone;
-  }
-
-  get editEventToJSON {
-     if (editItem != null) {
-       return editItem!.getTimeDataMap;
-     }
-    return {};
-  }
-
-  get editManagerToJSON {
-    if (editItem != null) {
-      return editItem!.getManagerDataMap;
-    }
-    return {};
-  }
-
-  get editCustomToJSON {
-    if (editItem != null) {
-      return editItem!.getCustomDataMap;
-    }
-    return {};
   }
 
   setImageData() {

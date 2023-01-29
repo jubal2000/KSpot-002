@@ -113,7 +113,7 @@ class AppData {
   static JSON INFO_CUSTOMFIELD = JSON.from(infoData['customField' ] ??= {});
   static JSON INFO_PROMOTION = JSON.from(infoData['promotion' ] ??= {});
 
-  static JSON INFO_HISTORY_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['history'] ??= {}) : {};
+  static JSON INFO_STORY_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['story'] ??= {}) : {};
   static JSON INFO_TALENT_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['talent'] ??= {}) : {};
   static JSON INFO_GOODS_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['goods'] ??= {}) : {};
   static JSON INFO_PUSH_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['push'] ??= {}) : {};

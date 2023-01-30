@@ -25,12 +25,6 @@ class EventEditPlaceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     LOG('--> _viewModel : ${_viewModel.stepIndex} / ${_viewModel.placeInfo != null ? _viewModel.placeInfo!.address.toJson() : ''}');
     return Scaffold(
-      appBar: AppBar(
-        title: TopTitleText(context, 'PLACE SETTING'.tr),
-        titleSpacing: 0,
-        toolbarHeight: UI_APPBAR_TOOL_HEIGHT.w,
-        backgroundColor: Colors.transparent,
-      ),
       body: ListView(
         children: [
           SubTitle(context, 'EVENT GROUP SELECT'.tr),

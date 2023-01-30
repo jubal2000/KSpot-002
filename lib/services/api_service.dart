@@ -1,5 +1,6 @@
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:developer';
@@ -2383,7 +2384,9 @@ class ApiService extends GetxService {
     if (imageInfo['data'] != null) {
       try {
         final ref = FirebaseStorage.instance.ref().child('$path/${imageInfo['id']}');
-        var uploadTask = ref.putData(imageInfo['data']);
+        List<int> list = utf8.encode(imageInfo['data']);
+        Uint8List bytes = Uint8List.fromList(list);
+        var uploadTask = ref.putData(bytes);
         var snapshot = await uploadTask;
         if (snapshot.state == TaskState.success) {
           var imageUrl = await snapshot.ref.getDownloadURL();

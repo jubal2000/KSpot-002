@@ -31,6 +31,7 @@ class EventEditViewModel extends ChangeNotifier {
   BuildContext? buildContext;
   final userRepo  = UserRepository();
   final eventRepo = EventRepository();
+  final titleN = ['Agree to Terms and Conditions', 'Place Setting', 'Event Information'];
 
   // for Edit..
   final _imageGalleryKey  = GlobalKey();
@@ -373,7 +374,6 @@ class EventEditViewModel extends ChangeNotifier {
   moveNextStep() {
     if (stepIndex + 1 < stepMax) {
       stepIndex++;
-      initData();
       notifyListeners();
     } else {
       if (checkEditDone(true)) {
@@ -407,10 +407,13 @@ class EventEditViewModel extends ChangeNotifier {
     if (stepIndex - 1 >= 0) {
       stepIndex--;
       notifyListeners();
+    } else {
+      Get.back();
     }
   }
 
   uploadNewEvent() async {
+    showLoadingDialog(buildContext!, 'Uploading now...');
     // upload new images..
     editItem!.picData = null;
     if (imageData.isNotEmpty) {
@@ -454,20 +457,12 @@ class EventEditViewModel extends ChangeNotifier {
       }
       LOG('---> custom image upload done : $upCount');
     }
-
-    // // add pic..
-    // if (titlePicKey.isNotEmpty) {
-    //   var result = await eventRepo.uploadImageData(
-    //       _titlePic['0'], 'eventPic_img');
-    //   if (result != null) {
-    //     _eventInfo['pic'] = result;
-    //   }
-    //   LOG('---> pic image upload done : ${_eventInfo['imageData'].length} / $upCount');
-    // }
     // clean option data..
     if (placeInfo != null) {
       editItem!.country       = placeInfo!.country;
       editItem!.countryState  = placeInfo!.countryState;
+      editItem!.placeId       = placeInfo!.id;
+      editItem!.groupId       = placeInfo!.groupId;
     } else {
       editItem!.country       = AppData.currentCountry;
       editItem!.countryState  = AppData.currentState;
@@ -477,7 +472,6 @@ class EventEditViewModel extends ChangeNotifier {
     // set search data..
     editItem!.searchData = CreateSearchWordList(editItem!.toJson());
 
-    showLoadingDialog(buildContext!, 'Uploading now...');
     eventRepo.addEventItem(editItem!).then((result) {
       hideLoadingDialog();
       if (result != null) {
@@ -485,6 +479,7 @@ class EventEditViewModel extends ChangeNotifier {
       } else {
         showAlertDialog(buildContext!, 'Upload'.tr, 'Event Upload Failed'.tr, '', 'OK'.tr);
       }
+      Get.back();
     });
   }
 

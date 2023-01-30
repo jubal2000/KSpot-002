@@ -45,6 +45,9 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
     if (widget.eventItem != null) {
       _viewModel.setEditItem(widget.eventItem!);
     }
+    if (widget.placeInfo != null) {
+      _viewModel.setPlaceInfo(widget.placeInfo!);
+    }
     if (AppData.userInfo.id.isEmpty) { // TODO : for Dev..
       AppData.userInfo.id       = 'lBSiD1qEBhvcPu49W56q';
       AppData.userInfo.loginId  = 'e0lVUcIw4NV0XM5uX9mDjHdk91m2';
@@ -68,22 +71,21 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
         pic: AppData.userInfo.pic,
         status: 1,
       );
-      _viewModel.editItem!.managerData ??= [];
-      _viewModel.editItem!.managerData!.add(addItem);
+      _viewModel.editItem!.managerData = [addItem];
       _viewModel.managerData[addItem.id] = addItem.toJson();
     }
     LOG('--> _viewModel.editManagerToJSON : ${_viewModel.editManagerToJSON}');
     return Scaffold(
-      appBar: AppBar(
-        title: TopTitleText(context, widget.eventItem != null ? 'Event Edit'.tr : 'Event Information'.tr),
-        titleSpacing: 0,
-        toolbarHeight: UI_APPBAR_TOOL_HEIGHT,
-        backgroundColor: Colors.transparent,
-        actions: [
-          InkWell(onTap: () {}, child: Padding(padding:EdgeInsets.all(5), child: Icon(Icons.copy, size: 24))),
-          InkWell(onTap: () {}, child: Padding(padding:EdgeInsets.all(5), child: Icon(Icons.clear, size: 24))),
-        ],
-      ),
+      // appBar: AppBar(
+      //   title: TopTitleText(context, widget.eventItem != null ? 'Event Edit'.tr : 'Event Information'.tr),
+      //   titleSpacing: 0,
+      //   toolbarHeight: UI_APPBAR_TOOL_HEIGHT,
+      //   backgroundColor: Colors.transparent,
+      //   actions: [
+      //     InkWell(onTap: () {}, child: Padding(padding:EdgeInsets.all(5), child: Icon(Icons.copy, size: 24))),
+      //     InkWell(onTap: () {}, child: Padding(padding:EdgeInsets.all(5), child: Icon(Icons.clear, size: 24))),
+      //   ],
+      // ),
       body: ListView(
         children: [
           if (widget.eventItem != null)...[

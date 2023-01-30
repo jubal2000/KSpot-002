@@ -14,7 +14,7 @@ class EventModelEx extends EventModel {
     }) :
     super(
       id: id,
-      status: 0,
+      status: 1,
       title: title,
       titleKr: '',
       desc: desc,
@@ -22,10 +22,6 @@ class EventModelEx extends EventModel {
       pic: '',
       groupId: '',
       placeId: '',
-      enterFee: 0.0,
-      reserveFee: 0.0,
-      reserveDay: 0,
-      currency: '',
       country: '',
       countryState: '',
       userId: '',
@@ -59,10 +55,6 @@ class EventModel {
   String  pic;            // 대표 이미지 (Small Size)
   String  groupId;        // 그룹 ID
   String  placeId;        // 장소 ID
-  double  enterFee;       // 현장 입장료
-  double  reserveFee;     // 예매 입장료
-  int     reserveDay;     // 예매 가능일 (해당 날짜 - 예매 가능일 = 예매 시작일, 0:예매불가)
-  String  currency;       // 통화단위 (KRW, USD..)
   String  country;        // 국가
   String  countryState;   // 도시
   String  userId;         // 소유 유저
@@ -91,10 +83,6 @@ class EventModel {
     required this.pic,
     required this.groupId,
     required this.placeId,
-    required this.enterFee,
-    required this.reserveFee,
-    required this.reserveDay,
-    required this.currency,
     required this.country,
     required this.countryState,
     required this.userId,

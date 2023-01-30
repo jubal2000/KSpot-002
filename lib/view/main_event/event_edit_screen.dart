@@ -21,17 +21,29 @@ import '../../utils/utils.dart';
 import '../../view_model/app_view_model.dart';
 import '../../widget/dropdown_widget.dart';
 import '../../widget/page_dot_widget.dart';
+import '../../widget/title_text_widget.dart';
 import '../../widget/verify_phone_widget.dart';
 import 'event_edit_place_screen.dart';
 
-class EventEditScreen extends StatelessWidget {
+class EventEditScreen extends StatefulWidget {
   EventEditScreen({Key? key}) : super(key: key);
+
+  @override
+  _EventEditScreenState createState ()=> _EventEditScreenState();
+}
+
+class _EventEditScreenState extends State<EventEditScreen> {
   final _viewModel = EventEditViewModel();
+
+  @override
+  void initState () {
+    _viewModel.setEditItem(EventModelEx.empty(''));
+    super.initState ();
+  }
 
   @override
   Widget build(BuildContext context) {
     _viewModel.init(context);
-    _viewModel.setEditItem(EventModelEx.empty(''));
     return  ChangeNotifierProvider<EventEditViewModel>.value(
       value: _viewModel,
       child: Consumer<EventEditViewModel>(
@@ -43,8 +55,13 @@ class EventEditScreen extends StatelessWidget {
             },
             child: SafeArea(
               child:Scaffold(
+                appBar: AppBar(
+                  title: TopTitleText(context, viewModel.titleN[viewModel.stepIndex].tr),
+                  titleSpacing: 0,
+                  toolbarHeight: UI_EDIT_TOOL_HEIGHT.w,
+                  backgroundColor: Colors.transparent,
+                ),
                 body: Container(
-                  padding: EdgeInsets.only(top: UI_TOP_SPACE.w),
                   child: Column(
                     children: [
                       PageDotWidget(
@@ -69,6 +86,7 @@ class EventEditScreen extends StatelessWidget {
                         ),
                       ),
                       if (!viewModel.isShowOnly)...[
+                        SizedBox(height: UI_LIST_TEXT_SPACE_S),
                         BottomCenterAlign(
                           child: GestureDetector(
                             onTap: () {
@@ -83,7 +101,7 @@ class EventEditScreen extends StatelessWidget {
                               child: Text('Next'.tr, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.inversePrimary)),
                             )
                           )
-                        )
+                        ),
                       ]
                     ],
                   )
@@ -104,13 +122,6 @@ class EventEditScreen extends StatelessWidget {
               height: layout.maxHeight,
               child: Column(
                 children: [
-                  SizedBox(
-                      width: double.infinity,
-                      child: Text(
-                        'Terms of service'.tr,
-                        style: DescTitleStyle(context),
-                      )
-                  ),
                   SizedBox(height: 10),
                   Expanded(
                       child: Container(

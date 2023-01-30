@@ -46,6 +46,11 @@ class Words extends Translations {
       'SIGN UP': '회원가입',
       'START': '시작',
 
+      // signup_screen
+      'Agree to Terms and Conditions': '약관 동의',
+      'Place Setting': '장소 설정',
+      'Event Information': '이벤트 정보',
+
       // event_screen
       'Enable': '활성화',
       'Disable': '비활성화',

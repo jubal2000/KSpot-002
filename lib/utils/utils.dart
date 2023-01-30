@@ -2124,7 +2124,7 @@ REMIAN_TIME_TEXTSPAN(DateTime dateTime, [
 // ignore: non_constant_identifier_names
 CreateSearchWordList(JSON jsonData) {
   var checkItem = ['title', 'desc'];
-  var result = [];
+  List<String> result = [];
   for (var item in checkItem) {
     result.addAll(CreateSearchWordItem(jsonData[item]));
   }
@@ -2133,7 +2133,7 @@ CreateSearchWordList(JSON jsonData) {
 
 // ignore: non_constant_identifier_names
 CreateSearchWordItem(String? text) {
-  var result = [];
+  List<String> result = [];
   if (text != null && text.isNotEmpty) {
     var array = text.split(' ');
     for (var item in array) {
@@ -2153,7 +2153,7 @@ CreateSearchWordItem(String? text) {
 String RemoveSearchWordItem(String text) {
   debugPrint('--> remove word: $text');
   if (text.length > 1) {
-    var checkWord = ['있습니다','합니다','입니다','팝니다','부터','은','는','이','가','을','를','와',',','!','?','.'];
+    var checkWord = ['있습니다','합니다','입니다','팝니다','갑니다','옴니다','부터','은','는','이','가','을','를','와','과',',','!','?','.'];
     for (var word in checkWord) {
       if (text.length > word.length) {
         var item = text.substring(text.length - word.length, text.length);
@@ -2167,3 +2167,4 @@ String RemoveSearchWordItem(String text) {
   }
   return '';
 }
+

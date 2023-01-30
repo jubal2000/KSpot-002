@@ -1,5 +1,6 @@
 
 const double UI_APPBAR_TOOL_HEIGHT = 45.0;
+const double UI_EDIT_TOOL_HEIGHT = 55.0;
 const double UI_ITEM_HEIGHT = 60.0;
 const double UI_MENU_HEIGHT = 60.0;
 const double UI_MENU_BG_HEIGHT = 65.0;

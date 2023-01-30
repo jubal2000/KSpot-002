@@ -2120,3 +2120,50 @@ REMIAN_TIME_TEXTSPAN(DateTime dateTime, [
   TextStyle styleNow = const TextStyle(fontSize: 12), String tailText = '']) {
   return TextSpan(text: REMIAN_TIME(dateTime, tailText), style: REMIAN_TIME_STYLE(dateTime, style, styleNow));
 }
+
+// ignore: non_constant_identifier_names
+CreateSearchWordList(JSON jsonData) {
+  var checkItem = ['title', 'desc'];
+  var result = [];
+  for (var item in checkItem) {
+    result.addAll(CreateSearchWordItem(jsonData[item]));
+  }
+  return result;
+}
+
+// ignore: non_constant_identifier_names
+CreateSearchWordItem(String? text) {
+  var result = [];
+  if (text != null && text.isNotEmpty) {
+    var array = text.split(' ');
+    for (var item in array) {
+      var addItem = item.toString();
+      if (addItem.length > 1) {
+        result.add(item.toString());
+        var removedItem = RemoveSearchWordItem(item);
+        if (removedItem.length > 1 && !result.contains(removedItem)) result.add(removedItem);
+        // debugPrint('--> [$text] : $result / $removedItem');
+      }
+    }
+  }
+  return result;
+}
+
+// ignore: non_constant_identifier_names
+String RemoveSearchWordItem(String text) {
+  debugPrint('--> remove word: $text');
+  if (text.length > 1) {
+    var checkWord = ['있습니다','합니다','입니다','팝니다','부터','은','는','이','가','을','를','와',',','!','?','.'];
+    for (var word in checkWord) {
+      if (text.length > word.length) {
+        var item = text.substring(text.length - word.length, text.length);
+        if (item == word) {
+          debugPrint('--> check: $item / $word -> $text / ${text.substring(0, text.length - word.length)}');
+          return RemoveSearchWordItem(text.substring(0, text.length - word.length));
+        }
+      }
+    }
+    return text;
+  }
+  return '';
+}

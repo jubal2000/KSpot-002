@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:kspot_002/repository/user_repository.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/app_data.dart';
@@ -18,6 +19,7 @@ import '../../view_model/app_view_model.dart';
 
 class IntroScreen extends StatelessWidget {
   IntroScreen({Key? key}) : super(key: key);
+  final userRepo = UserRepository();
   final _api = Get.find<ApiService>();
 
   @override
@@ -86,10 +88,7 @@ class IntroScreen extends StatelessWidget {
                                   padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
                                   child: ElevatedButton(
                                       onPressed: () async {
-                                        if (AppData.loginInfo.loginId.isEmpty) {
-                                          final userCredential = await FirebaseAuth.instance.signInAnonymously();
-                                          LOG('--> userCredential : $userCredential');
-                                        }
+                                        await userRepo.startGuestUser();
                                         Get.toNamed(Routes.APP);
                                       },
                                       child: Text(

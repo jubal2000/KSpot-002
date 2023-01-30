@@ -7,17 +7,17 @@ import 'package:get/get.dart';
 import 'package:progressive_time_picker/progressive_time_picker.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../data/app_data.dart';
-import '../../data/common_sizes.dart';
-import '../../data/dialogs.dart';
-import '../../data/theme_manager.dart';
-import '../../utils/utils.dart';
-import '../../widget/edit/edit_list_widget.dart';
-import '../../widget/slide_timepicker_screen.dart';
+import '../data/app_data.dart';
+import '../data/common_sizes.dart';
+import '../data/dialogs.dart';
+import '../data/theme_manager.dart';
+import '../utils/utils.dart';
+import 'edit/edit_list_widget.dart';
+import 'slide_timepicker_screen.dart';
 
 
-class EventTimeSelectScreen extends StatefulWidget {
-  EventTimeSelectScreen(this.timeInfo, {Key? key, this.title = '', this.isEdit = false}) : super(key: key);
+class EventTimeSelectWidget extends StatefulWidget {
+  EventTimeSelectWidget(this.timeInfo, {Key? key, this.title = '', this.isEdit = false}) : super(key: key);
 
   JSON timeInfo;
   String title;
@@ -38,7 +38,7 @@ enum TextType {
 final weekText     = ['Every', '1st', '2nd', '3rd', '4th', 'Last'];
 final dayWeekText  = ['Every', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-class _EventTimeSelectState extends State<EventTimeSelectScreen> {
+class _EventTimeSelectState extends State<EventTimeSelectWidget> {
   final _textController  = List<TextEditingController>.generate(TextType.values.length, (index) => TextEditingController());
   final _tabText        = ['SELECT DAYS'.tr, 'SELECT PERIOD'.tr];
   final _selectColor    = Colors.purple;

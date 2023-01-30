@@ -248,7 +248,6 @@ class EventModel {
 
   addTagData(String tag) {
     tagData ??= [];
-    LOG('--> addTimeData : $tag / $tagData');
     if (!tagData!.contains(tag)) {
       tagData!.add(tag);
     }
@@ -269,12 +268,25 @@ class EventModel {
     return result;
   }
 
-  addOptionData(OptionData item) {
+  setOptionDataMap(JSON map) {
     optionData ??= [];
-    LOG('--> addTimeData : $item / $optionData');
-    if (!optionData!.contains(item)) {
-      optionData!.add(item);
+    optionData!.clear();
+    if (map.isNotEmpty) {
+      for (var item in map.entries) {
+        optionData!.add(OptionData(
+          id: item.key,
+          value: item.value
+        ));
+      }
     }
-    return optionData!.indexOf(item);
+    return optionData;
   }
+
+// addOptionData(OptionData item) {
+  //   optionData ??= [];
+  //   if (!optionData!.contains(item)) {
+  //     optionData!.add(item);
+  //   }
+  //   return optionData!.indexOf(item);
+  // }
 }

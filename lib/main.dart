@@ -97,7 +97,7 @@ class MyApp extends StatelessWidget {
               return child;
             },
             // initialRoute: AppData.loginInfo.loginId.isEmpty ? Routes.INTRO : Routes.APP,
-            initialRoute: Routes.EVENT_EDIT,
+            initialRoute: Routes.INTRO,
             getPages: [
               GetPage(
                 name: Routes.INTRO,

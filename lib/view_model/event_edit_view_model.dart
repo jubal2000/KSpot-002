@@ -16,9 +16,10 @@ import '../models/etc_model.dart';
 import '../models/event_group_model.dart';
 import '../models/event_model.dart';
 import '../models/place_model.dart';
+import '../repository/event_repository.dart';
 import '../utils/utils.dart';
 import '../view/follow/follow_screen.dart';
-import '../view/main_event/event_time_edit_screen.dart';
+import '../widget/event_time_edit_widget.dart';
 import '../view/main_my/target_profile.dart';
 import '../widget/card_scroll_viewer.dart';
 import '../widget/edit/edit_list_widget.dart';
@@ -28,20 +29,21 @@ class EventEditViewModel extends ChangeNotifier {
   EventModel?   editItem;
   PlaceModel?   placeInfo;
   BuildContext? buildContext;
-  final repo = UserRepository();
+  final userRepo  = UserRepository();
+  final eventRepo = EventRepository();
 
   // for Edit..
   final _imageGalleryKey  = GlobalKey();
-  JSON imageList = {};
+  JSON imageData = {};
   JSON managerData = {};
   JSON customData = {};
+  var titlePicKey = '';
 
-  var stepIndex = 2;
+  var stepIndex = 0;
   var stepMax = 3;
   var agreeMax = 1;
 
   var isShowOnly = false;
-  var isInputDone = false;
   var isEdited = false;
   var agreeChecked = false;
 
@@ -50,7 +52,7 @@ class EventEditViewModel extends ChangeNotifier {
       case 0: return agreeChecked;
       case 1: return placeInfo != null;
     }
-    return isInputDone;
+    return checkEditDone(false);
   }
 
   get editEventToJSON {
@@ -75,21 +77,24 @@ class EventEditViewModel extends ChangeNotifier {
   }
 
   get editOptionToJSON {
+    JSON result = {};
     if (editItem != null) {
-      return editItem!.getOptionDataMap;
+      for (var item in editItem!.getOptionDataMap.entries) {
+       result[item.key] = item.value['value'];
+      }
     }
-    return {};
-  }
-
-  get editReserveToJSON {
-    if (editItem != null) {
-      return editItem!.getOptionDataMap;
-    }
-    return {};
+    return result;
   }
 
   init(BuildContext context) {
     buildContext = context;
+  }
+
+  initData() {
+    imageData = {};
+    managerData = {};
+    customData = {};
+    titlePicKey = '';
     isEdited = false;
   }
 
@@ -104,7 +109,7 @@ class EventEditViewModel extends ChangeNotifier {
         var jsonItem = {'id': item.id, 'type': 0};
         if (item.url.isNotEmpty) jsonItem['url'] = item.url;
         if (item.data != null) jsonItem['data'] = item.data.toString();
-        imageList[item.id] = jsonItem;
+        imageData[item.id] = jsonItem;
       }
     }
   }
@@ -158,12 +163,13 @@ class EventEditViewModel extends ChangeNotifier {
             var key = Uuid().v1();
             var customInfo = AppData.INFO_CUSTOMFIELD[customId];
             var title = customInfo['titleEdit'] ?? customInfo['title'];
-            var addItem = {'id':key, 'title':title, 'customId':customId};
+            var addItem = {'id':key, 'title':title, 'customId':customId, 'parentId': customInfo['parentId']};
             if (customInfo['titleEx'] != null) addItem['titleEx'] = customInfo['titleEx'];
-            LOG("-->  showCustomFieldSelectDialog result : $customId / $addItem");
+            LOG("-->  showCustomFieldSelectDialog edit result : $customId / $addItem");
             customData[key] = addItem;
             editItem!.customData ??= [];
             editItem!.customData!.add(CustomData.fromJson(addItem));
+            notifyListeners();
           }
         });
         break;
@@ -201,7 +207,7 @@ class EventEditViewModel extends ChangeNotifier {
         break;
       case EditListType.manager:
         if (status == 0) {
-          var userInfo = await repo.getUserInfo(managerData[key]['id']);
+          var userInfo = await userRepo.getUserInfo(managerData[key]['id']);
           if (userInfo != null) {
             Get.to(() => TargetProfileScreen(userInfo))!.then((result) {
 
@@ -259,13 +265,23 @@ class EventEditViewModel extends ChangeNotifier {
     }
   }
 
-  onSettingChanged(String key, String value) {
-    editItem!.optionData ??= [];
-    editItem!.addOptionData(OptionData(
-      id: key,
-      value: BOL(value),
-    ));
+  onSettingChanged(JSON data) {
+    LOG('-----> onSettingChanged : $data');
+    editItem!.setOptionDataMap(data);
     isEdited = true;
+  }
+
+  checkCustomField(String id, [bool isParent = false]) {
+    if (isParent) {
+      for (var item in editItem!.getCustomDataMap.entries) {
+        if (item.value['parentId'] == id) {
+          return true;
+        }
+      }
+    } else {
+      return editItem!.getCustomDataMap[id] != null;
+    }
+    return false;
   }
 
   addTimeItem() {
@@ -273,7 +289,7 @@ class EventEditViewModel extends ChangeNotifier {
   }
 
   onEditTime(JSON editField, [bool isEdit = true]) {
-    Get.to(() => EventTimeSelectScreen(editField, isEdit: isEdit))!.then((result) {
+    Get.to(() => EventTimeSelectWidget(editField, isEdit: isEdit))!.then((result) {
       LOG('-----> EventTimeSelectScreen result : $result');
       if (result != null) {
         try {
@@ -284,6 +300,7 @@ class EventEditViewModel extends ChangeNotifier {
           editItem!.timeData ??= [];
           editItem!.addTimeData(addItem);
           isEdited = true;
+          notifyListeners();
           LOG('=======> timeData result : ${addItem.toJson()}');
         } catch (e) {
           LOG('--> timeData error : $e');
@@ -293,7 +310,7 @@ class EventEditViewModel extends ChangeNotifier {
   }
 
   setImageData() {
-    editItem!.picData = imageList.entries.map((item) => PicData.fromJson(item.value)).toList();
+    editItem!.picData = imageData.entries.map((item) => PicData.fromJson(item.value)).toList();
     LOG('----> setImageData: ${editItem!.picData!.length}');
   }
 
@@ -302,28 +319,30 @@ class EventEditViewModel extends ChangeNotifier {
     if (pickList.isNotEmpty) {
       for (var i=0; i<pickList.length; i++) {
         var image = pickList[i];
-        var imageUrl   = await ShowImageCroper(image.path);
-        var imageData  = await ReadFileByte(imageUrl);
-        var resizeData = await resizeImage(imageData!, IMAGE_SIZE_MAX) as Uint8List;
+        var url   = await ShowImageCroper(image.path);
+        var data  = await ReadFileByte(url);
+        var resizeData = await resizeImage(data!, IMAGE_SIZE_MAX) as Uint8List;
         var key = Uuid().v1();
-        imageList[key] = PicData(id: key, type: 0, url: '', data: String.fromCharCodes(resizeData)).toJson();
-        LOG('----> picLocalImage: ${imageList[key]}');
+        imageData[key] = PicData(id: key, type: 0, url: '', data: String.fromCharCodes(resizeData)).toJson();
+        LOG('----> picLocalImage: ${imageData[key]}');
         if (editItem!.pic.isEmpty) editItem!.pic = key;
       }
+      setImageData();
       notifyListeners();
     }
   }
 
   showImageSelector() {
-    LOG('----> showImageSelector: ${imageList.length}');
-    for (var item in imageList.entries) {
+    LOG('----> showImageSelector: ${imageData.length}');
+    for (var item in imageData.entries) {
       LOG('  -- ${item.value}');
     }
     return ImageEditScrollViewer(
-        imageList,
+        imageData,
         key: _imageGalleryKey,
         title: 'EVENT PHOTO *'.tr,
         addText: 'Photo Add'.tr,
+        selectedId: titlePicKey,
         selectText: '[first]'.tr,
         selectTextStyle: TextStyle(fontSize: 11.0, fontWeight: FontWeight.bold, color: Colors.purple,
             shadows: outlinedText(strokeWidth: 1, strokeColor: Colors.white.withOpacity(0.5))),
@@ -334,12 +353,12 @@ class EventEditViewModel extends ChangeNotifier {
               break;
             }
             case 2: {
-              imageList.remove(key);
+              imageData.remove(key);
               notifyListeners();
               break;
             }
             default: {
-              editItem!.pic = key;
+              titlePicKey = key;
             }
           }
         }
@@ -354,10 +373,34 @@ class EventEditViewModel extends ChangeNotifier {
   moveNextStep() {
     if (stepIndex + 1 < stepMax) {
       stepIndex++;
+      initData();
       notifyListeners();
     } else {
+      if (checkEditDone(true)) {
+        uploadNewEvent();
+      }
       // Get.to(() => SignupStepDoneScreen());
     }
+  }
+
+  checkEditDone(showAlert) {
+    if (editItem!.picData == null || editItem!.picData!.isEmpty) {
+      if (showAlert) showAlertDialog(buildContext!, 'Upload Failed'.tr, 'Please enter select picture..'.tr, '', 'OK'.tr);
+      return false;
+    }
+    if (editItem!.title.isEmpty) {
+      if (showAlert) showAlertDialog(buildContext!, 'Upload Failed'.tr, 'Please enter event title..'.tr, '', 'OK'.tr);
+      return false;
+    }
+    if (editItem!.timeData == null || editItem!.timeData!.isEmpty) {
+      if (showAlert) showAlertDialog(buildContext!, 'Upload Failed'.tr, 'Please enter event time..'.tr, '', 'OK'.tr);
+      return false;
+    }
+    if (editItem!.managerData == null || editItem!.managerData!.isEmpty) {
+      if (showAlert) showAlertDialog(buildContext!, 'Upload Failed'.tr, 'Please enter select manager..'.tr, '', 'OK'.tr);
+      return false;
+    }
+    return true;
   }
 
   moveBackStep() {
@@ -365,6 +408,84 @@ class EventEditViewModel extends ChangeNotifier {
       stepIndex--;
       notifyListeners();
     }
+  }
+
+  uploadNewEvent() async {
+    // upload new images..
+    editItem!.picData = null;
+    if (imageData.isNotEmpty) {
+      var upCount = 0;
+      for (var item in imageData.entries) {
+        if (item.value['data'] != null && (item.value['url'] == null || item.value['url'].isEmpty)) {
+          var result = await eventRepo.uploadImageInfo(item.value as JSON);
+          if (result != null) {
+            editItem!.picData ??= [];
+            editItem!.picData!.add(PicData(
+              id: item.key,
+              type: 0,
+              url: result,
+            ));
+            if (titlePicKey.isNotEmpty && titlePicKey == item.key) {
+              // set title pic..
+              editItem!.pic = result;
+            }
+            upCount++;
+          }
+        }
+      }
+      LOG('---> image upload done : $upCount');
+    }
+    // set uploaded images url..
+    for (var item in imageData.entries) {
+      if (item.value['url'] != null && item.value['url'].isNotEmpty) editItem!.picData!.add(PicData.fromJson(item.value));
+    }
+    // upload customField image..
+    if (editItem!.customData != null) {
+      var upCount = 0;
+      for (var item in editItem!.customData!) {
+        if (item.data != null) {
+          var result = await eventRepo.uploadImageData(item as PicData, 'eventCustom_img');
+          if (result != null) {
+            item.url = result;
+            item.data = null;
+            upCount++;
+          }
+        }
+      }
+      LOG('---> custom image upload done : $upCount');
+    }
+
+    // // add pic..
+    // if (titlePicKey.isNotEmpty) {
+    //   var result = await eventRepo.uploadImageData(
+    //       _titlePic['0'], 'eventPic_img');
+    //   if (result != null) {
+    //     _eventInfo['pic'] = result;
+    //   }
+    //   LOG('---> pic image upload done : ${_eventInfo['imageData'].length} / $upCount');
+    // }
+    // clean option data..
+    if (placeInfo != null) {
+      editItem!.country       = placeInfo!.country;
+      editItem!.countryState  = placeInfo!.countryState;
+    } else {
+      editItem!.country       = AppData.currentCountry;
+      editItem!.countryState  = AppData.currentState;
+    }
+    // set status..
+    editItem!.status = editItem!.optionData == null || BOL(editItem!.getOptionDataMap['open']) ? 1 : 2;
+    // set search data..
+    editItem!.searchData = CreateSearchWordList(editItem!.toJson());
+
+    showLoadingDialog(buildContext!, 'Uploading now...');
+    eventRepo.addEventItem(editItem!).then((result) {
+      hideLoadingDialog();
+      if (result != null) {
+        showAlertDialog(buildContext!, 'Upload'.tr, 'Event Upload Complete'.tr, '', 'OK'.tr);
+      } else {
+        showAlertDialog(buildContext!, 'Upload'.tr, 'Event Upload Failed'.tr, '', 'OK'.tr);
+      }
+    });
   }
 
   @override

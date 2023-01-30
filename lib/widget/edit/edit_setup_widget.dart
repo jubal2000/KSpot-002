@@ -19,7 +19,7 @@ class EditSetupWidget extends StatefulWidget {
   JSON optionInfo; // INFO_GOODS_OPTION...
   JSON customData;
   List<JSON> showOption;
-  Function(String, String)? onDataChanged;
+  Function(JSON)? onDataChanged;
 
   bool showAllButton;
 
@@ -32,6 +32,13 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
   JSON _linkList = {};
   int _optionCount = 0;
   bool _isShowAll = true;
+  BuildContext? _context;
+
+  initData() {
+    setState(() {
+      initLink();
+    });
+  }
 
   initLink() {
     _linkList = {};
@@ -76,7 +83,6 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
                 STR(showItem['showId']) == item.value['parent'] ||
                 STR(showItem['showId']) == item.value['parent_rev']) {
               _isAdd = BOL(showItem['value']);
-              LOG('--> set default option data : ${STR(showItem['showId'])} => ${_isAdd ? 'Add' : 'No'}');
               break;
             }
           }
@@ -85,12 +91,13 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
           // if (BOL(item.value['value']) && !widget.optionData.containsKey(item.key)) {
           //   widget.optionData[item.key] = '1';
           // }
+          widget.optionData[item.key] ??= item.value['value'];
           _optionCount++;
           _itemList.add(SwitchListTile(
             key: Key(item.value['index'].toString()),
             title: Text(STR(item.value['title']), style: ItemTitleStyle(context)),
             secondary: item.value['parent'] != null || item.value['parent_rev'] != null ? Image.asset(
-                'assets/ui/sub_line_00.png', color: Colors.white70) : null,
+                'assets/ui/sub_line_00.png', color: Theme.of(_context!).hintColor) : null,
             contentPadding: EdgeInsets.all(0),
             subtitle: Text(DESC(item.value['desc']), style: DescBodyExStyle(context)),
             dense: true,
@@ -111,7 +118,6 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
       _linkList.forEach((key, value) {
         value['list'].forEach((item) {
           if (item == checkKey) {
-            log('--> item : $item => $value / ${widget.optionData[key]} ($key)');
             if (value['type'] == 0 && !BOL(widget.optionData[key])) result = false;
             if (value['type'] == 1 && BOL(widget.optionData[key])) result = false;
           }
@@ -124,20 +130,17 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
   setSwitch(String key, bool value) {
     if (value) value = checkLink(key);
     setState(() {
-      int nowCount = 0;
-      int maxCount = 0;
       widget.optionData[key] = value ? '1' : '';
       if (_linkList[key] != null &&
           ((_linkList[key]['type'] == 0 && !BOL(widget.optionData[key])) ||
            (_linkList[key]['type'] == 1 && BOL(widget.optionData[key])))) {
           _linkList[key]['list'].forEach((itemKey) {
-            maxCount++;
             widget.optionData[itemKey] = '';
         });
       }
       checkSwitchAll();
       refreshSwitch();
-      if (widget.onDataChanged != null) widget.onDataChanged!(key, widget.optionData[key]);
+      if (widget.onDataChanged != null) widget.onDataChanged!(widget.optionData);
     });
   }
 
@@ -155,10 +158,10 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
                 widget.optionData[itemKey] = '';
               });
             }
-            if (widget.onDataChanged != null) widget.onDataChanged!(key, widget.optionData[key]);
         }
       }
       refreshSwitch();
+      if (widget.onDataChanged != null) widget.onDataChanged!(widget.optionData);
     });
   }
 
@@ -170,12 +173,6 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
     _isShowAll = nowCount > 0;
   }
 
-  initData() {
-    setState(() {
-      initLink();
-    });
-  }
-
   @override
   void initState() {
     initLink();
@@ -185,6 +182,7 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
   @override
   Widget build(BuildContext context) {
     // print('--> widget.optionInfo : ${widget.optionData} / ${widget.optionInfo}');
+    _context = context;
     refreshSwitch();
     return Container(
       padding: EdgeInsets.symmetric(vertical: 5),

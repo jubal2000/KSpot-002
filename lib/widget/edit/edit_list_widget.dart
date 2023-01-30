@@ -112,9 +112,9 @@ class _EditListSortState extends State<EditListWidget> {
       _itemList = _listData.map((item) {
         LOG('----> _itemList item : $item');
         JSON data = {
-          'image': widget.listItem[item['id']] != null ? STR(widget.listItem[item['id']]['icon']) : '',
           'title': item[showTextField[widget.type.index]] ?? '',
-          'desc': item['desc'] ?? item['titleEx'] ?? '',
+          'desc' : item['desc'] ?? item['titleEx'] ?? '',
+          'pic'  : widget.listItem[item['id']] != null ? STR(widget.listItem[item['id']]['icon']) : '',
         };
         switch (widget.type) {
           case EditListType.reserve:
@@ -136,8 +136,8 @@ class _EditListSortState extends State<EditListWidget> {
               _listData.indexOf(item),
               itemIcon[widget.type.index],
               data,
-              item['image'],
-              item['backPic'],
+              item['data'],
+              item['url'],
               ItemTitleStyle(context),
               widget.isCanMove,
               BOL(item['disabled']),
@@ -251,7 +251,7 @@ class _EditListSortState extends State<EditListWidget> {
       var imageData = await ReadFileByte(imageUrl);
       imageData = await resizeImage(imageData!.buffer.asUint8List(), 512) as Uint8List;
       setState(() {
-        widget.listItem[key]['image'] = imageData;
+        widget.listItem[key]['data'] = imageData;
         if (widget.onListItemChanged != null) widget.onListItemChanged!(widget.type, widget.listItem);
       });
     }
@@ -347,7 +347,7 @@ class _EditListSortState extends State<EditListWidget> {
 }
 // String image, String title, String desc
 Widget EditListItem(BuildContext context, EditListType type, String key, int index,
-    IconData icon, JSON data, dynamic imageData, String? backPic,
+    IconData icon, JSON data, dynamic imageData, String? imageUrl,
     TextStyle style, bool isCanMove, bool isDisabled, Function(EditListType, String, int)? onCallback, {String iconEx = ''}) {
   final _textController = TextEditingController();
   final _descStyle = TextStyle(color: Theme.of(context).hintColor, fontWeight: FontWeight.normal, fontSize: 14);
@@ -413,14 +413,14 @@ Widget EditListItem(BuildContext context, EditListType type, String key, int ind
                       child: Text(STR(data['title']), style: _textStyle),
                     ),
                     SizedBox(width: 5),
-                    if (backPic != null)
-                      showImage(backPic, Size(_height - 10, _height - 10), fit: BoxFit.fitHeight),
-                    if (backPic == null && imageData != null)
+                    if (imageUrl != null)
+                      showImage(imageUrl, Size(_height - 10, _height - 10), fit: BoxFit.fitHeight),
+                    if (imageUrl == null && imageData != null)
                       SizedBox(
                         height: _height - 10,
                         child: Image.memory(imageData as Uint8List, fit: BoxFit.fitHeight),
                       ),
-                    if (backPic == null && imageData == null)
+                    if (imageUrl == null && imageData == null)
                       Expanded(
                         child: Container(
                           padding: EdgeInsets.all(10),

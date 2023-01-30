@@ -622,7 +622,7 @@ class CSCPickerState extends State<CSCPicker> {
   ///Read JSON country data from assets
   Future<dynamic> getResponse() async {
     var res = await rootBundle
-        .loadString('packages/csc_picker/lib/assets/country.json');
+        .loadString('assets/data/country.json');
     return jsonDecode(res);
   }
 

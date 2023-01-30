@@ -73,7 +73,10 @@ CustomData _$CustomDataFromJson(Map<String, dynamic> json) => CustomData(
       id: json['id'] as String,
       title: json['title'] as String,
       customId: json['customId'] as String,
+      parentId: json['parentId'] as String,
       desc: json['desc'] as String?,
+      url: json['url'] as String?,
+      data: json['data'] as String?,
     );
 
 Map<String, dynamic> _$CustomDataToJson(CustomData instance) =>
@@ -81,7 +84,10 @@ Map<String, dynamic> _$CustomDataToJson(CustomData instance) =>
       'id': instance.id,
       'title': instance.title,
       'customId': instance.customId,
+      'parentId': instance.parentId,
       'desc': instance.desc,
+      'url': instance.url,
+      'data': instance.data,
     };
 
 PicData _$PicDataFromJson(Map<String, dynamic> json) => PicData(
@@ -115,7 +121,7 @@ Map<String, dynamic> _$CountryDataToJson(CountryData instance) =>
 
 OptionData _$OptionDataFromJson(Map<String, dynamic> json) => OptionData(
       id: json['id'] as String,
-      value: json['value'] as bool,
+      value: json['value'] as String,
     );
 
 Map<String, dynamic> _$OptionDataToJson(OptionData instance) =>

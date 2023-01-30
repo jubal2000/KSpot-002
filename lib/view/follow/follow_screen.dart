@@ -43,8 +43,10 @@ class FollowScreenState extends State<FollowScreen> {
 
   refreshTab() {
     _tabList = [
-      FollowTab(0, "FOLLOW".tr  , AppData.followData, isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
-      FollowTab(1, "FOLLOWER".tr, AppData.followData, isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
+      FollowTab(0, "FOLLOW".tr  , AppData.followData, selectData: widget.selectData,
+          isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
+      FollowTab(1, "FOLLOWER".tr, AppData.followData, selectData: widget.selectData,
+          isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
     ];
   }
 

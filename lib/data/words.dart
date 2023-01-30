@@ -60,11 +60,17 @@ class Words extends Translations {
       'Event Add': '이벤트 추가',
       'Event Edit': '이벤트 수정',
       'Event Information': '이벤트 정보',
+      'Please enter select picture..': '이벤트 사진을 선택해 주세요..',
       'Please enter event title..': '이벤트 제목을 입력해 주세요..',
       'Please enter event description..': '이벤트 내용을 입력해 주세요..',
+      'Please enter event time..': '이벤트 시간을 입력해 주세요..',
+      'Please enter select manager..': '이벤트 관리자를 선택해 주세요..',
       'TITLE': '제목',
       'IMAGE': '사진',
       '[first]': '[대표이미지]',
+      'Upload Failed': '업로드 실패',
+      'Event Upload Failed': '이벤트 업로드에 실패했습니다',
+      'Event Upload Complete': '이벤트 업로드 완료',
 
       // main_event
       'There are no events': '이벤트가 없습니다',

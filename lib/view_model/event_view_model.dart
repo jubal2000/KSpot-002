@@ -16,7 +16,7 @@ import '../models/event_group_model.dart';
 import '../models/event_model.dart';
 import '../models/place_model.dart';
 import '../utils/utils.dart';
-import '../view/main_event/event_time_edit_screen.dart';
+import '../widget/event_time_edit_widget.dart';
 import '../widget/card_scroll_viewer.dart';
 import '../widget/edit/edit_list_widget.dart';
 import '../widget/event_group_dialog.dart';

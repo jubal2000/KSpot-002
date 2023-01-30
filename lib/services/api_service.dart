@@ -325,8 +325,9 @@ class ApiService extends GetxService {
       var ref = firestore!.collection(UserCollection);
       var key = ref.doc().id;
       LOG('--> createNewUser $key : $newUser');
-
-      newUser['id'] = key;
+      if (newUser['id'] == null || newUser['id'].isEmpty) {
+        newUser['id'] = key;
+      }
       newUser['status'] = status;
       newUser['createTime'] = CURRENT_SERVER_TIME();
 
@@ -620,8 +621,8 @@ class ApiService extends GetxService {
 
   final EventCollection = 'data_event';
   
-  Future<JSON> getEventList(String groupId, String country, [String countryState = '']) async {
-    LOG('--> getPlaceEventList : $groupId / $country / $countryState');
+  Future<JSON> getEventListFromCountry(String groupId, String country, [String countryState = '']) async {
+    LOG('--> getEventListFromCountry : $groupId / $country / $countryState');
     JSON result = {};
     var ref = firestore!.collection(EventCollection);
     var query = ref.where('status', isEqualTo: 1);
@@ -642,10 +643,10 @@ class ApiService extends GetxService {
       LOG('--> add event : ${doc.data()['id']}');
     }
     result = await cleanEventExpire(result);
-    LOG('--> getPlaceEventList result : ${result.length}');
+    LOG('--> getEventListFromCountry result : ${result.length}');
     return result;
   }
-  
+
   Future<JSON> getEventLinkDataAll(List<dynamic>? linkList) async {
     log('--> getEventLinkDataAll : $linkList');
     JSON result = {};
@@ -2379,10 +2380,10 @@ class ApiService extends GetxService {
   //
   
   Future? uploadImageData(JSON imageInfo, String path) async {
-    if (imageInfo['image'] != null) {
+    if (imageInfo['data'] != null) {
       try {
         final ref = FirebaseStorage.instance.ref().child('$path/${imageInfo['id']}');
-        var uploadTask = ref.putData(imageInfo['image']);
+        var uploadTask = ref.putData(imageInfo['data']);
         var snapshot = await uploadTask;
         if (snapshot.state == TaskState.success) {
           var imageUrl = await snapshot.ref.getDownloadURL();

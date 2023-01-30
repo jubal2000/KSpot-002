@@ -153,7 +153,7 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
               key:_setupKey,
               customData: _viewModel.editCustomToJSON,
               showOption: [
-                {'showId': 'reserv' , 'value': _viewModel.editCustomToJSON.isNotEmpty},
+                {'showId': 'reserv' , 'value': _viewModel.checkCustomField('reserve', true)},
               ],
               onDataChanged: _viewModel.onSettingChanged),
           SizedBox(height: UI_LIST_TEXT_SPACE_L),

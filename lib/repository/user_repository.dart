@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/services/api_service.dart';
 
@@ -10,16 +11,57 @@ import '../models/user_model.dart';
 class UserRepository {
   final api = Get.find<ApiService>();
 
+  //----------------------------------------------------------------------------
+  //  user signup & sign in
+  //
+
+  Future<UserModel?> startGuestUser() async {
+    if (AppData.loginInfo.loginId.isEmpty) {
+      final userCred = await FirebaseAuth.instance.signInAnonymously();
+      LOG('--> userCredential : $userCred');
+      if (userCred.user != null) {
+        setLoginUserInfo(userCred.user!);
+      } else {
+        return null;
+      }
+    }
+    return await getGuestUserInfo();
+  }
+
+  setLoginUserInfo(User user) {
+    AppData.loginInfo.loginId   = STR(user.uid);
+    AppData.loginInfo.email     = STR(user.email);
+    AppData.loginInfo.nickName  = STR(user.displayName);
+    AppData.loginInfo.pic       = STR(user.photoURL);
+  }
+
+  getGuestUserInfo() async {
+    final orgUser = await getStartUserInfo(AppData.loginInfo.loginId);
+    if (orgUser != null) {
+      AppData.userInfo = orgUser;
+      return orgUser;
+    } else {
+      final newUser = await createNewUser(UserModelEx.create(AppData.loginInfo.loginId, 'guest'));
+      if (newUser != null) {
+        AppData.userInfo = newUser;
+        return newUser;
+      }
+    }
+    return null;
+  }
+
   Future<UserModel?> getStartUserInfo(String loginId) async {
     try {
       final response = await api.getStartUserInfo(loginId);
-      final jsonData = UserModel.fromJson(FROM_SERVER_DATA(response));
-      LOG("--> getStartUserInfo result: ${jsonData.toJson()}");
-      return jsonData;
+      LOG("--> getStartUserInfo result: $response");
+      if (response != null) {
+        final jsonData = UserModel.fromJson(FROM_SERVER_DATA(response));
+        return jsonData;
+      }
     } catch (e) {
       LOG("--> getStartUserInfo error: $e");
-      throw e.toString();
     }
+    return null;
   }
 
   Future<UserModel?> getUserInfo(String userId) async {

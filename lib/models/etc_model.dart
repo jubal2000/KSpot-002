@@ -73,12 +73,18 @@ class CustomData {
   String id;
   String title;
   String customId;
+  String parentId;
   String? desc;
+  String? url;
+  String? data;
   CustomData({
     required this.id,
     required this.title,
     required this.customId,
+    required this.parentId,
     this.desc,
+    this.url,
+    this.data,
   });
   factory CustomData.fromJson(JSON json) => _$CustomDataFromJson(json);
   JSON toJson() => _$CustomDataToJson(this);
@@ -87,14 +93,14 @@ class CustomData {
 @JsonSerializable()
 class PicData {
   String  id;
-  int     type; // 이미지 종류 (0:photo, 1:movie..)
+  int     type; // 이미지 종류 (0:photo or picture, 1:movie..)
   String  url;
   String? data;
   PicData({
     required this.id,
     required this.type,
     required this.url,
-    required this.data,
+    this.data,
   });
   factory PicData.fromJson(JSON json) => _$PicDataFromJson(json);
   JSON toJson() => _$PicDataToJson(this);
@@ -120,7 +126,7 @@ class CountryData {
 @JsonSerializable()
 class OptionData {
   String id;
-  bool   value;
+  String value;
   OptionData({
     required this.id,
     required this.value,

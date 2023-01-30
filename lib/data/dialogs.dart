@@ -60,7 +60,7 @@ Future showAlertDialog(BuildContext context,
                 width: MediaQuery.of(context).size.width * 0.9,
                 alignment: Alignment.center,
                 constraints: BoxConstraints(
-                    minHeight: 100
+                    minHeight: 80
                 ),
                 child: ListBody(
                     children: [

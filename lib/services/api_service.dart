@@ -525,7 +525,6 @@ class ApiService extends GetxService {
 
     if (snapshot.docs.isNotEmpty) {
       JSON result = FROM_SERVER_DATA(snapshot.docs.first.data());
-      LOG('--> getPlaceFromId result : $result');
       return result;
     }
     return null;
@@ -643,7 +642,7 @@ class ApiService extends GetxService {
       result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
       LOG('--> add event : ${doc.data()['id']}');
     }
-    result = await cleanEventExpire(result);
+    // result = await cleanEventExpire(result);
     LOG('--> getEventListFromCountry result : ${result.length}');
     return result;
   }
@@ -2384,9 +2383,9 @@ class ApiService extends GetxService {
     if (imageInfo['data'] != null) {
       try {
         final ref = FirebaseStorage.instance.ref().child('$path/${imageInfo['id']}');
-        List<int> list = utf8.encode(imageInfo['data']);
-        Uint8List bytes = Uint8List.fromList(list);
-        var uploadTask = ref.putData(bytes);
+        // List<int> list = utf8.encode(STR(imageInfo['data']));
+        // Uint8List bytes = Uint8List.fromList(list);
+        var uploadTask = ref.putData(imageInfo['data']);
         var snapshot = await uploadTask;
         if (snapshot.state == TaskState.success) {
           var imageUrl = await snapshot.ref.getDownloadURL();

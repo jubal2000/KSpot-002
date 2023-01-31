@@ -109,7 +109,7 @@ class EventEditViewModel extends ChangeNotifier {
       for (var item in editItem!.picData!) {
         var jsonItem = {'id': item.id, 'type': 0};
         if (item.url.isNotEmpty) jsonItem['url'] = item.url;
-        if (item.data != null) jsonItem['data'] = item.data.toString();
+        // if (item.data != null) jsonItem['data'] = item.data.toString();
         imageData[item.id] = jsonItem;
       }
     }
@@ -324,7 +324,7 @@ class EventEditViewModel extends ChangeNotifier {
         var data  = await ReadFileByte(url);
         var resizeData = await resizeImage(data!, IMAGE_SIZE_MAX) as Uint8List;
         var key = Uuid().v1();
-        imageData[key] = PicData(id: key, type: 0, url: '', data: String.fromCharCodes(resizeData)).toJson();
+        imageData[key] = {'id': key, 'type': 0, 'url': '', 'data': resizeData};
         LOG('----> picLocalImage: ${imageData[key]}');
         if (editItem!.pic.isEmpty) editItem!.pic = key;
       }
@@ -337,6 +337,7 @@ class EventEditViewModel extends ChangeNotifier {
     LOG('----> showImageSelector: ${imageData.length}');
     for (var item in imageData.entries) {
       LOG('  -- ${item.value}');
+      if (titlePicKey.isEmpty) titlePicKey = item.key;
     }
     return ImageEditScrollViewer(
         imageData,
@@ -384,7 +385,7 @@ class EventEditViewModel extends ChangeNotifier {
   }
 
   checkEditDone(showAlert) {
-    if (editItem!.picData == null || editItem!.picData!.isEmpty) {
+    if (imageData.isEmpty) {
       if (showAlert) showAlertDialog(buildContext!, 'Upload Failed'.tr, 'Please enter select picture..'.tr, '', 'OK'.tr);
       return false;
     }
@@ -413,7 +414,8 @@ class EventEditViewModel extends ChangeNotifier {
   }
 
   uploadNewEvent() async {
-    showLoadingDialog(buildContext!, 'Uploading now...');
+    LOG('---> uploadNewEvent: $titlePicKey');
+    showLoadingDialog(buildContext!, 'Uploading now...'.tr);
     // upload new images..
     editItem!.picData = null;
     if (imageData.isNotEmpty) {
@@ -428,7 +430,7 @@ class EventEditViewModel extends ChangeNotifier {
               type: 0,
               url: result,
             ));
-            if (titlePicKey.isNotEmpty && titlePicKey == item.key) {
+            if (titlePicKey == item.key) {
               // set title pic..
               editItem!.pic = result;
             }
@@ -447,7 +449,12 @@ class EventEditViewModel extends ChangeNotifier {
       var upCount = 0;
       for (var item in editItem!.customData!) {
         if (item.data != null) {
-          var result = await eventRepo.uploadImageData(item as PicData, 'eventCustom_img');
+          // var result = await eventRepo.uploadImageData(item, 'eventCustom_img');
+          var result = await eventRepo.uploadImageInfo({
+            'id': item.id,
+            'type': 0,
+            'data': item.data,
+          }, 'eventCustom_img');
           if (result != null) {
             item.url = result;
             item.data = null;
@@ -471,15 +478,17 @@ class EventEditViewModel extends ChangeNotifier {
     editItem!.status = editItem!.optionData == null || BOL(editItem!.getOptionDataMap['open']) ? 1 : 2;
     // set search data..
     editItem!.searchData = CreateSearchWordList(editItem!.toJson());
+    editItem!.userId = AppData.USER_ID;
 
     eventRepo.addEventItem(editItem!).then((result) {
       hideLoadingDialog();
       if (result != null) {
-        showAlertDialog(buildContext!, 'Upload'.tr, 'Event Upload Complete'.tr, '', 'OK'.tr);
+        showAlertDialog(buildContext!, 'Upload'.tr, 'Event Upload Complete'.tr, '', 'OK'.tr).then((_) {
+          Get.back();
+        });
       } else {
         showAlertDialog(buildContext!, 'Upload'.tr, 'Event Upload Failed'.tr, '', 'OK'.tr);
       }
-      Get.back();
     });
   }
 

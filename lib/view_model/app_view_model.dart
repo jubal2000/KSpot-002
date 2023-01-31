@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:kspot_002/view_model/user_view_model.dart';
 import 'package:package_info/package_info.dart';
@@ -17,6 +18,7 @@ import '../models/start_model.dart';
 import '../repository/user_repository.dart';
 import '../services/api_service.dart';
 import '../services/local_service.dart';
+import '../view/main_event/event_edit_screen.dart';
 
 class MainMenuID {
   static int get hide     => 0;
@@ -34,10 +36,15 @@ class AppViewModel extends ChangeNotifier {
 
   var isShowDialog = false;
   var isCanStart = false;
-  var mainMenuIndex = 0;
+  BuildContext? buildContext;
 
   // app bar..
-  var appbarMenuMode = MainMenuID.hide;
+  var appbarMenuMode = MainMenuID.event;
+  var menuIndex = 0;
+
+  init(BuildContext context) {
+    buildContext = context;
+  }
 
   setCanStart(value) {
     isCanStart = value;
@@ -45,11 +52,13 @@ class AppViewModel extends ChangeNotifier {
   }
 
   setMainIndex(index) {
-    mainMenuIndex = index;
+    menuIndex = index;
+    appbarMenuMode = index == 0 ? MainMenuID.event : MainMenuID.story;
+    LOG('--> setMainIndex : $index');
     notifyListeners();
   }
 
-  Future<bool> checkAppUpdate(BuildContext context, VersionData serverVersionData) async {
+  Future<bool> checkAppUpdate(VersionData serverVersionData) async {
     if (isShowDialog) return false;
     isShowDialog = true;
     LOG('--> checkAppUpdate : ${serverVersionData.toJson()}');
@@ -61,12 +70,11 @@ class AppViewModel extends ChangeNotifier {
     // final version = ''; // for Dev..
     LOG('--> version : $isForceUpdate / $versionLocal / $versionServer');
     if (checkVersionString(APP_VERSION, versionServer, versionLocal ?? '')) {
-      var dlgResult = await showAppUpdateDialog(context,
+      var dlgResult = await showAppUpdateDialog(buildContext!,
         'New Version',
         '$APP_VERSION > $versionServer',
         isForceUpdate: isForceUpdate,
       );
-      LOG('--> showAppUpdateDialog result : $dlgResult');
       switch (dlgResult) {
         case 1: // move market..
           StoreRedirect.redirect(
@@ -133,6 +141,74 @@ class AppViewModel extends ChangeNotifier {
         notifyListeners();
       }
     );
+  }
+
+  showAddMenu(iconColor, iconSize) {
+    if (appbarMenuMode == MainMenuID.event || appbarMenuMode == MainMenuID.story || appbarMenuMode == MainMenuID.my) {
+      return DropdownButtonHideUnderline(
+        child: DropdownButton2(
+          customButton: Center(
+            child: Icon(Icons.add, color: iconColor),
+          ),
+          items: [
+            if (appbarMenuMode == MainMenuID.event)
+              ...DropdownItems.eventAddItem.map(
+                    (item) =>
+                    DropdownMenuItem<DropdownItem>(
+                      value: item,
+                      child: DropdownItems.buildItem(buildContext!, item),
+                    ),
+              ),
+            if (appbarMenuMode == MainMenuID.story)
+              ...DropdownItems.storyAddItem.map(
+                    (item) =>
+                    DropdownMenuItem<DropdownItem>(
+                      value: item,
+                      child: DropdownItems.buildItem(buildContext!, item),
+                    ),
+              ),
+            if (appbarMenuMode == MainMenuID.my)
+              ...DropdownItems.homeAddItems.map(
+                    (item) =>
+                    DropdownMenuItem<DropdownItem>(
+                      value: item,
+                      child: DropdownItems.buildItem(buildContext!, item),
+                    ),
+              ),
+          ],
+          onChanged: (value) {
+            // if (!isCreatorMode()) {
+            //   showAlertYesNoDialog(context, 'CREATOR MODE', 'You need creator mode ON', 'Move to setting screen?', 'No', 'Yes').then((result) {
+            //     if (result == 1) {
+            //       Navigator.of(AppData.topMenuContext!).popUntil((r) => r.isFirst);
+            //       Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupScreen(moveTo: 'creator')));
+            //     }
+            //   });
+            //   return;
+            // }
+            var selected = value as DropdownItem;
+            LOG("--> selected.index : ${selected.type}");
+            switch (selected.type) {
+              case DropdownItemType.event:
+                Get.to(() => EventEditScreen())!.then((_) {
+                  notifyListeners();
+                });
+                break;
+              case DropdownItemType.story:
+                break;
+            }
+          },
+          itemHeight: 45,
+          dropdownWidth: 190,
+          buttonHeight: iconSize,
+          buttonWidth: iconSize,
+          itemPadding: const EdgeInsets.all(10),
+          offset: const Offset(0, 5),
+        ),
+      );
+    } else {
+      return Container();
+    }
   }
 
   Future<int> showAppUpdateDialog(BuildContext context, String desc, String? msg, {bool isForceUpdate = false }) async {

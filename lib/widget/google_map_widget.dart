@@ -26,8 +26,10 @@ enum MapButtonAction {
   bus,
 }
 
-class GooglePlaceListWidget extends StatefulWidget{
-  GooglePlaceListWidget(this.showLocation, {Key? key,
+
+
+class GoogleMapWidget extends StatefulWidget{
+  GoogleMapWidget(this.showLocation, {Key? key,
     this.mapHeight = 400,
     this.showMyLocation = true,
     this.showDirection = false,
@@ -50,10 +52,10 @@ class GooglePlaceListWidget extends StatefulWidget{
   // LatLng endLocation    = LatLng(27.6875436, 85.2751138);
 
   @override
-  _GooglePlaceListState createState() => _GooglePlaceListState();
+  _GoogleMapState createState() => _GoogleMapState();
 }
 
-class _GooglePlaceListState extends State<GooglePlaceListWidget> {
+class _GoogleMapState extends State<GoogleMapWidget> {
 
   GoogleMapController? mapController; //contrller for Google map
   PolylinePoints polylinePoints = PolylinePoints();
@@ -95,7 +97,7 @@ class _GooglePlaceListState extends State<GooglePlaceListWidget> {
     LatLng? targetLoc;
     // add normal marker..
     for (var item in widget.showLocation) {
-      var address = item['address1'];
+      var address = item['address'];
       if (address != null) {
         var loc = LatLng(DBL(address['lat']), DBL(address['lng']));
         targetLoc ??= loc;
@@ -118,10 +120,11 @@ class _GooglePlaceListState extends State<GooglePlaceListWidget> {
     }
     // replace image marker..
     for (var item in widget.showLocation) {
+      LOG('--> add Image Marker : ${STR(item['pic'])}');
       getMarkerImage(STR(item['pic'])).then((icon) {
         if (icon != null) {
-          LOG('--> add Image Marker [${STR(item['pic'])}] : $icon / $markerSize');
-          var address = item['address1'];
+          LOG('--> getMarkerImage result : $icon / $markerSize');
+          var address = item['address'];
           if (address != null) {
             setState(() {
               markers.add(Marker( //add distination location marker
@@ -310,8 +313,11 @@ class _GooglePlaceListState extends State<GooglePlaceListWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final showPos = widget.showMyLocation && AppData.currentLocation != null ? AppData.currentLocation : LATLNG(widget.showLocation.first['address1']);
-    LOG('--> show GoogleMap : $showPos');
+    LOG('--> show GoogleMap : ${widget.showLocation.length}');
+    final showPos = widget.showMyLocation && AppData.currentLocation != null ?
+      AppData.currentLocation : widget.showLocation.isNotEmpty ?
+      LATLNG(widget.showLocation.first['address']): LatLng(37.55594599, 126.972317);
+    LOG('--> showPos : $showPos');
 
     return PointerInterceptor(
       child: SizedBox(

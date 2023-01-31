@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KSpot</string>
+    <string name="facebook_app_id">586197339864746</string>
+    <string name="fb_login_protocol_scheme">fb586197339864746</string>
+    <string name="facebook_client_token">568ebb30a8d85ac59727b847d8ad201a</string>
+    <string name="kakao_app_key">ad7e5bd7541fc42505617dae3cd98ea2</string>
+    <string name="naver_id">8iNdRT5D2LZbG_2v1JsF</string>
+    <string name="naver_secret">8wBtabva0M</string>
+    <string name="google_apikey">AIzaSyB4BgTVRI400uwFkTuH1YvSDfaKtdLpij8</string>
+    <string name="default_notification_channel_id" translatable="false">noti_channel_00</string>
+    <string name="naver_client_id">5hbndwcqsy</string>
+    <string name="naver_client_key">zaRo5fO7IbJCaMu5cdhoXS64J3ICpCbV7tLhPID9</string>
+</resources>

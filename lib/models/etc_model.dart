@@ -95,12 +95,10 @@ class PicData {
   String  id;
   int     type; // 이미지 종류 (0:photo or picture, 1:movie..)
   String  url;
-  String? data;
   PicData({
     required this.id,
     required this.type,
     required this.url,
-    this.data,
   });
   factory PicData.fromJson(JSON json) => _$PicDataFromJson(json);
   JSON toJson() => _$PicDataToJson(this);

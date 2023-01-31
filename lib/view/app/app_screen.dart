@@ -9,12 +9,13 @@ import 'package:kspot_002/view/main_event/event_screen.dart';
 import 'package:kspot_002/view/main_story/story_screen.dart';
 import 'package:provider/provider.dart';
 
+import '../../data/app_data.dart';
 import '../../data/theme_manager.dart';
 import '../../view_model/app_view_model.dart';
+import 'app_top_menu.dart';
 
 class AppScreen extends StatelessWidget {
   AppScreen({Key? key}) : super(key: key);
-  final _viewModel = AppViewModel();
   final _height = 40.0.w;
 
   List<Widget> pages = [
@@ -24,6 +25,7 @@ class AppScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppData.appViewModel.init(context);
     return WillPopScope(
       onWillPop: () async => await showDialog(
       context: context,
@@ -49,16 +51,27 @@ class AppScreen extends StatelessWidget {
         }
       ),
       child: SafeArea(
+        top: false,
         child: ChangeNotifierProvider<AppViewModel>.value(
-        value: _viewModel,
+        value: AppData.appViewModel,
         child: Consumer<AppViewModel>(
           builder: (context, viewModel, _) {
             return Consumer<ThemeNotifier>(
               builder: (context, theme, _) => Scaffold(
-                body: IndexedStack(
-                  key: ValueKey(_viewModel.mainMenuIndex),
-                  index: _viewModel.mainMenuIndex,
-                  children: pages,
+                body: Stack(
+                  children: [
+                    IndexedStack(
+                      key: ValueKey(viewModel.menuIndex),
+                      index: viewModel.menuIndex,
+                      children: pages,
+                    ),
+                    TopCenterAlign(
+                      child: SizedBox(
+                        height: UI_APPBAR_TOOL_HEIGHT.w * 1.7,
+                        child: AppTopMenuBar(MainMenuID.event, height: UI_APPBAR_TOOL_HEIGHT),
+                      )
+                    ),
+                  ]
                 ),
                 floatingActionButton: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -106,7 +119,8 @@ class AppScreen extends StatelessWidget {
                   ],
                 ),
                 bottomNavigationBar: Container(
-                  height: UI_MENU_BG_HEIGHT,
+                  height: UI_MENU_HEIGHT,
+                  color: Colors.transparent,
                   child: Stack(
                     children: [
                       BottomCenterAlign(
@@ -114,9 +128,9 @@ class AppScreen extends StatelessWidget {
                           height: UI_MENU_HEIGHT,
                           child: BottomNavigationBar(
                             onTap: (index) {
-                              _viewModel.setMainIndex(index);
+                              viewModel.setMainIndex(index);
                             },
-                            currentIndex: _viewModel.mainMenuIndex,
+                            currentIndex: viewModel.menuIndex,
                             selectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w600),
                             unselectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w400),
                             items: [

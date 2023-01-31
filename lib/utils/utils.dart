@@ -745,10 +745,14 @@ Widget showImageWidget(dynamic imagePath, BoxFit fit, {Color? color}) {
           fit: fit,
           color: color,
           imageUrl: url,
-          progressIndicatorBuilder: (context, url, progress) => CircularProgressIndicator(value: progress.progress),
+          progressIndicatorBuilder: (context, url, progress) => SizedBox(
+            width: 40,
+            height: 40,
+            child: CircularProgressIndicator(value: progress.progress),
+          )
         );
       } else if (url.contains('/cache')) {
-        return Image.file(File(url), color: color);
+        return Image.file(File(url), fit: fit, color: color);
       } else {
         return Image.asset(url, fit: fit, color: color);
       }
@@ -1029,6 +1033,8 @@ class DropdownItem {
 }
 
 class DropdownItems {
+  static const List<DropdownItem> eventAddItem    = [placeGroup, place, event];
+  static const List<DropdownItem> storyAddItem    = [story];
   static const List<DropdownItem> homeAddItems    = [placeGroup, place, event];
   static const List<DropdownItem> homeAddItem0    = [event, story];
   static const List<DropdownItem> homeAddItem10   = [place];

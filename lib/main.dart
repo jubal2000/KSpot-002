@@ -57,9 +57,9 @@ class MyApp extends StatelessWidget {
     // Make Fullscreen Mode..
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: []);
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.black,
-      statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.light,/* set Status bar icons color in Android devices.*/
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.dark,/* set Status bar icons color in Android devices.*/
     ));
 
     return ScreenUtilInit(

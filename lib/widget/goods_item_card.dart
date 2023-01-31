@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/widget/user_card_widget.dart';
+import 'package:kspot_002/widget/user_item_widget.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../data/app_data.dart';
@@ -30,6 +32,69 @@ enum GoodsItemCardSellType {
   goods,
   portfolio,
   place,
+  event,
+}
+
+class EventSquareItem extends GoodsItemCard {
+  EventSquareItem(
+      JSON itemData, {
+        Key? key,
+        GoodsItemCardType showType = GoodsItemCardType.square,
+        GoodsItemCardSellType sellType = GoodsItemCardSellType.event,
+        TextStyle titleStyle = const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.black),
+        TextStyle descStyle = const TextStyle(fontSize: 12, color: Colors.black87),
+        TextStyle extraStyle = const TextStyle(fontSize: 12, color: Colors.black),
+        TextStyle priceStyle = const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.purple),
+        TextStyle priceOrgStyle = const TextStyle(fontSize: 9, color: Colors.grey),
+        TextStyle ribbonStyle = const TextStyle(fontSize: 8, color: Colors.white),
+        Color ribbonColor = Colors.red,
+        Alignment descAlign = Alignment.centerLeft,
+        EdgeInsets padding = const EdgeInsets.fromLTRB(0, 5, 0, 5),
+        Color backgroundColor = Colors.transparent,
+        JSON? couponInfo,
+        int descMaxLine = 3,
+        double imageHeight = 60,
+        bool isSelected = false,
+        bool isSelectable = false,
+        bool isEditable = false,
+        showOutline = false,
+        isShowExtra = true,
+        outlineWidth = 3.0,
+        outlineColor = Colors.white,
+        cartId = '' ,
+        onChanged,
+        onSelected,
+        onShowDetail,
+      }) : super(
+    itemData,
+    key: key,
+    showType: showType,
+    sellType: sellType,
+    titleStyle: titleStyle,
+    descStyle: descStyle,
+    extraStyle: extraStyle,
+    priceStyle: priceStyle,
+    priceOrgStyle: priceOrgStyle,
+    ribbonStyle: ribbonStyle,
+    ribbonColor: ribbonColor,
+    descAlign: descAlign,
+    padding: padding,
+    backgroundColor: backgroundColor,
+    descMaxLine: descMaxLine,
+    imageHeight: imageHeight,
+    couponInfo: couponInfo,
+    isSelected: isSelected,
+    isSelectable: isSelectable,
+    isEditable: isEditable,
+    onChanged: onChanged,
+    onSelected: onSelected,
+    onShowDetail: onShowDetail,
+    cartId: cartId,
+    showOutline: showOutline,
+    outlineWidth: outlineWidth,
+    outlineColor: outlineColor,
+    isShowExtra: isShowExtra,
+  );
 }
 
 class ContentItem extends GoodsItemCard {
@@ -423,7 +488,7 @@ class GoodsItemCardState extends State<GoodsItemCard> {
             color: widget.backgroundColor,
             child: VisibilityDetector(
               onVisibilityChanged: (VisibilityInfo info) {
-                log("--> onVisibilityChanged [${widget.goodsData['id']}] : ${info.visibleFraction} / $_isDataReady - ${widget.goodsData['targetId']} / ${widget.goodsData['title']}");
+                // log("--> onVisibilityChanged [${widget.goodsData['id']}] : ${info.visibleFraction} / $_isDataReady - ${widget.goodsData['targetId']} / ${widget.goodsData['title']}");
                 if (info.visibleFraction > 0 && !_isDataReady && widget.goodsData['targetId'] != null) {
                   setState(() {
                     // _goodsDataInit = api.getGoodsDataFromId(widget.goodsData['targetId']);
@@ -445,32 +510,36 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                       },
                       child: Stack(children: [
                         Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             if (_goodsItem['pic'] != null) ...[
-                              Expanded(
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(roundCorner),
-                                    child: showImageFit(_goodsItem['pic']),
-                                  ),
+                              Container(
+                                constraints: BoxConstraints(
+                                  maxHeight: widget.imageHeight,
+                                  minWidth: double.infinity,
                                 ),
+                                child: showImageWidget(_goodsItem['pic'], BoxFit.cover),
                               ),
                               SizedBox(height: 5),
                             ],
-                            Text(STR(_goodsItem['title']), style: widget.titleStyle, maxLines: 1, textAlign: TextAlign.start),
-                            if (DESC(_goodsItem['desc']).isNotEmpty)...[
-                              SizedBox(height: 5),
-                              Text(STR(_goodsItem['desc']),
-                                  style: widget.descStyle,
-                                  maxLines: widget.descMaxLine,
-                                  textAlign: TextAlign.start),
-                            ],
-                            if (widget.showType != GoodsItemCardType.placeGroup)...[
-                              SizedBox(height: 5),
-                              priceTextStyle,
-                            ]
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.all(5),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(STR(_goodsItem['title']), style: widget.titleStyle, maxLines: 1, textAlign: TextAlign.start),
+                                    Text(DESC(_goodsItem['desc']),
+                                      style: widget.descStyle,
+                                      maxLines: widget.descMaxLine,
+                                      textAlign: TextAlign.center
+                                    ),
+                                    if (widget.showType != GoodsItemCardType.placeGroup)...[
+                                      UserIdCardOneWidget(_goodsItem['userId'])
+                                    ]
+                                  ],
+                                )
+                              )
+                            )
                           ],
                         ),
                         if (widget.isSelectable)
@@ -512,7 +581,7 @@ class GoodsItemCardState extends State<GoodsItemCard> {
               // color: Colors.yellow,
               child: VisibilityDetector(
                 onVisibilityChanged: (VisibilityInfo info) {
-                  log("--> onVisibilityChanged [${widget.goodsData['id']}] : ${info.visibleFraction} / $_isDataReady - ${widget.goodsData['targetId']} / ${widget.goodsData['title']}");
+                  // log("--> onVisibilityChanged [${widget.goodsData['id']}] : ${info.visibleFraction} / $_isDataReady - ${widget.goodsData['targetId']} / ${widget.goodsData['title']}");
                   if (info.visibleFraction > 0 && !_isDataReady && widget.goodsData['targetId'] != null) {
                     setState(() {
                       // _goodsDataInit = api.getGoodsDataFromId(widget.goodsData['targetId']);
@@ -655,7 +724,7 @@ class GoodsItemCardState extends State<GoodsItemCard> {
           ),
           child: VisibilityDetector(
             onVisibilityChanged: (VisibilityInfo info) {
-                log("--> onVisibilityChanged [${widget.goodsData['id']}] : ${info.visibleFraction} / $_isDataReady - ${widget.goodsData['targetId']} / ${widget.goodsData['title']}");
+                // log("--> onVisibilityChanged [${widget.goodsData['id']}] : ${info.visibleFraction} / $_isDataReady - ${widget.goodsData['targetId']} / ${widget.goodsData['title']}");
                 if (info.visibleFraction > 0 && !_isDataReady && widget.goodsData['targetId'] != null) {
                   setState(() {
                     // _goodsDataInit = api.getGoodsDataFromId(widget.goodsData['targetId']);
@@ -733,7 +802,7 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                               // if (widget.showType != GoodsItemCardType.placeGroup)...[
                               if (widget.isShowExtra)...[
                                 SizedBox(height: 3),
-                                priceTextStyle,
+                                priceTextStyle(),
                               ]
                             ],
                           ),
@@ -753,7 +822,7 @@ class GoodsItemCardState extends State<GoodsItemCard> {
     }
   }
 
-  Widget get priceTextStyle {
+  priceTextStyle() {
     var _iconColor = Theme.of(context).colorScheme.tertiary.withOpacity(0.5);
     switch (widget.showType) {
       case GoodsItemCardType.square:
@@ -792,19 +861,25 @@ class GoodsItemCardState extends State<GoodsItemCard> {
               {
                 return SizedBox(width: 1, height: 1);
               }
+            case GoodsItemCardSellType.event:
+              {
+                return Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Icon(Icons.sms, size: 12, color: _iconColor),
+                      SizedBox(width: 5),
+                      Text("${PRICE_STR(INT(_goodsItem['comments']))}", style: widget.descStyle),
+                      SizedBox(width: 10),
+                      Icon(Icons.favorite, size: 12, color: _iconColor),
+                      SizedBox(width: 5),
+                      Text("${PRICE_STR(INT(_goodsItem['likes']))}", style: widget.descStyle),
+                    ]
+                );
+              }
             default:
               {
                 return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
                   Text("${PRICE_STR(_curPrice)}원", style: widget.priceStyle),
-                  // SizedBox(width: 5),
-                  // Visibility(
-                  //   visible: _salePrice > 0 && _salePrice != _curPrice,
-                  //   child: Text("${PRICE_STR(_salePrice)}원",
-                  //     style: TextStyle(
-                  //         fontSize: widget.priceOrgStyle.fontSize,
-                  //         color: widget.priceOrgStyle.color,
-                  //         decoration: TextDecoration.lineThrough)),
-                  // ),
                   Expanded(
                     child: SizedBox(),
                   ),

@@ -9,6 +9,7 @@ import '../models/start_model.dart';
 import '../models/user_model.dart';
 import '../services/firebase_service.dart';
 import '../utils/utils.dart';
+import '../view_model/app_view_model.dart';
 
 const SCROLL_SPEED = 250;
 const APP_VERSION = '0.0.1';
@@ -54,7 +55,9 @@ class AppData {
 
   static var isDevMode = true;
 
-  static String defaultInfoID = 'info0001';
+  static var appViewModel = AppViewModel();
+
+  static var defaultInfoID = 'info0001';
 
   static StartModel? startInfo;
   static UserModel userInfo = UserModelEx.empty('');
@@ -93,6 +96,7 @@ class AppData {
   static JSON localInfo = {};
   static JSON infoData = {};
   static JSON timeData = {};
+  static JSON placeData = {};
   static JSON blockUserData = {}; // 차단된 유저 목록
   static JSON serviceQnAData = {};
   static Map<String, MessageModel> messageData = {};

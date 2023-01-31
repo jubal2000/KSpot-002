@@ -94,14 +94,12 @@ PicData _$PicDataFromJson(Map<String, dynamic> json) => PicData(
       id: json['id'] as String,
       type: json['type'] as int,
       url: json['url'] as String,
-      data: json['data'] as String?,
     );
 
 Map<String, dynamic> _$PicDataToJson(PicData instance) => <String, dynamic>{
       'id': instance.id,
       'type': instance.type,
       'url': instance.url,
-      'data': instance.data,
     };
 
 CountryData _$CountryDataFromJson(Map<String, dynamic> json) => CountryData(

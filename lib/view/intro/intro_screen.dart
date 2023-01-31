@@ -21,9 +21,11 @@ class IntroScreen extends StatelessWidget {
   IntroScreen({Key? key}) : super(key: key);
   final userRepo = UserRepository();
   final _api = Get.find<ApiService>();
+  final _viewModel = AppViewModel();
 
   @override
   Widget build(BuildContext context) {
+    _viewModel.init(context);
     return SafeArea(
       top: false,
       child: Scaffold(
@@ -35,14 +37,14 @@ class IntroScreen extends StatelessWidget {
               if (snapshot.hasData) {
                 LOG('--> snapshot.data : ${snapshot.data}');
                 final startData = StartModel.fromJson(snapshot.data as JSON);
-                return ChangeNotifierProvider<AppViewModel>(
-                  create: (_) => AppViewModel(),
+                return ChangeNotifierProvider.value(
+                  value:  _viewModel,
                   child: Consumer<AppViewModel>(builder: (context, viewModel, _) {
                     if (!viewModel.isCanStart) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         Future.delayed(const Duration(milliseconds: 500), () async {
                           var versionInfo = startData.appVersion[Platform.isAndroid ? 'android' : 'ios'];
-                          var result = await viewModel.checkAppUpdate(context, versionInfo!);
+                          var result = await viewModel.checkAppUpdate(versionInfo!);
                           LOG('--> checkAppUpdate result : $result');
                           if (result) {
                             viewModel.setCanStart(true);

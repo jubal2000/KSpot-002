@@ -38,6 +38,20 @@ class PlaceRepository {
     }
   }
 
+  Future<PlaceModel?> getPlaceFromId(String placeId) async {
+    try {
+      final response = await api.getPlaceFromId(placeId);
+      if (response != null) {
+        LOG('--> getPlaceFromId response : $response');
+        return PlaceModel.fromJson(response);
+      }
+    } catch (e) {
+      LOG('--> getPlaceFromId error : $e');
+      throw e.toString();
+    }
+    return null;
+  }
+
   Future<PlaceModel?> addPlaceItem(PlaceModel addItem) async {
     try {
       final response = await api.addPlaceItem(addItem.toJson());

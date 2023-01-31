@@ -16,7 +16,7 @@ class EventRepository {
     try {
       final response = await api.getEventListFromCountry(groupId, country, countryState);
       for (var item in response.entries) {
-        LOG('--> getEventListFromCountry item : ${item.value}');
+        LOG('--> getEventListFromCountry item : ${item.value['id']}');
         result[item.key] = EventModel.fromJson(item.value);
       }
       return result;
@@ -33,20 +33,13 @@ class EventRepository {
         return EventModel.fromJson(response);
       }
     } catch (e) {
-      LOG('--> addPlaceItem error : $e');
+      LOG('--> addEventItem error : $e');
       throw e.toString();
     }
     return null;
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////
-
-  Future<String?> uploadImageData(PicData data, [String path = 'event_img']) async {
-    return await api.uploadImageData({
-      'id': data.id,
-      'data': data.data
-    }, path);
-  }
 
   Future<String?> uploadImageInfo(JSON imageInfo, [String path = 'event_img']) async {
     return await api.uploadImageData(imageInfo, path);

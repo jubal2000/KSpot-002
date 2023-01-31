@@ -21,11 +21,6 @@ class StoryScreen extends StatelessWidget {
       value: StoryViewModel(),
       child: Consumer<StoryViewModel>(builder: (context, viewModel, _) {
         return Scaffold(
-          appBar: AppBar(
-            title: AppTopMenuBar(MainMenuID.story),
-            automaticallyImplyLeading: false,
-            toolbarHeight: UI_APPBAR_TOOL_HEIGHT.w,
-          ),
           body: viewModel.showMainList(context),
         );
       }),

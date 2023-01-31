@@ -231,12 +231,12 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
     LOG('--> UserIdCardWidget refresh : ${_userInfo['id']} / ${AppData.USER_ID}');
     if (_userInfo['id'] == AppData.USER_ID) {
       _isMyProfile = true;
-      if (_userInfo['pic'] != AppData.USER_PIC || _userInfo['nickName'] != AppData.USER_NICKNAME) {
-        LOG('--> UserListCardWidget Pic Update : ${_userInfo['pic']} / ${AppData.USER_PIC}');
-        _userInfo['pic' ] = AppData.USER_PIC;
-        _userInfo['nickName'] = AppData.USER_NICKNAME;
-        if (widget.onProfileChanged != null) widget.onProfileChanged!(_userInfo);
-      }
+      // if (_userInfo['pic'] != AppData.USER_PIC || _userInfo['nickName'] != AppData.USER_NICKNAME) {
+      //   LOG('--> UserListCardWidget Pic Update : ${_userInfo['pic']} / ${AppData.USER_PIC}');
+      //   _userInfo['pic' ] = AppData.USER_PIC;
+      //   _userInfo['nickName'] = AppData.USER_NICKNAME;
+      //   if (widget.onProfileChanged != null) widget.onProfileChanged!(_userInfo);
+      // }
     }
   }
 
@@ -274,6 +274,7 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
                     curve: Curves.easeIn,
                     duration: const Duration(milliseconds: 100),
                     child: Container(
+                      width: !_isOpen ? widget.size : null,
                         height: widget.size,
                         padding: EdgeInsets.only(right: widget.spacePadding),
                         child: ClipRRect(

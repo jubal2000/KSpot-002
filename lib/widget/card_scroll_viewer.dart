@@ -220,7 +220,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                                         child: widget.isThumbShow && item.value['thumb'] != null
                                             ? Image.memory(item.value['thumb'], fit: widget.backFit) :
                                         item.value['data'] != null
-                                            ? Image.memory(STRING_TO_UINT8LIST(STR(item.value['data'])), fit: widget.backFit) :
+                                            ? Image.memory(item.value['data'], fit: widget.backFit) :
                                         showImageWidget(item.value['url'], widget.backFit, color: widget.imageColor),
                                       ),
                                     ),

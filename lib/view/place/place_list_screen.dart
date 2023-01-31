@@ -296,7 +296,7 @@ class _PlaceListScreenState extends State<PlaceListScreen> with TickerProviderSt
                               ],
                               if (!widget.isSelectable)...[
                                 if (AppData.mainListType == HomeListType.map)...[
-                                  GooglePlaceListWidget(
+                                  GoogleMapWidget(
                                     _placeDataList.map((e) => e.toJson()).toList(),
                                     mapHeight: mapHeight,
                                     onMarkerSelected: (selectItem) {

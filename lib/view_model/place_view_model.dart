@@ -17,7 +17,7 @@ class PlaceViewModel extends ChangeNotifier {
   BuildContext? buildContext;
   PlaceModel? editItem;
   final _imageGalleryKey  = GlobalKey();
-  final JSON imageList = {};
+  final JSON imageData = {};
 
   init(BuildContext context) {
     buildContext = context;
@@ -33,14 +33,14 @@ class PlaceViewModel extends ChangeNotifier {
       for (var item in editItem!.picData!) {
         var jsonItem = {'id': item.id, 'type': 0};
         if (item.url.isNotEmpty) jsonItem['url'] = item.url;
-        if (item.data != null) jsonItem['data'] = item.data.toString();
-        imageList[item.id] = jsonItem;
+        // if (item.data != null) jsonItem['data'] = item.data.toString();
+        imageData[item.id] = jsonItem;
       }
     }
   }
 
   setImageData() {
-    editItem!.picData = imageList.entries.map((item) => PicData.fromJson(item.value)).toList();
+    editItem!.picData = imageData.entries.map((item) => PicData.fromJson(item.value)).toList();
     LOG('----> setImageData: ${editItem!.picData!.length}');
   }
 
@@ -49,12 +49,13 @@ class PlaceViewModel extends ChangeNotifier {
     if (pickList.isNotEmpty) {
       for (var i=0; i<pickList.length; i++) {
         var image = pickList[i];
-        var imageUrl   = await ShowImageCroper(image.path);
-        var imageData  = await ReadFileByte(imageUrl);
-        var resizeData = await resizeImage(imageData!, IMAGE_SIZE_MAX) as Uint8List;
+        var url  = await ShowImageCroper(image.path);
+        var data = await ReadFileByte(url);
+        var resizeData = await resizeImage(data!, IMAGE_SIZE_MAX) as Uint8List;
         var key = Uuid().v1();
-        imageList[key] = PicData(id: key, type: 0, url: '', data: String.fromCharCodes(resizeData)).toJson();
-        LOG('----> picLocalImage: ${imageList[key]}');
+        imageData[key] = {'id': key, 'type': 0, 'url': '', 'data': resizeData};
+        // imageList[key] = PicData(id: key, type: 0, url: '', data: String.fromCharCodes(resizeData)).toJson();
+        LOG('----> picLocalImage: ${imageData[key]}');
         if (editItem!.pic.isEmpty) editItem!.pic = key;
       }
       notifyListeners();
@@ -62,12 +63,12 @@ class PlaceViewModel extends ChangeNotifier {
   }
 
   showImageSelector() {
-    LOG('----> showImageSelector: ${imageList.length}');
-    for (var item in imageList.entries) {
+    LOG('----> showImageSelector: ${imageData.length}');
+    for (var item in imageData.entries) {
       LOG('  -- ${item.value}');
     }
     return ImageEditScrollViewer(
-        imageList,
+        imageData,
         key: _imageGalleryKey,
         title: 'IMAGE'.tr,
         addText: 'Photo Add'.tr,
@@ -81,7 +82,7 @@ class PlaceViewModel extends ChangeNotifier {
               break;
             }
             case 2: {
-              imageList.remove(key);
+              imageData.remove(key);
               notifyListeners();
               break;
             }

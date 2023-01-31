@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:helpers/helpers.dart';
+import 'package:kspot_002/utils/utils.dart';
 import 'package:kspot_002/view_model/event_edit_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -19,20 +21,44 @@ class EventScreen extends StatelessWidget {
     return ChangeNotifierProvider<EventViewModel>.value(
       value: EventViewModel(),
       child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+        viewModel.init(context);
         return Scaffold(
-          appBar: AppBar(
-            title: AppTopMenuBar(MainMenuID.event),
-            automaticallyImplyLeading: false,
-            toolbarHeight: UI_APPBAR_TOOL_HEIGHT.w,
-          ),
-          body: viewModel.showMainList(context),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Get.to(() => EventEditScreen());
-            },
-            mini: true,
-            child: Icon(Icons.add),
-          ),
+          // appBar: AppBar(
+          //   title: AppTopMenuBar(MainMenuID.event),
+          //   automaticallyImplyLeading: false,
+          //   toolbarHeight: UI_APPBAR_TOOL_HEIGHT.w,
+          //   backgroundColor: Colors.transparent,
+          // ),
+          body: Stack(
+            children: [
+              FutureBuilder(
+                future: viewModel.initData,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return FutureBuilder(
+                      future: viewModel.refreshShowList(snapshot.data!),
+                      builder: (context, snapshot2) {
+                        if (snapshot2.hasData) {
+                          return viewModel.showMainList();
+                        } else {
+                          return showLoadingFullPage(context);
+                        }
+                      }
+                    );
+                  } else {
+                    return showLoadingFullPage(context);
+                  }
+                }
+              ),
+              // floatingActionButton: FloatingActionButton(
+              //   onPressed: () {
+              //     Get.to(() => EventEditScreen());
+              //   },
+              //   mini: true,
+              //   child: Icon(Icons.add),
+              // ),
+            ]
+          )
         );
       }),
     );

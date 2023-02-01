@@ -12,7 +12,7 @@ import '../models/event_group_model.dart';
 import '../repository/event_group_repository.dart';
 import '../utils/local_utils.dart';
 import '../utils/utils.dart';
-import 'goods_item_card.dart';
+import 'content_item_card.dart';
 
 Future<EventGroupModel?> EventGroupSelectDialog(
     BuildContext mainContext,

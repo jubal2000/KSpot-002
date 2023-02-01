@@ -22,6 +22,7 @@ const double UI_HORIZONTAL_SPACE = 16.0;
 const double UI_HORIZONTAL_SPACE_L = 32.0;
 const double UI_VERTICAL_SPACE = 40.0;
 const double UI_DIALOG_SPACE = 60.0;
+const double UI_DATE_PICKER_HEIGHT = 90.0;
 
 const double UI_BOTTOM_SPACE = 20.0;
 const double UI_BOTTOM_HEIGHT = 50.0;

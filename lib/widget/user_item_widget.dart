@@ -192,10 +192,12 @@ class _UserFollowState extends State<UserFollowWidget> {
 class UserIdCardOneWidget extends StatefulWidget {
   UserIdCardOneWidget(this.userId, { Key? key,
     this.size = 35,
-    this.faceCircleSize = 1.0,
+    this.faceCircleSize = 2.0,
     this.padding = const EdgeInsets.all(3),
     this.spacePadding = 0,
     this.isCanExtend = true,
+    this.textColor,
+    this.backColor,
     this.onEdited,
     this.onSelected,
     this.onProfileChanged,
@@ -208,6 +210,8 @@ class UserIdCardOneWidget extends StatefulWidget {
   EdgeInsets padding;
   double spacePadding;
   bool isCanExtend;
+  Color? textColor;
+  Color? backColor;
   Function(String, int)? onEdited;
   Function(String)? onSelected;
   Function(JSON)? onProfileChanged;
@@ -271,76 +275,76 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
                 }
                 refreshData();
                 return AnimatedSize(
-                    curve: Curves.easeIn,
-                    duration: const Duration(milliseconds: 100),
-                    child: Container(
-                      width: !_isOpen ? widget.size : null,
-                        height: widget.size,
-                        padding: EdgeInsets.only(right: widget.spacePadding),
-                        child: ClipRRect(
-                            borderRadius: BorderRadius.circular(widget.size),
-                            child: Container(
-                                color: Theme
-                                    .of(context)
-                                    .primaryColor
-                                    .withOpacity(0.2),
-                                child: Row(
-                                  children: [
-                                    if (STR(_userInfo['pic']).isNotEmpty)...[
-                                      if (!widget.isCanExtend)
-                                        Container(
-                                          width: widget.size,
-                                          height: widget.size,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.all(Radius.circular(widget.size)),
-                                            border: Border.all(
-                                              color: Theme
-                                                  .of(context)
-                                                  .colorScheme
-                                                  .secondary,
-                                              width: widget.faceCircleSize,
-                                            ),
-                                          ),
-                                          child: ClipOval(
-                                            child: showImageFit(_userInfo['pic']),
-                                          ),
-                                        ),
-                                      if (widget.isCanExtend)
-                                        GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              _isOpen = !_isOpen;
-                                            });
-                                          },
-                                          child: Container(
-                                            width: widget.size,
-                                            height: widget.size,
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(Radius.circular(widget.size)),
-                                              border: Border.all(
-                                                color: Theme
-                                                    .of(context)
-                                                    .colorScheme
-                                                    .secondary,
-                                                width: widget.faceCircleSize,
-                                              ),
-                                            ),
-                                            child: ClipOval(
-                                              child: showImageFit(_userInfo['pic']),
-                                            ),
-                                          ),
-                                        )
-                                    ],
-                                    if (_isOpen)...[
-                                      SizedBox(width: 5),
-                                      Text(STR(_userInfo['nickName']), style: ItemDescStyle(context)),
-                                      SizedBox(width: 10),
-                                    ],
-                                  ],
+                  curve: Curves.easeIn,
+                  duration: const Duration(milliseconds: 200),
+                  child: Container(
+                    width: !_isOpen ? widget.size : null,
+                    height: widget.size,
+                    padding: EdgeInsets.only(right: widget.spacePadding),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(widget.size),
+                      child: Container(
+                        color: widget.backColor ?? Theme
+                            .of(context)
+                            .primaryColor
+                            .withOpacity(0.2),
+                        child: Row(
+                          children: [
+                            if (STR(_userInfo['pic']).isNotEmpty)...[
+                              if (!widget.isCanExtend)
+                                Container(
+                                  width: widget.size,
+                                  height: widget.size,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(Radius.circular(widget.size)),
+                                    border: Border.all(
+                                      color: Theme
+                                          .of(context)
+                                          .colorScheme
+                                          .secondary,
+                                      width: widget.faceCircleSize,
+                                    ),
+                                  ),
+                                  child: ClipOval(
+                                    child: showImageFit(_userInfo['pic']),
+                                  ),
+                                ),
+                              if (widget.isCanExtend)
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _isOpen = !_isOpen;
+                                    });
+                                  },
+                                  child: Container(
+                                    width: widget.size,
+                                    height: widget.size,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.all(Radius.circular(widget.size)),
+                                      border: Border.all(
+                                        color: Theme
+                                            .of(context)
+                                            .colorScheme
+                                            .secondary,
+                                        width: widget.faceCircleSize,
+                                      ),
+                                    ),
+                                    child: ClipOval(
+                                      child: showImageFit(_userInfo['pic']),
+                                    ),
+                                  ),
                                 )
-                            )
+                            ],
+                            if (_isOpen)...[
+                              SizedBox(width: 5),
+                              Text(STR(_userInfo['nickName']), style: CardNameStyle(context), maxLines: 2),
+                              SizedBox(width: 10),
+                            ],
+                          ],
                         )
+                      )
                     )
+                  )
                 );
               } else {
                 return Container();

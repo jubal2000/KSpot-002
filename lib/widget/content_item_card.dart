@@ -3,8 +3,10 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:helpers/helpers.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/widget/csc_picker/csc_picker.dart';
 import 'package:kspot_002/widget/user_card_widget.dart';
 import 'package:kspot_002/widget/user_item_widget.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -329,10 +331,11 @@ class GoodsItemCard extends StatefulWidget {
     this.ribbonStyle = const TextStyle(fontSize: 8, color: Colors.white),
     this.ribbonColor = Colors.red,
     this.descAlign = Alignment.centerLeft,
-    this.padding = const EdgeInsets.fromLTRB(0, 5, 0, 5),
+    this.padding = EdgeInsets.zero,
     this.backgroundColor = Colors.transparent,
     this.descMaxLine = 2,
     this.imageHeight = 80.0,
+    this.faceSize = 46.0,
     this.cartCount = 1,
     this.couponInfo,
     this.isSelected = false,
@@ -384,6 +387,7 @@ class GoodsItemCard extends StatefulWidget {
   bool isShowExtra;
 
   double imageHeight;
+  double faceSize;
 
   int cartCount; // 구매갯수..
 
@@ -481,11 +485,9 @@ class GoodsItemCardState extends State<GoodsItemCard> {
     switch (widget.showType) {
       case GoodsItemCardType.square:
       case GoodsItemCardType.squareSmall:
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(roundCorner),
-          child: Container(
-            padding: widget.padding,
-            color: widget.backgroundColor,
+        return LayoutBuilder(
+          builder: (context, layout) {
+           return Container(
             child: VisibilityDetector(
               onVisibilityChanged: (VisibilityInfo info) {
                 // log("--> onVisibilityChanged [${widget.goodsData['id']}] : ${info.visibleFraction} / $_isDataReady - ${widget.goodsData['targetId']} / ${widget.goodsData['title']}");
@@ -508,9 +510,19 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                       onTap: () {
                         if (widget.onShowDetail != null) widget.onShowDetail!(_goodsItem['id'], 0);
                       },
-                      child: Stack(children: [
-                        Column(
+                      child: Stack(
+                        alignment: Alignment.center,
                           children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12.0),
+                              child: Container(
+                              height: layout.maxHeight - widget.faceSize * 0.5,
+                              color: Theme.of(context).canvasColor,
+                              child: Column(
+                              children: [
                             if (_goodsItem['pic'] != null) ...[
                               Container(
                                 constraints: BoxConstraints(
@@ -533,15 +545,25 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                                       maxLines: widget.descMaxLine,
                                       textAlign: TextAlign.center
                                     ),
-                                    if (widget.showType != GoodsItemCardType.placeGroup)...[
-                                      UserIdCardOneWidget(_goodsItem['userId'])
-                                    ]
                                   ],
                                 )
                               )
+                            ),
+                                SizedBox(height: widget.faceSize * 0.5),
+                                ]
+                              )
+                            ),
                             )
                           ],
                         ),
+                        if (widget.showType != GoodsItemCardType.placeGroup)...[
+                          Positioned(
+                            bottom: 0,
+                            child: UserIdCardOneWidget(_goodsItem['userId'],
+                              size: widget.faceSize,
+                              backColor: Theme.of(context).colorScheme.primaryContainer),
+                          ),
+                        ],
                         if (widget.isSelectable)
                           Positioned(
                             top: 15,
@@ -561,12 +583,13 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                       )
                     );
                   } else {
-                    return showLoadingImageSquare(widget.imageHeight);
+                    return showLoadingImageSquare(20);
                   }
                 }
               )
             )
-          )
+          );
+          }
         );
       case GoodsItemCardType.cart:
         return GestureDetector(

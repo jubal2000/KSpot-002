@@ -87,6 +87,7 @@ dependencies:
   progressive_time_picker: ^0.0.4
   image_editor: ^1.0.2
   image_gallery_saver: ^1.7.1
+  date_picker_timeline: ^1.2.3
 
   # ui..
   cupertino_icons: any

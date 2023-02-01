@@ -79,6 +79,7 @@ class AppData {
   static var currentCountryCode = '';
   static var currentState = '';
   static var currentCity = '';
+  static var currentDate = DateTime.now();
   static List<CountryData> countrySelectList = [];
 
   static EventGroupModel? currentEventGroup;
@@ -89,7 +90,6 @@ class AppData {
   static var isEventGroupGridMode = true;
   static var isMainActive = true;
 
-  static DateTime? currentDate;
   static JSON selectEventTime = {};
   static JSON messageReadLog = {};
   static JSON startInfoData = {};

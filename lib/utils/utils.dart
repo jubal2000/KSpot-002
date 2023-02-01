@@ -27,6 +27,7 @@ import '../models/user_model.dart';
 import '../view/place/place_list_screen.dart';
 import '../widget/event_group_dialog.dart';
 import '../widget/dropdown_widget.dart';
+import '../widget/event_time_edit_widget.dart';
 
 typedef JSON = Map<String, dynamic>;
 typedef SnapShot = QuerySnapshot<Map<String, dynamic>>;
@@ -2172,5 +2173,111 @@ String RemoveSearchWordItem(String text) {
     return text;
   }
   return '';
+}
+
+extension DateHelpers on DateTime {
+  bool isToday() {
+    final now = DateTime.now();
+    return now.day == day &&
+        now.month == month &&
+        now.year == year;
+  }
+
+  bool isYesterday() {
+    final yesterday = DateTime.now().subtract(Duration(days: 1));
+    return yesterday.day == day &&
+        yesterday.month == month &&
+        yesterday.year == year;
+  }
+
+  int get weekOfMonth {
+    var date = this;
+    final firstDayOfMonth = DateTime(date.year, date.month, 1);
+    // int sum = (firstDayOfMonth.weekday == 7 ? 1 : firstDayOfMonth.weekday - 1) + date.day;
+    int sum = firstDayOfMonth.weekday - 1 + date.day;
+    if (sum % 7 == 0) {
+      return sum ~/ 7;
+    } else {
+      return sum ~/ 7 + 1;
+    }
+  }
+
+  int get lastWeek {
+    var date = this;
+    var lastDay = DateTime(date.year, date.month + 1, 0);
+    return lastDay.weekOfMonth;
+  }
+
+  bool compareDateTo(DateTime target) {
+    return target.year == year && target.month == month && target.day == day;
+  }
+}
+
+extension MapHelpers on Map {
+  bool compareTo(Map target) {
+    if (length != target.length) return false;
+    for (var item in target.entries) {
+      if (!containsKey(item.key)) return false;
+    }
+    return true;
+  }
+}
+
+bool checkDateTimeShow(JSON? timeData, DateTime checkDate) {
+  if (timeData == null) return false;
+  // var _defaultBgColor = Colors.blueGrey;
+  for (var item in timeData.entries) {
+    // var eventId = item.value['eventId'] ?? '';
+    // var placeId = item.value['placeId'] ?? '';
+    LOG('--> timeList.entries item : ${item.value['day']}');
+    if (LIST_NOT_EMPTY(item.value['day'])) {
+      for (var time in item.value['day']) {
+        var startDate = DateTime.parse(time);
+        LOG('--> Day check : ${startDate.toString().split(' ').first} / ${checkDate.toString().split(' ').first}');
+        if (startDate.toString().split(' ').first == checkDate.toString().split(' ').first) return true;
+        // var dayStr = startDate.toString().split(' ').first;
+        // var markColor = COL(item.value['themeColor'], defaultValue:_defaultBgColor);
+        // var appoint = setCalendarDaySource(item.key, eventId, placeId, dayStr, item.value, markColor);
+        // if (appoint != null) appointments.add(appoint);
+      }
+      return false;
+    } else {
+      // LOG('--> Date Range init : ${item.value['startDate']} ~ ${item.value['endDate']}');
+      if (STR(item.value['startDate']).isEmpty) item.value['startDate'] = DateTime.now().toString().split(' ').first;
+      var startDate = DateTime.parse(STR(item.value['startDate']));
+      if (STR(item.value['endDate']).isEmpty) item.value['endDate'] = startDate.add(Duration(days: 364)).toString().split(' ').first;
+      var endDate = DateTime.parse(STR(item.value['endDate']));
+      var duration  = endDate.difference(startDate).inDays + 1;
+      LOG('--> Date Range : ${item.value['startDate']} ~ ${item.value['endDate']} => $duration / ${item.value['week']}');
+
+      for (var i=0; i<duration; i++) {
+        var day = startDate.add(Duration(days: i));
+        var dayStr = day.toString().split(' ').first;
+        var isShow = item.value['exceptDayData'] == null || !item.value['exceptDayData'].contains(dayStr);
+        if (isShow && LIST_NOT_EMPTY(item.value['week']) && !item.value['week'].contains(weekText.first)) {
+          var wm = day.weekOfMonth;
+          isShow = ((wm < weekText.length && item.value['week'].contains(weekText[wm])) || wm >= weekText.length) &&
+              (wm == day.lastWeek && item.value['week'].contains(weekText.last) || wm != day.lastWeek);
+          LOG('--> week [$dayStr / ${day.weekday}] : $wm / ${day.lastWeek} => $isShow');
+        }
+        if (isShow && LIST_NOT_EMPTY(item.value['dayWeek']) && !item.value['dayWeek'].contains(dayWeekText.first)) {
+          var wm = day.weekday;
+          isShow = item.value['dayWeek'].contains(dayWeekText[wm]);
+          LOG('--> weekday [$dayStr] : $wm / ${dayWeekText[wm]} => $isShow');
+        }
+        if (isShow) {
+          return true;
+          // var markColor = COL(item.value['themeColor'], defaultValue:_defaultBgColor).withOpacity(0.75);
+          // var appoint = setCalendarDaySource(item.key, eventId, placeId, dayStr, item.value, markColor);
+          // if (appoint != null) {
+          //   appointments.add(appoint);
+          // }
+        } else {
+          // LOG('--> exceptDayData : $dayStr');
+        }
+      }
+    }
+  }
+  return false;
 }
 

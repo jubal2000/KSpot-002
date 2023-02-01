@@ -12,7 +12,7 @@ import '../../models/place_model.dart';
 import '../../utils/utils.dart';
 import '../../view_model/event_edit_view_model.dart';
 import '../../widget/event_group_dialog.dart';
-import '../../widget/goods_item_card.dart';
+import '../../widget/content_item_card.dart';
 import '../../widget/title_text_widget.dart';
 
 class EventEditPlaceScreen extends StatelessWidget {

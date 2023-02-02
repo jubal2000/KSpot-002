@@ -15,52 +15,42 @@ import 'event_edit_screen.dart';
 
 class EventScreen extends StatelessWidget {
   EventScreen({Key? key}) : super(key: key);
+  final _viewModel = EventViewModel();
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<EventViewModel>.value(
-      value: EventViewModel(),
-      child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-        viewModel.init(context);
-        return Scaffold(
-          // appBar: AppBar(
-          //   title: AppTopMenuBar(MainMenuID.event),
-          //   automaticallyImplyLeading: false,
-          //   toolbarHeight: UI_APPBAR_TOOL_HEIGHT.w,
-          //   backgroundColor: Colors.transparent,
-          // ),
-          body: Stack(
-            children: [
-              FutureBuilder(
-                future: viewModel.initData,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return FutureBuilder(
-                      future: viewModel.refreshShowList(snapshot.data!),
-                      builder: (context, snapshot2) {
-                        if (snapshot2.hasData) {
-                          return viewModel.showMainList();
-                        } else {
-                          return showLoadingFullPage(context);
-                        }
+    _viewModel.init(context);
+    return Scaffold(
+      body: Stack(
+        children: [
+          FutureBuilder(
+            future: _viewModel.initData,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                _viewModel.eventData = snapshot.data;
+                return FutureBuilder(
+                  future: _viewModel.refreshShowList(),
+                  builder: (context, snapshot2) {
+                    if (snapshot2.hasData) {
+                      _viewModel.eventShowList = snapshot2.data!;
+                      return ChangeNotifierProvider<EventViewModel>.value(
+                          value: _viewModel,
+                          child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+                            return viewModel.showMainList();
+                          }),
+                        );
+                      } else {
+                        return showLoadingFullPage(context);
                       }
-                    );
-                  } else {
-                    return showLoadingFullPage(context);
-                  }
-                }
-              ),
-              // floatingActionButton: FloatingActionButton(
-              //   onPressed: () {
-              //     Get.to(() => EventEditScreen());
-              //   },
-              //   mini: true,
-              //   child: Icon(Icons.add),
-              // ),
-            ]
-          )
-        );
-      }),
+                    }
+                  );
+              } else {
+                return showLoadingFullPage(context);
+              }
+            }
+          ),
+        ]
+      )
     );
   }
 }

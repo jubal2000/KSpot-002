@@ -37,6 +37,7 @@ class GoogleMapWidget extends StatefulWidget{
     this.showButtons = false,
     this.onButtonAction,
     this.onMarkerSelected,
+    this.onCameraMoved,
   }) : super(key: key);
 
   bool showMyLocation;
@@ -47,6 +48,7 @@ class GoogleMapWidget extends StatefulWidget{
   List<JSON> showLocation;
   Function(MapButtonAction)? onButtonAction;
   Function(JSON)? onMarkerSelected;
+  Function(CameraPosition, LatLngBounds)? onCameraMoved;
 
   // LatLng startLocation  = LatLng(27.6683619, 85.3101895);
   // LatLng endLocation    = LatLng(27.6875436, 85.2751138);
@@ -344,6 +346,12 @@ class _GoogleMapState extends State<GoogleMapWidget> {
                   rootBundle.load('assets/ui/map_marker_00.png').then((value) {
                     markerBgImage = value;
                     refreshMap();
+                  });
+                },
+                onCameraMove: (pos) {
+                  if (mapController == null) return;
+                  mapController!.getVisibleRegion().then((region) {
+                    if (widget.onCameraMoved !=null) widget.onCameraMoved!(pos, region);
                   });
                 },
                 // onTap: (pos) {

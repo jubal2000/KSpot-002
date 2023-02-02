@@ -2223,17 +2223,24 @@ extension MapHelpers on Map {
   }
 }
 
+extension ListHelpers on List {
+  bool equals(List list) {
+    if(length!=list.length) return false;
+    return every((item) => list.contains(item));
+  }
+}
+
 bool checkDateTimeShow(JSON? timeData, DateTime checkDate) {
   if (timeData == null) return false;
   // var _defaultBgColor = Colors.blueGrey;
   for (var item in timeData.entries) {
     // var eventId = item.value['eventId'] ?? '';
     // var placeId = item.value['placeId'] ?? '';
-    LOG('--> timeList.entries item : ${item.value['day']}');
+    // LOG('--> timeList.entries item : ${item.value['day']}');
     if (LIST_NOT_EMPTY(item.value['day'])) {
       for (var time in item.value['day']) {
         var startDate = DateTime.parse(time);
-        LOG('--> Day check : ${startDate.toString().split(' ').first} / ${checkDate.toString().split(' ').first}');
+        // LOG('--> Day check : ${startDate.toString().split(' ').first} / ${checkDate.toString().split(' ').first}');
         if (startDate.toString().split(' ').first == checkDate.toString().split(' ').first) return true;
         // var dayStr = startDate.toString().split(' ').first;
         // var markColor = COL(item.value['themeColor'], defaultValue:_defaultBgColor);
@@ -2248,7 +2255,7 @@ bool checkDateTimeShow(JSON? timeData, DateTime checkDate) {
       if (STR(item.value['endDate']).isEmpty) item.value['endDate'] = startDate.add(Duration(days: 364)).toString().split(' ').first;
       var endDate = DateTime.parse(STR(item.value['endDate']));
       var duration  = endDate.difference(startDate).inDays + 1;
-      LOG('--> Date Range : ${item.value['startDate']} ~ ${item.value['endDate']} => $duration / ${item.value['week']}');
+      // LOG('--> Date Range : ${item.value['startDate']} ~ ${item.value['endDate']} => $duration / ${item.value['week']}');
 
       for (var i=0; i<duration; i++) {
         var day = startDate.add(Duration(days: i));
@@ -2258,12 +2265,12 @@ bool checkDateTimeShow(JSON? timeData, DateTime checkDate) {
           var wm = day.weekOfMonth;
           isShow = ((wm < weekText.length && item.value['week'].contains(weekText[wm])) || wm >= weekText.length) &&
               (wm == day.lastWeek && item.value['week'].contains(weekText.last) || wm != day.lastWeek);
-          LOG('--> week [$dayStr / ${day.weekday}] : $wm / ${day.lastWeek} => $isShow');
+          // LOG('--> week [$dayStr / ${day.weekday}] : $wm / ${day.lastWeek} => $isShow');
         }
         if (isShow && LIST_NOT_EMPTY(item.value['dayWeek']) && !item.value['dayWeek'].contains(dayWeekText.first)) {
           var wm = day.weekday;
           isShow = item.value['dayWeek'].contains(dayWeekText[wm]);
-          LOG('--> weekday [$dayStr] : $wm / ${dayWeekText[wm]} => $isShow');
+          // LOG('--> weekday [$dayStr] : $wm / ${dayWeekText[wm]} => $isShow');
         }
         if (isShow) {
           return true;

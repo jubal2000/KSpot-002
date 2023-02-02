@@ -66,14 +66,18 @@ class UserRepository {
 
   Future<UserModel?> getUserInfo(String userId) async {
     try {
+      if (AppData.userData.containsKey(userId)) return AppData.userData[userId];
       final response = await api.getUserInfoFromId(userId);
-      final jsonData = UserModel.fromJson(FROM_SERVER_DATA(response));
-      LOG("--> getUserInfo result: ${jsonData.toJson()}");
-      return jsonData;
+      if (response != null) {
+        final userData = UserModel.fromJson(FROM_SERVER_DATA(response));
+        LOG("--> getUserInfo result: ${userData.toJson()}");
+        AppData.userData[userData.id] = userData;
+        return userData;
+      }
     } catch (e) {
       LOG("--> getUserInfo error: $e");
-      throw e.toString();
     }
+    return null;
   }
 
   Future<bool> setUserInfoJSON(String userId, JSON items) async {

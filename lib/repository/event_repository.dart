@@ -19,22 +19,39 @@ class EventRepository {
         LOG('--> getEventListFromCountry item : ${item.value['id']}');
         result[item.key] = EventModel.fromJson(item.value);
       }
-      return result;
     } catch (e) {
       LOG('--> getEventListFromCountry error [$groupId] : $e');
-      throw e.toString();
     }
+    return result;
+  }
+
+  Future<EventModel?> getEventFromId(String eventId) async {
+    try {
+      if (AppData.eventData.containsKey(eventId)) return AppData.eventData[eventId];
+      final response = await api.getEventFromId(eventId);
+      if (response != null) {
+        final eventData = EventModel.fromJson(FROM_SERVER_DATA(response));
+        LOG("--> getUserInfo result: ${eventData.toJson()}");
+        AppData.eventData[eventData.id] = eventData;
+        return eventData;
+      }
+    } catch (e) {
+      LOG('--> getEventListFromCountry error [$eventId] : $e');
+    }
+    return null;
   }
 
   Future<EventModel?> addEventItem(EventModel addItem) async {
     try {
       final response = await api.addEventItem(addItem.toJson());
       if (response != null) {
-        return EventModel.fromJson(response);
+        final eventData = EventModel.fromJson(FROM_SERVER_DATA(response));
+        LOG("--> getUserInfo result: ${eventData.toJson()}");
+        AppData.eventData[eventData.id] = eventData;
+        return eventData;
       }
     } catch (e) {
       LOG('--> addEventItem error : $e');
-      throw e.toString();
     }
     return null;
   }

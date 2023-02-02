@@ -1,10 +1,14 @@
 
 import 'package:address_search_field/address_search_field.dart';
 import 'package:date_picker_timeline/date_picker_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/repository/event_repository.dart';
+import 'package:kspot_002/widget/main_list_item.dart';
 
 import '../data/app_data.dart';
 import '../data/common_sizes.dart';
@@ -21,49 +25,51 @@ class EventListType {
 }
 
 class EventViewModel extends ChangeNotifier {
-  Map<String, EventModel>? eventList;
+  Map<String, EventModel>? eventData;
+  Map<String, Widget> listItemData = {};
   BuildContext? buildContext;
   List<JSON>    eventShowList = [];
   Future<Map<String, EventModel>>? initData;
+  LatLngBounds? mapBounds;
+
   final eventRepo = EventRepository();
   final placeRepo = PlaceRepository();
 
-  // for Edit..
-  final _imageGalleryKey  = GlobalKey();
-  final JSON imageList = {};
+  var cameraPos = CameraPosition(target: LatLng(0,0));
   var isTimePickerExtend = false;
   var eventListType = EventListType.map;
 
   init(BuildContext context) {
     buildContext = context;
+    mapBounds = null;
     getEventList();
   }
 
   getEventList() {
-    initData = eventRepo.getEventListFromCountry(AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
+    initData ??= eventRepo.getEventListFromCountry(AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
   }
 
-  refreshShowList(Map<String, EventModel> data) async {
-    eventShowList = [];
-    for (var item in data.entries) {
-      final showItem = item.value.toJson();
-      final placeInfo = await placeRepo.getPlaceFromId(item.value.placeId);
-      if (placeInfo != null) {
-        showItem['address'] = placeInfo.address.toJson();
-        LOG('--> checkDateTimeShow : ${item.value.getTimeDataMap} / ${AppData.currentDate.toString()}');
-        if (checkDateTimeShow(item.value.getTimeDataMap, AppData.currentDate)) {
-          LOG('--> eventShowList add : ${showItem['id']}');
-          eventShowList.add(showItem);
+  Future<List<JSON>> refreshShowList() async {
+    List<JSON> result = [];
+    if (eventData != null && eventData!.isNotEmpty) {
+      for (var item in eventData!.entries) {
+        final showItem = item.value.toJson();
+        var placeInfo = showItem['placeInfo'];
+        placeInfo ??= await placeRepo.getPlaceFromId(item.value.placeId);
+        if (placeInfo != null) {
+          showItem['placeInfo'] = placeInfo.toJson();
+          showItem['address'  ] = placeInfo.address.toJson();
+          final pos = LatLng(DBL(showItem['address']['lat']), DBL(showItem['address']['lng']));
+          if (mapBounds !=  null) LOG('--> eventShowList add : ${mapBounds!.toJson()} / $pos');
+          if (checkDateTimeShow(item.value.getTimeDataMap, AppData.currentDate) && (mapBounds == null || mapBounds!.contains(pos))) {
+            LOG('--> eventShowList add : ${showItem['id']}');
+            result.add(showItem);
+          }
         }
       }
     }
-    LOG('--> eventShowList : ${eventShowList.length}');
-    return eventShowList;
-  }
-
-  addMainData(EventModel mainItem) {
-    eventList ??= {};
-    eventList![mainItem.id] = mainItem;
+    LOG('--> eventShowList : ${result.length}');
+    return result;
   }
 
   showTimePicker() {
@@ -95,6 +101,45 @@ class EventViewModel extends ChangeNotifier {
       ),
     );
   }
+q
+  onMapRegionChanged(region) async {
+    mapBounds = region;
+    List<JSON> tmpList = await refreshShowList();
+    if (tmpList.equals(eventShowList)) {
+      LOG('--> onMapRegionChanged cancel : ${tmpList.length} / ${eventShowList.length}');
+      return false;
+    }
+    eventShowList = tmpList;
+    LOG('--> onMapRegionChanged update : ${tmpList.length} / ${eventShowList.length}');
+    notifyListeners();
+    return true;
+  }
+
+  showEventList(itemWidth, itemHeight) {
+    List<Widget> showList = [];
+    for (var item in eventShowList) {
+      var addItem = listItemData[item['id']];
+      addItem ??= Container(
+          width: itemWidth,
+          height: itemHeight,
+          margin: EdgeInsets.symmetric(horizontal: 3),
+          child: EventSquareItem(
+            item,
+            backgroundColor: Theme.of(buildContext!).canvasColor,
+            padding: EdgeInsets.zero,
+            imageHeight: itemHeight * 0.5,
+            titleStyle: CardTitleStyle(buildContext!),
+            descStyle: CardDescStyle(buildContext!),
+            onSelected: (key, status) {
+
+            },
+          )
+        );
+      listItemData[item['id']] = addItem;
+      showList.add(addItem);
+    }
+    return showList;
+  }
 
   showMainList() {
     if (eventListType == EventListType.map) {
@@ -114,36 +159,25 @@ class EventViewModel extends ChangeNotifier {
                   // _listController.animateTo(0, curve: Curves.linear, duration: Duration(milliseconds: 200));
                   // refreshData();
                 },
+                onCameraMoved: (pos, region) {
+                  cameraPos = pos;
+                  onMapRegionChanged(region);
+                },
               ),
               Align(
                 widthFactor: 1.25,
                 heightFactor: 2.8,
                 child: showTimePicker(),
               ),
-              BottomCenterAlign(
+              BottomLeftAlign(
                 child: Container(
-                  width: Get.size.width,
                   height: itemHeight,
                   margin: EdgeInsets.only(bottom: 10),
                   child: ListView(
+                    shrinkWrap: true,
                     scrollDirection: Axis.horizontal,
                     padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                    children: eventShowList.map((item) => Container(
-                      width: itemWidth,
-                      height: itemHeight,
-                      margin: EdgeInsets.symmetric(horizontal: 3),
-                      child: EventSquareItem(
-                        item,
-                        backgroundColor: Theme.of(context).canvasColor,
-                        padding: EdgeInsets.zero,
-                        imageHeight: itemHeight * 0.5,
-                        titleStyle: CardTitleStyle(buildContext!),
-                        descStyle: CardDescStyle(buildContext!),
-                        onSelected: (key, status) {
-
-                        },
-                      )
-                    )).toList(),
+                    children: showEventList(itemWidth, itemHeight),
                   ),
                 )
               )

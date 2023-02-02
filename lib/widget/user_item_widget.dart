@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/repository/user_repository.dart';
 import 'package:kspot_002/services/api_service.dart';
 
 import '../data/app_data.dart';
@@ -221,20 +222,20 @@ class UserIdCardOneWidget extends StatefulWidget {
 }
 
 class _UserIdCardOneState extends State<UserIdCardOneWidget> {
-  final api = Get.find<ApiService>();
-  Future<JSON?>? _userInit;
-  JSON _userInfo = {};
-  var _isMyProfile = false;
-  var _isOpen = false;
+  var userRepo = UserRepository();
+  Future<UserModel?>? userInit;
+  UserModel userInfo = UserModelEx.empty('');
+  var isMyProfile = false;
+  var isOpen = false;
 
   initData() {
-    _userInit = api.getUserInfoFromId(widget.userId);
+    userInit = userRepo.getUserInfo(widget.userId);
   }
 
   refreshData() {
-    LOG('--> UserIdCardWidget refresh : ${_userInfo['id']} / ${AppData.USER_ID}');
-    if (_userInfo['id'] == AppData.USER_ID) {
-      _isMyProfile = true;
+    LOG('--> UserIdCardWidget refresh : ${userInfo!.id} / ${AppData.USER_ID}');
+    if (userInfo.id == AppData.USER_ID) {
+      isMyProfile = true;
       // if (_userInfo['pic'] != AppData.USER_PIC || _userInfo['nickName'] != AppData.USER_NICKNAME) {
       //   LOG('--> UserListCardWidget Pic Update : ${_userInfo['pic']} / ${AppData.USER_PIC}');
       //   _userInfo['pic' ] = AppData.USER_PIC;
@@ -255,22 +256,21 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
     return GestureDetector(
         onTap: () {
           if (widget.onSelected != null) {
-            widget.onSelected!(_userInfo['id']);
+            widget.onSelected!(userInfo.id);
           } else {
-            Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                TargetProfileScreen(UserModel.fromJson(_userInfo)))).then((value) {
+            Get.to(() => TargetProfileScreen(userInfo))!.then((value) {
               setState(() {});
             });
           }
         },
         child: FutureBuilder(
-            future: _userInit,
+            future: userInit,
             builder: (context, snapshot) {
-              if (snapshot.hasData || _userInfo.isNotEmpty) {
-                if (_userInfo.isEmpty) {
-                  _userInfo = snapshot.data as JSON;
+              if (snapshot.hasData || userInfo.id.isNotEmpty) {
+                if (snapshot.hasData) {
+                  userInfo = snapshot.data as UserModel;
                 }
-                if (_userInfo.isEmpty) {
+                if (userInfo.id.isEmpty) {
                   return Container();
                 }
                 refreshData();
@@ -278,7 +278,7 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
                   curve: Curves.easeIn,
                   duration: const Duration(milliseconds: 200),
                   child: Container(
-                    width: !_isOpen ? widget.size : null,
+                    width: !isOpen ? widget.size : null,
                     height: widget.size,
                     padding: EdgeInsets.only(right: widget.spacePadding),
                     child: ClipRRect(
@@ -290,7 +290,7 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
                             .withOpacity(0.2),
                         child: Row(
                           children: [
-                            if (STR(_userInfo['pic']).isNotEmpty)...[
+                            if (STR(userInfo.pic).isNotEmpty)...[
                               if (!widget.isCanExtend)
                                 Container(
                                   width: widget.size,
@@ -306,14 +306,14 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
                                     ),
                                   ),
                                   child: ClipOval(
-                                    child: showImageFit(_userInfo['pic']),
+                                    child: showImageFit(userInfo.pic),
                                   ),
                                 ),
                               if (widget.isCanExtend)
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
-                                      _isOpen = !_isOpen;
+                                      isOpen = !isOpen;
                                     });
                                   },
                                   child: Container(
@@ -330,14 +330,14 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
                                       ),
                                     ),
                                     child: ClipOval(
-                                      child: showImageFit(_userInfo['pic']),
+                                      child: showImageFit(userInfo.pic),
                                     ),
                                   ),
                                 )
                             ],
-                            if (_isOpen)...[
+                            if (isOpen)...[
                               SizedBox(width: 5),
-                              Text(STR(_userInfo['nickName']), style: CardNameStyle(context), maxLines: 2),
+                              Text(userInfo.nickName, style: CardNameStyle(context), maxLines: 2),
                               SizedBox(width: 10),
                             ],
                           ],

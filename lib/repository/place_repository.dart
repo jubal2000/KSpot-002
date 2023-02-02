@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:kspot_002/models/place_model.dart';
 import 'package:kspot_002/services/api_service.dart';
 
+import '../data/app_data.dart';
 import '../models/event_group_model.dart';
 import '../utils/utils.dart';
 
@@ -19,8 +20,8 @@ class PlaceRepository {
       return result;
     } catch (e) {
       LOG('--> getPlaceListWithCountry error [$groupId] : $e');
-      throw e.toString();
     }
+    return result;
   }
 
   Future<Map<String, PlaceModel>> getPlaceListFromGroupId(String groupId) async {
@@ -31,23 +32,24 @@ class PlaceRepository {
         result[item.key] = PlaceModel.fromJson(item.value);
         LOG('--> getPlaceListFromGroupId item : ${result[item.key]!.toJson()}');
       }
-      return result;
     } catch (e) {
       LOG('--> getPlaceListFromGroupId error [$groupId] : $e');
-      throw e.toString();
     }
+    return result;
   }
 
   Future<PlaceModel?> getPlaceFromId(String placeId) async {
     try {
+      if (AppData.placeData.containsKey(placeId)) return AppData.placeData[placeId];
       final response = await api.getPlaceFromId(placeId);
       if (response != null) {
         LOG('--> getPlaceFromId response : $response');
-        return PlaceModel.fromJson(response);
+        final placeData = PlaceModel.fromJson(FROM_SERVER_DATA(response));
+        AppData.placeData[placeData.id] = placeData;
+        return placeData;
       }
     } catch (e) {
       LOG('--> getPlaceFromId error : $e');
-      throw e.toString();
     }
     return null;
   }
@@ -56,11 +58,12 @@ class PlaceRepository {
     try {
       final response = await api.addPlaceItem(addItem.toJson());
       if (response != null) {
-        return PlaceModel.fromJson(response);
+        final placeData = PlaceModel.fromJson(FROM_SERVER_DATA(response));
+        AppData.placeData[placeData.id] = placeData;
+        return placeData;
       }
     } catch (e) {
       LOG('--> addPlaceItem error : $e');
-      throw e.toString();
     }
     return null;
   }

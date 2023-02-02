@@ -17,22 +17,18 @@ class FollowRepository {
         result[item.key] = FollowModel.fromJson(item.value);
         LOG('--> getFollowListFromUserId item : ${result[item.key]!.toJson()}');
       }
-      return result;
     } catch (e) {
       LOG('--> getFollowListFromUserId error [$userId] : $e');
-      throw e.toString();
     }
+    return result;
   }
 
   Future<FollowModel?> addFollowTarget(UserModel user, PlaceModel target) async {
     try {
       final response = await api.addFollowTarget(user.toJson(), target.toJson());
-      if (response != null) {
-        return FollowModel.fromJson(response);
-      }
+      return FollowModel.fromJson(response);
     } catch (e) {
       LOG('--> addFollowTarget error : $e');
-      throw e.toString();
     }
     return null;
   }

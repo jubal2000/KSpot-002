@@ -6,6 +6,7 @@ import 'package:kspot_002/utils/utils.dart';
 import 'package:kspot_002/view_model/event_edit_view_model.dart';
 import 'package:provider/provider.dart';
 
+import '../../data/app_data.dart';
 import '../../data/common_sizes.dart';
 import '../../view_model/app_view_model.dart';
 import '../../view_model/event_view_model.dart';
@@ -19,38 +20,43 @@ class EventScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context);
-    return Scaffold(
-      body: Stack(
-        children: [
-          FutureBuilder(
-            future: _viewModel.initData,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                _viewModel.eventData = snapshot.data;
-                return FutureBuilder(
-                  future: _viewModel.refreshShowList(),
-                  builder: (context, snapshot2) {
-                    if (snapshot2.hasData) {
-                      _viewModel.eventShowList = snapshot2.data!;
-                      return ChangeNotifierProvider<EventViewModel>.value(
-                          value: _viewModel,
-                          child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+    return ChangeNotifierProvider<AppViewModel>.value(
+      value: AppData.appViewModel,
+      child: Consumer<AppViewModel>(builder: (context, appViewModel, _) {
+        _viewModel.init(context);
+        return Scaffold(
+          body: Stack(
+            children: [
+              FutureBuilder(
+                future: _viewModel.initData,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    _viewModel.eventData = snapshot.data;
+                    return FutureBuilder(
+                      future: _viewModel.setShowList(),
+                      builder: (context, snapshot2) {
+                        if (snapshot2.hasData) {
+                          _viewModel.eventShowList = snapshot2.data!;
+                          return ChangeNotifierProvider<EventViewModel>.value(
+                              value: _viewModel,
+                              child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
                             return viewModel.showMainList();
-                          }),
-                        );
-                      } else {
-                        return showLoadingFullPage(context);
-                      }
-                    }
-                  );
-              } else {
-                return showLoadingFullPage(context);
-              }
-            }
-          ),
-        ]
-      )
+                            })
+                          );
+                          } else {
+                            return showLoadingFullPage(context);
+                          }
+                        }
+                      );
+                  } else {
+                    return showLoadingFullPage(context);
+                  }
+                }
+              ),
+            ]
+          )
+        );
+      }),
     );
   }
 }

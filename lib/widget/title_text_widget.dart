@@ -284,6 +284,55 @@ SelectTitleText(context, text,
       height: height);
 }
 
+DateDayText(context, text,
+    {double fontSize = UI_FONT_SIZE_LT,
+      var color = Colors.black,
+      var lineMax = 1,
+      var height = 1.1,
+      var align = TextAlign.center}) {
+  return TextInterface(
+      title: text,
+      color: color,
+      font: TextFont.EB,
+      size: fontSize,
+      align: align,
+      lineMax: lineMax,
+      height: height);
+}
+
+DateMonthText(context, text,
+    {double fontSize = UI_FONT_SIZE_SX,
+      var color = Colors.black,
+      var lineMax = 1,
+      var height = 1.1,
+      var align = TextAlign.center}) {
+  return TextInterface(
+      title: text,
+      color: color,
+      font: TextFont.B,
+      size: fontSize,
+      align: align,
+      lineMax: lineMax,
+      height: height);
+}
+
+DateWeekText(context, text,
+    {double fontSize = UI_FONT_SIZE_SX,
+      var color = Colors.black,
+      var lineMax = 1,
+      var height = 1.1,
+      var align = TextAlign.center}) {
+  return TextInterface(
+      title: text,
+      color: color,
+      font: TextFont.B,
+      size: fontSize,
+      align: align,
+      lineMax: lineMax,
+      height: height);
+}
+
+
 MnemonicNumberText(text, {double fontSize = UI_FONT_SIZE_LX, var color = Colors.black, var lineMax = 1, var height = 1.1, var align = TextAlign.center}) {
   return TextInterface(title: text, color: color, font: TextFont.EB, size: fontSize.sp, align: align, lineMax: lineMax, height: height);
 }

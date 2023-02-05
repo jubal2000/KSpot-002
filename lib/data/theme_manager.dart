@@ -470,7 +470,7 @@ ItemDescOutlineExStyle(BuildContext context, {Color borderColor = Colors.black})
 }
 
 CardTitleStyle(BuildContext context) {
-  return TextStyle(fontSize: 13, color: Theme.of(context).hintColor, fontWeight: FontWeight.w600, height: 1.0);
+  return TextStyle(fontSize: 13, color: Theme.of(context).indicatorColor, fontWeight: FontWeight.w600, height: 1.0);
 }
 
 CardDescStyle(BuildContext context) {

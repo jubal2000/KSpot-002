@@ -16,6 +16,8 @@ class UserCardWidget extends StatefulWidget {
     this.faceCircleSize = 2.0,
     this.nameHeight = 20,
     this.padding = EdgeInsets.zero,
+    this.circleColor,
+    this.backgroundColor,
     this.onEdited,
     this.onSelected,
     this.onProfileChanged,
@@ -23,6 +25,7 @@ class UserCardWidget extends StatefulWidget {
     this.isCanFollow = true,
     this.isBottomName = false,
     this.isShowTime = false,
+    this.isShowName = true,
   }) : super(key: key);
 
   JSON userInfo;
@@ -31,6 +34,8 @@ class UserCardWidget extends StatefulWidget {
   double faceCircleSize;
   double nameHeight;
   EdgeInsets padding;
+  Color? circleColor;
+  Color? backgroundColor;
   Function(String, int)? onEdited;
   Function(String)? onSelected;
   Function(JSON)? onProfileChanged;
@@ -39,6 +44,7 @@ class UserCardWidget extends StatefulWidget {
   bool isCanFollow;
   bool isBottomName;
   bool isShowTime;
+  bool isShowName;
 
   @override
   _UserCardState createState() => _UserCardState();
@@ -95,15 +101,16 @@ class _UserCardState extends State<UserCardWidget> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(widget.faceSize)),
                           border: Border.all(
-                            color: Theme.of(context).primaryColor.withOpacity(0.8),
+                            color: widget.circleColor ?? Theme.of(context).primaryColor.withOpacity(0.8),
                             width: widget.faceCircleSize,
                           ),
+                          color: widget.backgroundColor,
                         ),
                         child: ClipOval(
                           child: showImageFit(widget.userInfo['pic'] ?? widget.userInfo['userPic']),
                         ),
                       ),
-                      if (widget.isBottomName)...[
+                      if (widget.isShowName && widget.isBottomName)...[
                         Container(
                             width: double.infinity,
                             height: widget.nameHeight,
@@ -116,8 +123,10 @@ class _UserCardState extends State<UserCardWidget> {
                     ],
                   ),
                 ),
-                SizedBox(width: 10),
-                if (!widget.isBottomName)...[
+                if (widget.isShowName)...[
+                  SizedBox(width: 10),
+                ],
+                if (widget.isShowName && !widget.isBottomName)...[
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,

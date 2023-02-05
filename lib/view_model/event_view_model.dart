@@ -7,8 +7,11 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:helpers/helpers.dart';
+import 'package:intl/intl.dart';
+import 'package:kspot_002/models/place_model.dart';
 import 'package:kspot_002/repository/event_repository.dart';
 import 'package:kspot_002/widget/main_list_item.dart';
+import 'package:kspot_002/widget/title_text_widget.dart';
 
 import '../data/app_data.dart';
 import '../data/common_sizes.dart';
@@ -16,8 +19,11 @@ import '../data/theme_manager.dart';
 import '../models/event_model.dart';
 import '../repository/place_repository.dart';
 import '../utils/utils.dart';
+import '../view/app/app_top_menu.dart';
+import '../view/main_event/event_detail_screen.dart';
 import '../widget/content_item_card.dart';
 import '../widget/google_map_widget.dart';
+import 'app_view_model.dart';
 
 class EventListType {
   static int get map      => 0;
@@ -34,6 +40,7 @@ class EventViewModel extends ChangeNotifier {
 
   final eventRepo = EventRepository();
   final placeRepo = PlaceRepository();
+  final mapKey = GlobalKey();
 
   var cameraPos = CameraPosition(target: LatLng(0,0));
   var isTimePickerExtend = false;
@@ -42,14 +49,17 @@ class EventViewModel extends ChangeNotifier {
   init(BuildContext context) {
     buildContext = context;
     mapBounds = null;
+    initData = null;
+    eventShowList.clear();
+    listItemData.clear();
     getEventList();
   }
 
   getEventList() {
-    initData ??= eventRepo.getEventListFromCountry(AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
+    initData = eventRepo.getEventListFromCountry(AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
   }
 
-  Future<List<JSON>> refreshShowList() async {
+  Future<List<JSON>> setShowList() async {
     List<JSON> result = [];
     if (eventData != null && eventData!.isNotEmpty) {
       for (var item in eventData!.entries) {
@@ -68,49 +78,100 @@ class EventViewModel extends ChangeNotifier {
         }
       }
     }
-    LOG('--> eventShowList : ${result.length}');
+    LOG('--> eventShowList : ${result.length} / ${eventData!.length} / ${AppData.currentDate.toString()}');
     return result;
   }
 
   showTimePicker() {
-    return AnimatedSize(
-      duration: Duration(milliseconds: 200),
-      child: Container(
-        width: isTimePickerExtend ? Get.width : 66,
-        height: UI_DATE_PICKER_HEIGHT,
-        color: Theme.of(buildContext!).canvasColor.withOpacity(isTimePickerExtend ? 0.5 : 0),
-        child: DatePicker(
-          // selectDate.subtract(Duration(days: 30)),
-          isTimePickerExtend ? DateTime.now() : AppData.currentDate,
-          width: 60.0,
-          height: 60.0,
-          initialSelectedDate: AppData.currentDate,
-          selectionColor: Theme.of(buildContext!).primaryColor,
-          locale: Get.locale.toString(),
-          onDateChange: (date) {
-            // New date selected
-            if (isTimePickerExtend) {
-              isTimePickerExtend = AppData.currentDate != date;
-              AppData.currentDate = date;
-            } else {
+    String month     = DateFormat.M(Get.locale.toString()).format(AppData.currentDate);
+    String dayOfWeek = DateFormat.E(Get.locale.toString()).format(AppData.currentDate);
+    return Row(
+      children: [
+        if (!isTimePickerExtend)
+          GestureDetector(
+            onTap: () {
               isTimePickerExtend = true;
-            }
-            notifyListeners();
-          },
-        ),
-      ),
+              notifyListeners();
+            },
+            child: Container(
+              width: 60.0,
+              height: 80.0,
+              margin: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE,vertical: 5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+                color: Theme.of(buildContext!).canvasColor.withOpacity(0.55)
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  DateMonthText(buildContext!, month, color: Theme.of(buildContext!).hintColor),
+                  DateDayText  (buildContext!, '${AppData.currentDate.day}', color: Theme.of(buildContext!).indicatorColor),
+                  DateWeekText (buildContext!, dayOfWeek, color: Theme.of(buildContext!).hintColor),
+                ],
+              )
+            ),
+          ),
+        if (isTimePickerExtend)
+          Container(
+            width: Get.width,
+            height: UI_DATE_PICKER_HEIGHT,
+            color: Theme.of(buildContext!).canvasColor.withOpacity(0.5),
+            child: DatePicker(
+              DateTime.now().subtract(Duration(days: 20)),
+              width:  60.0,
+              height: 60.0,
+              initialSelectedDate: AppData.currentDate,
+              selectionColor: Theme.of(buildContext!).primaryColor,
+              monthTextStyle: TextStyle(color: Theme.of(buildContext!).hintColor, fontSize: UI_FONT_SIZE_SX),
+              dateTextStyle: TextStyle(color: Theme.of(buildContext!).indicatorColor, fontSize: UI_FONT_SIZE_LT),
+              dayTextStyle: TextStyle(color: Theme.of(buildContext!).hintColor, fontSize: UI_FONT_SIZE_SX),
+              locale: Get.locale.toString(),
+              onDateChange: (date) {
+                // New date selected
+                if (AppData.currentDate == date) {
+                  isTimePickerExtend = false;
+                  notifyListeners();
+                } else {
+                  AppData.currentDate = date;
+                  onMapDayChanged();
+                }
+              },
+            ),
+          ),
+      ]
     );
   }
-q
+
   onMapRegionChanged(region) async {
     mapBounds = region;
-    List<JSON> tmpList = await refreshShowList();
+    List<JSON> tmpList = await setShowList();
     if (tmpList.equals(eventShowList)) {
-      LOG('--> onMapRegionChanged cancel : ${tmpList.length} / ${eventShowList.length}');
+      // LOG('--> onMapRegionChanged cancel : ${tmpList.length} / ${eventShowList.length}');
       return false;
     }
     eventShowList = tmpList;
     LOG('--> onMapRegionChanged update : ${tmpList.length} / ${eventShowList.length}');
+    Future.delayed(const Duration(milliseconds: 200), () async {
+      var state = mapKey.currentState as GoogleMapState;
+      state.refreshMarker(tmpList, false);
+    });
+    notifyListeners();
+    return true;
+  }
+
+  onMapDayChanged() async {
+    mapBounds = null;
+    List<JSON> tmpList = await setShowList();
+    if (tmpList.equals(eventShowList)) {
+      // LOG('--> onMapRegionChanged cancel : ${tmpList.length} / ${eventShowList.length}');
+      return false;
+    }
+    eventShowList = tmpList;
+    LOG('--> onMapRegionChanged update : ${tmpList.length} / ${eventShowList.length}');
+    Future.delayed(const Duration(milliseconds: 200), () async {
+      var state = mapKey.currentState as GoogleMapState;
+      state.refreshMarker(tmpList);
+    });
     notifyListeners();
     return true;
   }
@@ -125,13 +186,14 @@ q
           margin: EdgeInsets.symmetric(horizontal: 3),
           child: EventSquareItem(
             item,
-            backgroundColor: Theme.of(buildContext!).canvasColor,
+            backgroundColor: Theme.of(buildContext!).cardColor,
             padding: EdgeInsets.zero,
             imageHeight: itemHeight * 0.5,
+            descMaxLine: 2,
             titleStyle: CardTitleStyle(buildContext!),
             descStyle: CardDescStyle(buildContext!),
             onSelected: (key, status) {
-
+              Get.to(() => EventDetailScreen(EventModel.fromJson(item), PlaceModel.fromJson(item['placeInfo'])));
             },
           )
         );
@@ -142,22 +204,20 @@ q
   }
 
   showMainList() {
+    LOG('--> showMainList : ${eventShowList.length}');
     if (eventListType == EventListType.map) {
       return LayoutBuilder(
         builder: (context, layout) {
           final itemWidth  = layout.maxWidth / 3.5;
-          final itemHeight = itemWidth * 2.0;
+          final itemHeight = itemWidth * 1.85;
           return Stack(
             children: [
               GoogleMapWidget(
                 eventShowList,
+                key: mapKey,
                 mapHeight: layout.maxHeight,
                 onMarkerSelected: (selectItem) {
                   LOG('--> onMarkerSelected : ${selectItem['title']} / ${selectItem['id']}');
-                  // _selectPlace.clear();
-                  // _selectPlace[selectItem['id']] = selectItem;
-                  // _listController.animateTo(0, curve: Curves.linear, duration: Duration(milliseconds: 200));
-                  // refreshData();
                 },
                 onCameraMoved: (pos, region) {
                   cameraPos = pos;
@@ -166,7 +226,7 @@ q
               ),
               Align(
                 widthFactor: 1.25,
-                heightFactor: 2.8,
+                heightFactor: 3.0,
                 child: showTimePicker(),
               ),
               BottomLeftAlign(

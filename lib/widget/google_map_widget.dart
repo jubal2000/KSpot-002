@@ -54,10 +54,10 @@ class GoogleMapWidget extends StatefulWidget{
   // LatLng endLocation    = LatLng(27.6875436, 85.2751138);
 
   @override
-  _GoogleMapState createState() => _GoogleMapState();
+  GoogleMapState createState() => GoogleMapState();
 }
 
-class _GoogleMapState extends State<GoogleMapWidget> {
+class GoogleMapState extends State<GoogleMapWidget> {
 
   GoogleMapController? mapController; //contrller for Google map
   PolylinePoints polylinePoints = PolylinePoints();
@@ -69,6 +69,7 @@ class _GoogleMapState extends State<GoogleMapWidget> {
   double markerSize = 150.0;
   double distance = 0.0;
   JSON? targetPosition;
+  bool isMoveActive = false;
 
   refreshMap() {
     if (widget.showDirection) {
@@ -94,9 +95,16 @@ class _GoogleMapState extends State<GoogleMapWidget> {
     }
   }
 
-  initMarker() {
-    LOG('--> GoogleDirectionListWidget initMarker : ${widget.showLocation.length}');
+  refreshMarker(List<JSON> list, [bool isBoundsFresh = true]) {
+    widget.showLocation = list;
+    initMarker(isBoundsFresh);
+  }
+
+  initMarker([bool isBoundsFresh = true]) {
+    LOG('--> GoogleDirectionListWidget initMarker : ${widget.showLocation.length} / $isBoundsFresh');
     LatLng? targetLoc;
+    markers = Set();
+    isMoveActive = false;
     // add normal marker..
     for (var item in widget.showLocation) {
       var address = item['address'];
@@ -147,38 +155,43 @@ class _GoogleMapState extends State<GoogleMapWidget> {
         }
       });
     }
-    if (markers.isNotEmpty) {
-      Future.delayed(Duration(milliseconds: 500), () =>
-      mapController!.moveCamera(CameraUpdate.newLatLngBounds(
-          MapUtils.boundsFromLatLngList(markers.map((loc) => loc.position).toList()), 50)));
+    if (isBoundsFresh && markers.isNotEmpty) {
+      Future.delayed(Duration(milliseconds: 200), () {
+        LOG('--> newLatLngBounds : ${markers.length}');
+        mapController!.moveCamera(CameraUpdate.newLatLngBounds(
+            MapUtils.boundsFromLatLngList(markers.map((loc) => loc.position).toList()), 100));
+        Future.delayed(Duration(milliseconds: 500), () {
+          isMoveActive = true;
+        });
+      });
     }
   }
 
   getMarkerImage(String imagePath) async {
     final fileName = imagePath.split('=').last;
-    LOG('--> getMarkerImage : $fileName');
-    final Uint8List? response = await getBytesFromAsset(imagePath, markerSize);
-    if (response != null) {
-      writeLocalFile(fileName, String.fromCharCodes(response));
-      var result = BitmapDescriptor.fromBytes(response);
-      LOG('--> load server image : $imagePath');
-      return result;
-    }
-    // final localData = await readLocalFile(fileName);
-    // if (localData.isNotEmpty) {
-    //   LOG('--> load local image : $imagePath');
-    //   var result = Uint8List.fromList(localData.codeUnits);
-    //   return BitmapDescriptor.fromBytes(result);
-    // } else {
-    //   final Uint8List? response = await getBytesFromAsset(imagePath, markerSize);
-    //   if (response != null) {
-    //     writeLocalFile(fileName, String.fromCharCodes(response));
-    //     var result = BitmapDescriptor.fromBytes(response);
-    //     LOG('--> load server image : $imagePath');
-    //     return result;
-    //   }
+    // LOG('--> getMarkerImage : $fileName');
+    // final Uint8List? response = await getBytesFromAsset(imagePath, markerSize);
+    // if (response != null) {
+    //   writeLocalFile(fileName, String.fromCharCodes(response));
+    //   var result = BitmapDescriptor.fromBytes(response);
+    //   LOG('--> load server image : $imagePath');
+    //   return result;
     // }
-    // return null;
+    final localData = await readLocalFile(fileName);
+    if (localData.isNotEmpty) {
+      LOG('--> load local image : $imagePath');
+      var result = Uint8List.fromList(localData.codeUnits);
+      return BitmapDescriptor.fromBytes(result);
+    } else {
+      final Uint8List? response = await getBytesFromAsset(imagePath, markerSize);
+      if (response != null) {
+        writeLocalFile(fileName, String.fromCharCodes(response));
+        var result = BitmapDescriptor.fromBytes(response);
+        LOG('--> load server image : $imagePath');
+        return result;
+      }
+    }
+    return null;
   }
 
   onMarkerTaped(JSON item) {
@@ -237,6 +250,15 @@ class _GoogleMapState extends State<GoogleMapWidget> {
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(oldWidget) {
+    // LOG('--> didUpdateWidget : ${markers.length}');
+    // if (mapController != null) {
+    //   refreshMap(false);
+    // }
+    super.didUpdateWidget(oldWidget);
   }
 
   getDirections(LatLng endLocation) async {
@@ -349,7 +371,12 @@ class _GoogleMapState extends State<GoogleMapWidget> {
                   });
                 },
                 onCameraMove: (pos) {
-                  if (mapController == null) return;
+                  if (mapController == null || !isMoveActive) return;
+                  LOG('--> onCameraMove');
+                  isMoveActive = false;
+                  Future.delayed(Duration(milliseconds: 500), () {
+                    isMoveActive = true;
+                  });
                   mapController!.getVisibleRegion().then((region) {
                     if (widget.onCameraMoved !=null) widget.onCameraMoved!(pos, region);
                   });

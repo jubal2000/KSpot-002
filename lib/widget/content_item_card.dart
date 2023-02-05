@@ -583,7 +583,7 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                       )
                     );
                   } else {
-                    return showLoadingImageSquare(20);
+                    return showLoadingCircleSquare(20);
                   }
                 }
               )

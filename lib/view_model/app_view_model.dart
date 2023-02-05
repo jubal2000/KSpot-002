@@ -118,7 +118,7 @@ class AppViewModel extends ChangeNotifier {
     return false;
   }
 
-  showCountrySelect(context) {
+  showCountrySelect(context, [Function? onChanged]) {
     final List<JSON> logList = AppData.countrySelectList.map((e) => e.toJson()).toList();
     showCountryLogSelectDialog(context, 'COUNTRY SELECT'.tr, logList).then((_) {
         for (var item in AppData.countrySelectList) {
@@ -139,6 +139,7 @@ class AppViewModel extends ChangeNotifier {
         LOG('--> AppData.countrySelectList : ${AppData.countrySelectList.length}');
         writeCountryLog();
         notifyListeners();
+        if (onChanged != null) onChanged();
       }
     );
   }
@@ -202,7 +203,6 @@ class AppViewModel extends ChangeNotifier {
           dropdownWidth: 190,
           buttonHeight: iconSize,
           buttonWidth: iconSize,
-          itemPadding: const EdgeInsets.all(10),
           offset: const Offset(0, 5),
         ),
       );

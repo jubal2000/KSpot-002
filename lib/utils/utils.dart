@@ -2097,7 +2097,20 @@ CheckOwner(dynamic userId) {
   return AppData.USER_ID == userId;
 }
 
+// ignore: non_constant_identifier_names
+CheckManager(JSON jsonData) {
+  if (JSON_EMPTY(jsonData)) return false;
+  if (STR(jsonData['userId']) == AppData.USER_ID) return true;
+  if (JSON_NOT_EMPTY(jsonData['managerData'])) {
+    if (jsonData['managerData'].containsKey(AppData.USER_ID)) return true;
+  }
+  if (JSON_NOT_EMPTY(jsonData['guestData'])) {
+    if (jsonData['guestData'].containsKey(AppData.USER_ID)) return true;
+  }
+  return false;
+}
 
+// ignore: non_constant_identifier_names
 REMIAN_TIME(DateTime dateTime, [String tailText = '']) {
   if (dateTime.isAfter(DateTime.now())) return '';
   var remainTime = DateTime.now().difference(dateTime);
@@ -2115,6 +2128,7 @@ REMIAN_TIME(DateTime dateTime, [String tailText = '']) {
   '${remainTime.inSeconds} ${'sec'.tr}';
 }
 
+// ignore: non_constant_identifier_names
 REMIAN_TIME_STYLE(DateTime dateTime, TextStyle style, TextStyle styleNow) {
   if (dateTime.isAfter(DateTime.now())) return style;
   var remainTime = DateTime.now().difference(dateTime);

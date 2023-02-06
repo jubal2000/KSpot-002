@@ -174,7 +174,7 @@ class ImageScrollViewerState extends State<ImageScrollViewer> {
                                     color: Colors.black,
                                     child: showImageWidget(
                                         widget.itemList[index].runtimeType == String ? widget.itemList[index] :
-                                        widget.itemList[index]['backPic'] ?? widget.itemList[index]['pic'], widget.imageFit
+                                        widget.itemList[index]['url'] ?? widget.itemList[index]['pic'], widget.imageFit
                                     )
                                   );
                                 }

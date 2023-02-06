@@ -56,9 +56,17 @@ class EventRepository {
     return null;
   }
 
+  Future<bool> setEventStatus(String eventId, int status) async {
+    return await api.setEventStatus(eventId, status);
+  }
+
   /////////////////////////////////////////////////////////////////////////////////////////////
 
   Future<String?> uploadImageInfo(JSON imageInfo, [String path = 'event_img']) async {
     return await api.uploadImageData(imageInfo, path);
+  }
+
+  checkIsExpired(EventModel eventModel) {
+    return api.checkIsExpired(eventModel.toJson());
   }
 }

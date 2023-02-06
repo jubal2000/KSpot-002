@@ -192,7 +192,7 @@ class EventViewModel extends ChangeNotifier {
             descMaxLine: 2,
             titleStyle: CardTitleStyle(buildContext!),
             descStyle: CardDescStyle(buildContext!),
-            onSelected: (key, status) {
+            onShowDetail: (key, status) {
               Get.to(() => EventDetailScreen(EventModel.fromJson(item), PlaceModel.fromJson(item['placeInfo'])));
             },
           )

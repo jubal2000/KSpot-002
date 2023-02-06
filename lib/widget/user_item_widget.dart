@@ -84,7 +84,7 @@ class _UserCardState extends State<UserCardWidget> {
     return GestureDetector(
         onTap: () {
           LOG('--> UserCardWidget onSelected : ${widget.userInfo}');
-          if (widget.onSelected != null) widget.onSelected!(widget.userInfo['userId']);
+          if (widget.onSelected != null) widget.onSelected!(widget.userInfo['userId'] ?? widget.userInfo['id']);
         },
         child: Container(
             padding: widget.padding,

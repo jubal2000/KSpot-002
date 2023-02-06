@@ -760,7 +760,7 @@ class ApiService extends GetxService {
       for (var item in eventData.entries) {
         var isExpired = checkIsExpired(item.value);
         if (isExpired) {
-          if (await setEventItemStatus(item.key, 2)) {
+          if (await setEventStatus(item.key, 2)) {
             LOG('-----------> cleanEventExpire isExpired ${item.key}');
           }
         }
@@ -780,8 +780,8 @@ class ApiService extends GetxService {
     if (JSON_NOT_EMPTY(item['timeData'])) {
       for (var time in item['timeData'].entries) {
         // LOG('--> checkIsExpired item dayData [${item['id']}] / ${time.value['dayData']}');
-        if (LIST_NOT_EMPTY(time.value['dayData'])) {
-          for (var day in time.value['dayData']) {
+        if (LIST_NOT_EMPTY(time.value['day'])) {
+          for (var day in time.value['day']) {
             var days = DateTime.parse(STR(day)).difference(today).inDays;
             // LOG('--> check [${item['id']}] : dayData - ${STR(item['targetDate'])} / $today -> $days');
             if (days >= 0) {
@@ -811,7 +811,7 @@ class ApiService extends GetxService {
     }
   }
   
-  Future<bool> setEventItemStatus(String eventId, int status) async {
+  Future<bool> setEventStatus(String eventId, int status) async {
     // LOG('------> setEventItemStatus : $eventId / $status');
     try {
       var ref = firestore!.collection(EventCollection);
@@ -820,7 +820,7 @@ class ApiService extends GetxService {
       });
       return true;
     } catch (e) {
-      LOG('--> setEventItemStatus error : $e');
+      LOG('--> setEventStatus error : $e');
     }
     return false;
   }

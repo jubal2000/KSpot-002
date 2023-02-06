@@ -105,6 +105,22 @@ class EventModel {
   factory EventModel.fromJson(JSON json) => _$EventModelFromJson(json);
   JSON toJson() => _$EventModelToJson(this);
 
+
+  //------------------------------------------------------------------------------------------------------
+  //  PicData
+  //
+
+  get getPicDataList {
+    List<JSON> result = [];
+    if (picData != null) {
+      for (var item in picData!) {
+        result.add(item.toJson());
+      }
+    }
+    return result;
+  }
+
+
   //------------------------------------------------------------------------------------------------------
   //  TimeData
   //

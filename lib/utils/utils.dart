@@ -18,6 +18,7 @@ import 'package:kspot_002/data/theme_manager.dart';
 import 'package:image/image.dart' as IMG;
 import 'package:kspot_002/services/api_service.dart';
 import 'package:material_tag_editor/tag_editor.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import '../data/app_data.dart';
 import '../data/common_colors.dart';
@@ -1573,6 +1574,41 @@ class _Chip extends StatelessWidget {
   }
 }
 
+class DataSource extends CalendarDataSource {
+  DataSource(List<Appointment> source) {
+    appointments = source;
+  }
+}
+
+TagTextList(BuildContext context, List<String> tagList, {String headTitle = '', bool showBackground = true, Function(String)? onSelected}) {
+  List<Widget> chipList = [];
+  for (var item in tagList) {
+    if (item.isNotEmpty) {
+      chipList.add(GestureDetector(
+          onTap: () {
+            if (onSelected != null) onSelected(item);
+          },
+          child: Container(
+            padding: showBackground ? EdgeInsets.symmetric(horizontal: 10, vertical: 5) : EdgeInsets.zero,
+            margin: EdgeInsets.symmetric(vertical: 2),
+            decoration: BoxDecoration(
+                color: showBackground ? Theme.of(context).primaryColor.withOpacity(0.1) : Colors.transparent,
+                borderRadius: BorderRadius.all(Radius.circular(8))
+            ),
+            child: Text('$headTitle$item',
+                style: showBackground ? ItemTitleExStyle(context) :
+                headTitle == '#' ? DescBodyExStyle(context) :  DescBodyExStyle(context)),
+          )
+      )
+      );
+    }
+  }
+  return Wrap(
+    spacing: 5,
+    children: chipList,
+  );
+}
+
 TagTextField(List<String>? tagList, Function(List<String>)? onChanged) {
   return TagTextEditField(tagList, 'Search Tag'.tr, '', true, onChanged);
 }
@@ -2101,12 +2137,14 @@ CheckOwner(dynamic userId) {
 CheckManager(JSON jsonData) {
   if (JSON_EMPTY(jsonData)) return false;
   if (STR(jsonData['userId']) == AppData.USER_ID) return true;
-  if (JSON_NOT_EMPTY(jsonData['managerData'])) {
-    if (jsonData['managerData'].containsKey(AppData.USER_ID)) return true;
+  if (LIST_NOT_EMPTY(jsonData['managerData'])) {
+    for (var item in jsonData['managerData']) {
+      if (STR(item['id']) == AppData.USER_ID) return true;
+    }
   }
-  if (JSON_NOT_EMPTY(jsonData['guestData'])) {
-    if (jsonData['guestData'].containsKey(AppData.USER_ID)) return true;
-  }
+  // if (JSON_NOT_EMPTY(jsonData['guestData'])) {
+  //   if (jsonData['guestData'].containsKey(AppData.USER_ID)) return true;
+  // }
   return false;
 }
 

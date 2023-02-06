@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 import '../models/etc_model.dart';
 import '../models/event_group_model.dart';
 import '../models/event_model.dart';
@@ -82,7 +83,8 @@ class AppData {
   static var currentCity = '';
   static var currentDate = DateTime.now();
   static List<CountryData> countrySelectList = [];
-
+  static CalendarController? calenderController;
+  static var calendarMode = CalendarView.month;
   static EventGroupModel? currentEventGroup;
   static var currentContentType = '';
   static var currentCurrency = '';

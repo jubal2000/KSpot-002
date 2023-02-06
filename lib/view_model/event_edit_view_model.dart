@@ -484,7 +484,7 @@ class EventEditViewModel extends ChangeNotifier {
       hideLoadingDialog();
       if (result != null) {
         showAlertDialog(buildContext!, 'Upload'.tr, 'Event Upload Complete'.tr, '', 'OK'.tr).then((_) {
-          Get.back();
+          Get.back(result: editItem);
         });
       } else {
         showAlertDialog(buildContext!, 'Upload'.tr, 'Event Upload Failed'.tr, '', 'OK'.tr);

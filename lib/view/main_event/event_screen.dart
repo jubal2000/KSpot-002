@@ -14,49 +14,50 @@ import '../../widget/title_text_widget.dart';
 import '../app/app_top_menu.dart';
 import 'event_edit_screen.dart';
 
-class EventScreen extends StatelessWidget {
+class EventScreen extends StatefulWidget {
   EventScreen({Key? key}) : super(key: key);
-  final _viewModel = EventViewModel();
+  final viewModel = EventViewModel();
+
+  @override
+  _EventScreenState createState() => _EventScreenState();
+}
+
+class _EventScreenState extends State<EventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<AppViewModel>.value(
-      value: AppData.appViewModel,
-      child: Consumer<AppViewModel>(builder: (context, appViewModel, _) {
-        _viewModel.init(context);
-        return Scaffold(
-          body: Stack(
-            children: [
-              FutureBuilder(
-                future: _viewModel.initData,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    _viewModel.eventData = snapshot.data;
-                    return FutureBuilder(
-                      future: _viewModel.setShowList(),
-                      builder: (context, snapshot2) {
-                        if (snapshot2.hasData) {
-                          _viewModel.eventShowList = snapshot2.data!;
-                          return ChangeNotifierProvider<EventViewModel>.value(
-                              value: _viewModel,
-                              child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-                            return viewModel.showMainList();
-                            })
-                          );
-                          } else {
-                            return showLoadingFullPage(context);
-                          }
-                        }
+    widget.viewModel.init(context);
+    return Scaffold(
+      body: Stack(
+        children: [
+          FutureBuilder(
+            future: widget.viewModel.initData,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                widget.viewModel.eventData = snapshot.data;
+                return FutureBuilder(
+                  future: widget.viewModel.setShowList(),
+                  builder: (context, snapshot2) {
+                    if (snapshot2.hasData) {
+                      widget.viewModel.eventShowList = snapshot2.data!;
+                      return ChangeNotifierProvider<EventViewModel>.value(
+                          value: widget.viewModel,
+                          child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+                        return viewModel.showMainList();
+                        })
                       );
-                  } else {
-                    return showLoadingFullPage(context);
-                  }
-                }
-              ),
-            ]
-          )
-        );
-      }),
+                      } else {
+                        return showLoadingFullPage(context);
+                      }
+                    }
+                  );
+              } else {
+                return showLoadingFullPage(context);
+              }
+            }
+          ),
+        ]
+      )
     );
   }
 }

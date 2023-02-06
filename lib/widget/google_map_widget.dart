@@ -155,10 +155,10 @@ class GoogleMapState extends State<GoogleMapWidget> {
         }
       });
     }
-    if (isBoundsFresh && markers.isNotEmpty) {
+    if (isBoundsFresh && markers.isNotEmpty && mapController != null) {
       Future.delayed(Duration(milliseconds: 200), () {
         LOG('--> newLatLngBounds : ${markers.length}');
-        mapController!.moveCamera(CameraUpdate.newLatLngBounds(
+        mapController?.moveCamera(CameraUpdate.newLatLngBounds(
             MapUtils.boundsFromLatLngList(markers.map((loc) => loc.position).toList()), 100));
         Future.delayed(Duration(milliseconds: 200), () {
           isMoveActive = true;
@@ -250,15 +250,6 @@ class GoogleMapState extends State<GoogleMapWidget> {
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void didUpdateWidget(oldWidget) {
-    // LOG('--> didUpdateWidget : ${markers.length}');
-    // if (mapController != null) {
-    //   refreshMap(false);
-    // }
-    super.didUpdateWidget(oldWidget);
   }
 
   getDirections(LatLng endLocation) async {
@@ -449,6 +440,13 @@ class GoogleMapState extends State<GoogleMapWidget> {
         )
       )
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    mapController?.dispose();
+    mapController = null;
   }
 }
 

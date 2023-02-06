@@ -69,99 +69,223 @@ class AppScreen extends StatelessWidget {
                       index: viewModel.menuIndex,
                       children: pages,
                     ),
-                    TopCenterAlign(
-                      child: SizedBox(
-                        height: UI_TOP_MENU_HEIGHT * 1.7,
-                        child: AppTopMenuBar(MainMenuID.event, height: UI_TOP_MENU_HEIGHT),
-                      )
-                    ),
-                  ]
-                ),
-                floatingActionButton: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SizedBox(width: 30.w),
-                    GestureDetector(
-                      onTap: () {
-                        var mode = theme.toggleSchemeMode();
-                        Fluttertoast.showToast(
-                            msg: mode,
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.CENTER,
-                            timeInSecForIosWeb: 1,
-                            backgroundColor: theme.getMode() ? Colors.white : Colors.black,
-                            textColor: theme.getMode() ? Colors.black : Colors.white,
-                            fontSize: 16.0.sp
-                        );
-                      },
-                      child: SizedBox(
-                        height: _height,
-                        width: _height,
-                        child: Icon(Icons.visibility_outlined),
-                      )
-                  ),
-                  SizedBox(width: 5.w),
-                  GestureDetector(
-                      onTap: () {
-                        var mode = theme.setFlexSchemeRotate();
-                        Fluttertoast.showToast(
-                            msg: mode,
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.CENTER,
-                            timeInSecForIosWeb: 1,
-                            backgroundColor: theme.getMode() ? Colors.white : Colors.black,
-                            textColor: theme.getMode() ? Colors.black : Colors.white,
-                            fontSize: 16.0.sp
-                        );
-                      },
-                      child: SizedBox(
-                        height: _height,
-                        width: _height,
-                        child: Icon(Icons.color_lens_outlined),
-                      )
-                    ),
-                  ],
-                ),
-                bottomNavigationBar: Container(
-                  height: UI_MENU_HEIGHT,
-                  color: Colors.transparent,
-                  child: Stack(
-                    children: [
-                      BottomCenterAlign(
-                        child: SizedBox(
+                    // TopCenterAlign(
+                    //   child: SizedBox(
+                    //     height: UI_TOP_MENU_HEIGHT * 1.7,
+                    //     child: AppTopMenuBar(MainMenuID.event, height: UI_TOP_MENU_HEIGHT),
+                    //   )
+                    // ),
+                    BottomCenterAlign(
+                      child: Container(
+                        height: UI_MENU_BG_HEIGHT,
+                        child: Container(
                           height: UI_MENU_HEIGHT,
-                          child: BottomNavigationBar(
-                            onTap: (index) {
-                              viewModel.setMainIndex(index);
-                            },
-                            type: BottomNavigationBarType.fixed,
-                            currentIndex: viewModel.menuIndex,
-                            selectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w600),
-                            unselectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w400),
-                            items: [
-                              BottomNavigationBarItem(
-                                icon: Icon(Icons.event_available_outlined),
-                                label: 'EVENT'.tr,
+                            alignment: Alignment.bottomCenter,
+                            child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Stack(
+                                alignment: Alignment.bottomRight,
+                                children: [
+                                  BottomCenterAlign(
+                                    child: Container(
+                                      width: 100,
+                                      height: UI_MENU_HEIGHT,
+                                      color: Theme.of(context).bottomAppBarColor,
+                                    ),
+                                  ),
+                                  Center(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.all(Radius.circular(100)),
+                                          color: Theme.of(context).bottomAppBarColor
+                                        ),
+                                        child: Icon(Icons.account_circle, size: UI_MENU_BG_HEIGHT),
+                                      ),
+                                    ),
+                                  )
+                                ]
                               ),
-                              BottomNavigationBarItem(
-                                icon: Icon(Icons.photo_library_outlined),
-                                label: 'STORY'.tr,
+                              Expanded(
+                                child: SizedBox(
+                                  height: UI_MENU_HEIGHT,
+                                  child: BottomNavigationBar(
+                                    onTap: (index) {
+                                      viewModel.setMainIndex(index);
+                                    },
+                                    type: BottomNavigationBarType.fixed,
+                                    currentIndex: viewModel.menuIndex,
+                                    selectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w600),
+                                    unselectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w400),
+                                    items: [
+                                      BottomNavigationBarItem(
+                                        icon: Icon(Icons.event_available_outlined),
+                                        label: 'EVENT'.tr,
+                                      ),
+                                      BottomNavigationBarItem(
+                                        icon: Icon(Icons.photo_library_outlined),
+                                        label: 'STORY'.tr,
+                                      ),
+                                      BottomNavigationBarItem(
+                                        icon: Icon(Icons.message_outlined),
+                                        label: 'MESSAGE'.tr,
+                                      ),
+                                      BottomNavigationBarItem(
+                                        icon: Icon(Icons.account_circle_outlined),
+                                        label: 'MY'.tr,
+                                      ),
+                                    ]
+                                ),
                               ),
-                              BottomNavigationBarItem(
-                                icon: Icon(Icons.message_outlined),
-                                label: 'MESSAGE'.tr,
-                              ),
-                              BottomNavigationBarItem(
-                                icon: Icon(Icons.info),
-                                label: 'MY'.tr,
-                              ),
+                              )
                             ]
-                          ),
+                          )
                         )
                       )
-                    ]
-                  )
-                )
+                    ),
+                    BottomRightAlign(
+                      heightFactor: 17.5,
+                      child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        SizedBox(width: 30.w),
+                        GestureDetector(
+                            onTap: () {
+                              var mode = theme.toggleSchemeMode();
+                              Fluttertoast.showToast(
+                                  msg: mode,
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.CENTER,
+                                  timeInSecForIosWeb: 1,
+                                  backgroundColor: theme.getMode() ? Colors.white : Colors.black,
+                                  textColor: theme.getMode() ? Colors.black : Colors.white,
+                                  fontSize: 16.0.sp
+                              );
+                            },
+                            child: SizedBox(
+                              height: _height,
+                              width: _height,
+                              child: Icon(Icons.visibility_outlined),
+                            )
+                        ),
+                        SizedBox(width: 5.w),
+                        GestureDetector(
+                            onTap: () {
+                              var mode = theme.setFlexSchemeRotate();
+                              Fluttertoast.showToast(
+                                  msg: mode,
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.CENTER,
+                                  timeInSecForIosWeb: 1,
+                                  backgroundColor: theme.getMode() ? Colors.white : Colors.black,
+                                  textColor: theme.getMode() ? Colors.black : Colors.white,
+                                  fontSize: 16.0.sp
+                              );
+                            },
+                            child: SizedBox(
+                              height: _height,
+                              width: _height,
+                              child: Icon(Icons.color_lens_outlined),
+                            )
+                        ),
+                      ],
+                    ),
+                    )
+                  ]
+                ),
+                // floatingActionButton: Row(
+                //   mainAxisAlignment: MainAxisAlignment.end,
+                //   children: [
+                //     SizedBox(width: 30.w),
+                //     GestureDetector(
+                //       onTap: () {
+                //         var mode = theme.toggleSchemeMode();
+                //         Fluttertoast.showToast(
+                //             msg: mode,
+                //             toastLength: Toast.LENGTH_SHORT,
+                //             gravity: ToastGravity.CENTER,
+                //             timeInSecForIosWeb: 1,
+                //             backgroundColor: theme.getMode() ? Colors.white : Colors.black,
+                //             textColor: theme.getMode() ? Colors.black : Colors.white,
+                //             fontSize: 16.0.sp
+                //         );
+                //       },
+                //       child: SizedBox(
+                //         height: _height,
+                //         width: _height,
+                //         child: Icon(Icons.visibility_outlined),
+                //       )
+                //   ),
+                //   SizedBox(width: 5.w),
+                //   GestureDetector(
+                //       onTap: () {
+                //         var mode = theme.setFlexSchemeRotate();
+                //         Fluttertoast.showToast(
+                //             msg: mode,
+                //             toastLength: Toast.LENGTH_SHORT,
+                //             gravity: ToastGravity.CENTER,
+                //             timeInSecForIosWeb: 1,
+                //             backgroundColor: theme.getMode() ? Colors.white : Colors.black,
+                //             textColor: theme.getMode() ? Colors.black : Colors.white,
+                //             fontSize: 16.0.sp
+                //         );
+                //       },
+                //       child: SizedBox(
+                //         height: _height,
+                //         width: _height,
+                //         child: Icon(Icons.color_lens_outlined),
+                //       )
+                //     ),
+                //   ],
+                // ),
+                // bottomNavigationBar: Container(
+                //   height: UI_MENU_HEIGHT,
+                //   color: Colors.transparent,
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.center,
+                //     children: [
+                //       SizedBox(
+                //         width: 80,
+                //         child: Icon(Icons.photo_library_outlined),
+                //       ),
+                //       SizedBox(
+                //         width: 300,
+                //         child: BottomNavigationBar(
+                //             onTap: (index) {
+                //               viewModel.setMainIndex(index);
+                //             },
+                //             type: BottomNavigationBarType.fixed,
+                //             currentIndex: viewModel.menuIndex,
+                //             selectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w600),
+                //             unselectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w400),
+                //             backgroundColor: Colors.transparent,
+                //             items: [
+                //               BottomNavigationBarItem(
+                //                 icon: Icon(Icons.event_available_outlined),
+                //                 label: 'EVENT'.tr,
+                //               ),
+                //               BottomNavigationBarItem(
+                //                 icon: Icon(Icons.photo_library_outlined),
+                //                 label: 'STORY'.tr,
+                //               ),
+                //               BottomNavigationBarItem(
+                //                 icon: Icon(Icons.message_outlined),
+                //                 label: 'MESSAGE'.tr,
+                //               ),
+                //               BottomNavigationBarItem(
+                //                 icon: Icon(Icons.account_circle_outlined),
+                //                 label: 'MY'.tr,
+                //               ),
+                //             ]
+                //           ),
+                //       ),
+                //     ]
+                //   )
+                // )
               )
             );
           }),

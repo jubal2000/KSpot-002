@@ -29,6 +29,7 @@ import '../view/place/place_list_screen.dart';
 import '../widget/event_group_dialog.dart';
 import '../widget/dropdown_widget.dart';
 import '../widget/event_time_edit_widget.dart';
+import '../widget/title_text_widget.dart';
 
 typedef JSON = Map<String, dynamic>;
 typedef SnapShot = QuerySnapshot<Map<String, dynamic>>;
@@ -2338,5 +2339,28 @@ bool checkDateTimeShow(JSON? timeData, DateTime checkDate) {
     }
   }
   return false;
+}
+
+showDatePickerText(BuildContext context, DateTime date, Function()? onSelect) {
+  String month     = DateFormat.M(Get.locale.toString()).format(date);
+  String dayOfWeek = DateFormat.E(Get.locale.toString()).format(date);
+  return GestureDetector(
+    onTap: onSelect,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            DateMonthText(context, month, color: Theme.of(context).hintColor),
+            DateWeekText (context, dayOfWeek, color: Theme.of(context).indicatorColor),
+          ],
+        ),
+        SizedBox(width: 5),
+        DateDayText(context, '${date.day}', fontSize: UI_FONT_SIZE_LT, color: Theme.of(context).indicatorColor),
+      ],
+    )
+  );
 }
 

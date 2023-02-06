@@ -41,6 +41,7 @@ class Words extends Translations {
       'Message box': '메시지함',
       'Spot group': '스팟 그룹',
       'Spot': '스팟',
+      'MY': '내정보',
 
       // intro_screen
       'SIGN UP': '회원가입',

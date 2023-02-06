@@ -26,16 +26,18 @@ import '../../widget/user_item_widget.dart';
 import '../main_event/event_edit_screen.dart';
 
 class AppTopMenuBar extends StatelessWidget {
-  AppTopMenuBar(this.menuMode, {Key? key, this.height = 65.0, this.iconColor = Colors.black, this.onCountryChanged}) : super(key: key);
+  AppTopMenuBar(this.menuMode, {Key? key, this.isShowDatePick = true, this.height = 65.0, this.onCountryChanged, this.onDateChange}) : super(key: key);
   int menuMode;
   double height;
-  Function? onCountryChanged;
-  var   iconColor = Colors.black;
-  var   iconSize = 24.0;
+  Function()? onCountryChanged;
+  Function()? onDateChange;
+  var iconSize = 24.0;
+  bool isShowDatePick;
 
   @override
   Widget build(BuildContext context) {
     LOG('--> AppData.currentState: ${AppData.currentState}');
+    final iconColor = Theme.of(context).indicatorColor;
     return Container(
       height: height,
       padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE, 30, UI_HORIZONTAL_SPACE, 0),
@@ -67,7 +69,7 @@ class AppTopMenuBar extends StatelessWidget {
                               GestureDetector(
                                 child: Container(
                                   alignment: Alignment.center,
-                                  padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),
+                                  padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 12 : 0),
                                   constraints: BoxConstraints(
                                     maxHeight: height * 0.8,
                                     minWidth: height * 0.8,
@@ -91,6 +93,43 @@ class AppTopMenuBar extends StatelessWidget {
                                   AppData.appViewModel.showCountrySelect(context, onCountryChanged);
                                 },
                               ),
+                              SizedBox(width: 5),
+                              Container(
+                                alignment: Alignment.center,
+                                padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),
+                                constraints: BoxConstraints(
+                                  maxHeight: height * 0.8,
+                                  minWidth: height * 0.8,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(height * 0.5)),
+                                  color: Theme.of(context).canvasColor.withOpacity(0.55),
+                                ),
+                                child: AppData.appViewModel.showAddMenu(iconColor, iconSize),
+                              ),
+                              Expanded(
+                                  child: Container(
+                                    color: Colors.transparent,
+                                  )
+                              ),
+                              if (isShowDatePick)
+                              GestureDetector(
+                                child: Container(
+                                    alignment: Alignment.center,
+                                    padding: EdgeInsets.symmetric(horizontal: 12),
+                                    constraints: BoxConstraints(
+                                      maxHeight: height * 0.8,
+                                      minWidth: height * 0.8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.all(Radius.circular(height * 0.5)),
+                                      color: Theme.of(context).canvasColor.withOpacity(0.55),
+                                    ),
+                                    child: showDatePickerText(context, AppData.currentDate, onDateChange),
+                                ),
+                                onTap: () {
+                                },
+                              ),
                             ],
                             if (AppData.appViewModel.appbarMenuMode == MainMenuID.my)
                               Container(
@@ -103,40 +142,35 @@ class AppTopMenuBar extends StatelessWidget {
                                   },
                                 )
                               ),
-                            Expanded(
-                              child: Container(
-                                color: Colors.transparent,
-                              )
-                            ),
-                            Container(
-                              child: Row(
-                                 mainAxisAlignment: MainAxisAlignment.end,
-                                 crossAxisAlignment: CrossAxisAlignment.center,
-                                 children: [
-                                   AppData.appViewModel.showAddMenu(iconColor, iconSize),
-                                   SizedBox(width: 8),
-                                   Badge(
-                                     position: BadgePosition(top:1, end:5),
-                                     badgeContent: Text('3', style: TextStyle(fontSize:10, fontWeight: FontWeight.bold, color: Colors.white)),
-                                     showBadge: true,
-                                     child: IconButton(
-                                       icon: Icon(Icons.message_outlined, color: iconColor),
-                                       onPressed: () {
-                                       },
-                                     )
-                                   ),
-                                   SizedBox(width: 8),
-                                   UserCardWidget(AppData.userInfo.toJson(),
-                                    isShowName: false,
-                                    faceSize: UI_MENU_CIRCLE_SIZE,
-                                    circleColor: Theme.of(context).canvasColor,
-                                    backgroundColor: Theme.of(context).canvasColor,
-                                    onSelected: (_) {
-                                      Get.to(() => ProfileScreen());
-                                    }),
-                                ]
-                              )
-                            ),
+                            // Container(
+                            //   child: Row(
+                            //      mainAxisAlignment: MainAxisAlignment.end,
+                            //      crossAxisAlignment: CrossAxisAlignment.center,
+                            //      children: [
+                            //        AppData.appViewModel.showAddMenu(iconColor, iconSize),
+                            //        SizedBox(width: 8),
+                            //        Badge(
+                            //          position: BadgePosition(top:1, end:5),
+                            //          badgeContent: Text('3', style: TextStyle(fontSize:10, fontWeight: FontWeight.bold, color: Colors.white)),
+                            //          showBadge: true,
+                            //          child: IconButton(
+                            //            icon: Icon(Icons.message_outlined, color: iconColor),
+                            //            onPressed: () {
+                            //            },
+                            //          )
+                            //        ),
+                            //        SizedBox(width: 8),
+                            //        UserCardWidget(AppData.userInfo.toJson(),
+                            //         isShowName: false,
+                            //         faceSize: UI_MENU_CIRCLE_SIZE,
+                            //         circleColor: Theme.of(context).canvasColor,
+                            //         backgroundColor: Theme.of(context).canvasColor,
+                            //         onSelected: (_) {
+                            //           Get.to(() => ProfileScreen());
+                            //         }),
+                            //     ]
+                            //   )
+                            // ),
                             // Container(
                             //   child: Row(
                             //     mainAxisAlignment: MainAxisAlignment.center,

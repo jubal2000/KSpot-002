@@ -122,31 +122,31 @@ class EventViewModel extends ChangeNotifier {
           color: Theme.of(buildContext!).canvasColor.withOpacity(0.5),
           child: datePicker,
         ),
-        if (!isDatePickerExtend)
-          GestureDetector(
-            onTap: () {
-              isDatePickerExtend = true;
-              notifyListeners();
-              dateController.animateToSelection(duration: Duration(milliseconds: 10));
-            },
-            child: Container(
-              width: 60.0,
-              height: 80.0,
-              margin: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE,vertical: 5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                color: Theme.of(buildContext!).canvasColor.withOpacity(0.55)
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  DateMonthText(buildContext!, month, color: Theme.of(buildContext!).hintColor),
-                  DateDayText  (buildContext!, '${AppData.currentDate.day}', color: Theme.of(buildContext!).indicatorColor),
-                  DateWeekText (buildContext!, dayOfWeek, color: Theme.of(buildContext!).hintColor),
-                ],
-              )
-            ),
-          ),
+        // if (!isDatePickerExtend)
+        //   GestureDetector(
+        //     onTap: () {
+        //       isDatePickerExtend = true;
+        //       notifyListeners();
+        //       dateController.animateToSelection(duration: Duration(milliseconds: 10));
+        //     },
+        //     child: Container(
+        //       width: 60.0,
+        //       height: 80.0,
+        //       margin: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE,vertical: 5),
+        //       decoration: BoxDecoration(
+        //         borderRadius: BorderRadius.all(Radius.circular(8)),
+        //         color: Theme.of(buildContext!).canvasColor.withOpacity(0.55)
+        //       ),
+        //       child: Column(
+        //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        //         children: [
+        //           DateMonthText(buildContext!, month, color: Theme.of(buildContext!).hintColor),
+        //           DateDayText  (buildContext!, '${AppData.currentDate.day}', color: Theme.of(buildContext!).indicatorColor),
+        //           DateWeekText (buildContext!, dayOfWeek, color: Theme.of(buildContext!).hintColor),
+        //         ],
+        //       )
+        //     ),
+        //   ),
       ]
     );
   }
@@ -241,7 +241,7 @@ class EventViewModel extends ChangeNotifier {
               BottomLeftAlign(
                 child: Container(
                   height: itemHeight,
-                  margin: EdgeInsets.only(bottom: 10),
+                  margin: EdgeInsets.only(bottom: UI_MENU_BG_HEIGHT),
                   child: ListView(
                     shrinkWrap: true,
                     scrollDirection: Axis.horizontal,
@@ -249,7 +249,17 @@ class EventViewModel extends ChangeNotifier {
                     children: showEventList(itemWidth, itemHeight),
                   ),
                 )
-              )
+              ),
+              TopCenterAlign(
+                  child: SizedBox(
+                    height: UI_TOP_MENU_HEIGHT * 1.7,
+                    child: AppTopMenuBar(MainMenuID.event, isShowDatePick: !isDatePickerExtend, height: UI_TOP_MENU_HEIGHT, onDateChange: () {
+                      isDatePickerExtend = true;
+                      notifyListeners();
+                      dateController.animateToSelection(duration: Duration(milliseconds: 10));
+                    }),
+                  )
+              ),
             ],
           );
         }

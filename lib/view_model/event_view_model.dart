@@ -40,11 +40,14 @@ class EventViewModel extends ChangeNotifier {
 
   final eventRepo = EventRepository();
   final placeRepo = PlaceRepository();
+  final dateController = DatePickerController();
   final mapKey = GlobalKey();
 
   var cameraPos = CameraPosition(target: LatLng(0,0));
-  var isTimePickerExtend = false;
+  var isDatePickerExtend = false;
   var eventListType = EventListType.map;
+
+  DatePicker? datePicker;
 
   init(BuildContext context) {
     buildContext = context;
@@ -82,16 +85,49 @@ class EventViewModel extends ChangeNotifier {
     return result;
   }
 
-  showTimePicker() {
+  initDatePicker() {
+    datePicker ??= DatePicker(
+      DateTime.now().subtract(Duration(days: 20)),
+      width:  60.0,
+      height: 60.0,
+      controller: dateController,
+      initialSelectedDate: AppData.currentDate,
+      selectionColor: Theme.of(buildContext!).primaryColor,
+      monthTextStyle: TextStyle(color: Theme.of(buildContext!).hintColor, fontSize: UI_FONT_SIZE_SX),
+      dateTextStyle: TextStyle(color: Theme.of(buildContext!).indicatorColor, fontSize: UI_FONT_SIZE_LT),
+      dayTextStyle: TextStyle(color: Theme.of(buildContext!).hintColor, fontSize: UI_FONT_SIZE_SX),
+      locale: Get.locale.toString(),
+      onDateChange: (date) {
+        // New date selected
+        if (AppData.currentDate == date) {
+          isDatePickerExtend = false;
+          notifyListeners();
+        } else {
+          AppData.currentDate = date;
+          onMapDayChanged();
+        }
+      },
+    );
+  }
+
+  showDatePicker() {
     String month     = DateFormat.M(Get.locale.toString()).format(AppData.currentDate);
     String dayOfWeek = DateFormat.E(Get.locale.toString()).format(AppData.currentDate);
+    initDatePicker();
     return Row(
       children: [
-        if (!isTimePickerExtend)
+        Container(
+          width: isDatePickerExtend ? Get.width : 0,
+          height: UI_DATE_PICKER_HEIGHT,
+          color: Theme.of(buildContext!).canvasColor.withOpacity(0.5),
+          child: datePicker,
+        ),
+        if (!isDatePickerExtend)
           GestureDetector(
             onTap: () {
-              isTimePickerExtend = true;
+              isDatePickerExtend = true;
               notifyListeners();
+              dateController.animateToSelection(duration: Duration(milliseconds: 10));
             },
             child: Container(
               width: 60.0,
@@ -109,33 +145,6 @@ class EventViewModel extends ChangeNotifier {
                   DateWeekText (buildContext!, dayOfWeek, color: Theme.of(buildContext!).hintColor),
                 ],
               )
-            ),
-          ),
-        if (isTimePickerExtend)
-          Container(
-            width: Get.width,
-            height: UI_DATE_PICKER_HEIGHT,
-            color: Theme.of(buildContext!).canvasColor.withOpacity(0.5),
-            child: DatePicker(
-              DateTime.now().subtract(Duration(days: 20)),
-              width:  60.0,
-              height: 60.0,
-              initialSelectedDate: AppData.currentDate,
-              selectionColor: Theme.of(buildContext!).primaryColor,
-              monthTextStyle: TextStyle(color: Theme.of(buildContext!).hintColor, fontSize: UI_FONT_SIZE_SX),
-              dateTextStyle: TextStyle(color: Theme.of(buildContext!).indicatorColor, fontSize: UI_FONT_SIZE_LT),
-              dayTextStyle: TextStyle(color: Theme.of(buildContext!).hintColor, fontSize: UI_FONT_SIZE_SX),
-              locale: Get.locale.toString(),
-              onDateChange: (date) {
-                // New date selected
-                if (AppData.currentDate == date) {
-                  isTimePickerExtend = false;
-                  notifyListeners();
-                } else {
-                  AppData.currentDate = date;
-                  onMapDayChanged();
-                }
-              },
             ),
           ),
       ]
@@ -227,7 +236,7 @@ class EventViewModel extends ChangeNotifier {
               Align(
                 widthFactor: 1.25,
                 heightFactor: 3.0,
-                child: showTimePicker(),
+                child: showDatePicker(),
               ),
               BottomLeftAlign(
                 child: Container(

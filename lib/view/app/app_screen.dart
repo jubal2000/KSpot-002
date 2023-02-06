@@ -118,37 +118,37 @@ class AppScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                // bottomNavigationBar: Container(
-                //   height: UI_MENU_HEIGHT,
-                //   color: Colors.transparent,
-                //   child: Stack(
-                //     children: [
-                //       BottomCenterAlign(
-                //         child: SizedBox(
-                //           height: UI_MENU_HEIGHT,
-                //           child: BottomNavigationBar(
-                //             onTap: (index) {
-                //               viewModel.setMainIndex(index);
-                //             },
-                //             currentIndex: viewModel.menuIndex,
-                //             selectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w600),
-                //             unselectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w400),
-                //             items: [
-                //               BottomNavigationBarItem(
-                //                 icon: Icon(Icons.event_available_outlined),
-                //                 label: 'EVENT'.tr,
-                //               ),
-                //               BottomNavigationBarItem(
-                //                 icon: Icon(Icons.photo_library_outlined),
-                //                 label: 'STORY'.tr,
-                //               ),
-                //             ]
-                //           ),
-                //         )
-                //       )
-                //     ]
-                //   )
-                // )
+                bottomNavigationBar: Container(
+                  height: UI_MENU_HEIGHT,
+                  color: Colors.transparent,
+                  child: Stack(
+                    children: [
+                      BottomCenterAlign(
+                        child: SizedBox(
+                          height: UI_MENU_HEIGHT,
+                          child: BottomNavigationBar(
+                            onTap: (index) {
+                              viewModel.setMainIndex(index);
+                            },
+                            currentIndex: viewModel.menuIndex,
+                            selectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w600),
+                            unselectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w400),
+                            items: [
+                              BottomNavigationBarItem(
+                                icon: Icon(Icons.event_available_outlined),
+                                label: 'EVENT'.tr,
+                              ),
+                              BottomNavigationBarItem(
+                                icon: Icon(Icons.photo_library_outlined),
+                                label: 'STORY'.tr,
+                              ),
+                            ]
+                          ),
+                        )
+                      )
+                    ]
+                  )
+                )
               )
             );
           }),

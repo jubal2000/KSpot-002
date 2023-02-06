@@ -160,7 +160,7 @@ class GoogleMapState extends State<GoogleMapWidget> {
         LOG('--> newLatLngBounds : ${markers.length}');
         mapController!.moveCamera(CameraUpdate.newLatLngBounds(
             MapUtils.boundsFromLatLngList(markers.map((loc) => loc.position).toList()), 100));
-        Future.delayed(Duration(milliseconds: 500), () {
+        Future.delayed(Duration(milliseconds: 200), () {
           isMoveActive = true;
         });
       });
@@ -374,7 +374,7 @@ class GoogleMapState extends State<GoogleMapWidget> {
                   if (mapController == null || !isMoveActive) return;
                   LOG('--> onCameraMove');
                   isMoveActive = false;
-                  Future.delayed(Duration(milliseconds: 500), () {
+                  Future.delayed(Duration(milliseconds: 300), () {
                     isMoveActive = true;
                   });
                   mapController!.getVisibleRegion().then((region) {

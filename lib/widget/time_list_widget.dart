@@ -43,13 +43,20 @@ class _ShowTimeListState extends State<ShowTimeList> {
             isAdd = AppData.selectEventTime.containsKey(item.key);
           }
           if (isAdd) {
-            LOG('--> ShowTimeList add [$i] : ${item.key}');
+            LOG('--> ShowTimeList add [$i] : ${item.value}');
             widget._itemShowFlag[item.key] = item;
+            JSON customData = {};
+            if (LIST_NOT_EMPTY(item.value['customData'])) {
+              for (var item in item.value['customData']) {
+                customData[item['id']] = item;
+              }
+            }
+
             _itemList.add(GestureDetector(
                 onTap: () {
-                  if (JSON_NOT_EMPTY(item.value['dayData'])) {
-                    var currentDate = DateTime.parse(STR(item.value['dayData'].first));
-                    LOG('--> select [$i] : ${item.value['dayData'].first} => $currentDate');
+                  if (JSON_NOT_EMPTY(item.value['day'])) {
+                    var currentDate = DateTime.parse(STR(item.value['day'].first));
+                    LOG('--> select [$i] : ${item.value['day'].first} => $currentDate');
                     AppData.currentDate = currentDate;
                   }
                 },
@@ -84,13 +91,13 @@ class _ShowTimeListState extends State<ShowTimeList> {
                             ],
                           ),
                         ],
-                        if (LIST_NOT_EMPTY(item.value['dayData']))...[
+                        if (LIST_NOT_EMPTY(item.value['day']))...[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               SubTitleSmall(context, '${'DATE'.tr} : '),
                               Expanded(
-                                child: TagTextList(context, List<String>.from(item.value['dayData']), onSelected: (date) {
+                                child: TagTextList(context, List<String>.from(item.value['day']), onSelected: (date) {
                                   LOG('--> TagTextList Select : $date');
                                   widget.currentDate = DateTime.parse(date);
                                   AppData.currentDate = widget.currentDate!;
@@ -143,9 +150,9 @@ class _ShowTimeListState extends State<ShowTimeList> {
                             ],
                           ),
                         ],
-                        if (JSON_NOT_EMPTY(item.value['customData']))...[
+                        if (customData.isNotEmpty)...[
                           showHorizontalDivider(Size(double.infinity * 0.9, 10), color: LineColor(context)),
-                          ShowCustomField(context, item.value['customData']),
+                          ShowCustomField(context, customData),
                           SizedBox(height: 5),
                         ],
                       ],

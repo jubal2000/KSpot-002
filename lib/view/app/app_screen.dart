@@ -6,12 +6,14 @@ import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/view/main_event/event_screen.dart';
+import 'package:kspot_002/view/main_my/profile_screen.dart';
 import 'package:kspot_002/view/main_story/story_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/app_data.dart';
 import '../../data/theme_manager.dart';
 import '../../view_model/app_view_model.dart';
+import '../message/message_screen.dart';
 import 'app_top_menu.dart';
 
 class AppScreen extends StatelessWidget {
@@ -20,7 +22,9 @@ class AppScreen extends StatelessWidget {
 
   List<Widget> pages = [
     EventScreen(),
-    StoryScreen()
+    StoryScreen(),
+    MessageScreen(),
+    ProfileScreen(),
   ];
 
   @override
@@ -130,6 +134,7 @@ class AppScreen extends StatelessWidget {
                             onTap: (index) {
                               viewModel.setMainIndex(index);
                             },
+                            type: BottomNavigationBarType.fixed,
                             currentIndex: viewModel.menuIndex,
                             selectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w600),
                             unselectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w400),
@@ -141,6 +146,14 @@ class AppScreen extends StatelessWidget {
                               BottomNavigationBarItem(
                                 icon: Icon(Icons.photo_library_outlined),
                                 label: 'STORY'.tr,
+                              ),
+                              BottomNavigationBarItem(
+                                icon: Icon(Icons.message_outlined),
+                                label: 'MESSAGE'.tr,
+                              ),
+                              BottomNavigationBarItem(
+                                icon: Icon(Icons.info),
+                                label: 'MY'.tr,
                               ),
                             ]
                           ),

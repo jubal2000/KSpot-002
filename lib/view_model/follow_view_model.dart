@@ -6,8 +6,8 @@ import '../repository/follow_repository.dart';
 import '../utils/utils.dart';
 
 class FollowViewModel extends ChangeNotifier {
-  BuildContext? buildContext;
   final repo = FollowRepository();
+  BuildContext? buildContext;
 
   init(BuildContext context) {
     buildContext = context;

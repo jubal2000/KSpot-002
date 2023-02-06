@@ -354,6 +354,7 @@ class GoogleMapState extends State<GoogleMapWidget> {
                 zoomGesturesEnabled: true,
                 zoomControlsEnabled: false,
                 mapToolbarEnabled: false,
+                compassEnabled: false,
                 padding: EdgeInsets.all(20),
                 initialCameraPosition: CameraPosition( //innital position in map
                   target: showPos, //initial position

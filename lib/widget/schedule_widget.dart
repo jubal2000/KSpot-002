@@ -219,8 +219,8 @@ DataSource? getCalendarDataSource(JSON timeList) {
     var eventId = item.value['eventId'] ?? '';
     var placeId = item.value['placeId'] ?? '';
     LOG('--> timeList.entries item : $eventId / $placeId => $item');
-    if (LIST_NOT_EMPTY(item.value['dayData'])) {
-      for (var time in item.value['dayData']) {
+    if (LIST_NOT_EMPTY(item.value['day'])) {
+      for (var time in item.value['day']) {
         // LOG('--> Day Data : ${item.value['dayData'][i]} / $duration');
         var startDate = DateTime.parse(time);
         var dayStr = startDate.toString().split(' ').first;

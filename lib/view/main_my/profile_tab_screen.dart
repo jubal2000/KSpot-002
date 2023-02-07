@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/common_sizes.dart';
+import 'package:kspot_002/models/event_model.dart';
 import 'package:kspot_002/models/story_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -583,7 +584,7 @@ class MyProfileTab extends StatelessWidget {
                                   var item = _showList[index];
                                   // var controller = AnimationController(duration: const Duration(milliseconds: 150), vsync: this);
                                   return EventCardItem(
-                                    item,
+                                    EventModel.fromJson(item),
                                     // animationController: controller,
                                     isShowTheme: false,
                                     isShowUser: false,

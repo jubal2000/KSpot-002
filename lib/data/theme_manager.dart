@@ -470,7 +470,7 @@ ItemDescOutlineExStyle(BuildContext context, {Color borderColor = Colors.black})
 }
 
 CardTitleStyle(BuildContext context) {
-  return TextStyle(fontSize: 13, color: Theme.of(context).indicatorColor, fontWeight: FontWeight.w600, height: 1.0);
+  return TextStyle(fontSize: 12, color: Theme.of(context).indicatorColor, fontWeight: FontWeight.w600, height: 1.1);
 }
 
 CardDescStyle(BuildContext context) {
@@ -527,6 +527,11 @@ ItemButtonDisableStyle(BuildContext context) {
 
 DescBodyInfoStyle(BuildContext context, [double opacity = 0.5]) {
   return TextStyle(fontSize: 12, color: Theme.of(context).primaryColor.withOpacity(opacity), height: 1);
+}
+
+GroupTitleOutlineStyle(BuildContext context, Color borderColor) {
+  return TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w500,
+      shadows: outlinedText(strokeColor: borderColor), height: 1.1);
 }
 
 SubTitleBar(BuildContext context, String title, {double horizontalPadding = 20, double height = 30, IconData? icon, Function(String)? onActionSelect}) {

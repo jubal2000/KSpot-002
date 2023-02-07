@@ -5,6 +5,9 @@ import 'package:helpers/helpers/widgets/align.dart';
 
 import '../../data/app_data.dart';
 import '../../data/theme_manager.dart';
+import '../../models/event_model.dart';
+import '../../models/place_model.dart';
+import '../../repository/event_repository.dart';
 import '../../services/api_service.dart';
 import '../../utils/utils.dart';
 import '../../widget/like_widget.dart';
@@ -27,8 +30,8 @@ class EventCardItem extends StatefulWidget {
         this.selectMax = 9,
         this.onRefresh}) : super(key: key);
 
-  JSON itemData;
-  JSON? placeData;
+  EventModel itemData;
+  PlaceModel? placeData;
   bool isSelectable;
   bool isShowHomeButton;
   bool isShowPlaceButton;
@@ -48,6 +51,7 @@ class EventCardItem extends StatefulWidget {
 }
 
 class _EventCardItemState extends State<EventCardItem> {
+  final eventRepo = EventRepository();
   final api = Get.find<ApiService>();
   var _imageHeight = 0.0;
   var _isExpired = false;
@@ -58,24 +62,24 @@ class _EventCardItemState extends State<EventCardItem> {
     widget.itemPadding ??= EdgeInsets.symmetric(vertical: 5);
     _imageHeight = widget.itemHeight - widget.itemPadding!.top - widget.itemPadding!.bottom;
     _userListData.clear();
-    if (JSON_NOT_EMPTY(widget.itemData['managerData'])) {
-      for (var item in widget.itemData['managerData'].entries) {
-        _userListData.add(item.value as JSON);
+    if (JSON_NOT_EMPTY(widget.itemData.managerData)) {
+      for (var item in widget.itemData.managerData!) {
+        _userListData.add(item.toJson());
         // List<JSON>.from(widget.itemData['managerData'].entries.map((key, value) => JSON.from(value)).toList());
       }
-    } else if (STR(widget.itemData['userId']).isNotEmpty) {
-      _userListData.add(widget.itemData);
+    } else if (STR(widget.itemData.userId).isNotEmpty) {
+      _userListData.add(widget.itemData.toJson());
     }
-    _isExpired = api.checkIsExpired(widget.itemData);
+    _isExpired = eventRepo.checkIsExpired(widget.itemData);
     return GestureDetector(
         onTap: () {
           if (widget.isSelectable) {
             if (widget.selectMax == 1) {
               AppData.listSelectData.clear();
-              AppData.listSelectData[widget.itemData['id']] = widget.itemData;
+              AppData.listSelectData[widget.itemData.id] = widget.itemData;
               Navigator.of(context).pop();
             } else {
-              AppData.listSelectData[widget.itemData['id']] = widget.itemData;
+              AppData.listSelectData[widget.itemData.id] = widget.itemData;
             }
           } else {
             unFocusAll(context);
@@ -109,7 +113,7 @@ class _EventCardItemState extends State<EventCardItem> {
                   children: [
                     // showSizedImage(item.value['pic'] ?? _placeInfo['pic'], _height - _padding * 2),
                     if (widget.isSelectable)...[
-                      Icon(Icons.arrow_forward_ios, color: AppData.listSelectData.containsKey(widget.itemData['id']) ?
+                      Icon(Icons.arrow_forward_ios, color: AppData.listSelectData.containsKey(widget.itemData.id) ?
                       Theme.of(context).primaryColor : Theme.of(context).primaryColor.withOpacity(0.5)),
                       SizedBox(width: 5),
                     ],
@@ -127,8 +131,8 @@ class _EventCardItemState extends State<EventCardItem> {
                               //     child: showImage(STR(widget.itemData['pic']), Size(_imageHeight, _imageHeight)),
                               //   ),
                               // if (widget.animationController == null)
-                              showImage(STR(widget.itemData['pic']), Size(_imageHeight, _imageHeight)),
-                              if (INT(widget.itemData['status']) == 2)
+                              showImage(widget.itemData.pic, Size(_imageHeight, _imageHeight)),
+                              if (widget.itemData.status == 2)
                                 ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, 3, 3),
                               if (_isExpired)
                                 Center(
@@ -152,7 +156,7 @@ class _EventCardItemState extends State<EventCardItem> {
                                           width: 12,
                                           height: 12,
                                           decoration: BoxDecoration(
-                                            color: COL(widget.itemData['themeColor'], defaultValue: Theme.of(context).primaryColor.withOpacity(0.5)),
+                                            color: Theme.of(context).primaryColor.withOpacity(0.5),
                                             borderRadius: BorderRadius.all(Radius.circular(8.0)),
                                           ),
                                         ),
@@ -161,7 +165,7 @@ class _EventCardItemState extends State<EventCardItem> {
                                       Expanded(
                                         child: Row(
                                           children: [
-                                            Text(STR(widget.itemData['title']), style: ItemTitleStyle(context), maxLines: 1),
+                                            Text(STR(widget.itemData.title), style: ItemTitleStyle(context), maxLines: 1),
                                             if (widget.isPromotion)...[
                                               SizedBox(width: 2),
                                               Icon(Icons.star, size: 20, color: Theme.of(context).colorScheme.tertiary),
@@ -171,7 +175,7 @@ class _EventCardItemState extends State<EventCardItem> {
                                       ),
                                       if (widget.isShowLike)...[
                                         SizedBox(width: 5),
-                                        LikeSmallWidget(context, 'event', widget.itemData),
+                                        LikeSmallWidget(context, 'event', widget.itemData.toJson()),
                                       ],
                                       SizedBox(width: 5),
                                     ]
@@ -190,7 +194,7 @@ class _EventCardItemState extends State<EventCardItem> {
                                                 RichText(maxLines: 2,
                                                   overflow: TextOverflow.ellipsis,
                                                   text: TextSpan(
-                                                      text: DESC(widget.itemData['desc']),
+                                                      text: DESC(widget.itemData.desc),
                                                       style: ItemDescStyle(context)
                                                   ),
                                                 ),
@@ -198,7 +202,7 @@ class _EventCardItemState extends State<EventCardItem> {
                                                     maxLines: 1,
                                                     overflow: TextOverflow.ellipsis,
                                                     text: TextSpan(
-                                                      text: EVENT_TIMEDATA_TITLE_TIME_STR(widget.itemData['timeData']),
+                                                      text: EVENT_TIMEDATA_TITLE_TIME_STR(widget.itemData.getTimeDataMap),
                                                       style: ItemDescExStyle(context),
                                                     )
                                                 ),

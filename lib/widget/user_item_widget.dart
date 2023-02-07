@@ -208,6 +208,7 @@ class UserIdCardOneWidget extends StatefulWidget {
     this.isCanExtend = true,
     this.textColor,
     this.backColor,
+    this.borderColor,
     this.onEdited,
     this.onSelected,
     this.onProfileChanged,
@@ -222,6 +223,7 @@ class UserIdCardOneWidget extends StatefulWidget {
   bool isCanExtend;
   Color? textColor;
   Color? backColor;
+  Color? borderColor;
   Function(String, int)? onEdited;
   Function(String)? onSelected;
   Function(JSON)? onProfileChanged;
@@ -331,10 +333,7 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.all(Radius.circular(widget.size)),
                                       border: Border.all(
-                                        color: Theme
-                                            .of(context)
-                                            .colorScheme
-                                            .secondary,
+                                        color: widget.borderColor ?? Theme.of(context).colorScheme.secondary,
                                         width: widget.faceCircleSize,
                                       ),
                                     ),

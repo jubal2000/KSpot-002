@@ -60,7 +60,8 @@ DBL(dynamic value, {double defaultValue = 0.0}) {
 
 // ignore: non_constant_identifier_names
 STR(dynamic value, {String defaultValue = ''}) {
-  return value.runtimeType != Null && value != 'null' && value!.toString().isNotEmpty ? value!.toString() : defaultValue;
+  var result = value.runtimeType != Null && value != 'null' && value!.toString().isNotEmpty ? value!.toString() : defaultValue;
+  return result.replaceAll('\\n', ' ');
 }
 
 // ignore: non_constant_identifier_names
@@ -748,10 +749,13 @@ Widget showImageWidget(dynamic imagePath, BoxFit fit, {Color? color}) {
           fit: fit,
           color: color,
           imageUrl: url,
-          progressIndicatorBuilder: (context, url, progress) => SizedBox(
+          cacheKey: url.split('=').last,
+          progressIndicatorBuilder: (context, url, progress) => Center(
+            child: SizedBox(
             width: 40,
             height: 40,
             child: CircularProgressIndicator(value: progress.progress),
+            ),
           )
         );
       } else if (url.contains('/cache')) {
@@ -2313,7 +2317,7 @@ bool checkDateTimeShow(JSON? timeData, DateTime checkDate) {
       for (var i=0; i<duration; i++) {
         var day = startDate.add(Duration(days: i));
         var dayStr = day.toString().split(' ').first;
-        var isShow = item.value['exceptDayData'] == null || !item.value['exceptDayData'].contains(dayStr);
+        var isShow = item.value['exceptDay'] == null || !item.value['exceptDay'].contains(dayStr);
         if (isShow && LIST_NOT_EMPTY(item.value['week']) && !item.value['week'].contains(weekText.first)) {
           var wm = day.weekOfMonth;
           isShow = ((wm < weekText.length && item.value['week'].contains(weekText[wm])) || wm >= weekText.length) &&

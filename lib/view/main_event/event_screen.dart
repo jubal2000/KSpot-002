@@ -14,35 +14,35 @@ import '../../widget/title_text_widget.dart';
 import '../app/app_top_menu.dart';
 import 'event_edit_screen.dart';
 
-class EventScreen extends StatefulWidget {
+class EventScreen extends StatelessWidget {
   EventScreen({Key? key}) : super(key: key);
-  final viewModel = EventViewModel();
-
-  @override
-  _EventScreenState createState() => _EventScreenState();
-}
-
-class _EventScreenState extends State<EventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    widget.viewModel.init(context);
+    AppData.eventViewModel.init(context);
     return Scaffold(
-      body: Stack(
+      body: ChangeNotifierProvider<AppViewModel>.value(
+        value: AppData.appViewModel,
+        child: Consumer<AppViewModel>(
+        builder: (context, appViewModel, _) {
+        LOG('--> AppViewModel');
+      return Stack(
         children: [
+          if (AppData.eventViewModel.eventShowList.isEmpty)
           FutureBuilder(
-            future: widget.viewModel.initData,
+            future: AppData.eventViewModel.getEventList(),
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                widget.viewModel.eventData = snapshot.data;
+              if (AppData.eventViewModel.eventData != null) {
+                LOG('--> set eventData : ${AppData.eventViewModel.eventData!.length}');
                 return FutureBuilder(
-                  future: widget.viewModel.setShowList(),
+                  future: AppData.eventViewModel.setShowList(),
                   builder: (context, snapshot2) {
                     if (snapshot2.hasData) {
-                      widget.viewModel.eventShowList = snapshot2.data!;
+                      AppData.eventViewModel.eventShowList = snapshot2.data!;
                       return ChangeNotifierProvider<EventViewModel>.value(
-                          value: widget.viewModel,
+                          value: AppData.eventViewModel,
                           child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+                            LOG('--> EventViewModel 1');
                         return viewModel.showMainList();
                         })
                       );
@@ -56,7 +56,18 @@ class _EventScreenState extends State<EventScreen> {
               }
             }
           ),
+          if (AppData.eventViewModel.eventShowList.isNotEmpty)
+            ChangeNotifierProvider<EventViewModel>.value(
+                value: AppData.eventViewModel,
+                child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+                  LOG('--> EventViewModel 2');
+                  return viewModel.showMainList();
+                })
+            )
         ]
+      );
+    }
+    )
       )
     );
   }

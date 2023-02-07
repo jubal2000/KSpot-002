@@ -13,6 +13,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:helpers/helpers.dart';
 import 'package:http/http.dart';
 import 'package:image_editor/image_editor.dart';
+import 'package:kspot_002/data/common_sizes.dart';
 import 'package:location/location.dart' as loc;
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'dart:ui' as ui;
@@ -35,6 +36,7 @@ class GoogleMapWidget extends StatefulWidget{
     this.showDirection = false,
     this.showPosButton = true,
     this.showButtons = false,
+    this.isRefresh = true,
     this.onButtonAction,
     this.onMarkerSelected,
     this.onCameraMoved,
@@ -44,6 +46,7 @@ class GoogleMapWidget extends StatefulWidget{
   bool showPosButton;
   bool showDirection;
   bool showButtons;
+  bool isRefresh;
   double mapHeight;
   List<JSON> showLocation;
   Function(MapButtonAction)? onButtonAction;
@@ -52,24 +55,26 @@ class GoogleMapWidget extends StatefulWidget{
 
   // LatLng startLocation  = LatLng(27.6683619, 85.3101895);
   // LatLng endLocation    = LatLng(27.6875436, 85.2751138);
+  Set<Marker> markers = Set(); //markers for google map
+  GoogleMapController? mapController; //contrller for Google map
+  ByteData? markerBgImage;
 
   @override
   GoogleMapState createState() => GoogleMapState();
 }
 
-class GoogleMapState extends State<GoogleMapWidget> {
+class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClientMixin<GoogleMapWidget> {
 
-  GoogleMapController? mapController; //contrller for Google map
   PolylinePoints polylinePoints = PolylinePoints();
-  ByteData? markerBgImage;
-
-  Set<Marker> markers = Set(); //markers for google map
   Map<PolylineId, Polyline> polylines = {}; //polylines to show direction
 
   double markerSize = 150.0;
   double distance = 0.0;
   JSON? targetPosition;
-  bool isMoveActive = false;
+  var isMoveActive = true;
+
+  @override
+  bool get wantKeepAlive => true;
 
   refreshMap() {
     if (widget.showDirection) {
@@ -103,15 +108,14 @@ class GoogleMapState extends State<GoogleMapWidget> {
   initMarker([bool isBoundsFresh = true]) {
     LOG('--> GoogleDirectionListWidget initMarker : ${widget.showLocation.length} / $isBoundsFresh');
     LatLng? targetLoc;
-    markers = Set();
-    isMoveActive = false;
+    widget.markers.clear();
     // add normal marker..
     for (var item in widget.showLocation) {
       var address = item['address'];
       if (address != null) {
         var loc = LatLng(DBL(address['lat']), DBL(address['lng']));
         targetLoc ??= loc;
-        markers.add(Marker( //add distination location marker
+        widget.markers.add(Marker( //add distination location marker
           markerId: MarkerId(STR(item['id'])),
           position: loc, //position of marker
           icon: BitmapDescriptor.defaultMarker,
@@ -131,13 +135,13 @@ class GoogleMapState extends State<GoogleMapWidget> {
     // replace image marker..
     for (var item in widget.showLocation) {
       LOG('--> add Image Marker : ${STR(item['pic'])}');
-      getMarkerImage(STR(item['pic'])).then((icon) {
+      getMarkerImage(STR(item['pic']), markerSize).then((icon) {
         if (icon != null) {
           LOG('--> getMarkerImage result : $icon / $markerSize');
           var address = item['address'];
           if (address != null) {
             setState(() {
-              markers.add(Marker( //add distination location marker
+              widget.markers.add(Marker( //add distination location marker
                 markerId: MarkerId(STR(item['id'])),
                 position: LatLng(DBL(address['lat']), DBL(address['lng'])), //position of marker
                 icon: icon ?? BitmapDescriptor.defaultMarker,
@@ -155,19 +159,33 @@ class GoogleMapState extends State<GoogleMapWidget> {
         }
       });
     }
-    if (isBoundsFresh && markers.isNotEmpty && mapController != null) {
+    if (isBoundsFresh && widget.markers.isNotEmpty && widget.mapController != null) {
+      isMoveActive = false;
       Future.delayed(Duration(milliseconds: 200), () {
-        LOG('--> newLatLngBounds : ${markers.length}');
-        mapController?.moveCamera(CameraUpdate.newLatLngBounds(
-            MapUtils.boundsFromLatLngList(markers.map((loc) => loc.position).toList()), 100));
-        Future.delayed(Duration(milliseconds: 200), () {
-          isMoveActive = true;
-        });
+        // same position counter..
+        var posCount = [];
+        for (var item in widget.markers) {
+          var str = '${item.position.latitude}-${item.position.longitude}';
+          if (!posCount.contains(str)) posCount.add(str);
+        }
+        LOG('--> newLatLngBounds : ${widget.markers.length} / ${posCount.length}');
+        if (posCount.length > 1) {
+          widget.mapController?.moveCamera(CameraUpdate.newLatLngBounds(
+              MapUtils.boundsFromLatLngList(widget.markers.map((loc) => loc.position).toList()), 100));
+          Future.delayed(Duration(milliseconds: 200), () {
+            isMoveActive = true;
+          });
+        } else {
+          widget.mapController?.moveCamera(CameraUpdate.newLatLng(widget.markers.first.position));
+          Future.delayed(Duration(milliseconds: 200), () {
+            isMoveActive = true;
+          });
+        }
       });
     }
   }
 
-  getMarkerImage(String imagePath) async {
+  getMarkerImage(String imagePath, double size) async {
     final fileName = imagePath.split('=').last;
     // LOG('--> getMarkerImage : $fileName');
     // final Uint8List? response = await getBytesFromAsset(imagePath, markerSize);
@@ -183,8 +201,9 @@ class GoogleMapState extends State<GoogleMapWidget> {
       var result = Uint8List.fromList(localData.codeUnits);
       return BitmapDescriptor.fromBytes(result);
     } else {
-      final Uint8List? response = await getBytesFromAsset(imagePath, markerSize);
+      final Uint8List? response = await getBytesFromAsset(imagePath, size);
       if (response != null) {
+        // var resizeData = await resizeImage(response, size) as Uint8List;
         writeLocalFile(fileName, String.fromCharCodes(response));
         var result = BitmapDescriptor.fromBytes(response);
         LOG('--> load server image : $imagePath');
@@ -219,7 +238,7 @@ class GoogleMapState extends State<GoogleMapWidget> {
       );
       option.addImage(
         MergeImageConfig(
-          image: MemoryImageSource(markerBgImage!.buffer.asUint8List()),
+          image: MemoryImageSource(widget.markerBgImage!.buffer.asUint8List()),
           position: ImagePosition(
             Offset(0, 0),
             Size.square(width),
@@ -234,7 +253,7 @@ class GoogleMapState extends State<GoogleMapWidget> {
   }
 
   showCurrentLocation() {
-    markers.add(Marker( //add distination location marker
+    widget.markers.add(Marker( //add distination location marker
       markerId: MarkerId('myLoc'),
       position: LatLng(AppData.currentLocation!.latitude, AppData.currentLocation!.longitude),
       //position of marker
@@ -287,10 +306,10 @@ class GoogleMapState extends State<GoogleMapWidget> {
     LOG('--> totalDistance : $totalDistance');
     setState(() {
       distance = totalDistance;
-      if (mapController != null) {
+      if (widget.mapController != null) {
         Future.delayed(
-            Duration(milliseconds: 200), () => mapController!.animateCamera(CameraUpdate.newLatLngBounds(
-            MapUtils.boundsFromLatLngList(markers.map((loc) => loc.position).toList()), 50))
+            Duration(milliseconds: 200), () => widget.mapController!.animateCamera(CameraUpdate.newLatLngBounds(
+            MapUtils.boundsFromLatLngList(widget.markers.map((loc) => loc.position).toList()), 50))
         );
       }
     });
@@ -332,7 +351,7 @@ class GoogleMapState extends State<GoogleMapWidget> {
     final showPos = widget.showMyLocation && AppData.currentLocation != null ?
       AppData.currentLocation : widget.showLocation.isNotEmpty ?
       LATLNG(widget.showLocation.first['address']): LatLng(37.55594599, 126.972317);
-    LOG('--> showPos : $showPos');
+    LOG('--> showPos : $showPos / $isMoveActive');
 
     return PointerInterceptor(
       child: SizedBox(
@@ -346,30 +365,29 @@ class GoogleMapState extends State<GoogleMapWidget> {
                 zoomControlsEnabled: false,
                 mapToolbarEnabled: false,
                 compassEnabled: false,
-                padding: EdgeInsets.all(20),
                 initialCameraPosition: CameraPosition( //innital position in map
                   target: showPos, //initial position
                   zoom: 12.0, //initial zoom level
                 ),
-                markers: markers.toSet(),
+                markers: widget.markers.toSet(),
                 polylines: Set<Polyline>.of(polylines.values),
                 onMapCreated: (controller) { //method called when map is created
-                  mapController = controller;
+                  widget.mapController = controller;
                   // markerSize = MediaQuery.of(context).size.width * 0.4;
-                  LOG('--> show marker window ready : ${markers.length}');
+                  LOG('--> show marker window ready : ${widget.markers.length}');
                   rootBundle.load('assets/ui/map_marker_00.png').then((value) {
-                    markerBgImage = value;
+                    widget.markerBgImage = value;
                     refreshMap();
                   });
                 },
                 onCameraMove: (pos) {
-                  if (mapController == null || !isMoveActive) return;
+                  if (widget.mapController == null || !isMoveActive) return;
                   LOG('--> onCameraMove');
                   isMoveActive = false;
                   Future.delayed(Duration(milliseconds: 300), () {
                     isMoveActive = true;
                   });
-                  mapController!.getVisibleRegion().then((region) {
+                  widget.mapController!.getVisibleRegion().then((region) {
                     if (widget.onCameraMoved !=null) widget.onCameraMoved!(pos, region);
                   });
                 },
@@ -444,9 +462,9 @@ class GoogleMapState extends State<GoogleMapWidget> {
 
   @override
   void dispose() {
+    widget.mapController?.dispose();
+    widget.mapController = null;
     super.dispose();
-    mapController?.dispose();
-    mapController = null;
   }
 }
 

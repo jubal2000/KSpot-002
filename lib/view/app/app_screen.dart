@@ -8,17 +8,22 @@ import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/view/main_event/event_screen.dart';
 import 'package:kspot_002/view/main_my/profile_screen.dart';
 import 'package:kspot_002/view/main_story/story_screen.dart';
+import 'package:kspot_002/widget/title_text_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/app_data.dart';
 import '../../data/theme_manager.dart';
+import '../../utils/utils.dart';
 import '../../view_model/app_view_model.dart';
+import '../../widget/event_group_dialog.dart';
 import '../message/message_screen.dart';
 import 'app_top_menu.dart';
 
 class AppScreen extends StatelessWidget {
   AppScreen({Key? key}) : super(key: key);
-  final _height = 40.0.w;
+  final _height = 40.0;
+  final _iconSize = 24.0;
+  final _fontSize = UI_FONT_SIZE_SS;
 
   List<Widget> pages = [
     EventScreen(),
@@ -26,6 +31,29 @@ class AppScreen extends StatelessWidget {
     MessageScreen(),
     ProfileScreen(),
   ];
+
+  NavigatorButton(context, viewModel, index, icon, label) {
+    final isOn = viewModel.menuIndex == index;
+    return GestureDetector(
+      onTap: () {
+        viewModel.setMainIndex(index);
+      },
+      child: Container(
+        color: Colors.transparent,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: _iconSize, color: isOn ? Theme.of(context).primaryColor : Theme.of(context).hintColor),
+            Text(label, style: TextStyle(fontSize: _fontSize,
+                color: isOn ? Theme.of(context).primaryColor : Theme.of(context).hintColor,
+                fontWeight: isOn ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,11 +92,12 @@ class AppScreen extends StatelessWidget {
               builder: (context, theme, _) => Scaffold(
                 body: Stack(
                   children: [
-                    IndexedStack(
-                      key: ValueKey(viewModel.menuIndex),
-                      index: viewModel.menuIndex,
-                      children: pages,
-                    ),
+                    pages[viewModel.menuIndex],
+                    // IndexedStack(
+                    //   key: ValueKey(viewModel.menuIndex),
+                    //   index: viewModel.menuIndex,
+                    //   children: pages,
+                    // ),
                     // TopCenterAlign(
                     //   child: SizedBox(
                     //     height: UI_TOP_MENU_HEIGHT * 1.7,
@@ -80,68 +109,109 @@ class AppScreen extends StatelessWidget {
                         height: UI_MENU_BG_HEIGHT,
                         child: Container(
                           height: UI_MENU_HEIGHT,
-                            alignment: Alignment.bottomCenter,
-                            child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          alignment: Alignment.bottomCenter,
+                          child: Row(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
+                              Expanded(
+                                child: Container(
+                                  height: UI_MENU_HEIGHT,
+                                  color: Theme.of(context).bottomAppBarColor,
+                                  padding: EdgeInsets.only(left: UI_HORIZONTAL_SPACE_S),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      NavigatorButton(context, viewModel, 0, Icons.event_available_outlined, 'EVENT'.tr),
+                                      NavigatorButton(context, viewModel, 1, Icons.photo_library_outlined, 'STORY'.tr),
+                                    ],
+                                  )
+                                )
+                              ),
                               Stack(
-                                alignment: Alignment.bottomRight,
+                                alignment: Alignment.bottomCenter,
                                 children: [
                                   BottomCenterAlign(
                                     child: Container(
-                                      width: 100,
+                                      width: UI_MENU_BG_HEIGHT,
                                       height: UI_MENU_HEIGHT,
                                       color: Theme.of(context).bottomAppBarColor,
                                     ),
                                   ),
-                                  Center(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                      },
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.all(Radius.circular(100)),
-                                          color: Theme.of(context).bottomAppBarColor
-                                        ),
-                                        child: Icon(Icons.account_circle, size: UI_MENU_BG_HEIGHT),
+                                  GestureDetector(
+                                    onTap: () {
+                                      viewModel.showGroupSelect();
+                                    },
+                                    child: Container(
+                                      width:  UI_MENU_BG_HEIGHT - 10,
+                                      height: UI_MENU_BG_HEIGHT - 10,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(Radius.circular(80)),
+                                        border: Border.all(color: Theme.of(context).bottomAppBarColor, width: 5.0,),
+                                        color: Theme.of(context).bottomAppBarColor
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          ClipOval(
+                                            child: Container(
+                                              width:  UI_MENU_BG_HEIGHT - 10,
+                                              height: UI_MENU_BG_HEIGHT - 10,
+                                              child: showImageWidget(AppData.currentEventGroup!.pic, BoxFit.fill),
+                                            )
+                                          ),
+                                          // BottomCenterAlign(
+                                          //   child: Text(AppData.currentEventGroup!.title,
+                                          //       style: GroupTitleOutlineStyle(context, Theme.of(context).bottomAppBarColor),
+                                          //       maxLines: 4,
+                                          //       textAlign: TextAlign.center),
+                                          // )
+                                        ],
                                       ),
                                     ),
-                                  )
+                                  ),
                                 ]
                               ),
                               Expanded(
-                                child: SizedBox(
+                                child: Container(
                                   height: UI_MENU_HEIGHT,
-                                  child: BottomNavigationBar(
-                                    onTap: (index) {
-                                      viewModel.setMainIndex(index);
-                                    },
-                                    type: BottomNavigationBarType.fixed,
-                                    currentIndex: viewModel.menuIndex,
-                                    selectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w600),
-                                    unselectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w400),
-                                    items: [
-                                      BottomNavigationBarItem(
-                                        icon: Icon(Icons.event_available_outlined),
-                                        label: 'EVENT'.tr,
-                                      ),
-                                      BottomNavigationBarItem(
-                                        icon: Icon(Icons.photo_library_outlined),
-                                        label: 'STORY'.tr,
-                                      ),
-                                      BottomNavigationBarItem(
-                                        icon: Icon(Icons.message_outlined),
-                                        label: 'MESSAGE'.tr,
-                                      ),
-                                      BottomNavigationBarItem(
-                                        icon: Icon(Icons.account_circle_outlined),
-                                        label: 'MY'.tr,
-                                      ),
-                                    ]
-                                ),
-                              ),
+                                  color: Theme.of(context).bottomAppBarColor,
+                                  padding: EdgeInsets.only(right: UI_HORIZONTAL_SPACE_S),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      NavigatorButton(context, viewModel, 2, Icons.message_outlined, 'MESSAGE'.tr),
+                                      NavigatorButton(context, viewModel, 3, Icons.account_circle_outlined, 'MY'.tr),
+                                    ],
+                                  )
+                                )
                               )
+                              //     child: BottomNavigationBar(
+                              //       onTap: (index) {
+                              //         viewModel.setMainIndex(index);
+                              //       },
+                              //       type: BottomNavigationBarType.fixed,
+                              //       currentIndex: viewModel.menuIndex,
+                              //       selectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w600),
+                              //       unselectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w400),
+                              //       items: [
+                              //         BottomNavigationBarItem(
+                              //           icon: Icon(Icons.event_available_outlined),
+                              //           label: 'EVENT'.tr,
+                              //         ),
+                              //         BottomNavigationBarItem(
+                              //           icon: Icon(Icons.photo_library_outlined),
+                              //           label: 'STORY'.tr,
+                              //         ),
+                              //         BottomNavigationBarItem(
+                              //           icon: Icon(Icons.message_outlined),
+                              //           label: 'MESSAGE'.tr,
+                              //         ),
+                              //         BottomNavigationBarItem(
+                              //           icon: Icon(Icons.account_circle_outlined),
+                              //           label: 'MY'.tr,
+                              //         ),
+                              //       ]
+                              //   ),
+                              // ),
                             ]
                           )
                         )

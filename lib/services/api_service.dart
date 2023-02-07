@@ -778,10 +778,10 @@ class ApiService extends GetxService {
     var addCount = 0;
     var today = DateTime.parse(DATE_STR(DateTime.now()));
     if (JSON_NOT_EMPTY(item['timeData'])) {
-      for (var time in item['timeData'].entries) {
+      for (var time in item['timeData']) {
         // LOG('--> checkIsExpired item dayData [${item['id']}] / ${time.value['dayData']}');
-        if (LIST_NOT_EMPTY(time.value['day'])) {
-          for (var day in time.value['day']) {
+        if (LIST_NOT_EMPTY(time['day'])) {
+          for (var day in time['day']) {
             var days = DateTime.parse(STR(day)).difference(today).inDays;
             // LOG('--> check [${item['id']}] : dayData - ${STR(item['targetDate'])} / $today -> $days');
             if (days >= 0) {
@@ -789,14 +789,14 @@ class ApiService extends GetxService {
               break;
             }
           }
-        } else if (STR(time.value['endDate']).isNotEmpty) {
-          var days = DateTime.parse(STR(time.value['endDate'])).difference(today).inDays;
+        } else if (STR(time['endDate']).isNotEmpty) {
+          var days = DateTime.parse(STR(time['endDate'])).difference(today).inDays;
           // LOG('--> check [${item['id']}] : endDate - ${STR(time.value['endDate'])} / $today -> $days');
           if (days >= 0) {
             addCount++;
           }
-        } else if (STR(time.value['startDate']).isNotEmpty) {
-          var days = DateTime.parse(STR(time.value['startDate'])).add(Duration(days: 365)).difference(today).inDays;
+        } else if (STR(time['startDate']).isNotEmpty) {
+          var days = DateTime.parse(STR(time['startDate'])).add(Duration(days: 365)).difference(today).inDays;
           // LOG('--> check [${item['id']}] : startDate - ${STR(time.value['endDate'])} / $today -> $days');
           if (days >= 0) {
             addCount++;

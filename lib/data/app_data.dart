@@ -12,6 +12,7 @@ import '../models/user_model.dart';
 import '../services/firebase_service.dart';
 import '../utils/utils.dart';
 import '../view_model/app_view_model.dart';
+import '../view_model/event_view_model.dart';
 
 const SCROLL_SPEED = 250;
 const APP_VERSION = '0.0.1';
@@ -22,6 +23,7 @@ const TITLE_LENGTH = 24;
 const DESC_LENGTH = 999;
 const COMMENT_LENGTH = 999;
 const IMAGE_SIZE_MAX = 512.0;
+const PIN_IMAGE_SIZE_MAX = 12.0;
 
 const FACE_CIRCLE_SIZE_L = 120.0;
 const FACE_CIRCLE_SIZE_M = 50.0;
@@ -58,6 +60,7 @@ class AppData {
   static var isDevMode = true;
 
   static var appViewModel = AppViewModel();
+  static var eventViewModel = EventViewModel();
 
   static var defaultInfoID = 'info0001';
 

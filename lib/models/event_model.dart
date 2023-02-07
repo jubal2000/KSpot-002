@@ -184,6 +184,48 @@ class EventModel {
     return timeData;
   }
 
+  TimeData? getDateTimeData(DateTime checkDate) {
+    final weekText     = ['Every', '1st', '2nd', '3rd', '4th', 'Last'];
+    final dayWeekText  = ['Every', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    if (timeData == null) return null;
+    for (var item in timeData!) {
+      if (LIST_NOT_EMPTY(item.day)) {
+        for (var time in item.day!) {
+          var startDate = DateTime.parse(time);
+          if (startDate.toString().split(' ').first == checkDate.toString().split(' ').first) return item;
+        }
+        return null;
+      } else {
+        // LOG('--> Date Range init : ${item.value['startDate']} ~ ${item.value['endDate']}');
+        if (STR(item.startDate).isEmpty) item.startDate = DateTime.now().toString().split(' ').first;
+        var startDate = DateTime.parse(item.startDate!);
+        if (STR(item.endDate).isEmpty) item.endDate = startDate.add(Duration(days: 364)).toString().split(' ').first;
+        var endDate = DateTime.parse(item.endDate!);
+        var duration  = endDate.difference(startDate).inDays + 1;
+        // LOG('--> Date Range : ${item.value['startDate']} ~ ${item.value['endDate']} => $duration / ${item.value['week']}');
+
+        for (var i=0; i<duration; i++) {
+          var day = startDate.add(Duration(days: i));
+          var dayStr = day.toString().split(' ').first;
+          var isShow = LIST_NOT_EMPTY(item.exceptDay!) || !item.exceptDay!.contains(dayStr);
+          if (isShow && LIST_NOT_EMPTY(item.week) && !item.week!.contains(weekText.first)) {
+            var wm = day.weekOfMonth;
+            isShow = ((wm < weekText.length && item.week!.contains(weekText[wm])) || wm >= weekText.length) &&
+                (wm == day.lastWeek && item.week!.contains(weekText.last) || wm != day.lastWeek);
+          }
+          if (isShow && LIST_NOT_EMPTY(item.dayWeek) && !item.dayWeek!.contains(dayWeekText.first)) {
+            var wm = day.weekday;
+            isShow = item.dayWeek!.contains(dayWeekText[wm]);
+          }
+          if (isShow) {
+            return item;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   //------------------------------------------------------------------------------------------------------
   //  TimeData
   //

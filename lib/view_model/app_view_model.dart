@@ -19,6 +19,7 @@ import '../repository/user_repository.dart';
 import '../services/api_service.dart';
 import '../services/local_service.dart';
 import '../view/main_event/event_edit_screen.dart';
+import '../widget/event_group_dialog.dart';
 
 class MainMenuID {
   static int get hide     => 0;
@@ -56,6 +57,15 @@ class AppViewModel extends ChangeNotifier {
     appbarMenuMode = index == 0 ? MainMenuID.event : MainMenuID.story;
     LOG('--> setMainIndex : $index');
     notifyListeners();
+  }
+
+  showGroupSelect() {
+    EventGroupSelectDialog(buildContext!,
+        AppData.currentEventGroup!.id,
+        AppData.currentEventGroup!.contentType).then((_) {
+          AppData.eventViewModel.refreshModel();
+          notifyListeners();
+    });
   }
 
   Future<bool> checkAppUpdate(VersionData serverVersionData) async {

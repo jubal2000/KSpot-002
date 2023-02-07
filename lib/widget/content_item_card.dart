@@ -43,10 +43,10 @@ class EventSquareItem extends GoodsItemCard {
         Key? key,
         GoodsItemCardType showType = GoodsItemCardType.square,
         GoodsItemCardSellType sellType = GoodsItemCardSellType.event,
-        TextStyle titleStyle = const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.black),
-        TextStyle descStyle = const TextStyle(fontSize: 12, color: Colors.black87),
-        TextStyle extraStyle = const TextStyle(fontSize: 12, color: Colors.black),
-        TextStyle priceStyle = const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.purple),
+        TextStyle titleStyle = const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.black, height: 1.1),
+        TextStyle descStyle = const TextStyle(fontSize: 12, color: Colors.black87, height: 1.1),
+        TextStyle extraStyle = const TextStyle(fontSize: 12, color: Colors.amber),
+        TextStyle priceStyle = const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.amber),
         TextStyle priceOrgStyle = const TextStyle(fontSize: 9, color: Colors.grey),
         TextStyle ribbonStyle = const TextStyle(fontSize: 8, color: Colors.white),
         Color ribbonColor = Colors.red,
@@ -54,7 +54,8 @@ class EventSquareItem extends GoodsItemCard {
         EdgeInsets padding = const EdgeInsets.fromLTRB(0, 5, 0, 5),
         Color backgroundColor = Colors.transparent,
         JSON? couponInfo,
-        int descMaxLine = 3,
+        int titleMaxLine = 1,
+        int descMaxLine = 1,
         double imageHeight = 60,
         bool isSelected = false,
         bool isSelectable = false,
@@ -63,6 +64,7 @@ class EventSquareItem extends GoodsItemCard {
         isShowExtra = true,
         outlineWidth = 3.0,
         outlineColor = Colors.white,
+        faceOutlineColor = Colors.black,
         cartId = '' ,
         onChanged,
         onSelected,
@@ -82,6 +84,7 @@ class EventSquareItem extends GoodsItemCard {
     descAlign: descAlign,
     padding: padding,
     backgroundColor: backgroundColor,
+    titleMaxLine: titleMaxLine,
     descMaxLine: descMaxLine,
     imageHeight: imageHeight,
     couponInfo: couponInfo,
@@ -95,6 +98,7 @@ class EventSquareItem extends GoodsItemCard {
     showOutline: showOutline,
     outlineWidth: outlineWidth,
     outlineColor: outlineColor,
+    faceOutlineColor: faceOutlineColor,
     isShowExtra: isShowExtra,
   );
 }
@@ -333,6 +337,7 @@ class GoodsItemCard extends StatefulWidget {
     this.descAlign = Alignment.centerLeft,
     this.padding = EdgeInsets.zero,
     this.backgroundColor = Colors.transparent,
+    this.titleMaxLine = 1,
     this.descMaxLine = 2,
     this.imageHeight = 80.0,
     this.faceSize = 46.0,
@@ -349,6 +354,7 @@ class GoodsItemCard extends StatefulWidget {
     this.showOutline = false,
     this.outlineWidth = 2.0,
     this.outlineColor = Colors.white,
+    this.faceOutlineColor = Colors.black,
     this.isShowExtra = true,
   }) : super(key: key);
 
@@ -375,11 +381,13 @@ class GoodsItemCard extends StatefulWidget {
   Alignment descAlign;
   EdgeInsets padding;
   Color backgroundColor;
+  int titleMaxLine;
   int descMaxLine;
 
   bool   showOutline;
   double outlineWidth;
   Color  outlineColor;
+  Color  faceOutlineColor;
 
   bool isSelected;
   bool isSelectable;
@@ -520,7 +528,7 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                               borderRadius: BorderRadius.circular(12.0),
                               child: Container(
                               height: layout.maxHeight - widget.faceSize * 0.5,
-                              color: Theme.of(context).canvasColor,
+                              color: widget.backgroundColor,
                               child: Column(
                               children: [
                             if (_goodsItem['pic'] != null) ...[
@@ -535,16 +543,25 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                             ],
                             Expanded(
                               child: Container(
-                                padding: EdgeInsets.all(5),
+                                padding: EdgeInsets.fromLTRB(5, 2, 5, 5),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(STR(_goodsItem['title']), style: widget.titleStyle, maxLines: 1, textAlign: TextAlign.start),
-                                    Text(DESC(_goodsItem['desc']),
-                                      style: widget.descStyle,
-                                      maxLines: widget.descMaxLine,
-                                      textAlign: TextAlign.center
-                                    ),
+                                    Text(DESC(_goodsItem['title']), style: widget.titleStyle, maxLines: widget.titleMaxLine, textAlign: TextAlign.center),
+                                    if (widget.descMaxLine > 0 && STR(_goodsItem['desc']).isNotEmpty)...[
+                                      Text(DESC(_goodsItem['desc']),
+                                        style: widget.descStyle,
+                                        maxLines: widget.descMaxLine,
+                                        textAlign: TextAlign.center
+                                      ),
+                                    ],
+                                    if (STR(_goodsItem['timeRange']).isNotEmpty)...[
+                                      Text(DESC(_goodsItem['timeRange']),
+                                          style: widget.extraStyle,
+                                          maxLines: 1,
+                                          textAlign: TextAlign.center
+                                      ),
+                                    ]
                                   ],
                                 )
                               )
@@ -561,7 +578,9 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                             bottom: 0,
                             child: UserIdCardOneWidget(_goodsItem['userId'],
                               size: widget.faceSize,
-                              backColor: Theme.of(context).colorScheme.primaryContainer),
+                              faceCircleSize: 3.0,
+                              borderColor: widget.faceOutlineColor,
+                              backColor: Color(0xFF333333)),
                           ),
                         ],
                         if (widget.isSelectable)
@@ -767,7 +786,6 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                   }
                   return GestureDetector(
                     onTap: () {
-                      LOG("--> select item : $_orgId");
                       if (widget.onShowDetailJSON != null) widget.onShowDetailJSON!(_goodsItem, 0);
                       if (widget.onShowDetail != null) widget.onShowDetail!(_goodsItem['id'], 0);
                     },
@@ -809,8 +827,10 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                         ),
                         SizedBox(width: 10),
                         Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          child: Container(
+                            padding: EdgeInsets.only(top: 5, bottom: 5, right: 10),
+                            child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(children: [
@@ -829,6 +849,7 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                               ]
                             ],
                           ),
+                          ),
                         ),
                         if (widget.isEditable)
                           editMenuWidget,
@@ -846,6 +867,7 @@ class GoodsItemCardState extends State<GoodsItemCard> {
   }
 
   priceTextStyle() {
+    LOG("--> priceTextStyle : ${widget.showType}");
     var _iconColor = Theme.of(context).colorScheme.tertiary.withOpacity(0.5);
     switch (widget.showType) {
       case GoodsItemCardType.square:
@@ -902,7 +924,6 @@ class GoodsItemCardState extends State<GoodsItemCard> {
             default:
               {
                 return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-                  Text("${PRICE_STR(_curPrice)}원", style: widget.priceStyle),
                   Expanded(
                     child: SizedBox(),
                   ),
@@ -958,6 +979,28 @@ class GoodsItemCardState extends State<GoodsItemCard> {
             case GoodsItemCardSellType.portfolio:
               {
                 return SizedBox(width: 1, height: 1);
+              }
+            case GoodsItemCardSellType.event:
+              {
+                return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                  Text(_goodsItem['timeRange'], style: widget.extraStyle),
+                  SizedBox(width: 5),
+                  Expanded(
+                    child: SizedBox(),
+                  ),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(Icons.sms, size: 15, color: _iconColor),
+                        SizedBox(width: 5),
+                        Text("${PRICE_STR(DBL(_goodsItem['comments']))}", style: widget.descStyle),
+                        SizedBox(width: 10),
+                        Icon(Icons.favorite, size: 15, color: _iconColor),
+                        SizedBox(width: 5),
+                        Text("${PRICE_STR(DBL(_goodsItem['likes']))}", style: widget.descStyle),
+                      ]),
+                ]);
               }
             default:
               {

@@ -143,9 +143,9 @@ SubTitleColorText(context, title, List<String> colorText,
 ContentTitleText(context, text,
     {double fontSize = UI_FONT_SIZE_H,
       var color = Colors.black,
-    var lineMax = 1,
-    var height = 1.1,
-    var align = TextAlign.start}) {
+      var lineMax = 1,
+      var height = 1.1,
+      var align = TextAlign.start}) {
   return TextInterface(
       title: text,
       color: color = Theme.of(context).primaryColorDark,

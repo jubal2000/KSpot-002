@@ -61,6 +61,7 @@ Future<EventGroupModel?> EventGroupSelectDialog(
                 // AppData.currentPlaceGroup = item.value;
                 // AppData.localInfo['eventGroup'] = item.value;
                 // writeLocalInfo();
+                AppData.currentEventGroup = item.value;
                 Navigator.of(context).pop(item.value);
               },
               child: AspectRatio(
@@ -103,6 +104,7 @@ Future<EventGroupModel?> EventGroupSelectDialog(
             // AppData.currentPlaceGroup = item.value;
             // AppData.localInfo['eventGroup'] = item.value;
             // writeLocalInfo();
+            AppData.currentEventGroup = item.value;
             Navigator.of(context).pop(item.value);
           },
         );

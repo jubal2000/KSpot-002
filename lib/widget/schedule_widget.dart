@@ -240,7 +240,7 @@ DataSource? getCalendarDataSource(JSON timeList) {
       for (var i=0; i<duration; i++) {
         var day = startDate.add(Duration(days: i));
         var dayStr = day.toString().split(' ').first;
-        var isShow = item.value['exceptDayData'] == null || !item.value['exceptDayData'].contains(dayStr);
+        var isShow = item.value['exceptDay'] == null || !item.value['exceptDay'].contains(dayStr);
         if (isShow && LIST_NOT_EMPTY(item.value['week']) && !item.value['week'].contains(weekText.first)) {
           var wm = day.weekOfMonth;
           isShow = ((wm < weekText.length && item.value['week'].contains(weekText[wm])) || wm >= weekText.length) &&

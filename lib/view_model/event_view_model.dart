@@ -10,6 +10,7 @@ import 'package:helpers/helpers.dart';
 import 'package:intl/intl.dart';
 import 'package:kspot_002/models/place_model.dart';
 import 'package:kspot_002/repository/event_repository.dart';
+import 'package:kspot_002/view/main_event/event_item.dart';
 import 'package:kspot_002/widget/main_list_item.dart';
 import 'package:kspot_002/widget/title_text_widget.dart';
 
@@ -33,10 +34,11 @@ class EventListType {
 class EventViewModel extends ChangeNotifier {
   Map<String, EventModel>? eventData;
   Map<String, Widget> listItemData = {};
+  Map<String, Widget> mapItemData = {};
   BuildContext? buildContext;
   List<JSON>    eventShowList = [];
-  Future<Map<String, EventModel>>? initData;
   LatLngBounds? mapBounds;
+  GoogleMapWidget? googleWidget;
 
   final eventRepo = EventRepository();
   final placeRepo = PlaceRepository();
@@ -51,15 +53,56 @@ class EventViewModel extends ChangeNotifier {
 
   init(BuildContext context) {
     buildContext = context;
-    mapBounds = null;
-    initData = null;
-    eventShowList.clear();
-    listItemData.clear();
-    getEventList();
   }
 
-  getEventList() {
-    initData = eventRepo.getEventListFromCountry(AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
+  refreshModel() {
+    mapBounds = null;
+    googleWidget = null;
+    eventShowList.clear();
+    mapItemData.clear();
+    listItemData.clear();
+  }
+
+  Future getEventList() async {
+    mapBounds = null;
+    eventShowList.clear();
+    mapItemData.clear();
+    listItemData.clear();
+    AppData.eventViewModel.eventData = null;
+    var result = await eventRepo.getEventListFromCountry(AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
+    LOG('--> getEventList result : ${result.toString()}');
+    AppData.eventViewModel.eventData = result;
+    return result;
+  }
+
+  showGoogleWidget(layout) {
+    LOG('--> showGoogleWidget : ${googleWidget == null ? 'none' : 'ready'} / ${eventShowList.length}');
+    final isRefresh = googleWidget == null;
+    googleWidget ??= GoogleMapWidget(
+      eventShowList,
+      key: mapKey,
+      mapHeight: layout.maxHeight - UI_MENU_HEIGHT,
+      onMarkerSelected: (selectItem) {
+        LOG('--> onMarkerSelected : ${selectItem['title']} / ${selectItem['id']}');
+      },
+      onCameraMoved: (pos, region) {
+        cameraPos = pos;
+        onMapRegionChanged(region);
+      },
+    );
+    googleWidget!.showLocation = eventShowList;
+    googleWidget!.isRefresh = isRefresh;
+    return googleWidget;
+  }
+
+  showEventListType() {
+    return GestureDetector(
+      onTap: () {
+        eventListType = eventListType == EventListType.map ? EventListType.list : EventListType.map;
+        notifyListeners();
+      },
+      child: Icon(eventListType == EventListType.map ? Icons.map_outlined : Icons.view_list_sharp),
+    );
   }
 
   Future<List<JSON>> setShowList() async {
@@ -74,8 +117,10 @@ class EventViewModel extends ChangeNotifier {
           showItem['address'  ] = placeInfo.address.toJson();
           final pos = LatLng(DBL(showItem['address']['lat']), DBL(showItem['address']['lng']));
           if (mapBounds !=  null) LOG('--> eventShowList add : ${mapBounds!.toJson()} / $pos');
-          if (checkDateTimeShow(item.value.getTimeDataMap, AppData.currentDate) && (mapBounds == null || mapBounds!.contains(pos))) {
-            LOG('--> eventShowList add : ${showItem['id']}');
+          final timeData = item.value.getDateTimeData(AppData.currentDate);
+          if (timeData != null && (mapBounds == null || mapBounds!.contains(pos))) {
+            showItem['timeRange'] = '${timeData.startTime} ~ ${timeData.endTime}';
+            LOG('--> eventShowList add : ${showItem['id']} / ${showItem['timeRange']}');
             result.add(showItem);
           }
         }
@@ -111,8 +156,6 @@ class EventViewModel extends ChangeNotifier {
   }
 
   showDatePicker() {
-    String month     = DateFormat.M(Get.locale.toString()).format(AppData.currentDate);
-    String dayOfWeek = DateFormat.E(Get.locale.toString()).format(AppData.currentDate);
     initDatePicker();
     return Row(
       children: [
@@ -122,31 +165,6 @@ class EventViewModel extends ChangeNotifier {
           color: Theme.of(buildContext!).canvasColor.withOpacity(0.5),
           child: datePicker,
         ),
-        // if (!isDatePickerExtend)
-        //   GestureDetector(
-        //     onTap: () {
-        //       isDatePickerExtend = true;
-        //       notifyListeners();
-        //       dateController.animateToSelection(duration: Duration(milliseconds: 10));
-        //     },
-        //     child: Container(
-        //       width: 60.0,
-        //       height: 80.0,
-        //       margin: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE,vertical: 5),
-        //       decoration: BoxDecoration(
-        //         borderRadius: BorderRadius.all(Radius.circular(8)),
-        //         color: Theme.of(buildContext!).canvasColor.withOpacity(0.55)
-        //       ),
-        //       child: Column(
-        //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //         children: [
-        //           DateMonthText(buildContext!, month, color: Theme.of(buildContext!).hintColor),
-        //           DateDayText  (buildContext!, '${AppData.currentDate.day}', color: Theme.of(buildContext!).indicatorColor),
-        //           DateWeekText (buildContext!, dayOfWeek, color: Theme.of(buildContext!).hintColor),
-        //         ],
-        //       )
-        //     ),
-        //   ),
       ]
     );
   }
@@ -185,20 +203,22 @@ class EventViewModel extends ChangeNotifier {
     return true;
   }
 
-  showEventList(itemWidth, itemHeight) {
+  showEventMap(itemWidth, itemHeight) {
     List<Widget> showList = [];
     for (var item in eventShowList) {
-      var addItem = listItemData[item['id']];
+      var addItem = mapItemData[item['id']];
       addItem ??= Container(
-          width: itemWidth,
+          width:  itemWidth,
           height: itemHeight,
           margin: EdgeInsets.symmetric(horizontal: 3),
           child: EventSquareItem(
             item,
             backgroundColor: Theme.of(buildContext!).cardColor,
+            faceOutlineColor: Theme.of(buildContext!).bottomAppBarColor,
             padding: EdgeInsets.zero,
-            imageHeight: itemHeight * 0.5,
-            descMaxLine: 2,
+            imageHeight: itemWidth,
+            titleMaxLine: 2,
+            descMaxLine: 0,
             titleStyle: CardTitleStyle(buildContext!),
             descStyle: CardDescStyle(buildContext!),
             onShowDetail: (key, status) {
@@ -206,6 +226,33 @@ class EventViewModel extends ChangeNotifier {
             },
           )
         );
+      mapItemData[item['id']] = addItem;
+      showList.add(addItem);
+    }
+    return showList;
+  }
+
+  showEventList(itemHeight) {
+    List<Widget> showList = [];
+    for (var item in eventShowList) {
+      var addItem = listItemData[item['id']];
+      addItem ??= EventCardItem(
+            EventModel.fromJson(item),
+            itemHeight: itemHeight,
+            // showType: GoodsItemCardType.normal,
+            // sellType: GoodsItemCardSellType.event,
+            // backgroundColor: Theme.of(buildContext!).cardColor,
+            // faceOutlineColor: Theme.of(buildContext!).bottomAppBarColor,
+            // padding: EdgeInsets.zero,
+            // imageHeight: itemHeight,
+            // titleMaxLine: 1,
+            // descMaxLine: 2,
+            // titleStyle: CardTitleStyle(buildContext!),
+            // descStyle: CardDescStyle(buildContext!),
+            // onShowDetail: (key, status) {
+            //   Get.to(() => EventDetailScreen(EventModel.fromJson(item), PlaceModel.fromJson(item['placeInfo'])));
+            // },
+      );
       listItemData[item['id']] = addItem;
       showList.add(addItem);
     }
@@ -213,26 +260,15 @@ class EventViewModel extends ChangeNotifier {
   }
 
   showMainList() {
-    LOG('--> showMainList : ${eventShowList.length}');
-    if (eventListType == EventListType.map) {
-      return LayoutBuilder(
-        builder: (context, layout) {
-          final itemWidth  = layout.maxWidth / 3.5;
-          final itemHeight = itemWidth * 1.85;
-          return Stack(
-            children: [
-              GoogleMapWidget(
-                eventShowList,
-                key: mapKey,
-                mapHeight: layout.maxHeight,
-                onMarkerSelected: (selectItem) {
-                  LOG('--> onMarkerSelected : ${selectItem['title']} / ${selectItem['id']}');
-                },
-                onCameraMoved: (pos, region) {
-                  cameraPos = pos;
-                  onMapRegionChanged(region);
-                },
-              ),
+    LOG('--> showMainList : ${eventShowList.length} / ${googleWidget == null ? 'none' : 'ready'}');
+    return LayoutBuilder(
+      builder: (context, layout) {
+        final itemWidth  = layout.maxWidth / 4.0;
+        final itemHeight = itemWidth * 2.0;
+        return Stack(
+          children: [
+            if (eventListType == EventListType.map)...[
+              showGoogleWidget(layout),
               Align(
                 widthFactor: 1.25,
                 heightFactor: 3.0,
@@ -246,28 +282,44 @@ class EventViewModel extends ChangeNotifier {
                     shrinkWrap: true,
                     scrollDirection: Axis.horizontal,
                     padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                    children: showEventList(itemWidth, itemHeight),
+                    children: showEventMap(itemWidth, itemHeight),
                   ),
                 )
               ),
-              TopCenterAlign(
-                  child: SizedBox(
-                    height: UI_TOP_MENU_HEIGHT * 1.7,
-                    child: AppTopMenuBar(MainMenuID.event, isShowDatePick: !isDatePickerExtend, height: UI_TOP_MENU_HEIGHT, onDateChange: () {
-                      isDatePickerExtend = true;
-                      notifyListeners();
-                      dateController.animateToSelection(duration: Duration(milliseconds: 10));
-                    }),
-                  )
-              ),
             ],
-          );
-        }
-      );
-    } else {
-      return ListView(
-      );
-    }
+            if (eventListType == EventListType.list)...[
+              Container(
+                height: layout.maxHeight,
+                padding: EdgeInsets.fromLTRB(0, UI_LIST_TOP_HEIGHT, 0, UI_MENU_HEIGHT),
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                  children: showEventList(itemWidth * 0.8),
+                ),
+              )
+            ],
+            TopCenterAlign(
+              child: SizedBox(
+                height: UI_TOP_MENU_HEIGHT * 1.7,
+                child: AppTopMenuBar(MainMenuID.event,
+                  isShowDatePick: !isDatePickerExtend && eventListType == EventListType.map, height: UI_TOP_MENU_HEIGHT,
+                  onCountryChanged: () {
+                    LOG('--> onCountryChanged : ${AppData.currentState}');
+                    refreshModel();
+                    notifyListeners();
+                  },
+                  onDateChange: () {
+                    isDatePickerExtend = true;
+                    notifyListeners();
+                    dateController.animateToSelection(duration: Duration(milliseconds: 10));
+                  }
+                ),
+              )
+            ),
+          ],
+        );
+      }
+    );
   }
 
   @override

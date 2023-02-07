@@ -70,7 +70,7 @@ class EventViewModel extends ChangeNotifier {
     listItemData.clear();
     AppData.eventViewModel.eventData = null;
     var result = await eventRepo.getEventListFromCountry(AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
-    LOG('--> getEventList result : ${result.toString()}');
+    LOG('--> getEventList result : ${result.length}');
     AppData.eventViewModel.eventData = result;
     return result;
   }
@@ -107,6 +107,7 @@ class EventViewModel extends ChangeNotifier {
 
   Future<List<JSON>> setShowList() async {
     List<JSON> result = [];
+    refreshModel();
     if (eventData != null && eventData!.isNotEmpty) {
       for (var item in eventData!.entries) {
         final showItem = item.value.toJson();
@@ -117,10 +118,15 @@ class EventViewModel extends ChangeNotifier {
           showItem['address'  ] = placeInfo.address.toJson();
           final pos = LatLng(DBL(showItem['address']['lat']), DBL(showItem['address']['lng']));
           if (mapBounds !=  null) LOG('--> eventShowList add : ${mapBounds!.toJson()} / $pos');
-          final timeData = item.value.getDateTimeData(AppData.currentDate);
-          if (timeData != null && (mapBounds == null || mapBounds!.contains(pos))) {
-            showItem['timeRange'] = '${timeData.startTime} ~ ${timeData.endTime}';
-            LOG('--> eventShowList add : ${showItem['id']} / ${showItem['timeRange']}');
+          if (eventListType == EventListType.map) {
+            final timeData = item.value.getDateTimeData(AppData.currentDate);
+            if (timeData != null && (mapBounds == null || mapBounds!.contains(pos))) {
+              showItem['timeRange'] = '${timeData.startTime} ~ ${timeData.endTime}';
+              LOG('--> eventShowList add : ${showItem['id']} / ${showItem['timeRange']}');
+              result.add(showItem);
+            }
+          } else {
+            LOG('--> eventShowList add : ${showItem['id']}');
             result.add(showItem);
           }
         }
@@ -171,16 +177,16 @@ class EventViewModel extends ChangeNotifier {
 
   onMapRegionChanged(region) async {
     mapBounds = region;
-    List<JSON> tmpList = await setShowList();
-    if (tmpList.equals(eventShowList)) {
-      // LOG('--> onMapRegionChanged cancel : ${tmpList.length} / ${eventShowList.length}');
-      return false;
-    }
-    eventShowList = tmpList;
-    LOG('--> onMapRegionChanged update : ${tmpList.length} / ${eventShowList.length}');
+    // List<JSON> tmpList = await setShowList();
+    // if (tmpList.equals(eventShowList)) {
+    //   // LOG('--> onMapRegionChanged cancel : ${tmpList.length} / ${eventShowList.length}');
+    //   return false;
+    // }
+    // eventShowList = tmpList;
+    LOG('--> onMapRegionChanged update : ${eventShowList.length}');
     Future.delayed(const Duration(milliseconds: 200), () async {
       var state = mapKey.currentState as GoogleMapState;
-      state.refreshMarker(tmpList, false);
+      state.refreshMarker(eventShowList, false);
     });
     notifyListeners();
     return true;
@@ -188,16 +194,16 @@ class EventViewModel extends ChangeNotifier {
 
   onMapDayChanged() async {
     mapBounds = null;
-    List<JSON> tmpList = await setShowList();
-    if (tmpList.equals(eventShowList)) {
-      // LOG('--> onMapRegionChanged cancel : ${tmpList.length} / ${eventShowList.length}');
-      return false;
-    }
-    eventShowList = tmpList;
-    LOG('--> onMapRegionChanged update : ${tmpList.length} / ${eventShowList.length}');
+    // List<JSON> tmpList = await setShowList();
+    // if (tmpList.equals(eventShowList)) {
+    //   // LOG('--> onMapRegionChanged cancel : ${tmpList.length} / ${eventShowList.length}');
+    //   return false;
+    // }
+    // eventShowList = tmpList;
+    LOG('--> onMapRegionChanged update : ${eventShowList.length}');
     Future.delayed(const Duration(milliseconds: 200), () async {
       var state = mapKey.currentState as GoogleMapState;
-      state.refreshMarker(tmpList);
+      state.refreshMarker(eventShowList);
     });
     notifyListeners();
     return true;
@@ -239,6 +245,7 @@ class EventViewModel extends ChangeNotifier {
       addItem ??= EventCardItem(
             EventModel.fromJson(item),
             itemHeight: itemHeight,
+            isShowTheme: false,
             // showType: GoodsItemCardType.normal,
             // sellType: GoodsItemCardSellType.event,
             // backgroundColor: Theme.of(buildContext!).cardColor,
@@ -278,25 +285,45 @@ class EventViewModel extends ChangeNotifier {
                 child: Container(
                   height: itemHeight,
                   margin: EdgeInsets.only(bottom: UI_MENU_BG_HEIGHT),
-                  child: ListView(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                    children: showEventMap(itemWidth, itemHeight),
+                  child: FutureBuilder(
+                    future: setShowList(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        eventShowList = snapshot.data as List<JSON>;
+                        return ListView(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.horizontal,
+                          padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                          children: showEventMap(itemWidth, itemHeight),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    }
                   ),
-                )
+                ),
               ),
             ],
             if (eventListType == EventListType.list)...[
               Container(
                 height: layout.maxHeight,
                 padding: EdgeInsets.fromLTRB(0, UI_LIST_TOP_HEIGHT, 0, UI_MENU_HEIGHT),
-                child: ListView(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                  children: showEventList(itemWidth * 0.8),
+                child: FutureBuilder(
+                    future: setShowList(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        eventShowList = snapshot.data as List<JSON>;
+                        return ListView(
+                          shrinkWrap: true,
+                          padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                          children: showEventList(itemWidth)
+                        );
+                      } else {
+                        return Container();
+                      }
+                    },
+                  ),
                 ),
-              )
             ],
             TopCenterAlign(
               child: SizedBox(

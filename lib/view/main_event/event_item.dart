@@ -71,6 +71,7 @@ class _EventCardItemState extends State<EventCardItem> {
       _userListData.add(widget.itemData.toJson());
     }
     _isExpired = eventRepo.checkIsExpired(widget.itemData);
+    final timeData = widget.itemData.getDateTimeData(AppData.currentDate);
     return GestureDetector(
         onTap: () {
           if (widget.isSelectable) {
@@ -106,9 +107,12 @@ class _EventCardItemState extends State<EventCardItem> {
           height: widget.itemHeight,
           padding: widget.itemPadding,
           child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(10),
               child: Container(
-                color: Theme.of(context).canvasColor,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(bottomRight: Radius.circular(20)),
+                  color: Theme.of(context).canvasColor,
+                ),
                 child: Row(
                   children: [
                     // showSizedImage(item.value['pic'] ?? _placeInfo['pic'], _height - _padding * 2),
@@ -144,7 +148,7 @@ class _EventCardItemState extends State<EventCardItem> {
                     SizedBox(width: 10),
                     Expanded(
                         child: Container(
-                            padding: EdgeInsets.only(top: 5),
+                            padding: EdgeInsets.only(top: 10),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.end,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,7 +161,7 @@ class _EventCardItemState extends State<EventCardItem> {
                                           height: 12,
                                           decoration: BoxDecoration(
                                             color: Theme.of(context).primaryColor.withOpacity(0.5),
-                                            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                                            borderRadius: BorderRadius.all(Radius.circular(5.0)),
                                           ),
                                         ),
                                         SizedBox(width: 5),
@@ -177,7 +181,6 @@ class _EventCardItemState extends State<EventCardItem> {
                                         SizedBox(width: 5),
                                         LikeSmallWidget(context, 'event', widget.itemData.toJson()),
                                       ],
-                                      SizedBox(width: 5),
                                     ]
                                 ),
                                 Expanded(child:
@@ -188,32 +191,19 @@ class _EventCardItemState extends State<EventCardItem> {
                                         child: Padding(
                                           padding: EdgeInsets.only(bottom: 5),
                                           child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                RichText(maxLines: 2,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  text: TextSpan(
-                                                      text: DESC(widget.itemData.desc),
-                                                      style: ItemDescStyle(context)
-                                                  ),
-                                                ),
-                                                RichText(
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    text: TextSpan(
-                                                      text: EVENT_TIMEDATA_TITLE_TIME_STR(widget.itemData.getTimeDataMap),
-                                                      style: ItemDescExStyle(context),
-                                                    )
-                                                ),
-                                              ]
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(timeData != null ? timeData.title : '', style: ItemDescExStyle(context)),
+                                              Text(timeData != null ? timeData.desc  : '', style: ItemDescExStyle(context), maxLines: 3),
+                                            ],
                                           ),
                                         ),
                                       ),
                                       if (_userListData.isNotEmpty)
                                         UserIdCardWidget(_userListData),
                                     ]
-                                )
+                                  )
                                 )
                               ],
                             )

@@ -184,6 +184,21 @@ class EventModel {
     return timeData;
   }
 
+  getDateTimeStr(DateTime checkDate) {
+    final date = getDateTimeData(checkDate);
+    return date != null ? '${date.startTime} ~ ${date.endTime}' : '';
+  }
+
+  getDateTimeTitleStr(DateTime checkDate) {
+    final date = getDateTimeData(checkDate);
+    return date != null ? '${date.title} : ${date.startTime} ~ ${date.endTime}' : '';
+  }
+
+  getDateTimeTitle(DateTime checkDate) {
+    final date = getDateTimeData(checkDate);
+    return date != null ? date.title : '';
+  }
+
   TimeData? getDateTimeData(DateTime checkDate) {
     final weekText     = ['Every', '1st', '2nd', '3rd', '4th', 'Last'];
     final dayWeekText  = ['Every', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

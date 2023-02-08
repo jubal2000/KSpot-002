@@ -48,6 +48,8 @@ class EventViewModel extends ChangeNotifier {
   var cameraPos = CameraPosition(target: LatLng(0,0));
   var isDatePickerExtend = false;
   var eventListType = EventListType.map;
+  var isFirstMapUpdate = true;
+  var isManagerMode = false; // 유저의 이벤트목록 일 경우 메니저이면, 기간이 지난 이벤트들도 표시..
 
   DatePicker? datePicker;
 
@@ -56,6 +58,7 @@ class EventViewModel extends ChangeNotifier {
   }
 
   refreshModel() {
+    isFirstMapUpdate = true;
     mapBounds = null;
     googleWidget = null;
     eventShowList.clear();
@@ -90,7 +93,6 @@ class EventViewModel extends ChangeNotifier {
         onMapRegionChanged(region);
       },
     );
-    googleWidget!.showLocation = eventShowList;
     googleWidget!.isRefresh = isRefresh;
     return googleWidget;
   }
@@ -107,27 +109,29 @@ class EventViewModel extends ChangeNotifier {
 
   Future<List<JSON>> setShowList() async {
     List<JSON> result = [];
-    refreshModel();
     if (eventData != null && eventData!.isNotEmpty) {
       for (var item in eventData!.entries) {
-        final showItem = item.value.toJson();
-        var placeInfo = showItem['placeInfo'];
-        placeInfo ??= await placeRepo.getPlaceFromId(item.value.placeId);
-        if (placeInfo != null) {
-          showItem['placeInfo'] = placeInfo.toJson();
-          showItem['address'  ] = placeInfo.address.toJson();
-          final pos = LatLng(DBL(showItem['address']['lat']), DBL(showItem['address']['lng']));
-          if (mapBounds !=  null) LOG('--> eventShowList add : ${mapBounds!.toJson()} / $pos');
-          if (eventListType == EventListType.map) {
-            final timeData = item.value.getDateTimeData(AppData.currentDate);
-            if (timeData != null && (mapBounds == null || mapBounds!.contains(pos))) {
-              showItem['timeRange'] = '${timeData.startTime} ~ ${timeData.endTime}';
-              LOG('--> eventShowList add : ${showItem['id']} / ${showItem['timeRange']}');
+        final isExpired = eventRepo.checkIsExpired(item.value);
+        if (isManagerMode || !isExpired) {
+          final showItem = item.value.toJson();
+          var placeInfo = showItem['placeInfo'];
+          placeInfo ??= await placeRepo.getPlaceFromId(item.value.placeId);
+          if (placeInfo != null) {
+            showItem['placeInfo'] = placeInfo.toJson();
+            showItem['address'  ] = placeInfo.address.toJson();
+            final pos = LatLng(DBL(showItem['address']['lat']), DBL(showItem['address']['lng']));
+            if (mapBounds !=  null) LOG('--> eventShowList add : ${mapBounds!.toJson()} / $pos');
+            if (eventListType == EventListType.map) {
+              final timeData = item.value.getDateTimeData(AppData.currentDate);
+              if (timeData != null && (mapBounds == null || mapBounds!.contains(pos))) {
+                showItem['timeRange'] = '${timeData.startTime} ~ ${timeData.endTime}';
+                LOG('--> eventShowList add : ${showItem['id']} / ${showItem['timeRange']}');
+                result.add(showItem);
+              }
+            } else {
+              LOG('--> eventShowList add : ${showItem['id']}');
               result.add(showItem);
             }
-          } else {
-            LOG('--> eventShowList add : ${showItem['id']}');
-            result.add(showItem);
           }
         }
       }
@@ -177,13 +181,13 @@ class EventViewModel extends ChangeNotifier {
 
   onMapRegionChanged(region) async {
     mapBounds = region;
+    // LOG('--> onMapRegionChanged update : ${eventShowList.length}');
     // List<JSON> tmpList = await setShowList();
     // if (tmpList.equals(eventShowList)) {
     //   // LOG('--> onMapRegionChanged cancel : ${tmpList.length} / ${eventShowList.length}');
     //   return false;
     // }
     // eventShowList = tmpList;
-    LOG('--> onMapRegionChanged update : ${eventShowList.length}');
     Future.delayed(const Duration(milliseconds: 200), () async {
       var state = mapKey.currentState as GoogleMapState;
       state.refreshMarker(eventShowList, false);
@@ -200,7 +204,7 @@ class EventViewModel extends ChangeNotifier {
     //   return false;
     // }
     // eventShowList = tmpList;
-    LOG('--> onMapRegionChanged update : ${eventShowList.length}');
+    // LOG('--> onMapRegionChanged update : ${eventShowList.length}');
     Future.delayed(const Duration(milliseconds: 200), () async {
       var state = mapKey.currentState as GoogleMapState;
       state.refreshMarker(eventShowList);
@@ -234,6 +238,13 @@ class EventViewModel extends ChangeNotifier {
         );
       mapItemData[item['id']] = addItem;
       showList.add(addItem);
+    }
+    if (isFirstMapUpdate) {
+      isFirstMapUpdate = false;
+      Future.delayed(const Duration(milliseconds: 200), () async {
+        var state = mapKey.currentState as GoogleMapState;
+        state.refreshMarker(eventShowList);
+      });
     }
     return showList;
   }

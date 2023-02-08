@@ -34,23 +34,13 @@ class EventScreen extends StatelessWidget {
             builder: (context, snapshot) {
               if (AppData.eventViewModel.eventData != null) {
                 LOG('--> set eventData : ${AppData.eventViewModel.eventData!.length}');
-                return FutureBuilder(
-                  future: AppData.eventViewModel.setShowList(),
-                  builder: (context, snapshot2) {
-                    if (snapshot2.hasData) {
-                      AppData.eventViewModel.eventShowList = snapshot2.data!;
-                      return ChangeNotifierProvider<EventViewModel>.value(
-                          value: AppData.eventViewModel,
-                          child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-                            LOG('--> EventViewModel 1');
-                        return viewModel.showMainList();
-                        })
-                      );
-                      } else {
-                        return showLoadingFullPage(context);
-                      }
-                    }
-                  );
+                return ChangeNotifierProvider<EventViewModel>.value(
+                    value: AppData.eventViewModel,
+                    child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+                      LOG('--> EventViewModel 1');
+                  return viewModel.showMainList();
+                  })
+                );
               } else {
                 return showLoadingFullPage(context);
               }

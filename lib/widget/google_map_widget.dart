@@ -196,8 +196,8 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
     //   return result;
     // }
     final localData = await readLocalFile(fileName);
+    LOG('--> localData : ${localData.length}');
     if (localData.isNotEmpty) {
-      LOG('--> load local image : $imagePath');
       var result = Uint8List.fromList(localData.codeUnits);
       return BitmapDescriptor.fromBytes(result);
     } else {
@@ -382,7 +382,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
                 },
                 onCameraMove: (pos) {
                   if (widget.mapController == null || !isMoveActive) return;
-                  LOG('--> onCameraMove');
+                  LOG('--> onCameraMove  :$isMoveActive');
                   isMoveActive = false;
                   Future.delayed(Duration(milliseconds: 300), () {
                     isMoveActive = true;

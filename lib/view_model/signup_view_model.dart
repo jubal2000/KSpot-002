@@ -18,7 +18,7 @@ enum TextInputId {
 
 class SignUpViewModel extends ChangeNotifier {
   final repo = UserRepository();
-  var stepIndex = 2;
+  var stepIndex = 0;
   var stepMax = 3;
   var isShowOnly = false;
   var isChecked = [false, false];
@@ -71,6 +71,8 @@ class SignUpViewModel extends ChangeNotifier {
     if (stepIndex - 1 >= 0) {
       stepIndex--;
       notifyListeners();
+    } else {
+      Get.back();
     }
   }
 }

@@ -42,7 +42,7 @@ class _ScheduleState extends State<ScheduleWidget> {
       for (Appointment item in dayData!.appointments!) {
         var checkTime = DateTime.parse(DATE_STR(item.startTime));
         // LOG('--> checkTime : $checkTime / ${widget.currentDate!} => ${checkTime.compareTo(widget.currentDate!)} / ${checkTime.compareDateTo(widget.currentDate!)}');
-        if (checkTime.compareDateTo(widget.currentDate!)) {
+        if (checkTime.isSameDay(widget.currentDate!)) {
           var noteData = jsonDecode(item.notes!);
           LOG('--> firstDayData added : $noteData');
           firstDayData[noteData['key']] = noteData;
@@ -236,7 +236,6 @@ DataSource? getCalendarDataSource(JSON timeList) {
       var endDate = DateTime.parse(STR(item.value['endDate']));
       var duration  = endDate.difference(startDate).inDays + 1;
       LOG('--> Date Range : ${item.value['startDate']} ~ ${item.value['endDate']} => $duration / ${item.value['week']}');
-
       for (var i=0; i<duration; i++) {
         var day = startDate.add(Duration(days: i));
         var dayStr = day.toString().split(' ').first;

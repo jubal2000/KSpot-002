@@ -26,7 +26,8 @@ class EventScreen extends StatelessWidget {
         child: Consumer<AppViewModel>(
         builder: (context, appViewModel, _) {
         LOG('--> AppViewModel');
-      return Stack(
+        AppData.eventViewModel.googleWidget = null;
+        return Stack(
         children: [
           if (AppData.eventViewModel.eventShowList.isEmpty)
           FutureBuilder(

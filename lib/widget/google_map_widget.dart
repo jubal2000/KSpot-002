@@ -109,6 +109,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
     LOG('--> GoogleDirectionListWidget initMarker : ${widget.showLocation.length} / $isBoundsFresh');
     LatLng? targetLoc;
     widget.markers.clear();
+
     // add normal marker..
     for (var item in widget.showLocation) {
       var address = item['address'];
@@ -170,13 +171,13 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
         }
         LOG('--> newLatLngBounds : ${widget.markers.length} / ${posCount.length}');
         if (posCount.length > 1) {
-          widget.mapController?.moveCamera(CameraUpdate.newLatLngBounds(
-              MapUtils.boundsFromLatLngList(widget.markers.map((loc) => loc.position).toList()), 100));
+          widget.mapController?.animateCamera(CameraUpdate.newLatLngBounds(
+              MapUtils.boundsFromLatLngList(widget.markers.map((loc) => loc.position).toList()), 150));
           Future.delayed(Duration(milliseconds: 200), () {
             isMoveActive = true;
           });
         } else {
-          widget.mapController?.moveCamera(CameraUpdate.newLatLng(widget.markers.first.position));
+          widget.mapController?.animateCamera(CameraUpdate.newLatLng(widget.markers.first.position));
           Future.delayed(Duration(milliseconds: 200), () {
             isMoveActive = true;
           });
@@ -353,6 +354,14 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
       LATLNG(widget.showLocation.first['address']): LatLng(37.55594599, 126.972317);
     LOG('--> showPos : $showPos / $isMoveActive');
 
+    // if (widget.mapController != null) {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     Future.delayed(const Duration(milliseconds: 200), () async {
+    //       refreshMap();
+    //     });
+    //   });
+    // }
+
     return PointerInterceptor(
       child: SizedBox(
         height: widget.mapHeight,
@@ -384,7 +393,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
                   if (widget.mapController == null || !isMoveActive) return;
                   LOG('--> onCameraMove  :$isMoveActive');
                   isMoveActive = false;
-                  Future.delayed(Duration(milliseconds: 300), () {
+                  Future.delayed(Duration(milliseconds: 200), () {
                     isMoveActive = true;
                   });
                   widget.mapController!.getVisibleRegion().then((region) {

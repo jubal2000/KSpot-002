@@ -2,8 +2,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../utils/utils.dart';
+import '../widget/event_time_edit_widget.dart';
 import 'etc_model.dart';
 part 'event_model.g.dart';
 
@@ -199,9 +201,7 @@ class EventModel {
     return date != null ? date.title : '';
   }
 
-  TimeData? getDateTimeData(DateTime checkDate) {
-    final weekText     = ['Every', '1st', '2nd', '3rd', '4th', 'Last'];
-    final dayWeekText  = ['Every', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  TimeData? getDateTimeData(DateTime checkDate, [String title = '']) {
     if (timeData == null) return null;
     for (var item in timeData!) {
       if (LIST_NOT_EMPTY(item.day)) {
@@ -212,28 +212,33 @@ class EventModel {
         return null;
       } else {
         // LOG('--> Date Range init : ${item.value['startDate']} ~ ${item.value['endDate']}');
-        if (STR(item.startDate).isEmpty) item.startDate = DateTime.now().toString().split(' ').first;
-        var startDate = DateTime.parse(item.startDate!);
-        if (STR(item.endDate).isEmpty) item.endDate = startDate.add(Duration(days: 364)).toString().split(' ').first;
-        var endDate = DateTime.parse(item.endDate!);
+        if (STR(item.startDate).isEmpty) item.startDate = DateTime.now().toString();
+        var startDate = DateTime.parse('${item.startDate!} 00:00:00.000');
+        if (STR(item.endDate).isEmpty) item.endDate = startDate.add(Duration(days: 364)).toString();
+        var endDate = DateTime.parse('${item.endDate!} 23:59:59.999');
         var duration  = endDate.difference(startDate).inDays + 1;
         // LOG('--> Date Range : ${item.value['startDate']} ~ ${item.value['endDate']} => $duration / ${item.value['week']}');
-
         for (var i=0; i<duration; i++) {
           var day = startDate.add(Duration(days: i));
           var dayStr = day.toString().split(' ').first;
-          var isShow = LIST_NOT_EMPTY(item.exceptDay!) || !item.exceptDay!.contains(dayStr);
-          if (isShow && LIST_NOT_EMPTY(item.week) && !item.week!.contains(weekText.first)) {
-            var wm = day.weekOfMonth;
-            isShow = ((wm < weekText.length && item.week!.contains(weekText[wm])) || wm >= weekText.length) &&
-                (wm == day.lastWeek && item.week!.contains(weekText.last) || wm != day.lastWeek);
-          }
-          if (isShow && LIST_NOT_EMPTY(item.dayWeek) && !item.dayWeek!.contains(dayWeekText.first)) {
-            var wm = day.weekday;
-            isShow = item.dayWeek!.contains(dayWeekText[wm]);
-          }
-          if (isShow) {
-            return item;
+          // if (checkDate.isAfter(startDate) && checkDate.isBefore(endDate)) {
+          if (checkDate.isSameDay(day)) {
+            // LOG('--> [$title] getDateTimeData day range ok : ${checkDate.toString()} / ${startDate.toString()} / ${endDate.toString()}');
+            var isShow = LIST_NOT_EMPTY(item.exceptDay!) || !item.exceptDay!.contains(dayStr);
+            if (isShow && LIST_NOT_EMPTY(item.week) && !item.week!.contains(weekText.first)) {
+              var wm = day.weekOfMonth;
+              isShow = ((wm < weekText.length && item.week!.contains(weekText[wm])) || wm >= weekText.length) &&
+                  (wm == day.lastWeek && item.week!.contains(weekText.last) || wm != day.lastWeek);
+              // LOG('--> [$title] day.weekOfMonth : $wm / ${item.week} => ${isShow ? 'show' : 'hide'}');
+            }
+            if (isShow && LIST_NOT_EMPTY(item.dayWeek) && !item.dayWeek!.contains(dayWeekText.first)) {
+              var wm = day.weekday;
+              isShow = item.dayWeek!.contains(dayWeekText[wm]);
+              // LOG('--> [$title] day.weekday : $wm / ${item.dayWeek} => ${isShow ? 'show' : 'hide'}');
+            }
+            if (isShow) {
+              return item;
+            }
           }
         }
       }
@@ -329,6 +334,11 @@ class EventModel {
     return result;
   }
 
+  getOptionValue(String key) {
+    final optionMap = getOptionDataMap;
+    return optionMap[key] != null && optionMap[key]['value'] == '1';
+  }
+
   setOptionDataMap(JSON map) {
     optionData ??= [];
     optionData!.clear();
@@ -336,7 +346,7 @@ class EventModel {
       for (var item in map.entries) {
         optionData!.add(OptionData(
           id: item.key,
-          value: item.value
+          value: item.value['value'],
         ));
       }
     }

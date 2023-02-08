@@ -2265,7 +2265,7 @@ extension DateHelpers on DateTime {
     return lastDay.weekOfMonth;
   }
 
-  bool compareDateTo(DateTime target) {
+  bool isSameDay(DateTime target) {
     return target.year == year && target.month == month && target.day == day;
   }
 }
@@ -2313,7 +2313,6 @@ bool checkDateTimeShow(JSON? timeData, DateTime checkDate) {
       var endDate = DateTime.parse(STR(item.value['endDate']));
       var duration  = endDate.difference(startDate).inDays + 1;
       // LOG('--> Date Range : ${item.value['startDate']} ~ ${item.value['endDate']} => $duration / ${item.value['week']}');
-
       for (var i=0; i<duration; i++) {
         var day = startDate.add(Duration(days: i));
         var dayStr = day.toString().split(' ').first;

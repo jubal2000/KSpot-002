@@ -113,6 +113,7 @@ class EventEditViewModel extends ChangeNotifier {
         imageData[item.id] = jsonItem;
       }
     }
+    refreshOption();
   }
 
   setEventGroup(EventGroupModel group) {
@@ -310,6 +311,34 @@ class EventEditViewModel extends ChangeNotifier {
     });
   }
 
+  refreshOption() {
+    final optionMap = editItem!.getOptionDataMap;
+    for (var item in AppData.INFO_EVENT_OPTION.entries) {
+      if (item.value.runtimeType != String && item.value.runtimeType != int) {
+        bool isAdd = true;
+        if (item.value['customShow'] != null) {
+          isAdd = false;
+          for (var customItem in editItem!.getCustomDataMap.entries) {
+            if (STR(customItem.value['customId']) == STR(item.value['customShow'])) {
+              isAdd = true;
+              break;
+            }
+          }
+        }
+        if (isAdd && BOL(item.value['value']) && !optionMap.containsKey(item.key)) {
+          LOG('--> add default option data : ${item.key} / ${optionMap.toString()}');
+          optionMap[item.key] = {'key': item.key, 'value': '1'};
+        }
+      }
+    }
+    if (editItem!.status == 2) {
+      optionMap['open'] = {'key': 'open', 'value': ''};
+    }
+    LOG('--> optionMap : ${optionMap.toString()}');
+    editItem!.setOptionDataMap(optionMap);
+    LOG('--> _eventInfo option : ${editItem!.getOptionDataMap}');
+  }
+
   setImageData() {
     editItem!.picData = imageData.entries.map((item) => PicData.fromJson(item.value)).toList();
     LOG('----> setImageData: ${editItem!.picData!.length}');
@@ -475,7 +504,7 @@ class EventEditViewModel extends ChangeNotifier {
       editItem!.countryState  = AppData.currentState;
     }
     // set status..
-    editItem!.status = editItem!.optionData == null || BOL(editItem!.getOptionDataMap['open']) ? 1 : 2;
+    editItem!.status = JSON_EMPTY(editItem!.getOptionDataMap) || editItem!.getOptionValue('open_now') ? 1 : 2;
     // set search data..
     editItem!.searchData = CreateSearchWordList(editItem!.toJson());
     editItem!.userId = AppData.USER_ID;

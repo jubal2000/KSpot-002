@@ -24,6 +24,7 @@ class AppScreen extends StatelessWidget {
   final _height = 40.0;
   final _iconSize = 24.0;
   final _fontSize = UI_FONT_SIZE_SS;
+  final _radiusSize = 20.0;
 
   List<Widget> pages = [
     EventScreen(),
@@ -116,7 +117,12 @@ class AppScreen extends StatelessWidget {
                               Expanded(
                                 child: Container(
                                   height: UI_MENU_HEIGHT,
-                                  color: Theme.of(context).bottomAppBarColor,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                        topLeft:  Radius.circular(_radiusSize),
+                                    ),
+                                    color: Theme.of(context).bottomAppBarColor,
+                                  ),
                                   padding: EdgeInsets.only(left: UI_HORIZONTAL_SPACE_S),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -132,7 +138,7 @@ class AppScreen extends StatelessWidget {
                                 children: [
                                   BottomCenterAlign(
                                     child: Container(
-                                      width: UI_MENU_BG_HEIGHT,
+                                      width: UI_MENU_BG_HEIGHT - 8,
                                       height: UI_MENU_HEIGHT,
                                       color: Theme.of(context).bottomAppBarColor,
                                     ),
@@ -173,7 +179,10 @@ class AppScreen extends StatelessWidget {
                               Expanded(
                                 child: Container(
                                   height: UI_MENU_HEIGHT,
-                                  color: Theme.of(context).bottomAppBarColor,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.only(topRight: Radius.circular(_radiusSize)),
+                                    color: Theme.of(context).bottomAppBarColor,
+                                  ),
                                   padding: EdgeInsets.only(right: UI_HORIZONTAL_SPACE_S),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -218,7 +227,7 @@ class AppScreen extends StatelessWidget {
                       )
                     ),
                     BottomRightAlign(
-                      heightFactor: 17.5,
+                      heightFactor: 19.0,
                       child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -239,10 +248,9 @@ class AppScreen extends StatelessWidget {
                             child: SizedBox(
                               height: _height,
                               width: _height,
-                              child: Icon(Icons.visibility_outlined),
+                              child: Icon(Icons.visibility_outlined, color: Colors.black),
                             )
                         ),
-                        SizedBox(width: 5.w),
                         GestureDetector(
                             onTap: () {
                               var mode = theme.setFlexSchemeRotate();
@@ -259,7 +267,7 @@ class AppScreen extends StatelessWidget {
                             child: SizedBox(
                               height: _height,
                               width: _height,
-                              child: Icon(Icons.color_lens_outlined),
+                              child: Icon(Icons.color_lens_outlined, color: Colors.black),
                             )
                         ),
                       ],

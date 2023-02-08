@@ -61,16 +61,16 @@ class EventViewModel extends ChangeNotifier {
     isFirstMapUpdate = true;
     mapBounds = null;
     googleWidget = null;
-    eventShowList.clear();
     mapItemData.clear();
     listItemData.clear();
+    eventShowList.clear();
   }
 
   Future getEventList() async {
     mapBounds = null;
     eventShowList.clear();
-    mapItemData.clear();
-    listItemData.clear();
+    // mapItemData.clear();
+    // listItemData.clear();
     AppData.eventViewModel.eventData = null;
     var result = await eventRepo.getEventListFromCountry(AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
     LOG('--> getEventList result : ${result.length}');
@@ -84,7 +84,7 @@ class EventViewModel extends ChangeNotifier {
     googleWidget ??= GoogleMapWidget(
       eventShowList,
       key: mapKey,
-      mapHeight: layout.maxHeight - UI_MENU_HEIGHT,
+      mapHeight: layout.maxHeight - UI_MENU_HEIGHT + 8,
       onMarkerSelected: (selectItem) {
         LOG('--> onMarkerSelected : ${selectItem['title']} / ${selectItem['id']}');
       },
@@ -120,16 +120,16 @@ class EventViewModel extends ChangeNotifier {
             showItem['placeInfo'] = placeInfo.toJson();
             showItem['address'  ] = placeInfo.address.toJson();
             final pos = LatLng(DBL(showItem['address']['lat']), DBL(showItem['address']['lng']));
-            if (mapBounds !=  null) LOG('--> eventShowList add : ${mapBounds!.toJson()} / $pos');
+            // if (mapBounds !=  null) LOG('--> eventShowList add : ${mapBounds!.toJson()} / $pos');
             if (eventListType == EventListType.map) {
-              final timeData = item.value.getDateTimeData(AppData.currentDate);
+              final timeData = item.value.getDateTimeData(AppData.currentDate, item.value.title);
               if (timeData != null && (mapBounds == null || mapBounds!.contains(pos))) {
                 showItem['timeRange'] = '${timeData.startTime} ~ ${timeData.endTime}';
-                LOG('--> eventShowList add : ${showItem['id']} / ${showItem['timeRange']}');
+                // LOG('--> eventShowList add : ${showItem['id']} / ${showItem['timeRange']}');
                 result.add(showItem);
               }
             } else {
-              LOG('--> eventShowList add : ${showItem['id']}');
+              // LOG('--> eventShowList add : ${showItem['id']}');
               result.add(showItem);
             }
           }
@@ -181,36 +181,53 @@ class EventViewModel extends ChangeNotifier {
 
   onMapRegionChanged(region) async {
     mapBounds = region;
-    // LOG('--> onMapRegionChanged update : ${eventShowList.length}');
-    // List<JSON> tmpList = await setShowList();
-    // if (tmpList.equals(eventShowList)) {
-    //   // LOG('--> onMapRegionChanged cancel : ${tmpList.length} / ${eventShowList.length}');
-    //   return false;
-    // }
+    List<JSON> tmpList = await setShowList();
+    if (compareShowList(tmpList)) {
+      LOG('--> onMapRegionChanged cancel');
+      return false;
+    }
+    // LOG('--> onMapRegionChanged update : ${eventShowList.length} / ${tmpList.length}');
     // eventShowList = tmpList;
-    Future.delayed(const Duration(milliseconds: 200), () async {
-      var state = mapKey.currentState as GoogleMapState;
-      state.refreshMarker(eventShowList, false);
-    });
-    notifyListeners();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Future.delayed(const Duration(milliseconds: 200), () async {
+    //     var state = mapKey.currentState as GoogleMapState;
+    //     state.refreshMarker(eventShowList, false);
+      // });
+      notifyListeners();
+    // });
     return true;
   }
 
   onMapDayChanged() async {
     mapBounds = null;
+    isFirstMapUpdate = true;
     // List<JSON> tmpList = await setShowList();
-    // if (tmpList.equals(eventShowList)) {
-    //   // LOG('--> onMapRegionChanged cancel : ${tmpList.length} / ${eventShowList.length}');
+    // if (compareShowList(tmpList)) {
+    //   LOG('--> onMapDayChanged cancel');
     //   return false;
     // }
+    // googleWidget = null;
     // eventShowList = tmpList;
-    // LOG('--> onMapRegionChanged update : ${eventShowList.length}');
-    Future.delayed(const Duration(milliseconds: 200), () async {
-      var state = mapKey.currentState as GoogleMapState;
-      state.refreshMarker(eventShowList);
-    });
-    notifyListeners();
+    // LOG('--> onMapDayChanged update : ${eventShowList.length}');
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Future.delayed(const Duration(milliseconds: 200), () async {
+    //     var state = mapKey.currentState as GoogleMapState;
+    //     state.refreshMarker(eventShowList);
+    //   });
+      notifyListeners();
+    // });
     return true;
+  }
+
+  compareShowList(List<JSON> checkList) {
+    if (checkList.length != eventShowList.length) return false;
+    var checkCount = 0;
+    for (var eItem in eventShowList) {
+      for (var cItem in checkList) {
+        if (eItem['id'] == cItem['id']) checkCount++;
+      }
+    }
+    return eventShowList.length > checkList.length ? checkCount == eventShowList.length : checkCount == checkList.length;
   }
 
   showEventMap(itemWidth, itemHeight) {
@@ -239,13 +256,16 @@ class EventViewModel extends ChangeNotifier {
       mapItemData[item['id']] = addItem;
       showList.add(addItem);
     }
-    if (isFirstMapUpdate) {
-      isFirstMapUpdate = false;
-      Future.delayed(const Duration(milliseconds: 200), () async {
-        var state = mapKey.currentState as GoogleMapState;
-        state.refreshMarker(eventShowList);
+    // if (isFirstMapUpdate) {
+    //   isFirstMapUpdate = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(milliseconds: 200), () async {
+          var state = mapKey.currentState as GoogleMapState;
+          state.refreshMarker(eventShowList, isFirstMapUpdate);
+          isFirstMapUpdate = false;
+        });
       });
-    }
+    // }
     return showList;
   }
 
@@ -283,7 +303,9 @@ class EventViewModel extends ChangeNotifier {
       builder: (context, layout) {
         final itemWidth  = layout.maxWidth / 4.0;
         final itemHeight = itemWidth * 2.0;
-        return Stack(
+        return Container(
+          color: eventListType == EventListType.map ? Colors.white : null,
+          child: Stack(
           children: [
             if (eventListType == EventListType.map)...[
               showGoogleWidget(layout),
@@ -342,7 +364,6 @@ class EventViewModel extends ChangeNotifier {
                 child: AppTopMenuBar(MainMenuID.event,
                   isShowDatePick: !isDatePickerExtend && eventListType == EventListType.map, height: UI_TOP_MENU_HEIGHT,
                   onCountryChanged: () {
-                    LOG('--> onCountryChanged : ${AppData.currentState}');
                     refreshModel();
                     notifyListeners();
                   },
@@ -355,6 +376,7 @@ class EventViewModel extends ChangeNotifier {
               )
             ),
           ],
+          )
         );
       }
     );

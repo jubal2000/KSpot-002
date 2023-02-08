@@ -739,35 +739,40 @@ Widget showImageFit(dynamic imagePath) {
 
 Widget showImageWidget(dynamic imagePath, BoxFit fit, {Color? color}) {
   // LOG('--> showImageWidget : $imagePath');
-  try {
-    if (imagePath != null && imagePath.runtimeType == String && imagePath
-        .toString()
-        .isNotEmpty) {
-      var url = imagePath.toString();
-      if (url.contains("http")) {
-        return CachedNetworkImage(
-          fit: fit,
-          color: color,
-          imageUrl: url,
-          cacheKey: url.split('=').last,
-          progressIndicatorBuilder: (context, url, progress) => Center(
-            child: SizedBox(
-            width: 40,
-            height: 40,
-            child: CircularProgressIndicator(value: progress.progress),
-            ),
-          )
-        );
-      } else if (url.contains('/cache')) {
-        return Image.file(File(url), fit: fit, color: color);
-      } else {
-        return Image.asset(url, fit: fit, color: color);
+  if (imagePath != null && imagePath.isNotEmpty) {
+    try {
+      if (imagePath.runtimeType == String && imagePath
+          .toString()
+          .isNotEmpty) {
+        var url = imagePath.toString();
+        if (url.contains("http")) {
+          return CachedNetworkImage(
+              fit: fit,
+              color: color,
+              imageUrl: url,
+              cacheKey: url
+                  .split('=')
+                  .last,
+              progressIndicatorBuilder: (context, url, progress) =>
+                  Center(
+                    child: SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: CircularProgressIndicator(value: progress.progress),
+                    ),
+                  )
+          );
+        } else if (url.contains('/cache')) {
+          return Image.file(File(url), fit: fit, color: color);
+        } else {
+          return Image.asset(url, fit: fit, color: color);
+        }
+      } else if (imagePath.runtimeType == Uint8List) {
+        return Image.memory(imagePath as Uint8List, fit: fit, color: color);
       }
-    } else if (imagePath.runtimeType == Uint8List) {
-      return Image.memory(imagePath as Uint8List, fit: fit, color: color);
+    } catch (e) {
+      LOG('--> showImage Error : $e');
     }
-  } catch (e) {
-    LOG('--> showImage Error : $e');
   }
   return Image.asset(NO_IMAGE);
 }

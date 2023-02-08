@@ -18,10 +18,11 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
       String title = '',
       bool showCount = false,
       bool isEnabled = true,
+      EdgeInsets? padding,
       Function(int)? onChangeCount
     }) {
-  var _iconColor0 = Theme.of(context).primaryColor;
-  var _iconColor1 = Theme.of(context).primaryColor.withOpacity(0.85);
+  var _iconColor0 = Theme.of(context).colorScheme.tertiary;
+  var _iconColor1 = Theme.of(context).colorScheme.tertiary.withOpacity(0.85);
   var api = Get.find<ApiService>();
 
   return FutureBuilder(
@@ -42,6 +43,7 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
                   child: Container(
                       width:  35,
                       color: Colors.transparent,
+                      padding: padding,
                       child: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [

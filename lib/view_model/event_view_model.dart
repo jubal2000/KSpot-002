@@ -241,7 +241,7 @@ class EventViewModel extends ChangeNotifier {
           child: EventSquareItem(
             item,
             backgroundColor: Theme.of(buildContext!).cardColor,
-            faceOutlineColor: Theme.of(buildContext!).bottomAppBarColor,
+            faceOutlineColor: Theme.of(buildContext!).colorScheme.secondary,
             padding: EdgeInsets.zero,
             imageHeight: itemWidth,
             titleMaxLine: 2,
@@ -256,16 +256,16 @@ class EventViewModel extends ChangeNotifier {
       mapItemData[item['id']] = addItem;
       showList.add(addItem);
     }
-    // if (isFirstMapUpdate) {
-    //   isFirstMapUpdate = false;
+    if (isFirstMapUpdate) {
+      isFirstMapUpdate = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Future.delayed(const Duration(milliseconds: 200), () async {
           var state = mapKey.currentState as GoogleMapState;
-          state.refreshMarker(eventShowList, isFirstMapUpdate);
+          state.refreshMarker(eventShowList);
           isFirstMapUpdate = false;
         });
       });
-    // }
+    }
     return showList;
   }
 

@@ -55,7 +55,6 @@ class GoogleMapWidget extends StatefulWidget{
 
   // LatLng startLocation  = LatLng(27.6683619, 85.3101895);
   // LatLng endLocation    = LatLng(27.6875436, 85.2751138);
-  Set<Marker> markers = Set(); //markers for google map
   GoogleMapController? mapController; //contrller for Google map
   ByteData? markerBgImage;
 
@@ -67,6 +66,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
 
   PolylinePoints polylinePoints = PolylinePoints();
   Map<PolylineId, Polyline> polylines = {}; //polylines to show direction
+  Set<Marker> markers = Set(); //markers for google map
 
   double markerSize = 150.0;
   double distance = 0.0;
@@ -106,84 +106,88 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
   }
 
   initMarker([bool isBoundsFresh = true]) {
-    LOG('--> GoogleDirectionListWidget initMarker : ${widget.showLocation.length} / $isBoundsFresh');
-    LatLng? targetLoc;
-    widget.markers.clear();
+    setState(() {
+      LOG('--> GoogleDirectionListWidget initMarker : ${widget.showLocation.length} / $isBoundsFresh');
+      LatLng? targetLoc;
+      markers.clear();
 
-    // add normal marker..
-    for (var item in widget.showLocation) {
-      var address = item['address'];
-      if (address != null) {
-        var loc = LatLng(DBL(address['lat']), DBL(address['lng']));
-        targetLoc ??= loc;
-        widget.markers.add(Marker( //add distination location marker
-          markerId: MarkerId(STR(item['id'])),
-          position: loc, //position of marker
-          icon: BitmapDescriptor.defaultMarker,
-          // infoWindow: InfoWindow( //popup info
-          //   title: STR(item['title']),
-          //   // snippet: DESC(item['desc']),
-          // ),
-          onTap: () {
-            onMarkerTaped(item);
-          },
-        ));
+      // add normal marker..
+      for (var item in widget.showLocation) {
+        var address = item['address'];
+        if (address != null) {
+          var loc = LatLng(DBL(address['lat']), DBL(address['lng']));
+          targetLoc ??= loc;
+          markers.add(Marker( //add distination location marker
+            markerId: MarkerId(STR(item['id'])),
+            position: loc, //position of marker
+            icon: BitmapDescriptor.defaultMarker,
+            // infoWindow: InfoWindow( //popup info
+            //   title: STR(item['title']),
+            //   // snippet: DESC(item['desc']),
+            // ),
+            onTap: () {
+              onMarkerTaped(item);
+            },
+          ));
+        }
+        if (widget.showDirection && targetLoc != null) {
+          getDirections(targetLoc);
+        }
       }
-      if (widget.showDirection && targetLoc != null) {
-        getDirections(targetLoc);
+      // replace image marker..
+      for (var item in widget.showLocation) {
+        LOG('--> add Image Marker : ${STR(item['pic'])}');
+        getMarkerImage(STR(item['pic']), markerSize).then((icon) {
+          if (icon != null) {
+            LOG('--> getMarkerImage result : $icon / $markerSize');
+            var address = item['address'];
+            if (address != null) {
+              setState(() {
+                markers.add(Marker( //add distination location marker
+                  markerId: MarkerId(STR(item['id'])),
+                  position: LatLng(DBL(address['lat']), DBL(address['lng'])), //position of marker
+                  icon: icon ?? BitmapDescriptor.defaultMarker,
+                  // infoWindow: InfoWindow( //popup info
+                  //   title: STR(item['title']),
+                  //   // snippet: DESC(item['desc']),
+                  // ),
+                  onTap: () {
+                    onMarkerTaped(item);
+                  },
+                  // onTap: onMarkerTaped(item),
+                ));
+              });
+            }
+          }
+        });
       }
-    }
-    // replace image marker..
-    for (var item in widget.showLocation) {
-      LOG('--> add Image Marker : ${STR(item['pic'])}');
-      getMarkerImage(STR(item['pic']), markerSize).then((icon) {
-        if (icon != null) {
-          LOG('--> getMarkerImage result : $icon / $markerSize');
-          var address = item['address'];
-          if (address != null) {
-            setState(() {
-              widget.markers.add(Marker( //add distination location marker
-                markerId: MarkerId(STR(item['id'])),
-                position: LatLng(DBL(address['lat']), DBL(address['lng'])), //position of marker
-                icon: icon ?? BitmapDescriptor.defaultMarker,
-                // infoWindow: InfoWindow( //popup info
-                //   title: STR(item['title']),
-                //   // snippet: DESC(item['desc']),
-                // ),
-                onTap: () {
-                  onMarkerTaped(item);
-                },
-                // onTap: onMarkerTaped(item),
-              ));
+      if (isBoundsFresh && markers.isNotEmpty && widget.mapController != null) {
+        isMoveActive = false;
+        Future.delayed(Duration(milliseconds: 200), () {
+          // same position counter..
+          var posCount = [];
+          for (var item in markers) {
+            var str = '${item.position.latitude}-${item.position.longitude}';
+            if (!posCount.contains(str)) posCount.add(str);
+          }
+          LOG('--> newLatLngBounds : ${markers.length} / ${posCount.length}');
+          if (posCount.length > 1) {
+            widget.mapController?.animateCamera(CameraUpdate.newLatLngBounds(
+                MapUtils.boundsFromLatLngList(markers.map((loc) => loc.position).toList()), 150));
+            Future.delayed(Duration(milliseconds: 200), () {
+              isMoveActive = true;
+            });
+          } else {
+            widget.mapController?.animateCamera(CameraUpdate.newLatLng(markers.first.position));
+            Future.delayed(Duration(milliseconds: 200), () {
+              isMoveActive = true;
             });
           }
-        }
-      });
-    }
-    if (isBoundsFresh && widget.markers.isNotEmpty && widget.mapController != null) {
-      isMoveActive = false;
-      Future.delayed(Duration(milliseconds: 200), () {
-        // same position counter..
-        var posCount = [];
-        for (var item in widget.markers) {
-          var str = '${item.position.latitude}-${item.position.longitude}';
-          if (!posCount.contains(str)) posCount.add(str);
-        }
-        LOG('--> newLatLngBounds : ${widget.markers.length} / ${posCount.length}');
-        if (posCount.length > 1) {
-          widget.mapController?.animateCamera(CameraUpdate.newLatLngBounds(
-              MapUtils.boundsFromLatLngList(widget.markers.map((loc) => loc.position).toList()), 150));
-          Future.delayed(Duration(milliseconds: 200), () {
-            isMoveActive = true;
-          });
-        } else {
-          widget.mapController?.animateCamera(CameraUpdate.newLatLng(widget.markers.first.position));
-          Future.delayed(Duration(milliseconds: 200), () {
-            isMoveActive = true;
-          });
-        }
-      });
-    }
+        });
+      } else if (markers.isNotEmpty) {
+
+      }
+    });
   }
 
   getMarkerImage(String imagePath, double size) async {
@@ -254,7 +258,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
   }
 
   showCurrentLocation() {
-    widget.markers.add(Marker( //add distination location marker
+    markers.add(Marker( //add distination location marker
       markerId: MarkerId('myLoc'),
       position: LatLng(AppData.currentLocation!.latitude, AppData.currentLocation!.longitude),
       //position of marker
@@ -310,7 +314,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
       if (widget.mapController != null) {
         Future.delayed(
             Duration(milliseconds: 200), () => widget.mapController!.animateCamera(CameraUpdate.newLatLngBounds(
-            MapUtils.boundsFromLatLngList(widget.markers.map((loc) => loc.position).toList()), 50))
+            MapUtils.boundsFromLatLngList(markers.map((loc) => loc.position).toList()), 50))
         );
       }
     });
@@ -352,7 +356,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
     final showPos = widget.showMyLocation && AppData.currentLocation != null ?
       AppData.currentLocation : widget.showLocation.isNotEmpty ?
       LATLNG(widget.showLocation.first['address']): LatLng(37.55594599, 126.972317);
-    LOG('--> showPos : $showPos / $isMoveActive');
+    LOG('--> showPos : $showPos / $isMoveActive / ${markers.length}');
 
     // if (widget.mapController != null) {
     //   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -378,12 +382,12 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
                   target: showPos, //initial position
                   zoom: 12.0, //initial zoom level
                 ),
-                markers: widget.markers.toSet(),
+                markers: markers.toSet(),
                 polylines: Set<Polyline>.of(polylines.values),
                 onMapCreated: (controller) { //method called when map is created
                   widget.mapController = controller;
                   // markerSize = MediaQuery.of(context).size.width * 0.4;
-                  LOG('--> show marker window ready : ${widget.markers.length}');
+                  LOG('--> show marker window ready : ${markers.length}');
                   rootBundle.load('assets/ui/map_marker_00.png').then((value) {
                     widget.markerBgImage = value;
                     refreshMap();

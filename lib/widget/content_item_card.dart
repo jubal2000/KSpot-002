@@ -19,6 +19,7 @@ import '../utils/utils.dart';
 import 'dart:developer';
 
 import 'edit/edit_text_input_widget.dart';
+import 'like_widget.dart';
 
 enum GoodsItemCardType {
   normal,
@@ -356,6 +357,7 @@ class GoodsItemCard extends StatefulWidget {
     this.outlineColor = Colors.white,
     this.faceOutlineColor = Colors.black,
     this.isShowExtra = true,
+    this.isShowLink = false,
   }) : super(key: key);
 
   void Function(String, int)? onChanged;
@@ -393,6 +395,7 @@ class GoodsItemCard extends StatefulWidget {
   bool isSelectable;
   bool isEditable;
   bool isShowExtra;
+  bool isShowLink;
 
   double imageHeight;
   double faceSize;
@@ -531,13 +534,22 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                               color: widget.backgroundColor,
                               child: Column(
                               children: [
-                            if (_goodsItem['pic'] != null) ...[
-                              Container(
-                                constraints: BoxConstraints(
-                                  maxHeight: widget.imageHeight,
-                                  minWidth: double.infinity,
-                                ),
-                                child: showImageWidget(_goodsItem['pic'], BoxFit.cover),
+                            if (JSON_NOT_EMPTY(_goodsItem['pic'])) ...[
+                              Stack(
+                                children: [
+                                  Container(
+                                    constraints: BoxConstraints(
+                                      maxHeight: widget.imageHeight,
+                                      minWidth: double.infinity,
+                                    ),
+                                    child: showImageWidget(_goodsItem['pic'], BoxFit.cover),
+                                  ),
+                                  if (widget.isShowLink)
+                                  TopRightAlign(
+                                    child: LikeWidget(context, 'event', _goodsItem,
+                                        iconSize: 22, padding: EdgeInsets.all(5)),
+                                  )
+                                ]
                               ),
                               SizedBox(height: 5),
                             ],

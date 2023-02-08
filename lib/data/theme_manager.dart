@@ -130,18 +130,38 @@ class ThemeNotifier with ChangeNotifier {
   var _schemeMode = true;
 
   ThemeNotifier() {
-    StorageManager.readData('SchemeIndex').then((value1) {
-      StorageManager.readData('SchemeMode').then((value2) {
-        print('value read from storage: $value1 / $value2');
-        _schemeMode  = BOL(value2 ?? '1');
-        _schemeIndex = value1 ?? 0;
-        AppData.currentThemeMode  = _schemeMode;
-        AppData.currentThemeIndex = _schemeIndex;
-        if (--_schemeIndex < 0) _schemeIndex = schemeList.length - 1;
-        setFlexSchemeRotate();
-        // notifyListeners();
-      });
-    });
+    AppData.currentThemeMode  = false;
+    AppData.currentThemeIndex = 0;
+    _schemeMode = false;
+    _themeData  = FlexThemeData.dark(
+      scheme: schemeList[_schemeIndex],
+      surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+      blendLevel: 15,
+      appBarStyle: FlexAppBarStyle.surface,
+      appBarOpacity: 0.90,
+      subThemesData: const FlexSubThemesData(
+        blendOnLevel: 30,
+      ),
+      keyColors: const FlexKeyColors(),
+      visualDensity: FlexColorScheme.comfortablePlatformDensity,
+      useMaterial3: true,
+      fontFamily: GoogleFonts
+          .notoSans()
+          .fontFamily,
+    );
+    notifyListeners();
+    // StorageManager.readData('SchemeIndex').then((value1) {
+    //   StorageManager.readData('SchemeMode').then((value2) {
+    //     print('value read from storage: $value1 / $value2');
+    //     _schemeMode  = BOL(value2 ?? '1');
+    //     _schemeIndex = value1 ?? 0;
+    //     AppData.currentThemeMode  = _schemeMode;
+    //     AppData.currentThemeIndex = _schemeIndex;
+    //     if (--_schemeIndex < 0) _schemeIndex = schemeList.length - 1;
+    //     setFlexSchemeRotate();
+    //     // notifyListeners();
+    //   });
+    // });
   }
 
   String setModeRotate(ThemeData currentTheme) {

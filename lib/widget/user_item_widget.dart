@@ -244,7 +244,7 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
   }
 
   refreshData() {
-    LOG('--> UserIdCardWidget refresh : ${userInfo!.id} / ${AppData.USER_ID}');
+    LOG('--> UserIdCardWidget refresh : ${userInfo.id} / [${userInfo.pic}]');
     if (userInfo.id == AppData.USER_ID) {
       isMyProfile = true;
       // if (_userInfo['pic'] != AppData.USER_PIC || _userInfo['nickName'] != AppData.USER_NICKNAME) {
@@ -301,18 +301,38 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
                             .withOpacity(0.2),
                         child: Row(
                           children: [
-                            if (STR(userInfo.pic).isNotEmpty)...[
-                              if (!widget.isCanExtend)
-                                Container(
+                            if (!widget.isCanExtend)
+                              Container(
+                                width: widget.size,
+                                height: widget.size,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(widget.size)),
+                                  border: Border.all(
+                                    color: Theme
+                                        .of(context)
+                                        .colorScheme
+                                        .secondary,
+                                    width: widget.faceCircleSize,
+                                  ),
+                                ),
+                                child: ClipOval(
+                                  child: showImageFit(userInfo.pic),
+                                ),
+                              ),
+                            if (widget.isCanExtend)
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    isOpen = !isOpen;
+                                  });
+                                },
+                                child: Container(
                                   width: widget.size,
                                   height: widget.size,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.all(Radius.circular(widget.size)),
                                     border: Border.all(
-                                      color: Theme
-                                          .of(context)
-                                          .colorScheme
-                                          .secondary,
+                                      color: widget.borderColor ?? Theme.of(context).colorScheme.secondary,
                                       width: widget.faceCircleSize,
                                     ),
                                   ),
@@ -320,29 +340,7 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
                                     child: showImageFit(userInfo.pic),
                                   ),
                                 ),
-                              if (widget.isCanExtend)
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      isOpen = !isOpen;
-                                    });
-                                  },
-                                  child: Container(
-                                    width: widget.size,
-                                    height: widget.size,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.all(Radius.circular(widget.size)),
-                                      border: Border.all(
-                                        color: widget.borderColor ?? Theme.of(context).colorScheme.secondary,
-                                        width: widget.faceCircleSize,
-                                      ),
-                                    ),
-                                    child: ClipOval(
-                                      child: showImageFit(userInfo.pic),
-                                    ),
-                                  ),
-                                )
-                            ],
+                              ),
                             if (isOpen)...[
                               SizedBox(width: 5),
                               Text(userInfo.nickName, style: CardNameStyle(context), maxLines: 2),

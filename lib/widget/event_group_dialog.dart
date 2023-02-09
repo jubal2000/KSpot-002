@@ -181,13 +181,19 @@ Future<EventGroupModel?> EventGroupSelectDialog(
           child: AlertDialog(
             title: Text('Spot group select'.tr),
             titleTextStyle: Theme.of(context).textTheme.subtitle1,
-            contentPadding: EdgeInsets.all(10),
-            insetPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 100),
+            titlePadding: EdgeInsets.all(20),
+            insetPadding: EdgeInsets.all(40),
+            actionsPadding: EdgeInsets.all(10),
+            contentPadding: EdgeInsets.symmetric(horizontal: 20),
+            backgroundColor: DialogBackColor(context),
             scrollable: true,
             content: Container(
                 width: Get.size.width - UI_HORIZONTAL_SPACE_L * 2,
                 height: _dialogHeight,
                 padding: EdgeInsets.zero,
+                constraints: BoxConstraints(
+                  maxHeight: Get.height * 0.5,
+                ),
                 child: FutureBuilder(
                   future: placeGroupInit,
                   builder: (context, snapshot) {

@@ -34,11 +34,38 @@ class UserModelEx extends UserModel {
     emailVerified: false,
   );
 
-  UserModelEx.create(loginId, loginType) : super(
+  UserModelEx.create(loginId, loginType, {String nickName = '', String pic = ''}) : super(
     id: '',
     status: 1,
     loginId: loginId,
     loginType: loginType,
+    nickName: nickName,
+    pic: pic,
+    message: '',
+    birthYear: 0,
+    gender: '',
+    mobile: '',
+    mobileIntl: '',
+    email: '',
+    country: '',
+    countryState: '',
+    followCount: 0,
+    followerCount: 0,
+    pushToken: '',
+    deviceType: '',
+    updateTime: '',
+    createTime: '',
+    mobileVerifyTime: '',
+    emailVerifyTime: '',
+    mobileVerified: false,
+    emailVerified: false,
+  );
+
+  UserModelEx.signOut() : super(
+    id: '',
+    status: 0,
+    loginId: '',
+    loginType: '',
     nickName: '',
     pic: '',
     message: '',

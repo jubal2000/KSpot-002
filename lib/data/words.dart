@@ -25,6 +25,7 @@ class Words extends Translations {
       'FOLLOWER': '팔로워',
       'FOLLOW LIST': '팔로우 목록',
       'BOOKMARK': '북마크',
+      'LIKE': '북마크',
       'NEW STORY': 'NEW 스토리',
       'HOT STORY': 'HOT 스토리',
       'APP SETTING': '앱 설정',
@@ -44,13 +45,16 @@ class Words extends Translations {
       'MY': '내정보',
 
       // intro_screen
-      'SIGN UP': '회원가입',
+      'SIGN IN': '로그인',
+      'SIGNUP': '회원가입',
       'START': '시작',
+      'GUEST START': '바로 시작하기',
 
       // signup_screen
       'Agree to Terms and Conditions': '약관 동의',
       'Place Setting': '장소 설정',
-      'Event Information': '이벤트 정보',
+      'Login phone number verification': '로그인 전화번호 인증',
+      'Please enter your registered phone number': '회원가입된 전화번호를 입력해 주세요',
 
       // event_screen
       'Enable': '활성화',
@@ -102,7 +106,9 @@ class Words extends Translations {
       'terms': '이용 약관',
       'Withdrawal': '회원탈퇴',
       'Sign out': '로그아웃',
+      'SIGN OUT': '로그아웃',
       'Sign out done': '로그아웃 완료',
+      'Would you like to sign out now?': '지금 로그아웃 하시겠습니까?',
       'Promotion list': '홍보 기록',
       'Terms': '이용 약관',
       'Phone number verification': '전화번호 인증',
@@ -237,7 +243,6 @@ class Words extends Translations {
       'Spot Group Title *': '스팟 그룹 이름 *',
 
       // signin_edit_screen
-      'SIGN IN': '로그인',
       'Sign in': '로그인',
       'Please enter email': '이메일을 입력해 주세요',
       'Password': '패스워드',
@@ -614,7 +619,7 @@ class Words extends Translations {
       'LIGHT': '라이트',
       'DARK': '다크',
       'The format of the phone number provided is incorrect': '잘못된 형식의 전화번호입니다',
-      'Auth credential is invalid': '잘못된 발송입니다',
+      'Auth credential is invalid': '잘못된 인증번호입니다',
 
 
       // dialog
@@ -697,6 +702,7 @@ class Words extends Translations {
       // error
       'Unable to get data': '정보를 가져올 수 없습니다',
       'Data does not exist': '정보가 존재하지 않습니다',
+      'User data does not exist': '유저정보가 존재하지 않습니다',
       'Can not find user information': '해당 유저정보를 찾을 수 없습니다',
       'Upload failed': '업로드가 실패했습니다',
       'No date information': '날짜 정보가 없습니다',

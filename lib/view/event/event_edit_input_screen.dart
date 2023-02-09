@@ -21,7 +21,6 @@ import '../../widget/edit/edit_list_widget.dart';
 import '../../widget/edit/edit_setup_widget.dart';
 import '../../widget/content_item_card.dart';
 import '../../widget/title_text_widget.dart';
-import '../app/app_top_menu.dart';
 import '../place/place_item.dart';
 import '../place/place_list_screen.dart';
 

@@ -13,12 +13,13 @@ import '../data/dialogs.dart';
 import '../data/themes.dart';
 import '../models/etc_model.dart';
 import '../models/user_model.dart';
+import '../services/firebase_service.dart';
 import '../utils/utils.dart';
 import '../models/start_model.dart';
 import '../repository/user_repository.dart';
 import '../services/api_service.dart';
 import '../services/local_service.dart';
-import '../view/main_event/event_edit_screen.dart';
+import '../view/event/event_edit_screen.dart';
 import '../widget/event_group_dialog.dart';
 
 class MainMenuID {
@@ -33,8 +34,6 @@ class MainMenuID {
 const COUNTRY_LOG_MAX = 5;
 
 class AppViewModel extends ChangeNotifier {
-  final _api = Get.find<ApiService>();
-
   var isShowDialog = false;
   var isCanStart = false;
   BuildContext? buildContext;

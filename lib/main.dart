@@ -5,10 +5,13 @@ import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flash/flash.dart';
-import 'package:kspot_002/view/app/app_screen.dart';
-import 'package:kspot_002/view/main_event/event_edit_input_screen.dart';
-import 'package:kspot_002/view/main_event/event_edit_screen.dart';
-import 'package:kspot_002/view/sign_up/sign_up_screen.dart';
+import 'package:kspot_002/services/auth_service.dart';
+import 'package:kspot_002/view/home/home_screen.dart';
+import 'package:kspot_002/view/intro/splash_screen.dart';
+import 'package:kspot_002/view/event/event_edit_input_screen.dart';
+import 'package:kspot_002/view/event/event_edit_screen.dart';
+import 'package:kspot_002/view/sign/sign_in_screen.dart';
+import 'package:kspot_002/view/sign/sign_up_screen.dart';
 import 'package:kspot_002/view_model/event_edit_view_model.dart';
 import 'package:provider/provider.dart';
 import '/view/intro/intro_screen.dart';
@@ -25,11 +28,12 @@ import 'data/words.dart';
 
 Future<void> main() async {
   await GetStorage.init();
-  await Get.putAsync(() => FirebaseService().init());
-  await Get.putAsync(() => ApiService().init());
-  await Get.putAsync(() => LocalService().init());
+  final api   = await Get.putAsync(() => ApiService().init());
+  final fire  = await Get.putAsync(() => FirebaseService().init());
+  final auth  = await Get.putAsync(() => AuthService().init());
+  final local = await Get.putAsync(() => LocalService().init());
 
-  final api = Get.find<ApiService>();
+  api.initFirebase();
 
   runApp(ChangeNotifierProvider<ThemeNotifier>(
     create: (_) => ThemeNotifier(),
@@ -38,10 +42,10 @@ Future<void> main() async {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           AppData.initStartInfo(snapshot.data as JSON);
-          LOG('--> infoData : ${AppData.infoData['customField']}');
+          LOG('--> MyApp Start : ${AppData.userInfo.id}');
           return MyApp();
         } else {
-          return showLogoLoadingPage(context);
+          return Container();
         }
       }
     )
@@ -61,7 +65,6 @@ class MyApp extends StatelessWidget {
       statusBarBrightness: Brightness.dark,
       statusBarIconBrightness: Brightness.dark,/* set Status bar icons color in Android devices.*/
     ));
-
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
@@ -96,19 +99,26 @@ class MyApp extends StatelessWidget {
               );
               return child;
             },
-            // initialRoute: AppData.loginInfo.loginId.isEmpty ? Routes.INTRO : Routes.APP,
-            initialRoute: Routes.INTRO,
+            initialRoute: Routes.SPLASH,
             getPages: [
+              GetPage(
+                name: Routes.SPLASH,
+                page: () => SplashScreen(),
+              ),
               GetPage(
                 name: Routes.INTRO,
                 page: () => IntroScreen(),
               ),
               GetPage(
-                name: Routes.APP,
-                page: () => AppScreen(),
+                name: Routes.HOME,
+                page: () => HomeScreen(),
               ),
               GetPage(
-                name: Routes.SIGNUP,
+                name: Routes.SIGN_IN,
+                page: () => SignInScreen(),
+              ),
+              GetPage(
+                name: Routes.SIGN_UP,
                 page: () => SignUpScreen(),
               ),
               GetPage(

@@ -38,7 +38,7 @@ class SignupStepDoneScreen extends StatelessWidget {
                 margin: EdgeInsets.all(UI_HORIZONTAL_SPACE.w),
                 child: ElevatedButton(
                     onPressed: () {
-                      Get.toNamed(Routes.APP);
+                      Get.toNamed(Routes.HOME);
                     },
                     child: Text(
                       'Use the service'.tr,

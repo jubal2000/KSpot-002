@@ -7,8 +7,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
-import 'package:kspot_002/view/main_event/event_screen.dart';
-import 'package:kspot_002/view/main_story/story_screen.dart';
+import 'package:kspot_002/view/event/event_screen.dart';
+import 'package:kspot_002/view/story/story_screen.dart';
 import 'package:kspot_002/view_model/signup_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -237,7 +237,6 @@ class SignUpScreen extends StatelessWidget {
                 padding: EdgeInsets.only(top: UI_ITEM_SPACE.w),
                 child: VerifyPhoneWidget(
                   AppData.loginInfo.mobile,
-                  true,
                   onCheckComplete: (userValue) async {
                     LOG('--> userValue : $userValue');
                     if (userValue != null && userValue.user != null) {

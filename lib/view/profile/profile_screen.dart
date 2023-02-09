@@ -1,6 +1,9 @@
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:kspot_002/data/common_sizes.dart';
+import 'package:kspot_002/data/dialogs.dart';
+import 'package:kspot_002/services/auth_service.dart';
 import 'package:kspot_002/view_model/user_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -8,13 +11,16 @@ import '../../data/app_data.dart';
 import '../../data/theme_manager.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({ Key? key }) : super(key: key);
+  ProfileScreen({ Key? key, this.isShowBack = false }) : super(key: key);
+
+  bool isShowBack;
 
   @override
   State<StatefulWidget> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final auth = Get.find<AuthService>();
   final _viewModel = UserViewModel();
 
   @override
@@ -37,7 +43,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
               length: viewModel.tabList.length,
               child: Scaffold(
                 appBar: AppBar(
+                  title: Text(viewModel.isMyProfile ? 'MY'.tr : ''),
+                  titleTextStyle: AppBarTitleStyle(context),
+                  titleSpacing: UI_HORIZONTAL_SPACE,
                   toolbarHeight: UI_APPBAR_TITLE_SPACE,
+                  automaticallyImplyLeading: widget.isShowBack,
+                  actions: [
+                    IconButton(
+                      onPressed: () {
+                        showAlertYesNoDialog(context, 'SIGN OUT'.tr, 'Would you like to sign out now?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+                          if (result == 1) {
+                            auth.signOut();
+                          }
+                        });
+                      },
+                      icon: Icon(Icons.settings)
+                    ),
+                  ],
                   bottom: TabBar(
                     onTap: (index) {
                       viewModel.currentTab = index;

@@ -113,7 +113,6 @@ SET_TO_SERVER_TIME_ALL_ITEM(data) {
 
 class ApiService extends GetxService {
   Future<ApiService> init() async {
-    initFirebase();
     return this;
   }
 

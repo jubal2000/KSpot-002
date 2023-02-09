@@ -15,10 +15,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kspot_002/data/dialogs.dart';
 import 'package:kspot_002/repository/user_repository.dart';
 import 'package:uuid/uuid.dart';
 import '../data/app_data.dart';
 import '../data/firebase_options.dart';
+import '../data/routes.dart';
+import '../models/user_model.dart';
 import '../utils/message.dart';
 import '../utils/push_utils.dart';
 import '../utils/utils.dart';
@@ -42,9 +45,9 @@ class FirebaseService extends GetxService {
   String? recommendCode;
   bool initLink = false;
   bool isInit = false;
-  bool isLoginCheckDone = false;
 
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final userRepo = UserRepository();
 
   AndroidNotificationChannel channel = AndroidNotificationChannel(
     'alert_channel_00', // id
@@ -74,19 +77,6 @@ class FirebaseService extends GetxService {
     //       options: DefaultFirebaseOptions.currentPlatform
     //   );
     // }
-
-    fireAuth!.authStateChanges()
-        .listen((User? user) {
-      if (user == null) {
-        LOG('--> User is currently signed out!');
-        AppData.loginInfo.loginType = '';
-        AppData.loginInfo.loginId = '';
-      } else {
-        LOG('--> User is signed in!');
-        getLoginUserInfo(user);
-      }
-      isLoginCheckDone = true;
-    });
   }
 
   initMessaging() async {
@@ -131,13 +121,6 @@ class FirebaseService extends GetxService {
       );
     }
     // this.subscribeTopic();
-  }
-
-  getLoginUserInfo(user) {
-    AppData.loginInfo.loginId   = STR(user.uid);
-    AppData.loginInfo.email     = STR(user.email);
-    AppData.loginInfo.nickName  = STR(user.displayName);
-    AppData.loginInfo.pic       = STR(user.photoURL);
   }
 
   void showReceiveLocalNotificationDialog(

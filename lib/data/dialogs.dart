@@ -33,7 +33,6 @@ import 'common_colors.dart';
 import '../utils/utils.dart';
 import '../data/style.dart';
 
-final dialogBgColor = NAVY.shade50;
 BuildContext? dialogContext;
 
 Future showAlertDialog(BuildContext context,
@@ -50,27 +49,28 @@ Future showAlertDialog(BuildContext context,
     builder: (BuildContext context) {
       return PointerInterceptor(
         child: AlertDialog(
-          title: Text(title, style: dialogTitleTextStyle),
+          title: Text(title, style: dialogTitleTextStyle(context)),
           titlePadding: EdgeInsets.all(20),
-          insetPadding: EdgeInsets.all(20),
+          insetPadding: EdgeInsets.all(40),
+          actionsPadding: EdgeInsets.all(10),
           contentPadding: EdgeInsets.symmetric(horizontal: 20),
-          backgroundColor: dialogBgColor,
+          backgroundColor: DialogBackColor(context),
           content: SingleChildScrollView(
             child: Container(
-                width: MediaQuery.of(context).size.width * 0.9,
-                alignment: Alignment.center,
-                constraints: BoxConstraints(
-                    minHeight: 80
-                ),
-                child: ListBody(
-                    children: [
-                      Text(message1, style: isErrorMode ? dialogDescTextErrorStyle : dialogDescTextStyle),
-                      if (message2.isNotEmpty)...[
-                        SizedBox(height: 10),
-                        Text(message2, style: dialogDescTextExStyle),
-                      ]
-                    ]
-                )
+              width: MediaQuery.of(context).size.width * 0.9,
+              alignment: Alignment.center,
+              constraints: BoxConstraints(
+                  minHeight: 100
+              ),
+              child: ListBody(
+                children: [
+                  Text(message1, style: isErrorMode ? dialogDescTextErrorStyle(context) : dialogDescTextStyle(context)),
+                  if (message2.isNotEmpty)...[
+                    SizedBox(height: 10),
+                    Text(message2, style: dialogDescTextExStyle(context)),
+                  ]
+                ]
+              )
             ),
           ),
           actions: <Widget>[
@@ -100,22 +100,29 @@ Future showAlertYesNoDialog(BuildContext context,
     builder: (BuildContext context) {
       return PointerInterceptor(
           child: AlertDialog(
-            title: Text(title, style: dialogTitleTextStyle),
+            title: Text(title, style: dialogTitleTextStyle(context)),
             titlePadding: EdgeInsets.all(20),
-            insetPadding: EdgeInsets.all(20),
-            backgroundColor: dialogBgColor,
+            insetPadding: EdgeInsets.all(40),
+            actionsPadding: EdgeInsets.all(10),
+            contentPadding: EdgeInsets.symmetric(horizontal: 20),
+            backgroundColor: DialogBackColor(context),
             content: SingleChildScrollView(
               child: Container(
-                  width: MediaQuery.of(context).size.width * 0.9,
+                width: MediaQuery.of(context).size.width * 0.9,
+                constraints: BoxConstraints(
+                    minHeight: 100
+                ),
+                child: Center(
                   child: ListBody(
-                      children: [
-                        Text(message1, style: dialogDescTextStyle),
-                        if (message2.isNotEmpty)...[
-                          SizedBox(height: 10),
-                          Text(message2, style: dialogDescTextExStyle),
-                        ],
-                      ]
+                    children: [
+                      Text(message1, style: dialogDescTextStyle(context)),
+                      if (message2.isNotEmpty)...[
+                        SizedBox(height: 10),
+                        Text(message2, style: dialogDescTextExStyle(context)),
+                      ],
+                    ]
                   )
+                )
               ),
             ),
             actions: [
@@ -152,22 +159,29 @@ Future showAlertYesNoExDialog(BuildContext context,
     builder: (BuildContext context) {
       return PointerInterceptor(
         child: AlertDialog(
-          title: Text(title, style: dialogTitleTextStyle),
+          title: Text(title, style: dialogTitleTextStyle(context)),
           titlePadding: EdgeInsets.all(20),
-          insetPadding: EdgeInsets.all(20),
-          backgroundColor: dialogBgColor,
+          insetPadding: EdgeInsets.all(40),
+          actionsPadding: EdgeInsets.all(10),
+          contentPadding: EdgeInsets.symmetric(horizontal: 20),
+          backgroundColor: DialogBackColor(context),
           content: SingleChildScrollView(
             child: Container(
-                width: MediaQuery.of(context).size.width * 0.9,
+              width: MediaQuery.of(context).size.width * 0.9,
+              constraints: BoxConstraints(
+                  minHeight: 100
+              ),
+              child: Center(
                 child: ListBody(
-                    children: [
-                      Text(message1, style: dialogDescTextStyle),
-                      if (message2.isNotEmpty)...[
-                        SizedBox(height: 10),
-                        Text(message2, style: dialogDescTextExStyle),
-                      ],
-                    ]
+                  children: [
+                    Text(message1, style: dialogDescTextStyle(context)),
+                    if (message2.isNotEmpty)...[
+                      SizedBox(height: 10),
+                      Text(message2, style: dialogDescTextExStyle(context)),
+                    ],
+                  ]
                 )
+              )
             ),
           ),
           actions: [
@@ -295,6 +309,7 @@ Future showImageSlideDialog(BuildContext context, List<String> imageData, int st
       }
   ) ?? '';
 }
+
 showLoadingDialog(BuildContext context, String message) {
   showDialog(
     context: context,
@@ -313,7 +328,7 @@ showLoadingDialog(BuildContext context, String message) {
               children: [
                 CircularProgressIndicator(),
                 SizedBox(width: 20),
-                Text(message, style: dialogDescTextStyle, maxLines: 5, softWrap: true),
+                Text(message, style: dialogDescTextExStyle(context), maxLines: 5, softWrap: true),
               ],
             ),
           )
@@ -471,6 +486,16 @@ Future<String> showCustomFieldSelectDialog(BuildContext context) async {
                                             Navigator.pop(_context, item.key);
                                           }
                                         },
+                                        style: ElevatedButton.styleFrom(
+                                            primary: Theme.of(context).canvasColor,
+                                            minimumSize: Size.zero, // Set this
+                                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5), // and this
+                                            shadowColor: Colors.transparent,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(10),
+                                                side: BorderSide(color: Colors.grey, width: 2)
+                                            )
+                                        ),
                                         child: Row(
                                             children: [
                                               Expanded(
@@ -481,16 +506,6 @@ Future<String> showCustomFieldSelectDialog(BuildContext context) async {
                                                 Icon(Icons.arrow_forward_ios, size: 20, color: Theme.of(context).primaryColor),
                                               ],
                                             ]
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                            primary: Theme.of(context).canvasColor,
-                                            minimumSize: Size.zero, // Set this
-                                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5), // and this
-                                            shadowColor: Colors.transparent,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(10),
-                                                side: BorderSide(color: Colors.grey, width: 2)
-                                            )
                                         ),
                                       ),
                                     ) : SizedBox(width: 0, height: 0),
@@ -2509,19 +2524,19 @@ Future showButtonDialog(BuildContext context,
     builder: (BuildContext context) {
       return PointerInterceptor(
         child: AlertDialog(
-          title: Text(title, style: dialogTitleTextStyle),
+          title: Text(title, style: dialogTitleTextStyle(context)),
           titlePadding: EdgeInsets.all(20),
           insetPadding: EdgeInsets.all(20),
-          backgroundColor: dialogBgColor,
+          backgroundColor: DialogBackColor(context),
           content: SingleChildScrollView(
             child: Container(
                 width: MediaQuery.of(context).size.width * 0.9,
                 child: ListBody(
                     children: [
-                      Text(message1, style: dialogDescTextStyle),
+                      Text(message1, style: dialogDescTextStyle(context)),
                       if (message2.isNotEmpty)...[
                         SizedBox(height: 10),
-                        Text(message2, style: dialogDescTextExStyle),
+                        Text(message2, style: dialogDescTextExStyle(context)),
                       ],
                     ]
                 )

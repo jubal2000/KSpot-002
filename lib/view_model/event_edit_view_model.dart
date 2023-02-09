@@ -20,7 +20,7 @@ import '../repository/event_repository.dart';
 import '../utils/utils.dart';
 import '../view/follow/follow_screen.dart';
 import '../widget/event_time_edit_widget.dart';
-import '../view/main_my/target_profile.dart';
+import '../view/profile/target_profile.dart';
 import '../widget/card_scroll_viewer.dart';
 import '../widget/edit/edit_list_widget.dart';
 import '../widget/event_group_dialog.dart';

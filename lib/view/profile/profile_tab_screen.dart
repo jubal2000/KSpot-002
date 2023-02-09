@@ -15,9 +15,9 @@ import '../../utils/utils.dart';
 import '../../view_model/user_view_model.dart';
 import '../../widget/like_widget.dart';
 import '../../widget/page_widget.dart';
-import '../main_event/event_item.dart';
+import '../event/event_item.dart';
 import '../follow/follow_screen.dart';
-import '../main_story/story_item.dart';
+import '../story/story_item.dart';
 
 class MainMyTab extends StatefulWidget {
   MainMyTab(

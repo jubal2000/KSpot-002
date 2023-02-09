@@ -12,9 +12,9 @@ const appbar_title_font_size = 18.0;
 const common_title_font_size = 14.0;
 const common_desc_font_size  = 12.0;
 const main_menu_font_size = 14.0;
-const dialog_title_font_size = 16.0;
-const dialog_desc_font_size = 14.0;
-const dialog_desc_ex_font_size = 12.0;
+const dialog_title_font_size = 17.0;
+const dialog_desc_font_size = 16.0;
+const dialog_desc_ex_font_size = 14.0;
 const item_title_font_size = 14.0;
 const item_title_sub_font_size = 13.0;
 const item_title_info_font_size = 12.0;
@@ -29,14 +29,18 @@ TextStyle menuItemTitleStyle = TextStyle(
     fontSize: main_menu_font_size, color: Colors.white, fontWeight: FontWeight.w600);
 
 // dialog..
-TextStyle dialogTitleTextStyle = TextStyle(
-    fontSize: dialog_title_font_size, color: Colors.black87, fontWeight: FontWeight.w700);
-TextStyle dialogDescTextStyle = TextStyle(
-    fontSize: dialog_desc_font_size, color: Colors.black54, fontWeight: FontWeight.w400);
-TextStyle dialogDescTextExStyle = TextStyle(
-    fontSize: dialog_desc_ex_font_size, color: Colors.black38, fontWeight: FontWeight.w400);
-TextStyle dialogDescTextErrorStyle = TextStyle(
-    fontSize: dialog_desc_font_size, color: Colors.redAccent, fontWeight: FontWeight.w400);
+dialogTitleTextStyle(context) { return TextStyle(
+    fontSize: dialog_title_font_size, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w700);
+}
+dialogDescTextStyle(context) { return TextStyle(
+    fontSize: dialog_desc_font_size, color: Theme.of(context).indicatorColor, fontWeight: FontWeight.w600);
+}
+dialogDescTextExStyle(context) { return TextStyle(
+    fontSize: dialog_desc_ex_font_size, color: Theme.of(context).hintColor, fontWeight: FontWeight.w400);
+}
+dialogDescTextErrorStyle(context) { return TextStyle(
+    fontSize: dialog_desc_font_size, color: Theme.of(context).errorColor, fontWeight: FontWeight.w400);
+}
 
 // item..
 TextStyle itemTitleStyle = TextStyle(

@@ -12,7 +12,7 @@ import '../data/dialogs.dart';
 import '../data/theme_manager.dart';
 import '../services/api_service.dart';
 import '../utils/utils.dart';
-import '../view/main_story/story_screen.dart';
+import '../view/story/story_screen.dart';
 
 class CommentListItem extends StatefulWidget {
   CommentListItem(

@@ -10,7 +10,7 @@ import 'package:helpers/helpers.dart';
 import 'package:intl/intl.dart';
 import 'package:kspot_002/models/place_model.dart';
 import 'package:kspot_002/repository/event_repository.dart';
-import 'package:kspot_002/view/main_event/event_item.dart';
+import 'package:kspot_002/view/event/event_item.dart';
 import 'package:kspot_002/widget/main_list_item.dart';
 import 'package:kspot_002/widget/title_text_widget.dart';
 
@@ -20,8 +20,8 @@ import '../data/theme_manager.dart';
 import '../models/event_model.dart';
 import '../repository/place_repository.dart';
 import '../utils/utils.dart';
-import '../view/app/app_top_menu.dart';
-import '../view/main_event/event_detail_screen.dart';
+import '../view/home/app_top_menu.dart';
+import '../view/event/event_detail_screen.dart';
 import '../widget/content_item_card.dart';
 import '../widget/google_map_widget.dart';
 import 'app_view_model.dart';
@@ -142,7 +142,7 @@ class EventViewModel extends ChangeNotifier {
 
   initDatePicker() {
     datePicker ??= DatePicker(
-      DateTime.now().subtract(Duration(days: 20)),
+      DateTime.now().subtract(Duration(days: 30)),
       width:  60.0,
       height: 60.0,
       controller: dateController,

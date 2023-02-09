@@ -4,12 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/repository/user_repository.dart';
+import 'package:kspot_002/services/auth_service.dart';
 
 import '../data/app_data.dart';
 import '../data/dialogs.dart';
 import '../data/theme_manager.dart';
 import '../utils/utils.dart';
-import '../view/sign_up/sign_up_done_screen.dart';
+import '../view/sign/sign_up_done_screen.dart';
 import '../widget/verify_phone_widget.dart';
 
 enum TextInputId {
@@ -18,6 +19,8 @@ enum TextInputId {
 
 class SignUpViewModel extends ChangeNotifier {
   final repo = UserRepository();
+  final auth = Get.find<AuthService>();
+
   var stepIndex = 0;
   var stepMax = 3;
   var isShowOnly = false;
@@ -38,6 +41,15 @@ class SignUpViewModel extends ChangeNotifier {
 
   init(context) {
     viewContext = context;
+    auth.onError = (type) {
+      switch(type) {
+        case 0:
+          showAlertDialog(context, 'User error'.tr, 'User data does not exist'.tr, '', 'OK'.tr).then((_) {
+            auth.signOut();
+          });
+          break;
+      }
+    };
   }
 
   setCheck(index, value) {

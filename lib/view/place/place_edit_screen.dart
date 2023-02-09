@@ -14,7 +14,6 @@ import '../../utils/utils.dart';
 import '../../widget/edit/edit_component_widget.dart';
 import '../../widget/edit/edit_list_widget.dart';
 import '../../widget/content_item_card.dart';
-import '../app/app_top_menu.dart';
 
 class PlaceEditScreen extends StatefulWidget {
   PlaceEditScreen({Key? key, this.placeItem}) : super(key: key);

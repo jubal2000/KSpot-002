@@ -11,7 +11,6 @@ import '../../utils/utils.dart';
 import '../../view_model/app_view_model.dart';
 import '../../view_model/story_view_model.dart';
 import '../../widget/title_text_widget.dart';
-import '../app/app_top_menu.dart';
 
 class StoryScreen extends StatelessWidget {
   StoryScreen({Key? key}) : super(key: key);

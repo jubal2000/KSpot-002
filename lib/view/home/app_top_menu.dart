@@ -13,7 +13,7 @@ import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
-import 'package:kspot_002/view/main_my/profile_screen.dart';
+import 'package:kspot_002/view/profile/profile_screen.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +24,7 @@ import '../../services/api_service.dart';
 import '../../view_model/app_view_model.dart';
 import '../../view_model/event_view_model.dart';
 import '../../widget/user_item_widget.dart';
-import '../main_event/event_edit_screen.dart';
+import '../event/event_edit_screen.dart';
 
 class AppTopMenuBar extends StatelessWidget {
   AppTopMenuBar(this.menuMode, {Key? key, this.isShowDatePick = true, this.height = 65.0, this.onCountryChanged, this.onDateChange}) : super(key: key);

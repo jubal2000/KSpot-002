@@ -9,7 +9,7 @@ import '../data/theme_manager.dart';
 import '../models/user_model.dart';
 import '../services/api_service.dart';
 import '../utils/utils.dart';
-import '../view/main_my/target_profile.dart';
+import '../view/profile/target_profile.dart';
 
 Widget ShowCustomField(BuildContext context, JSON customList) {
   final api = Get.find<ApiService>();

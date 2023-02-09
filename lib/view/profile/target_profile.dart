@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/repository/user_repository.dart';
-import 'package:kspot_002/view/main_my/profile_tab_screen.dart';
+import 'package:kspot_002/view/profile/profile_tab_screen.dart';
 
 import '../../data/app_data.dart';
 import '../../data/dialogs.dart';

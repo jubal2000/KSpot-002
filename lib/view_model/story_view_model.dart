@@ -4,7 +4,7 @@ import 'package:kspot_002/models/story_model.dart';
 
 import '../data/common_sizes.dart';
 import '../models/event_model.dart';
-import '../view/app/app_top_menu.dart';
+import '../view/home/app_top_menu.dart';
 import 'app_view_model.dart';
 
 class StoryViewModel extends ChangeNotifier {

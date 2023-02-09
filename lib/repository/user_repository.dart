@@ -20,28 +20,43 @@ class UserRepository {
       final userCred = await FirebaseAuth.instance.signInAnonymously();
       LOG('--> userCredential : $userCred');
       if (userCred.user != null) {
-        setLoginUserInfo(userCred.user!);
+        setGuestUserInfo(userCred.user!);
       } else {
         return null;
       }
     }
-    return await getGuestUserInfo();
+    return await createGuestUser();
   }
 
-  setLoginUserInfo(User user) {
+  setGuestUserInfo(User user) {
+    AppData.loginInfo.loginId   = STR(user.uid);
+    AppData.loginInfo.nickName  = 'Guest User';
+    AppData.loginInfo.pic       = NO_IMAGE;
+    AppData.loginInfo.loginType = 'guest';
+  }
+
+  setLoginUserInfo(User user, {String type = 'phone'}) {
     AppData.loginInfo.loginId   = STR(user.uid);
     AppData.loginInfo.email     = STR(user.email);
     AppData.loginInfo.nickName  = STR(user.displayName);
     AppData.loginInfo.pic       = STR(user.photoURL);
+    AppData.loginInfo.loginType = type;
   }
 
-  getGuestUserInfo() async {
+  createGuestUser([String type = 'guest']) async {
     final orgUser = await getStartUserInfo(AppData.loginInfo.loginId);
     if (orgUser != null) {
       AppData.userInfo = orgUser;
       return orgUser;
     } else {
-      final newUser = await createNewUser(UserModelEx.create(AppData.loginInfo.loginId, 'guest'));
+      final newUser = await createNewUser(
+        UserModelEx.create(
+            AppData.loginInfo.loginId,
+            type,
+            nickName: AppData.loginInfo.nickName,
+            pic: AppData.loginInfo.pic
+        )
+      );
       if (newUser != null) {
         AppData.userInfo = newUser;
         return newUser;
@@ -55,8 +70,7 @@ class UserRepository {
       final response = await api.getStartUserInfo(loginId);
       LOG("--> getStartUserInfo result: $response");
       if (response != null) {
-        final jsonData = UserModel.fromJson(FROM_SERVER_DATA(response));
-        return jsonData;
+        return UserModel.fromJson(FROM_SERVER_DATA(response));
       }
     } catch (e) {
       LOG("--> getStartUserInfo error: $e");

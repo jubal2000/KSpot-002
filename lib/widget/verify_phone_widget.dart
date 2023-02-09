@@ -33,7 +33,7 @@ enum VerifyStep {
 }
 
 class VerifyPhoneWidget extends StatefulWidget {
-  VerifyPhoneWidget(this.phoneNumber, this.isSignIn, {Key? key, this.onCheckComplete}) : super(key: key);
+  VerifyPhoneWidget(this.phoneNumber, {Key? key, this.isSignIn = true, this.onCheckComplete}) : super(key: key);
 
   String phoneNumber;
   bool isSignIn;
@@ -342,7 +342,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
               SizedBox(width: 20),
               RoundRectButtonEx(
                 context,
-                'CHECK',
+                'CHECK'.tr,
                 onPressed: () {
                   AppData.loginInfo.loginId = 'phone';
                   try {
@@ -354,6 +354,10 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                           initData();
                           writeLocalData();
                           _phoneValidated = true;
+                          if (countTimer != null) {
+                            countTimer!.cancel();
+                            countTimer = null;
+                          }
                           if (widget.onCheckComplete != null) widget.onCheckComplete!(value);
                         });
                       }).onError((error, stackTrace) {

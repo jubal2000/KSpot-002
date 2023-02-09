@@ -534,7 +534,7 @@ DescBodyBoldTextStyle(BuildContext context) {
 }
 
 DescBodyExStyle(BuildContext context) {
-  return TextStyle(fontSize: 14, color: Theme.of(context).primaryColor.withOpacity(0.65));
+  return TextStyle(fontSize: 14, color: Theme.of(context).primaryColor.withOpacity(0.75));
 }
 
 ItemButtonNormalStyle(BuildContext context) {

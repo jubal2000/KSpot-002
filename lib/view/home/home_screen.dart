@@ -5,13 +5,14 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
-import 'package:kspot_002/view/main_event/event_screen.dart';
-import 'package:kspot_002/view/main_my/profile_screen.dart';
-import 'package:kspot_002/view/main_story/story_screen.dart';
+import 'package:kspot_002/view/event/event_screen.dart';
+import 'package:kspot_002/view/profile/profile_screen.dart';
+import 'package:kspot_002/view/story/story_screen.dart';
 import 'package:kspot_002/widget/title_text_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/app_data.dart';
+import '../../data/dialogs.dart';
 import '../../data/theme_manager.dart';
 import '../../utils/utils.dart';
 import '../../view_model/app_view_model.dart';
@@ -19,8 +20,8 @@ import '../../widget/event_group_dialog.dart';
 import '../message/message_screen.dart';
 import 'app_top_menu.dart';
 
-class AppScreen extends StatelessWidget {
-  AppScreen({Key? key}) : super(key: key);
+class HomeScreen extends StatelessWidget {
+  HomeScreen({Key? key}) : super(key: key);
   final _height = 40.0;
   final _iconSize = 24.0;
   final _fontSize = UI_FONT_SIZE_SS;
@@ -60,30 +61,16 @@ class AppScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     AppData.appViewModel.init(context);
     return WillPopScope(
-      onWillPop: () async => await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-            title: Text('App exit'.tr),
-            content: Text('Are you sure you want to quit the app?'.tr),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context, false);
-                },
-                child: Text('Cancel'.tr),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
-                child: Text('Ok'.tr),
-              )
-            ]
-          );
-        }
-      ),
-      child: SafeArea(
+        onWillPop: () async => await showAlertYesNoDialog(context,
+            'APP EXIT'.tr,
+            'Are you sure you want to quit the app?'.tr,
+            '',
+            'Cancel'.tr,
+            'OK'.tr
+        ).then((result) {
+          return result == 1;
+        }),
+        child: SafeArea(
         top: false,
         child: ChangeNotifierProvider<AppViewModel>.value(
         value: AppData.appViewModel,

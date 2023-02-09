@@ -128,7 +128,7 @@ class _EventDetailState extends State<EventDetailScreen> {
             //     ],
             //   ],
             // ),
-            title: Text(viewModel.eventInfo!.title, style: AppBarTitleStyle(context)),
+            // title: Text(viewModel.eventInfo!.title, style: AppBarTitleStyle(context)),
             titleSpacing: 0,
             toolbarHeight: UI_APPBAR_TOOL_HEIGHT,
             actions: [

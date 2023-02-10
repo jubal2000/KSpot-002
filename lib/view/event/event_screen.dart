@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/utils/utils.dart';
 import 'package:kspot_002/view_model/event_edit_view_model.dart';
+import 'package:kspot_002/widget/csc_picker/csc_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/app_data.dart';
@@ -25,39 +26,43 @@ class EventScreen extends StatelessWidget {
         child: Consumer<AppViewModel>(
         builder: (context, appViewModel, _) {
         LOG('--> AppViewModel');
-        AppData.eventViewModel.googleWidget = null;
-        return Stack(
-        children: [
-          if (AppData.eventViewModel.eventShowList.isEmpty)
-          FutureBuilder(
-            future: AppData.eventViewModel.getEventList(),
-            builder: (context, snapshot) {
-              if (AppData.eventViewModel.eventData != null) {
-                LOG('--> set eventData : ${AppData.eventViewModel.eventData!.length}');
-                return ChangeNotifierProvider<EventViewModel>.value(
-                    value: AppData.eventViewModel,
-                    child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-                      LOG('--> EventViewModel 1');
-                  return viewModel.showMainList();
-                  })
+        // AppData.eventViewModel.googleWidget = null;
+        return LayoutBuilder(
+          builder: (context, layout) {
+            return Stack(
+              children: [
+                if (AppData.eventViewModel.eventShowList.isEmpty)
+                  FutureBuilder(
+                    future: AppData.eventViewModel.getEventList(),
+                    builder: (context, snapshot) {
+                      if (AppData.eventViewModel.eventData != null) {
+                        LOG('--> set eventData : ${AppData.eventViewModel.eventData!.length}');
+                        return ChangeNotifierProvider<EventViewModel>.value(
+                            value: AppData.eventViewModel,
+                            child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+                              LOG('--> EventViewModel 1');
+                          return viewModel.showMainList(layout);
+                          })
+                        );
+                      } else {
+                        return showLoadingFullPage(context);
+                      }
+                    }
+                  ),
+                  if (AppData.eventViewModel.eventShowList.isNotEmpty)
+                    ChangeNotifierProvider<EventViewModel>.value(
+                        value: AppData.eventViewModel,
+                        child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+                          LOG('--> EventViewModel 2');
+                          return viewModel.showMainList(layout);
+                        })
+                    )
+                  ]
                 );
-              } else {
-                return showLoadingFullPage(context);
               }
-            }
-          ),
-          if (AppData.eventViewModel.eventShowList.isNotEmpty)
-            ChangeNotifierProvider<EventViewModel>.value(
-                value: AppData.eventViewModel,
-                child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-                  LOG('--> EventViewModel 2');
-                  return viewModel.showMainList();
-                })
-            )
-        ]
-      );
-    }
-    )
+            );
+          }
+        )
       )
     );
   }

@@ -43,7 +43,7 @@ class EventViewModel extends ChangeNotifier {
   final eventRepo = EventRepository();
   final placeRepo = PlaceRepository();
   final dateController = DatePickerController();
-  final mapKey = GlobalKey();
+  GlobalKey mapKey = GlobalKey();
 
   var cameraPos = CameraPosition(target: LatLng(0,0));
   var isDatePickerExtend = false;
@@ -60,7 +60,7 @@ class EventViewModel extends ChangeNotifier {
   refreshModel() {
     isFirstMapUpdate = true;
     mapBounds = null;
-    googleWidget = null;
+    // googleWidget = null;
     mapItemData.clear();
     listItemData.clear();
     eventShowList.clear();
@@ -84,7 +84,7 @@ class EventViewModel extends ChangeNotifier {
     googleWidget ??= GoogleMapWidget(
       eventShowList,
       key: mapKey,
-      mapHeight: layout.maxHeight - UI_MENU_HEIGHT + 8,
+      mapHeight: layout.maxHeight - UI_MENU_HEIGHT + 6,
       onMarkerSelected: (selectItem) {
         LOG('--> onMarkerSelected : ${selectItem['title']} / ${selectItem['id']}');
       },
@@ -297,13 +297,10 @@ class EventViewModel extends ChangeNotifier {
     return showList;
   }
 
-  showMainList() {
-    LOG('--> showMainList : ${eventShowList.length} / ${googleWidget == null ? 'none' : 'ready'}');
-    return LayoutBuilder(
-      builder: (context, layout) {
-        final itemWidth  = layout.maxWidth / 4.0;
-        final itemHeight = itemWidth * 2.0;
-        return Container(
+  showMainList(layout) {
+    final itemWidth  = layout.maxWidth / 4.0;
+    final itemHeight = itemWidth * 2.0;
+    return Container(
           color: eventListType == EventListType.map ? Colors.white : null,
           child: Stack(
           children: [
@@ -378,8 +375,6 @@ class EventViewModel extends ChangeNotifier {
           ],
           )
         );
-      }
-    );
   }
 
   @override

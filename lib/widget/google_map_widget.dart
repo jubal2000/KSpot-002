@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -102,6 +103,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
 
   refreshMarker(List<JSON> list, [bool isBoundsFresh = true]) {
     widget.showLocation = list;
+    markers.clear();
     initMarker(isBoundsFresh);
   }
 
@@ -109,7 +111,6 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
     setState(() {
       LOG('--> GoogleDirectionListWidget initMarker : ${widget.showLocation.length} / $isBoundsFresh');
       LatLng? targetLoc;
-      markers.clear();
 
       // add normal marker..
       for (var item in widget.showLocation) {
@@ -676,6 +677,39 @@ class MapUtils {
     }
     return LatLngBounds(northeast: LatLng(x1!, y1!), southwest: LatLng(x0!, y0!));
   }
+}
+
+GoogleMapLinkDirectionMake(String? name, double? lat, double? lng) {
+  name ??= '';
+  lat ??= 0.0;
+  lng ??= 0.0;
+  if (Platform.isAndroid) {
+    return 'geo:$lat,$lng($name)';
+  } else {
+    return 'comgooglemaps://?center=$lat,$lng';
+  }
+  return 'nmap://place?lat=$lat&lng=$lng&name=$name&appname=com.jhfactory.kspot001:';
+}
+
+GoogleMapLinkBusLineMake(String sName, LatLng sLoc, String dName, LatLng dLoc) {
+  if (Platform.isAndroid) {
+    return 'geo:${sLoc.latitude},${sLoc.longitude}?q=${dLoc.latitude},${dLoc.longitude}($dName)';
+  } else {
+    return 'comgooglemaps://?saddr=${sLoc.latitude},${sLoc.longitude}'
+        '&daddr=${dLoc.latitude},${dLoc.longitude}&directionsmode=transit';
+  }
+}
+
+GetCurrentLocation() async {
+  try {
+    var result = await getGeoLocationPosition();
+    AppData.currentLocation = LatLng(result.latitude, result.longitude);
+    LOG('--> set startLocation : ${AppData.currentLocation!.latitude} / ${AppData.currentLocation!.longitude}');
+    return true;
+  } catch (e) {
+    LOG('--> GetCurrentLocation error : $e');
+  }
+  return false;
 }
 
 Future<Position> getGeoLocationPosition() async {

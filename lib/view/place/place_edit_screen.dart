@@ -32,7 +32,7 @@ class _PlaceEditScreenState extends State<PlaceEditScreen> {
   void initState () {
     widget.placeItem ??= PlaceModelEx.empty('', title: 'test title', desc: 'test desc..');
     _viewModel.init(context);
-    _viewModel.setEditItem(widget.placeItem!);
+    _viewModel.setPlaceInfo(widget.placeItem!);
     super.initState ();
   }
 
@@ -90,11 +90,11 @@ class _PlaceEditScreenState extends State<PlaceEditScreen> {
                       SizedBox(height: UI_LIST_TEXT_SPACE_S.w),
                       SubTitle(context, 'INFO'.tr),
                       SizedBox(height: UI_LIST_TEXT_SPACE_S.w),
-                      EditTextField(context, 'TITLE'.tr, viewModel.editItem!.title, hint: 'TITLE'.tr, maxLength: TITLE_LENGTH,
+                      EditTextField(context, 'TITLE'.tr, viewModel.placeInfo!.title, hint: 'TITLE'.tr, maxLength: TITLE_LENGTH,
                       onChanged: (value) {
 
                       }),
-                      EditTextField(context, 'DESC'.tr, viewModel.editItem!.desc, hint: 'DESC'.tr, maxLength: DESC_LENGTH,
+                      EditTextField(context, 'DESC'.tr, viewModel.placeInfo!.desc, hint: 'DESC'.tr, maxLength: DESC_LENGTH,
                       maxLines: null, keyboardType: TextInputType.multiline, onChanged: (value) {
 
                       }),

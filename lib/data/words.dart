@@ -131,6 +131,7 @@ class Words extends Translations {
       'PHONE': '전화번호',
       'EMAIL': '이메일',
       'SCHEDULE': '일정',
+      'PLACE & LOCATION': '장소 & 위치',
       'COMMENT': '댓글',
       'SELECT EVENT': '이벤트 선택',
       'EXPIRED': '기간초과',

@@ -26,21 +26,28 @@ import '../../view_model/event_view_model.dart';
 import '../../widget/user_item_widget.dart';
 import '../event/event_edit_screen.dart';
 
-class AppTopMenuBar extends StatelessWidget {
-  AppTopMenuBar(this.menuMode, {Key? key, this.isShowDatePick = true, this.height = 65.0, this.onCountryChanged, this.onDateChange}) : super(key: key);
+class AppTopMenuBar extends StatefulWidget {
+  AppTopMenuBar(this.menuMode, {Key? key, this.isShowDatePick = true, this.isDateOpen = true, this.height = 65.0, this.onCountryChanged, this.onDateChange}) : super(key: key);
   int menuMode;
   double height;
-  Function()? onCountryChanged;
-  Function()? onDateChange;
-  var iconSize = 24.0;
   bool isShowDatePick;
+  bool isDateOpen;
+  Function()? onCountryChanged;
+  Function(bool)? onDateChange;
+
+  @override
+  AppTopMenuState createState() => AppTopMenuState();
+}
+
+class AppTopMenuState extends State<AppTopMenuBar> {
+  var iconSize = 24.0;
 
   @override
   Widget build(BuildContext context) {
-    LOG('--> AppTopMenuBar : $menuMode');
+    LOG('--> AppTopMenuBar : ${widget.menuMode}');
     final iconColor = Theme.of(context).indicatorColor;
     return Container(
-      height: height,
+      height: widget.height,
       padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE, 30, UI_HORIZONTAL_SPACE, 0),
       child: Visibility(
         visible: AppData.appViewModel.appbarMenuMode != MainMenuID.hide,
@@ -56,7 +63,7 @@ class AppTopMenuBar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Icon(Icons.arrow_back_ios_new,
-                          size: height * 0.5,
+                          size: widget.height * 0.5,
                           color: Theme.of(context).hintColor
                       ),
                     ],
@@ -72,11 +79,11 @@ class AppTopMenuBar extends StatelessWidget {
                           alignment: Alignment.center,
                           padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 12 : 0),
                           constraints: BoxConstraints(
-                            maxHeight: height * 0.8,
-                            minWidth: height * 0.8,
+                            maxHeight: widget.height * 0.8,
+                            minWidth: widget.height * 0.8,
                           ),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(height * 0.5)),
+                            borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
                             color: Theme.of(context).canvasColor.withOpacity(0.55),
                           ),
                           child: Row(
@@ -91,26 +98,30 @@ class AppTopMenuBar extends StatelessWidget {
                         ),
                         onTap: () {
                           LOG('--> showCountrySelect');
-                          AppData.appViewModel.showCountrySelect(context, onCountryChanged);
+                          AppData.appViewModel.showCountrySelect(context, widget.onCountryChanged);
                         },
                       ),
                       SizedBox(width: 5),
-                      if (isShowDatePick)
+                      if (widget.isShowDatePick)
                         GestureDetector(
                           child: Container(
                             alignment: Alignment.center,
                             padding: EdgeInsets.symmetric(horizontal: 12),
                             constraints: BoxConstraints(
-                              maxHeight: height * 0.8,
-                              minWidth: height * 0.8,
+                              maxHeight: widget.height * 0.8,
+                              minWidth: widget.height * 0.8,
                             ),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(height * 0.5)),
+                              borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
                               color: Theme.of(context).canvasColor.withOpacity(0.55),
                             ),
-                            child: showDatePickerText(context, AppData.currentDate, onDateChange),
+                            child: widget.isDateOpen ? Icon(Icons.close, size: 24) : showDatePickerText(context, AppData.currentDate),
                           ),
                           onTap: () {
+                            setState(() {
+                              widget.isDateOpen = !widget.isDateOpen;
+                              if (widget.onDateChange != null) widget.onDateChange!(widget.isDateOpen);
+                            });
                           },
                         ),
                       Expanded(
@@ -122,11 +133,11 @@ class AppTopMenuBar extends StatelessWidget {
                         alignment: Alignment.center,
                         padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),
                         constraints: BoxConstraints(
-                          maxHeight: height * 0.8,
-                          minWidth: height * 0.8,
+                          maxHeight: widget.height * 0.8,
+                          minWidth: widget.height * 0.8,
                         ),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(height * 0.5)),
+                          borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
                           color: Theme.of(context).canvasColor.withOpacity(0.55),
                         ),
                         child: AppData.appViewModel.showAddMenu(iconColor, iconSize),
@@ -136,11 +147,11 @@ class AppTopMenuBar extends StatelessWidget {
                         alignment: Alignment.center,
                         padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),
                         constraints: BoxConstraints(
-                          maxHeight: height * 0.8,
-                          minWidth: height * 0.8,
+                          maxHeight: widget.height * 0.8,
+                          minWidth: widget.height * 0.8,
                         ),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(height * 0.5)),
+                          borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
                           color: Theme.of(context).canvasColor.withOpacity(0.55),
                         ),
                         child: AppData.eventViewModel.showEventListType(),

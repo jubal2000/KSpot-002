@@ -97,9 +97,9 @@ class CommentListItemState extends State<CommentListItem> {
     // var _editStyle    = TextStyle(color: Theme.of(context).colorScheme.secondary);
     var _authorStyle  = TextStyle(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.tertiary);
     var _nameStyle    = TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.secondary);
-    var _descStyle    = TextStyle(color: Theme.of(context).hintColor);
-    var _dateStyle    = TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 12);
-    var _editStyle    = TextStyle(color: Theme.of(context).colorScheme.secondary);
+    var _descStyle    = TextStyle(color: Theme.of(context).indicatorColor);
+    var _dateStyle    = TextStyle(color: Theme.of(context).hintColor.withOpacity(0.5), fontSize: 12);
+    var _editStyle    = TextStyle(color: Theme.of(context).hintColor);
     var _userName     = STR(widget.commentData['userName']);
     var _userNameStr  = widget.isAuthor ? '[${'MANAGER'.tr}]' : _isWriter ? '[$_userName]' : _userName;
 
@@ -151,7 +151,7 @@ class CommentListItemState extends State<CommentListItem> {
                             children: [
                               Icon(Icons.lock, size: 20, color: Theme.of(context).errorColor),
                               SizedBox(width: 5),
-                              Text('This is a secret...'.tr, style: DescBodyExStyle(context), maxLines: 1),
+                              Text('This is a secret...'.tr, style: _descStyle, maxLines: 1),
                             ],
                           ),
                         ),
@@ -165,7 +165,7 @@ class CommentListItemState extends State<CommentListItem> {
                                 Icon(Icons.lock, color: Colors.black, size: 20),
                                 SizedBox(width: 5),
                               ],
-                              Text(DESC(widget.commentData['desc']), style: DescBodyExStyle(context), maxLines: widget.maxLine),
+                              Text(DESC(widget.commentData['desc']), style: _descStyle, maxLines: widget.maxLine),
                             ],
                           ),
                         ),
@@ -330,9 +330,12 @@ class CommentListExItemState extends State<CommentListExItem> {
 
   @override
   Widget build(BuildContext context) {
-    var _authorStyle = TextStyle(fontWeight: FontWeight.w800, color: Theme.of(context).primaryColor);
-    var _nameStyle   = TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).hintColor);
-    var _editStyle   = TextStyle(color: Theme.of(context).colorScheme.secondary);
+    var _authorStyle  = TextStyle(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.tertiary);
+    var _nameStyle    = TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.secondary);
+    var _descStyle   = TextStyle(color: Theme.of(context).indicatorColor);
+    var _editStyle   = TextStyle(color: Theme.of(context).hintColor);
+    var _dateStyle   = TextStyle(fontSize: 12, color: Theme.of(context).hintColor.withOpacity(0.5));
+    LOG('--> CommentListExItem item : ${widget.commentData}');
 
     return GestureDetector(
       onTap: () {
@@ -343,10 +346,14 @@ class CommentListExItemState extends State<CommentListExItem> {
       },
       child: Container(
         key: _key,
-        color: Colors.transparent,
+        margin: EdgeInsets.symmetric(vertical: 3),
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          color: Theme.of(context).cardColor,
+        ),
         child: Column(
             children: [
-              SizedBox(height: 10),
               if (_isParent && widget.isShowDivider)...[
                 showHorizontalDivider(Size(double.infinity, 2), color: Theme.of(context).secondaryHeaderColor),
                 SizedBox(height: 10),
@@ -355,23 +362,16 @@ class CommentListExItemState extends State<CommentListExItem> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (!_isParent) ...[
-                      Image.asset('assets/ui/sub_line_01.png', width: 30, height: 25, color: Theme.of(context).primaryColor.withOpacity(0.5)),
+                      Image.asset('assets/ui/sub_line_01.png', width: 30, height: 25, color: Theme.of(context).hintColor),
                       SizedBox(width: 5),
                     ],
                     Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (widget.isShowAuthor)
-                          Row(
-                            children: [
-                              Text(widget.isAuthor ? '[${'MANAGER'.tr}]' : STR(widget.commentData['userName']),
-                                  style: widget.isAuthor ? _authorStyle : _isWriter ? SubTitleExStyle(context) : _nameStyle),
-                              if (_isParent && !widget.isAuthor && widget.commentType == CommentType.comment) ...[
-                                SizedBox(width: 10),
-                                VoteWidget(widget.commentData['vote'] ?? 1),
-                              ],
-                            ],
-                          ),
+                          if (_isParent && !widget.isAuthor && widget.commentType == CommentType.comment) ...[
+                            SizedBox(width: 10),
+                            VoteWidget(widget.commentData['vote'] ?? 1),
+                          ],
                           if (_imageList.isNotEmpty && (!BOL(widget.commentData['isHidden']) || AppData.USER_LEVEL > 1))...[
                             SizedBox(
                               width: MediaQuery.of(context).size.width - (_isParent ? 30 : 60) - widget.paddingSide,
@@ -386,7 +386,7 @@ class CommentListExItemState extends State<CommentListExItem> {
                                   children: [
                                     Icon(Icons.lock, size: 20, color: Theme.of(context).errorColor),
                                     SizedBox(width: 5),
-                                    Text('This is a secret...'.tr, style: DescBodyExStyle(context), maxLines: 1),
+                                    Text('This is a secret...'.tr, style: _descStyle, maxLines: 1),
                                   ],
                                 ),
                               ),
@@ -400,7 +400,7 @@ class CommentListExItemState extends State<CommentListExItem> {
                                       Icon(Icons.lock, color: Colors.black, size: 20),
                                       SizedBox(width: 5),
                                     ],
-                                    Text(DESC(widget.commentData['desc']), style: DescBodyExStyle(context), maxLines: widget.maxLine),
+                                    Text(DESC(widget.commentData['desc']), style: _descStyle, maxLines: widget.maxLine),
                                   ],
                                 ),
                               ),
@@ -410,7 +410,11 @@ class CommentListExItemState extends State<CommentListExItem> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(SERVER_TIME_STR(widget.commentData['updateTime'] ?? widget.commentData['createTime']),
-                                  style: TextStyle(fontSize: 12, color: Theme.of(context).primaryColor.withOpacity(0.75))),
+                                  style: _dateStyle),
+                              SizedBox(width: 10),
+                              if (widget.isShowAuthor)
+                                  Text(widget.isAuthor ? '[${'MANAGER'.tr}]' : STR(widget.commentData['userName']),
+                                      style: widget.isAuthor ? _authorStyle : _isWriter ? SubTitleExStyle(context) : _nameStyle),
                               if (widget.isShowMenu)...[
                                 SizedBox(width: 10),
                                 if (_isParent && (widget.commentType != CommentType.serviceQnA || AppData.USER_LEVEL > 1)) ...[

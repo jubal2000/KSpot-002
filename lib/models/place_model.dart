@@ -83,4 +83,19 @@ class PlaceModel {
 
   factory PlaceModel.fromJson(JSON json) => _$PlaceModelFromJson(json);
   JSON toJson() => _$PlaceModelToJson(this);
+
+  //------------------------------------------------------------------------------------------------------
+  //  PicData
+  //
+
+  get getPicDataList {
+    List<JSON> result = [];
+    if (picData != null) {
+      for (var item in picData!) {
+        result.add(item.toJson());
+      }
+    }
+    return result;
+  }
+
 }

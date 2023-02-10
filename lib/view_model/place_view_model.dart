@@ -15,7 +15,7 @@ import '../widget/card_scroll_viewer.dart';
 
 class PlaceViewModel extends ChangeNotifier {
   BuildContext? buildContext;
-  PlaceModel? editItem;
+  PlaceModel? placeInfo;
   final _imageGalleryKey  = GlobalKey();
   final JSON imageData = {};
 
@@ -23,14 +23,11 @@ class PlaceViewModel extends ChangeNotifier {
     buildContext = context;
   }
 
-  setEditItem(PlaceModel item) {
-    editItem = item;
-    LOG('----> setEditItem: ${editItem!.toJson()}');
-    if (editItem!.picData != null) {
-      for (var item in editItem!.picData!) {
-        LOG('  -- ${item.toJson()}');
-      }
-      for (var item in editItem!.picData!) {
+  setPlaceInfo(PlaceModel item) {
+    placeInfo = item;
+    LOG('----> setplaceInfo: ${placeInfo!.toJson()}');
+    if (placeInfo!.picData != null) {
+      for (var item in placeInfo!.picData!) {
         var jsonItem = {'id': item.id, 'type': 0};
         if (item.url.isNotEmpty) jsonItem['url'] = item.url;
         // if (item.data != null) jsonItem['data'] = item.data.toString();
@@ -40,8 +37,8 @@ class PlaceViewModel extends ChangeNotifier {
   }
 
   setImageData() {
-    editItem!.picData = imageData.entries.map((item) => PicData.fromJson(item.value)).toList();
-    LOG('----> setImageData: ${editItem!.picData!.length}');
+    placeInfo!.picData = imageData.entries.map((item) => PicData.fromJson(item.value)).toList();
+    LOG('----> setImageData: ${placeInfo!.picData!.length}');
   }
 
   picLocalImage() async {
@@ -56,7 +53,7 @@ class PlaceViewModel extends ChangeNotifier {
         imageData[key] = {'id': key, 'type': 0, 'url': '', 'data': resizeData};
         // imageList[key] = PicData(id: key, type: 0, url: '', data: String.fromCharCodes(resizeData)).toJson();
         LOG('----> picLocalImage: ${imageData[key]}');
-        if (editItem!.pic.isEmpty) editItem!.pic = key;
+        if (placeInfo!.pic.isEmpty) placeInfo!.pic = key;
       }
       notifyListeners();
     }
@@ -87,7 +84,7 @@ class PlaceViewModel extends ChangeNotifier {
               break;
             }
             default: {
-              editItem!.pic = key;
+              placeInfo!.pic = key;
             }
           }
         }

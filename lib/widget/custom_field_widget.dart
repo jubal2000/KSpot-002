@@ -102,7 +102,7 @@ Widget ShowCustomField(BuildContext context, JSON customList) {
                   //   ),
                   //   child: Text('$_title : ', style: _titleStyle),
                   // ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 5),
                   SubTitle(context, _title),
                   SizedBox(height: 5),
                   if (descItem != null)

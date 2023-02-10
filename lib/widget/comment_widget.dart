@@ -12,59 +12,59 @@ import '../utils/utils.dart';
 import 'comment_item_widget.dart';
 
 class CommentTabWidget extends StatefulWidget {
-  CommentTabWidget(this.parentInfo, this.type, {Key? key}) : super(key: key);
+  CommentTabWidget(this.parentInfo, this.type, {Key? key, this.isManager = false}) : super(key: key);
 
   JSON parentInfo;
   String type;
+  bool isManager;
 
-  List<GlobalKey> _tabKeyList = [];
-  List<CommentGroupTab> _tabList = [];
-  var _tabviewHeight = 200.0;
-  var _tabviewHeightOrg = 0.0;
-  var _currentTab = 0;
-  Map<int, double> _tabHeight = {};
+  List<GlobalKey> tabKeyList = [];
+  List<CommentGroupTab> tabList = [];
+  var tabviewHeight = 200.0;
+  var tabviewHeightOrg = 0.0;
+  var currentTab = 0;
+  // Map<int, double> tabHeight = {};
 
   @override
-  _CommenetTabState createState() => _CommenetTabState();
+  CommenetTabState createState() => CommenetTabState();
 }
 
-class _CommenetTabState extends State<CommentTabWidget> {
-  var _isManager = false;
+class CommenetTabState extends State<CommentTabWidget> {
 
   refreshCommentTabData() {
     LOG('---> refreshInfoTabData');
-    if (widget._tabList.isEmpty) {
-      widget._tabKeyList.add(GlobalKey());
-      widget._tabList.add(CommentGroupTab(
+    if (widget.tabList.isEmpty) {
+      widget.tabKeyList.add(GlobalKey());
+      widget.tabList.add(CommentGroupTab(
         widget.type, CommentType.story, 'STORY'.tr,
         widget.parentInfo,
-        key: widget._tabKeyList.last,
+        key: widget.tabKeyList.last,
         isAuthor: STR(widget.parentInfo['userId']) == AppData.USER_ID,
-        isManager: _isManager,
+        isManager: widget.isManager,
         onChanged: (data) {
           // firestoreCacheData['goodsData'][_placeInfo['id']] = _placeInfo;
         },
         onRefreshHeight: setTabHeight,
       ));
-      widget._tabKeyList.add(GlobalKey());
-      widget._tabList.add(CommentGroupTab(
+      widget.tabKeyList.add(GlobalKey());
+      widget.tabList.add(CommentGroupTab(
         widget.type, CommentType.comment, 'COMMENT'.tr,
         widget.parentInfo,
-        key: widget._tabKeyList.last,
+        key: widget.tabKeyList.last,
         isAuthor: STR(widget.parentInfo['userId']) == AppData.USER_ID,
-        isManager: _isManager,
+        isManager: widget.isManager,
         onChanged: (data) {
           // firestoreCacheData['goodsData'][_placeInfo['id']] = _placeInfo;
         },
         onRefreshHeight: setTabHeight,
       ));
-      widget._tabKeyList.add(GlobalKey());
-      widget._tabList.add(CommentGroupTab(
+      widget.tabKeyList.add(GlobalKey());
+      widget.tabList.add(CommentGroupTab(
         widget.type, CommentType.qna, 'QnA'.tr,
         widget.parentInfo,
-        key: widget._tabKeyList.last,
+        key: widget.tabKeyList.last,
         isAuthor: STR(widget.parentInfo['userId']) == AppData.USER_ID,
-        isManager: _isManager,
+        isManager: widget.isManager,
         onChanged: (data) {
           // firestoreCacheData['goodsData'][_placeInfo['id']] = _placeInfo;
         },
@@ -76,33 +76,12 @@ class _CommenetTabState extends State<CommentTabWidget> {
   setTabHeight(double height) {
     if (mounted) {
       setState(() {
-        widget._tabviewHeight = height;
-        widget._tabviewHeightOrg = widget._tabviewHeight;
-        widget._tabHeight[widget._currentTab] = height;
+        if (height > widget.tabviewHeight) {
+          widget.tabviewHeightOrg = widget.tabviewHeight;
+          widget.tabviewHeight = height;
+        }
       });
     }
-  }
-
-  refreshTabHeight() {
-    Future.delayed(const Duration(milliseconds: 500), () {
-      var tmpHeight = 0.0;
-      if (widget._tabHeight[widget._currentTab] != null) {
-        tmpHeight = widget._tabHeight[widget._currentTab]!;
-      } else {
-        var _item = widget._tabKeyList[widget._currentTab].currentState as CommentGroupTabState?;
-        if (_item != null) {
-          tmpHeight = _item
-              .getWidgetSize()
-              .height;
-          widget._tabHeight[widget._currentTab] = tmpHeight;
-        }
-      }
-      if (widget._tabviewHeightOrg == tmpHeight) return;
-      setState(() {
-        widget._tabviewHeight = tmpHeight;
-        widget._tabviewHeightOrg = widget._tabviewHeight;
-      });
-    });
   }
 
   @override
@@ -119,13 +98,10 @@ class _CommenetTabState extends State<CommentTabWidget> {
 
   Widget CommentTab() {
     refreshCommentTabData();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      refreshTabHeight();
-    });
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20),
       child: DefaultTabController(
-        length: widget._tabList.length,
+        length: widget.tabList.length,
         child: Column(
           children: [
             showHorizontalDivider(Size(double.infinity, 20), color: Colors.grey.withOpacity(0.25)),
@@ -134,8 +110,9 @@ class _CommenetTabState extends State<CommentTabWidget> {
               child: TabBar(
                 labelPadding: EdgeInsets.zero,
                 onTap: (index) {
-                  widget._currentTab = index;
-                  refreshTabHeight();
+                  setState(() {
+                    widget.currentTab = index;
+                  });
                 },
                 automaticIndicatorColorAdjustment: false,
                 labelColor: Theme.of(context).primaryColor,
@@ -143,14 +120,14 @@ class _CommenetTabState extends State<CommentTabWidget> {
                 unselectedLabelColor: Theme.of(context).hintColor,
                 unselectedLabelStyle: ItemTitleStyle(context),
                 indicatorColor: Theme.of(context).primaryColor,
-                tabs: widget._tabList.map((item) => item.getTab()).toList(),
+                tabs: widget.tabList.map((item) => item.getTab()).toList(),
               ),
             ),
             SizedBox(
-              height: widget._tabviewHeight,
+              height: widget.tabviewHeight,
               child: TabBarView(
                 physics: NeverScrollableScrollPhysics(),
-                children: widget._tabList,
+                children: widget.tabList,
               ),
             ),
           ],
@@ -187,92 +164,86 @@ class CommentGroupTabState extends State<CommentGroupTab> {
   final api = Get.find<ApiService>();
   final _commentScrollController = PageController(viewportFraction: 1, keepPage: true);
   final _textScrollController = PageController(viewportFraction: 1, keepPage: true);
-  List<CommentListExItem> _commentList = [];
-  List<GoodsInfoTextItem> _textList = [];
+  List<CommentListExItem> commentList = [];
 
-  List<GlobalKey> _commentKey = [];
-  List<GlobalKey> _textKey = [];
-  int _tabIndex = 0;
-  int _nowPage = 0;
-  int _maxPage = 0;
-  int _showCount = 0;
+  List<GlobalKey> commentKey = [];
+  int nowPage = 0;
+  int maxPage = 0;
   final _divSpace = 10.0;
   final _pageListMax = 3;
-
   final _padding = EdgeInsets.fromLTRB(0, 10, 0, 0);
-  final TextStyle _descStyle   = TextStyle(fontSize: 16, color: Colors.black , fontWeight: FontWeight.w300, height: 1.5);
-  final _sizeInfoKey = GlobalKey();
 
-  Future<JSON>? _initListData;
-  JSON _listData = {};
+  Future<JSON>? initListData;
+  JSON listData = {};
 
   initData() {
     switch(widget.commentType) {
       case CommentType.comment:
-        _initListData = api.getCommentFromTargetId(widget.type, widget.parentInfo['id']);
+        LOG("--> getCommentFromTargetId [${widget.type}] : ${widget.parentInfo['id']}");
+        initListData = api.getCommentFromTargetId(widget.type, widget.parentInfo['id']);
         break;
       case CommentType.qna:
-        _initListData = api.getQnaFromTargetId(widget.type, widget.parentInfo['id']);
+        initListData = api.getQnaFromTargetId(widget.type, widget.parentInfo['id']);
         break;
       case CommentType.story:
-        _initListData = api.getStoryFromTargetId(widget.parentInfo['id']);
+        initListData = api.getStoryFromTargetId(widget.parentInfo['id']);
         break;
     }
   }
 
   refreshList() {
-    _showCount = 0;
-    _commentKey = [];
-    _commentList = [];
+    commentKey = [];
+    commentList = [];
 
-    // _maxPage = widget.pageMax ~/ _pageListMax + (widget.pageMax % _pageListMax != 0 ? 1 : 0) + 1;
-    _maxPage = (_listData.length / _pageListMax + (_listData.length % _pageListMax > 0.0 ? 1 : 0)).toInt();
-    LOG("--> refreshList page [$_nowPage] : ${_listData.length} / $_pageListMax -> $_maxPage / ${_listData.length}");
+    // maxPage = widget.pageMax ~/ _pageListMax + (widget.pageMax % _pageListMax != 0 ? 1 : 0) + 1;
+    maxPage = (listData.length / _pageListMax + (listData.length % _pageListMax > 0.0 ? 1 : 0)).toInt();
+    LOG("--> refreshList page [$nowPage] : ${listData.length} / $_pageListMax -> $maxPage / ${listData.length}");
 
     int count = 0;
     int parentCount = 0;
-    _listData = JSON_UPDATE_TIME_SORT_DESC(_listData);
+    listData = JSON_UPDATE_TIME_SORT_DESC(listData);
 
-    for (var i=0; i<_listData.entries.length; i++) {
+    for (var i=0; i<listData.entries.length; i++) {
       if (parentCount >= _pageListMax) break;
-      var item = _listData.entries.elementAt(i).value;
+      final item = listData.entries.elementAt(i).value as JSON;
       // if (_goodsId.isEmpty) _goodsId = STR(item['targetId']);
       if (JSON_EMPTY(item['parentId'])) {
-        if (++count >= _nowPage * _pageListMax) {
-          _commentKey.add(GlobalKey());
-          _commentList.add(CommentListExItem(
-              item, widget.commentType, widget.parentInfo, isShowDivider: _commentList.isNotEmpty, key: _commentKey.last,
-              paddingSide: 10,
-              isAuthor: item['userId'] == widget.parentInfo['userId'],
-              isShowMenu: widget.commentType != CommentType.story,
-              onChanged: (itemData, status) {
-                setState(() {
-                  if (status == 2) {
-                    _listData.remove(itemData['id']);
-                  } else {
-                    _listData[itemData['id']] = itemData;
-                  }
-                  if (widget.onChanged != null) widget.onChanged!(_listData);
-                  refreshList();
-                });
-              }
+        if (++count >= nowPage * _pageListMax) {
+          commentKey.add(GlobalKey());
+          commentList.add(CommentListExItem(
+            item,
+            widget.commentType, widget.parentInfo, isShowDivider: commentList.isNotEmpty, key: commentKey.last,
+            paddingSide: 10,
+            isAuthor: item['userId'] == widget.parentInfo['userId'],
+            isShowMenu: widget.commentType != CommentType.story,
+            onChanged: (itemData, status) {
+              setState(() {
+                if (status == 2) {
+                  listData.remove(itemData['id']);
+                } else {
+                  listData[itemData['id']] = itemData;
+                }
+                if (widget.onChanged != null) widget.onChanged!(listData);
+                refreshList();
+              });
+            }
           ));
-          for (var itemEx in _listData.entries) {
+          for (var itemEx in listData.entries) {
             if (itemEx.value['parentId'] == item['id']) {
-              _commentKey.add(GlobalKey());
-              _commentList.add(CommentListExItem(
-                  itemEx.value, widget.commentType, widget.parentInfo, isShowDivider: false, key: _commentKey.last,
+              commentKey.add(GlobalKey());
+              commentList.add(CommentListExItem(
+                  itemEx.value, widget.commentType, widget.parentInfo, isShowDivider: false, key: commentKey.last,
                   paddingSide: 10,
                   isAuthor: itemEx.value['userId'] == widget.parentInfo['userId'],
                   isShowMenu: widget.commentType != CommentType.story,
                   onChanged: (itemData, status) {
                     setState(() {
                       if (status == 2) {
-                        _listData.remove(itemData['id']);
+                        listData.remove(itemData['id']);
                       } else {
-                        _listData[itemData['id']] = itemData;
+                        listData[itemData['id']] = itemData;
                       }
-                      if (widget.onChanged != null) widget.onChanged!(_listData);
+                      if (widget.onChanged != null) widget.onChanged!(listData);
                       refreshList();
                     });
                   }
@@ -299,18 +270,18 @@ class CommentGroupTabState extends State<CommentGroupTab> {
   getWidgetSize() {
     var width = 0.0;
     var height = 20.0;
-    for (var itemKey in _commentKey) {
+    for (var itemKey in commentKey) {
       var state = itemKey.currentState as CommentListExItemState?;
       if (state != null && state.mounted) {
         width  += state.getWidgetSize().width;
         height += state.getWidgetSize().height;
       }
     }
-    if (_listData['desc'] != null) height += _divSpace;
+    if (listData['desc'] != null) height += _divSpace;
     if (widget.isCanNewAdd) {
       height += 50;
     }
-    if (_maxPage > 1) {
+    if (maxPage > 1) {
       height += 40;
     }
     height += _padding.top + _padding.bottom;
@@ -321,88 +292,84 @@ class CommentGroupTabState extends State<CommentGroupTab> {
   Widget build(BuildContext context) {
     initData();
     return FutureBuilder(
-        future: _initListData,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            _listData = snapshot.data as JSON;
-            LOG("--> refreshList ready [${widget.commentType}]: $_maxPage / ${_listData.length}");
-            refreshList();
-            LOG("--> refreshList done [${widget.commentType}]: $_maxPage / ${_listData.length}");
-            return Container(
-              height: double.infinity,
-                padding: _padding,
-                child: SingleChildScrollView(
-                    child: Column(
-                        children: [
-                          // show comment & qna..
-                          if (_commentList.isNotEmpty)...[
-                            Column(
-                              children: _commentList,
-                            ),
-                            SizedBox(height: _divSpace),
-                          ],
-                          if (_maxPage > 1)...[
-                            ShowPageControlWidget(context, _nowPage, _maxPage, (page) {
-                              setState(() {
-                                LOG('--> now page : $page / $_maxPage');
-                                _nowPage = page;
-                                refreshList();
-                                // AppData.isMoveListBottom = true;
-                              });
-                            }),
-                          ],
-                          if (widget.isCanNewAdd)...[
-                            SizedBox(height: 10),
-                            RoundRectIconTextButton(context,
-                                // widget.commentType == CommentType.comment ? 'ADD COMMENT' : 'ADD QUESTION',
-                                '${widget.tabTitle} ${'ADD'.tr}',
-                                Icons.add, () async {
-                              var targetUser = await api.getUserInfoFromId(widget.parentInfo['userId']);
-                              if (targetUser != null) {
-                                JSON uploadData = {
-                                  "status": 1,
-                                  "targetType":   widget.type,
-                                  "targetTitle":  widget.parentInfo['title'],
-                                  "targetId":     widget.parentInfo['id'],
-                                  "parentId":     "",
-                                  "userId":       AppData.USER_ID,
-                                  "userName":     AppData.USER_NICKNAME,
-                                  "userPic":      AppData.USER_PIC,
-                                };
-                                showEditCommentDialog(
-                                    context,
-                                    widget.commentType,
-                                    // widget.commentType == CommentType.comment ? 'ADD COMMENT' : 'ADD QUESTION',
-                                    '${'ADD'.tr} ${widget.tabTitle}',
-                                    uploadData,
-                                    targetUser,
-                                    false,
-                                    !widget.isAuthor,
-                                    false).then((result) {
-                                  LOG('--> showEditCommentDialog comment result : $result');
-                                  if (result.isNotEmpty && mounted) {
-                                    setState(() {
-                                      var newId = result['id'];
-                                      _listData[newId] = result;
-                                      refreshList();
-                                      if (widget.onChanged != null) widget.onChanged!(_listData);
-                                    });
-                                  }
-                                });
-                              } else {
-                                showAlertDialog(context, 'Error'.tr, 'Can not find user information'.tr, '', 'OK'.tr);
-                              }
-                            }
-                          )
-                        ]
-                      ]
+      future: initListData,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          listData = snapshot.data as JSON;
+          refreshList();
+          LOG("--> refreshList done [${widget.commentType}]: $maxPage / ${listData.length}");
+          return Container(
+            height: double.infinity,
+              padding: _padding,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // show comment & qna..
+                  if (commentList.isNotEmpty)...[
+                    ...commentList,
+                    SizedBox(height: _divSpace),
+                  ],
+                  if (maxPage > 1)...[
+                    ShowPageControlWidget(context, nowPage, maxPage, (page) {
+                      setState(() {
+                        LOG('--> now page : $page / $maxPage');
+                        nowPage = page;
+                        refreshList();
+                        // AppData.isMoveListBottom = true;
+                      });
+                    }),
+                  ],
+                  if (widget.isCanNewAdd)...[
+                    SizedBox(height: 10),
+                    RoundRectIconTextButton(context,
+                        // widget.commentType == CommentType.comment ? 'ADD COMMENT' : 'ADD QUESTION',
+                        '${widget.tabTitle} ${'ADD'.tr}',
+                        Icons.add, () async {
+                      var targetUser = await api.getUserInfoFromId(widget.parentInfo['userId']);
+                      if (targetUser != null) {
+                        JSON uploadData = {
+                          "status": 1,
+                          "targetType":   widget.type,
+                          "targetTitle":  widget.parentInfo['title'],
+                          "targetId":     widget.parentInfo['id'],
+                          "parentId":     "",
+                          "userId":       AppData.USER_ID,
+                          "userName":     AppData.USER_NICKNAME,
+                          "userPic":      AppData.USER_PIC,
+                        };
+                        showEditCommentDialog(
+                            context,
+                            widget.commentType,
+                            // widget.commentType == CommentType.comment ? 'ADD COMMENT' : 'ADD QUESTION',
+                            '${'ADD'.tr} ${widget.tabTitle}',
+                            uploadData,
+                            targetUser,
+                            false,
+                            !widget.isAuthor,
+                            false).then((result) {
+                          LOG('--> showEditCommentDialog comment result : $result');
+                          if (result.isNotEmpty && mounted) {
+                            setState(() {
+                              var newId = result['id'];
+                              listData[newId] = result;
+                              refreshList();
+                              if (widget.onChanged != null) widget.onChanged!(listData);
+                            });
+                          }
+                        });
+                      } else {
+                        showAlertDialog(context, 'Error'.tr, 'Can not find user information'.tr, '', 'OK'.tr);
+                      }
+                    }
                   )
-                )
-            );
-          } else {
-            return showLoadingFullPage(context);
-          }
+                ]
+              ]
+            )
+          );
+        } else {
+          return showLoadingFullPage(context);
         }
+      }
     );
   }
 

@@ -69,7 +69,7 @@ SET_SERVER_TIME_ALL_ITEM(data) {
 // ignore: non_constant_identifier_names
 SET_SERVER_TIME(timestamp) {
   if (timestamp is Timestamp) {
-    return '${timestamp.seconds}';
+    return DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000).toString(); // fix for jsonSerialize
     // return {
     //   '_seconds': timestamp.seconds,
     //   '_nanoseconds': timestamp.nanoseconds,
@@ -95,6 +95,12 @@ SET_TO_SERVER_TIME_ALL(data) {
     }
   } else if (data is List) {
     data = SET_TO_SERVER_TIME_ALL_ITEM(data);
+  }
+  if (data is String && data.contains('Time')) {
+    final tmp = DateTime.tryParse(data);
+    if (tmp != null) {
+      return Timestamp.fromDate(tmp);
+    }
   }
   return data;
 }
@@ -1957,16 +1963,19 @@ class ApiService extends GetxService {
   }
   
   Future<JSON> getCommentFromTargetId(String targetType, String targetId) async {
+    LOG('--> getCommentFromTargetId : $targetId');
     JSON result = {};
     var snapshot = await firestore!.collection(CommentCollection)
         .where('targetType', isEqualTo: targetType)
         .where('targetId', isEqualTo: targetId)
         .get();
-    for (var item in snapshot.docs) {
-      result[item['id']] = FROM_SERVER_DATA(item);
+    for (var doc in snapshot.docs) {
+      result[doc['id']] = FROM_SERVER_DATA(doc.data());
+      LOG('--> getCommentFromTargetId item [${doc['id']}] => $result');
     }
+    result = JSON_CREATE_TIME_SORT_DESC(result);
     LOG('--> getCommentFromTargetId Result : $result');
-    return JSON_CREATE_TIME_SORT_DESC(result);
+    return result;
   }
   
   Future<JSON> addCommentItem(JSON addItem, JSON targetUserInfo) async {

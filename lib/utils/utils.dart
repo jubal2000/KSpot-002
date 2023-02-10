@@ -94,7 +94,8 @@ TME(dynamic value, {dynamic defaultValue = '00:00'}) {
   DateTime? result;
   try {
     result = value != null && value != 'null' && value!.toString().isNotEmpty
-        ? value is String ? DateTime.parse(value.toString()) : DateTime.fromMillisecondsSinceEpoch(value['_seconds']*1000)
+        ? value is String ? DateTime.parse(value.toString()) :
+        value is Timestamp ? DateTime.fromMillisecondsSinceEpoch(value.seconds * 1000) : DateTime.fromMillisecondsSinceEpoch(value['seconds']*1000)
         : defaultValue != null && defaultValue != ''
         ? DateTime.parse(defaultValue!.toString())
         : DateTime.parse('00:00');
@@ -389,36 +390,41 @@ JSON_START_DAY_SORT_DESC(JSON data) {
 // ignore: non_constant_identifier_names
 JSON_CREATE_TIME_SORT_DESC(JSON data) {
   LOG("--> JSON_CREATE_TIME_SORT_DESC : ${data.length}");
-  if (JSON_EMPTY(data)) return {};
+  try {
+  if (JSON_EMPTY(data)) return JSON.from({});
   if (data.length < 2) return data;
   return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
-    // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
+    LOG("--> check : ${data[a]['createTime']}");
     return data[a]['createTime'] != null && data[b]['createTime'] != null ?
-    data[a]['createTime']['_seconds'] > data[b]['createTime']['_seconds'] ? -1 : 1 : 1;
+    DateTime.parse(data[a]['createTime']).isBefore(DateTime.parse(data[b]['createTime'])) ? -1 : 1 : 1;
   }));
+  } catch (e) {
+    LOG("--> JSON_CREATE_TIME_SORT_DESC error : $e");
+  }
 }
 
 // ignore: non_constant_identifier_names
 JSON_UPDATE_TIME_SORT_DESC(JSON data) {
   LOG("--> JSON_UPDATE_TIME_SORT_DESC : ${data.length}");
-  if (JSON_EMPTY(data)) return {};
+  if (JSON_EMPTY(data)) return JSON.from({});
   if (data.length < 2) return data;
   return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
     // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
     return data[a]['updateTime'] != null && data[b]['updateTime'] != null ?
-    data[a]['updateTime']['_seconds'] > data[b]['updateTime']['_seconds'] ? -1 : 1 : 1;
+    DateTime.parse(data[a]['updateTime']).isBefore(DateTime.parse(data[b]['updateTime'])) ? -1 : 1 : 1;
   }));
 }
 
 // ignore: non_constant_identifier_names
 JSON_CREATE_TIME_SORT_ASCE(JSON data) {
   // LOG("--> JSON_CREATE_TIME_SORT_DESC : $data");
-  if (JSON_EMPTY(data)) return {};
+  if (JSON_EMPTY(data)) return JSON.from({});
   if (data.length < 2) return data;
   return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
     // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
     return data[a]['createTime'] != null && data[b]['createTime'] != null ?
-    data[a]['createTime']['_seconds'] > data[b]['createTime']['_seconds'] ? 1 : -1 : 1;
+    DateTime.parse(data[a]['createTime']).isBefore(DateTime.parse(data[b]['createTime'])) ? -1 : 1 : 1;
+    // data[a]['createTime']['_seconds'] > data[b]['createTime']['_seconds'] ? 1 : -1 : 1;
   }));
 }
 
@@ -426,11 +432,11 @@ JSON_CREATE_TIME_SORT_ASCE(JSON data) {
 JSON_TARGET_DATE_SORT_ASCE(JSON data) {
   LOG("--> JSON_TARGET_DATE_SORT_ASCE : $data");
   try {
-    if (JSON_EMPTY(data)) return {};
+    if (JSON_EMPTY(data)) return JSON.from({});
     if (data.length < 2) return data;
     return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
       // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
-      return DateTime.parse(STR(data[a]['targetDate'])).compareTo(DateTime.parse(STR(data[b]['targetDate']))).isNegative ? -1 : 1;
+      return DateTime.parse(STR(data[a]['targetDate'])).isBefore(DateTime.parse(STR(data[b]['targetDate']))) ? -1 : 1;
     }));
   } catch (e) {
     LOG("--> JSON_TARGET_DATE_SORT_ASCE error : $e");
@@ -441,7 +447,7 @@ JSON_TARGET_DATE_SORT_ASCE(JSON data) {
 // ignore: non_constant_identifier_names
 JSON_INDEX_SORT_ASCE(JSON data) {
   // LOG("--> JSON_INDEX_SORT_ASCE : $data");
-  if (JSON_EMPTY(data)) return {};
+  if (JSON_EMPTY(data)) return JSON.from({});
   if (data.length < 2) return data;
   return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
     // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
@@ -613,8 +619,11 @@ STRING_TO_UINT8LIST(String value) {
 
 // ignore: non_constant_identifier_names
 ADDR(dynamic desc) {
-  var tmp = desc != null ? desc['address'] ?? ''  : '';
-  return STR(tmp);
+  if (desc != null) {
+    var addr1 = desc['address1'] ?? '';
+    return STR(addr1);
+  }
+  return '';
 }
 
 // ignore: non_constant_identifier_names
@@ -2349,26 +2358,23 @@ bool checkDateTimeShow(JSON? timeData, DateTime checkDate) {
   return false;
 }
 
-showDatePickerText(BuildContext context, DateTime date, Function()? onSelect) {
+showDatePickerText(BuildContext context, DateTime date) {
   String month     = DateFormat.M(Get.locale.toString()).format(date);
   String dayOfWeek = DateFormat.E(Get.locale.toString()).format(date);
-  return GestureDetector(
-    onTap: onSelect,
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            DateMonthText(context, month, color: Theme.of(context).hintColor),
-            DateWeekText (context, dayOfWeek, color: Theme.of(context).indicatorColor),
-          ],
-        ),
-        SizedBox(width: 5),
-        DateDayText(context, '${date.day}', fontSize: UI_FONT_SIZE_LT, color: Theme.of(context).indicatorColor),
-      ],
-    )
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          DateMonthText(context, month, color: Theme.of(context).hintColor),
+          DateWeekText (context, dayOfWeek, color: Theme.of(context).indicatorColor),
+        ],
+      ),
+      SizedBox(width: 5),
+      DateDayText(context, '${date.day}', fontSize: UI_FONT_SIZE_LT, color: Theme.of(context).indicatorColor),
+    ],
   );
 }
 

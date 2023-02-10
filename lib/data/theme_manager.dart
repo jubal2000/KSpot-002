@@ -304,7 +304,7 @@ ButtonTitleInverseStyle(BuildContext context) {
 }
 
 MainTitleStyle(BuildContext context) {
-  return TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w800, fontSize: 28);
+  return TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w800, fontSize: 22, height: 1.3);
 }
 
 DialogTitleStyle(BuildContext context) {
@@ -360,7 +360,7 @@ ItemButtonStyle(BuildContext context, {Color? color, double? fontSize, FontWeigh
 }
 
 ItemTitleLargeStyle(BuildContext context) {
-  return TextStyle(fontSize: 16, color: Theme.of(context).hintColor, fontWeight: FontWeight.w800);
+  return TextStyle(fontSize: 16, color: Theme.of(context).indicatorColor, fontWeight: FontWeight.w800);
 }
 
 ItemTitleLargeHotStyle(BuildContext context) {

@@ -1,11 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/view/place/place_detail_screen.dart';
+import 'package:kspot_002/widget/google_map_widget.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../data/app_data.dart';
 import '../data/dialogs.dart';
 import '../data/theme_manager.dart';
 import '../models/event_model.dart';
+import '../models/place_model.dart';
 import '../models/user_model.dart';
 import '../repository/event_repository.dart';
 import '../repository/user_repository.dart';
@@ -13,6 +20,7 @@ import '../utils/utils.dart';
 import '../view/event/event_edit_screen.dart';
 import '../view/profile/target_profile.dart';
 import '../widget/comment_widget.dart';
+import '../widget/content_item_card.dart';
 import '../widget/custom_field_widget.dart';
 import '../widget/image_scroll_viewer.dart';
 import '../widget/like_widget.dart';
@@ -28,6 +36,7 @@ class EventDetailViewModel extends ChangeNotifier {
   final topHeight = 50.0;
   final botHeight = 70.0;
   final subTabHeight = 45.0;
+  final mapHeight = 200.0;
   // Future<JSON>? _initData;
 
   var isManager = false;
@@ -35,6 +44,7 @@ class EventDetailViewModel extends ChangeNotifier {
   var isCanReserve = false;
   var isShowReserveBtn = false;
   var isShowReserveList = false;
+  var isShowMap = false;
 
   JSON? selectReserve;
   JSON? selectInfo;
@@ -47,8 +57,8 @@ class EventDetailViewModel extends ChangeNotifier {
 
   setEventData(EventModel eventModel) {
     eventInfo = eventModel;
-    LOG('--> setEventData : ${eventInfo!.toJson()}');
     isManager = CheckManager(eventInfo!.toJson());
+    LOG('--> setEventData : $isManager / ${eventInfo!.toJson()}');
   }
 
   toggleStatus() {
@@ -123,18 +133,14 @@ class EventDetailViewModel extends ChangeNotifier {
     }
   }
 
-  showImageList(height) {
-    if (eventInfo!.picData != null && eventInfo!.picData!.isNotEmpty) {
-      return ImageScrollViewer(
-        eventInfo!.getPicDataList,
-        rowHeight: height,
-        showArrow: eventInfo!.picData!.length > 1,
-        showPage:  eventInfo!.picData!.length > 1,
-        autoScroll: false,
-      );
-    } else {
-      return Container();
-    }
+  showImageList() {
+    return ImageScrollViewer(
+      eventInfo!.getPicDataList,
+      rowHeight: Get.width,
+      showArrow: eventInfo!.picData!.length > 1,
+      showPage:  eventInfo!.picData!.length > 1,
+      autoScroll: false,
+    );
   }
 
   showPicture() {
@@ -148,11 +154,11 @@ class EventDetailViewModel extends ChangeNotifier {
   }
 
   showTitle() {
-    return Text(eventInfo!.title, style: MainTitleStyle(buildContext!), maxLines: 9);
+    return Text(DESC(eventInfo!.title), style: MainTitleStyle(buildContext!), maxLines: 2);
   }
 
   showDesc() {
-    return Text(eventInfo!.desc, style: DescBodyStyle(buildContext!));
+    return Text(DESC(eventInfo!.desc), style: DescBodyStyle(buildContext!));
   }
 
   showShareBox() {
@@ -202,19 +208,141 @@ class EventDetailViewModel extends ChangeNotifier {
     return TagTextList(buildContext!, eventInfo!.tagData!, headTitle: '#');
   }
 
+  showLocation(PlaceModel placeInfo) {
+    return Column(
+      children: [
+        SubTitle(buildContext!, 'PLACE & LOCATION'.tr, height: 40),
+        ContentItem(placeInfo.toJson(),
+          padding: EdgeInsets.zero,
+          showType: GoodsItemCardType.place,
+          descMaxLine: 2,
+          isShowExtra: false,
+          outlineColor: Theme.of(buildContext!).colorScheme.tertiary,
+          titleStyle: ItemTitleLargeStyle(buildContext!),
+          descStyle: ItemDescStyle(buildContext!),
+          onShowDetail: (id, type) {
+            Get.to(() => PlaceDetailScreen(placeInfo, AppData.currentEventGroup));
+          },
+        ),
+        SizedBox(height: 5),
+        SubTitle(buildContext!, 'ADDRESS'.tr, height: 40),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(placeInfo.address.address1, style: Theme
+                .of(buildContext!)
+                .textTheme
+                .bodyText1),
+            SizedBox(height: 2),
+            Text(placeInfo.address.address2, style: Theme
+                .of(buildContext!)
+                .textTheme
+                .bodyText1),
+            SizedBox(height: 15),
+            Row(
+              children: [
+                GestureDetector(
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                      color: Theme.of(buildContext!).cardColor,
+                    ),
+                    child: Icon(Icons.map_outlined, size: 24),
+                  ),
+                  onTap: () {
+                    isShowMap = !isShowMap;
+                    notifyListeners();
+                  },
+                ),
+                SizedBox(width: 5),
+                GestureDetector(
+                  onTap: () {
+                    var addr = '${placeInfo.address.address1} ${placeInfo.address.address2}';
+                    LOG('--> clipboard copy : $addr');
+                    Clipboard.setData(ClipboardData(text: addr));
+                    ShowToast('copied to clipboard'.tr);
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                      color: Theme.of(buildContext!).cardColor,
+                    ),
+                    child: Icon(Icons.copy, size: 24),
+                  ),
+                )
+              ],
+            )
+          ]
+        ),
+        if (isShowMap)...[
+          SizedBox(height: 10),
+          GoogleMapWidget(
+              [placeInfo.toJson()],
+              mapHeight: mapHeight,
+              showDirection: true,
+              showButtons: true,
+              showMyLocation: true,
+              onButtonAction: (action) {
+                if (action == MapButtonAction.direction) {
+                  var url = Uri.parse(GoogleMapLinkDirectionMake(
+                      placeInfo.title, placeInfo.address.lat, placeInfo.address.lng));
+                  canLaunchUrl(url).then((result) {
+                    if (!result) {
+                      if (Platform.isIOS) {
+                        url = Uri.parse(
+                            'https://apps.apple.com/gb/app/google-maps-transit-food/id585027354');
+                      } else {
+                        url = Uri.parse(
+                            'https://play.google.com/store/apps/details?id=com.google.android.apps.maps');
+                      }
+                    }
+                    launchUrl(url);
+                  });
+                } else {
+                  GetCurrentLocation().then((result) {
+                    if (AppData.currentLocation != null) {
+                      var url = Uri.parse(GoogleMapLinkBusLineMake(
+                          'My Location'.tr, AppData.currentLocation!,
+                          placeInfo.title, LATLNG(placeInfo.address.toJson())));
+                      canLaunchUrl(url).then((result) {
+                        if (!result) {
+                          if (Platform.isIOS) {
+                            url = Uri.parse(
+                                'https://apps.apple.com/gb/app/google-maps-transit-food/id585027354');
+                          } else {
+                            url = Uri.parse(
+                                'https://play.google.com/store/apps/details?id=com.google.android.apps.maps');
+                          }
+                        }
+                        LOG('--> url : $url');
+                        launchUrl(url);
+                      });
+                    }
+                  });
+                }
+              }),
+        ],
+      ],
+    );
+  }
+
   showTimeList() {
     return Column(
       children: [
         SubTitleBar(buildContext!, 'SCHEDULE'.tr),
         ShowTimeList(eventInfo!.getTimeDataMap, currentDate: AppData.currentDate, showAddButton: false,
-            onInitialSelected: (dateTime, jsonData) {
-              LOG('--> ShowTimeList onInitialSelected : $dateTime / $jsonData');
-              // refreshReservButton(dateTime, jsonData);
-            },
-            onSelected: (dateTime, jsonData) {
-              LOG('--> ShowTimeList onSelected : $dateTime / $jsonData');
-              // refreshReservButton(dateTime, jsonData);
-            }
+          onInitialSelected: (dateTime, jsonData) {
+            LOG('--> ShowTimeList onInitialSelected : $dateTime / $jsonData');
+            // refreshReservButton(dateTime, jsonData);
+          },
+          onSelected: (dateTime, jsonData) {
+            LOG('--> ShowTimeList onSelected : $dateTime / $jsonData');
+            // refreshReservButton(dateTime, jsonData);
+          }
         ),
       ],
     );
@@ -225,6 +353,7 @@ class EventDetailViewModel extends ChangeNotifier {
       children: [
         SubTitleBar(buildContext!, 'COMMENT'.tr, height: subTabHeight, icon: isOpenStoryList ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
             isOpenStoryList = !isOpenStoryList;
+            notifyListeners();
         }),
         if (isOpenStoryList)...[
           AutoScrollTag(
@@ -240,39 +369,39 @@ class EventDetailViewModel extends ChangeNotifier {
 
   showReserveButton() {
     return GestureDetector(
-        onTap: () {
-          var _addItem = {
-            'status'    : 1,
-            'people'    : 1,
-            'reserveStatus': 'request',
-            'price'     : DBL(selectReserve!['price']),
-            'currency'  : STR(selectReserve!['currency']),
-            'title'     : eventInfo!.title,
-            'targetType': 'event',
-            'targetId'  : eventInfo!.id,
-            'targetDate': DATE_STR(AppData.currentDate!),
-            'userId'    : AppData.USER_ID,
-            'userName'  : AppData.USER_NICKNAME,
-            'userPic'   : AppData.USER_PIC,
-          };
-          // Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(
-          //   ReservationScreen(_addItem, _selectReserve!, typeTitle: 'EVENT'.tr))).then((value) => {
-          // });
-        },
-        child: Container(
-          width: Get.width,
-          height: botHeight,
-          color: Theme.of(buildContext!).colorScheme.secondary,
-          child: Center(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('RESERVATION'.tr, style: ItemTitleLargeInverseStyle(buildContext!)),
-                    // Text(STR(_selectReserve!['descEx']), style: ItemTitleInverseStyle(context)),
-                  ]
-              )
-          ),
-        )
+      onTap: () {
+        var _addItem = {
+          'status'    : 1,
+          'people'    : 1,
+          'reserveStatus': 'request',
+          'price'     : DBL(selectReserve!['price']),
+          'currency'  : STR(selectReserve!['currency']),
+          'title'     : eventInfo!.title,
+          'targetType': 'event',
+          'targetId'  : eventInfo!.id,
+          'targetDate': DATE_STR(AppData.currentDate!),
+          'userId'    : AppData.USER_ID,
+          'userName'  : AppData.USER_NICKNAME,
+          'userPic'   : AppData.USER_PIC,
+        };
+        // Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(
+        //   ReservationScreen(_addItem, _selectReserve!, typeTitle: 'EVENT'.tr))).then((value) => {
+        // });
+      },
+      child: Container(
+        width: Get.width,
+        height: botHeight,
+        color: Theme.of(buildContext!).colorScheme.secondary,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('RESERVATION'.tr, style: ItemTitleLargeInverseStyle(buildContext!)),
+              // Text(STR(_selectReserve!['descEx']), style: ItemTitleInverseStyle(context)),
+            ]
+          )
+        ),
+      )
     );
   }
 }

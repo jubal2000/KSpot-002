@@ -130,7 +130,7 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
           SubTitle(context, 'INFO'.tr),
           SizedBox(height: UI_LIST_TEXT_SPACE_S),
           EditTextField(context, 'TITLE'.tr, _viewModel.editItem!.title, hint: 'Event Title *'.tr, maxLength: TITLE_LENGTH,
-            onChanged: (value) {
+            maxLines: 2, keyboardType: TextInputType.multiline, onChanged: (value) {
               _viewModel.editItem!.title = value;
           }),
           EditTextField(context, 'DESC'.tr, _viewModel.editItem!.desc, hint: 'Event Description'.tr, maxLength: DESC_LENGTH,

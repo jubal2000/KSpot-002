@@ -27,6 +27,7 @@ enum GoodsItemCardType {
   squareSmall,
   cart,
   placeGroup,
+  place,
 }
 
 enum GoodsItemCardSellType {
@@ -126,6 +127,7 @@ class ContentItem extends GoodsItemCard {
         bool isSelected = false,
         bool isSelectable = false,
         bool isEditable = false,
+        isShowSelectIcon = true,
         showOutline = false,
         isShowExtra = true,
         outlineWidth = 3.0,
@@ -155,6 +157,7 @@ class ContentItem extends GoodsItemCard {
     isSelected: isSelected,
     isSelectable: isSelectable,
     isEditable: isEditable,
+    isShowSelectIcon: isShowSelectIcon,
     onChanged: onChanged,
     onSelected: onSelected,
     onShowDetail: onShowDetail,
@@ -358,6 +361,7 @@ class GoodsItemCard extends StatefulWidget {
     this.faceOutlineColor = Colors.black,
     this.isShowExtra = true,
     this.isShowLink = false,
+    this.isShowSelectIcon = false,
   }) : super(key: key);
 
   void Function(String, int)? onChanged;
@@ -396,6 +400,7 @@ class GoodsItemCard extends StatefulWidget {
   bool isEditable;
   bool isShowExtra;
   bool isShowLink;
+  bool isShowSelectIcon;
 
   double imageHeight;
   double faceSize;
@@ -767,10 +772,117 @@ class GoodsItemCardState extends State<GoodsItemCard> {
             )
           )
         );
-      default:
+      case GoodsItemCardType.place:
+        return Container(
+            padding: widget.padding,
+            decoration: BoxDecoration(
+              color: widget.backgroundColor,
+              border: Border.all(color: widget.outlineColor, width: widget.outlineWidth, style: widget.showOutline ? BorderStyle.solid : BorderStyle.none),
+              borderRadius: BorderRadius.circular(roundCorner),
+            ),
+            child: VisibilityDetector(
+                onVisibilityChanged: (VisibilityInfo info) {
+                  // log("--> onVisibilityChanged [${widget.goodsData['id']}] : ${info.visibleFraction} / $_isDataReady - ${widget.goodsData['targetId']} / ${widget.goodsData['title']}");
+                  if (info.visibleFraction > 0 && !_isDataReady && widget.goodsData['targetId'] != null) {
+                    setState(() {
+                      // _goodsDataInit = api.getGoodsDataFromId(widget.goodsData['targetId']);
+                    });
+                  }
+                },
+                key: GlobalKey(),
+                child: FutureBuilder(
+                    future: _goodsDataInit,
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      // log("--> snapshot.hasData [${widget.goodsData['id']}] : ${snapshot.hasData} / $_isDataReady");
+                      if (snapshot.hasData || _isDataReady) {
+                        if (!_isDataReady) {
+                          // log("--> set _goodsItem [${widget.goodsData['id']}]");
+                          _goodsItem = snapshot.data;
+                          refresh();
+                        }
+                        return GestureDetector(
+                            onTap: () {
+                              if (widget.onShowDetailJSON != null) widget.onShowDetailJSON!(_goodsItem, 0);
+                              if (widget.onShowDetail != null) widget.onShowDetail!(_goodsItem['id'], 0);
+                            },
+                            behavior: HitTestBehavior.translucent,
+                            child: Row(
+                              children: [
+                                if (widget.isSelectable)
+                                  Checkbox(
+                                      value: widget.isSelected,
+                                      onChanged: (value) {
+                                        if (!isDisabled) {
+                                          setState(() {
+                                            widget.isSelected = value!;
+                                            widget.cartCount = widget.isSelected ? _buyMin : 0;
+                                            if (widget.onSelected != null) {
+                                              widget.onSelected!(_goodsItem['id'], widget.isSelected);
+                                            }
+                                          });
+                                        }
+                                      }),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(roundCorner),
+                                  child: SizedBox(
+                                    width: widget.imageHeight,
+                                    height: widget.imageHeight,
+                                    child: Stack(
+                                        children: [
+                                          SizedBox(
+                                            width: widget.imageHeight,
+                                            height: widget.imageHeight,
+                                            child: showImageFit(_goodsItem['pic']),
+                                          ),
+                                          if (_goodsItem['status'] == 2)...[
+                                            ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, 3, 5),
+                                          ]
+                                        ]
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: Container(
+                                    padding: EdgeInsets.only(top: 5, bottom: 5, right: 10),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(children: [
+                                          Expanded(
+                                            child: Text(STR(_goodsItem['title']), style: widget.titleStyle, maxLines: 1),
+                                          ),
+                                        ]),
+                                        if (_goodsItem['desc'] != null) ...[
+                                          SizedBox(height: 3),
+                                          Text(DESC(_goodsItem['desc']), style: widget.descStyle, maxLines: widget.descMaxLine),
+                                        ],
+                                        // if (widget.showType != GoodsItemCardType.placeGroup)...[
+                                        if (widget.isShowExtra)...[
+                                          SizedBox(height: 3),
+                                          priceTextStyle(),
+                                        ]
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                if (widget.isEditable)
+                                  editMenuWidget,
+                                if (widget.isShowSelectIcon)
+                                  Icon(Icons.arrow_forward_ios_sharp, size: 20, color: Theme.of(context).hintColor),
+                              ],
+                            )
+                        );
+                      } else {
+                        return showLoadingImageSquare(widget.imageHeight);
+                      }
+                    }
+                )
+            )
+        );      default:
         return Container(
           padding: widget.padding,
-          // height: widget.imageHeight + widget.padding.vertical,
           decoration: BoxDecoration(
             color: widget.backgroundColor,
             border: Border.all(color: widget.outlineColor, width: widget.outlineWidth, style: widget.showOutline ? BorderStyle.solid : BorderStyle.none),

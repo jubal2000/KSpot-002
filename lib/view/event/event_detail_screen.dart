@@ -17,9 +17,10 @@ import '../../models/place_model.dart';
 import '../../utils/utils.dart';
 import '../../view_model/event_detail_view_model.dart';
 import '../../widget/comment_widget.dart';
+import '../../widget/content_item_card.dart';
 import '../../widget/like_widget.dart';
 import '../../widget/share_widget.dart';
-import '../place/place_screen.dart';
+import '../place/place_detail_screen.dart';
 
 
 class EventDetailScreen extends StatefulWidget {
@@ -39,7 +40,6 @@ class _EventDetailState extends State<EventDetailScreen> {
   final _viewModel = EventDetailViewModel();
 
   initData() {
-    AppData.selectEventTime = {};
     _viewModel.setEventData(widget.eventInfo);
 
     // _eventInfo['reserveDay'] ??= 7;
@@ -192,49 +192,40 @@ class _EventDetailState extends State<EventDetailScreen> {
                       controller: viewModel.scrollController,
                       // physics: BouncingScrollPhysics(),
                       children: [
-                        viewModel.showImageList(layout.maxWidth),
-                        // if (_eventInfo['imageData'] == null || _eventInfo['imageData'].isEmpty)...[
-                        //   showHorizontalDivider(Size(double.infinity, 1)),
-                        // ],
+                        if (JSON_NOT_EMPTY(viewModel.eventInfo!.picData))...[
+                          viewModel.showImageList(),
+                        ],
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(height: 10),
+                                SizedBox(height: 20),
                                 Row(
                                   children: [
                                     viewModel.showPicture(),
-                                    SizedBox(width: 10),
+                                    SizedBox(width: 15),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: viewModel.showTitle(),
-                                              ),
-                                            ]
-                                          ),
-                                          if (widget.placeInfo != null)...[
-                                            SizedBox(height: 2),
-                                            Text(STR(widget.placeInfo!.title),
-                                                style: ItemDescStyle(context))
-                                          ]
+                                          viewModel.showTitle()
                                         ]
                                       ),
-                                    )
+                                    ),
+                                    if (!widget.isPreview)...[
+                                      SizedBox(height: 20),
+                                      viewModel.showShareBox(),
+                                    ],
                                   ]
                                 ),
-                                if (!widget.isPreview)...[
-                                  SizedBox(height: 20),
-                                  viewModel.showShareBox(),
-                                ],
                                 SizedBox(height: 20),
                                 if (viewModel.eventInfo!.desc.isNotEmpty)...[
                                   viewModel.showDesc(),
-                                  SizedBox(height: 10),
+                                ],
+                                if (JSON_NOT_EMPTY(viewModel.eventInfo!.tagData))...[
+                                  SizedBox(height: 30),
+                                  viewModel.showTagList(),
                                 ],
                                 // if (INT(_eventInfo['price']) > 0)...[
                                 //   showHorizontalDivider(Size(double.infinity * 0.9, 40), color: LineColor(context)),
@@ -246,13 +237,12 @@ class _EventDetailState extends State<EventDetailScreen> {
                                   viewModel.showManagerList(),
                                 ],
                                 if (JSON_NOT_EMPTY(viewModel.eventInfo!.customData))...[
-                                  showHorizontalDivider(Size(double.infinity * 0.9, 1), color: LineColor(context)),
+                                  showHorizontalDivider(Size(double.infinity * 0.9, 30), color: LineColor(context)),
                                   viewModel.showCustomFieldList(),
-                                  SizedBox(height: 10),
                                 ],
-                                if (JSON_NOT_EMPTY(viewModel.eventInfo!.tagData))...[
-                                  viewModel.showTagList(),
-                                  SizedBox(height: 20),
+                                if (widget.placeInfo != null)...[
+                                  showHorizontalDivider(Size(double.infinity * 0.9, 40), color: LineColor(context)),
+                                  viewModel.showLocation(widget.placeInfo!),
                                 ],
                               ]
                             )
@@ -260,13 +250,9 @@ class _EventDetailState extends State<EventDetailScreen> {
                           if (JSON_NOT_EMPTY(viewModel.eventInfo!.timeData))...[
                             SizedBox(height: 30),
                             viewModel.showTimeList(),
-                            SizedBox(height: 20),
                           ],
-                          // if (viewModel.isCanReserve)...[
-                          //   SubTitleBarEx(context, 'RESERVATION LIST'.tr, height: _subTabHeight, child: Text(DATE_STR(AppData.currentDate!), style: SubTitleStyle(context))),
-                          //   ShowReserveListWidget(context, _eventInfo, _isManager),
-                          // ],
                           if (!widget.isPreview)...[
+                            SizedBox(height: 20),
                             viewModel.showCommentList(),
                           ],
                           SizedBox(height: viewModel.botHeight),
@@ -278,7 +264,11 @@ class _EventDetailState extends State<EventDetailScreen> {
                           bottom: 0,
                           child: viewModel.showReserveButton(),
                         ),
-                      ]
+                    // if (viewModel.isCanReserve)...[
+                    //   SubTitleBarEx(context, 'RESERVATION LIST'.tr, height: _subTabHeight, child: Text(DATE_STR(AppData.currentDate!), style: SubTitleStyle(context))),
+                    //   ShowReserveListWidget(context, _eventInfo, _isManager),
+                    // ],
+                      ],
                     )
                   );
                 }

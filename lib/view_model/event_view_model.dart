@@ -46,7 +46,7 @@ class EventViewModel extends ChangeNotifier {
   GlobalKey mapKey = GlobalKey();
 
   var cameraPos = CameraPosition(target: LatLng(0,0));
-  var isDatePickerExtend = false;
+  var isDateOpen = false;
   var eventListType = EventListType.map;
   var isFirstMapUpdate = true;
   var isManagerMode = false; // 유저의 이벤트목록 일 경우 메니저이면, 기간이 지난 이벤트들도 표시..
@@ -155,7 +155,7 @@ class EventViewModel extends ChangeNotifier {
       onDateChange: (date) {
         // New date selected
         if (AppData.currentDate == date) {
-          isDatePickerExtend = false;
+          isDateOpen = false;
           notifyListeners();
         } else {
           AppData.currentDate = date;
@@ -170,7 +170,7 @@ class EventViewModel extends ChangeNotifier {
     return Row(
       children: [
         Container(
-          width: isDatePickerExtend ? Get.width : 0,
+          width: isDateOpen ? Get.width : 0,
           height: UI_DATE_PICKER_HEIGHT,
           color: Theme.of(buildContext!).canvasColor.withOpacity(0.5),
           child: datePicker,
@@ -257,12 +257,13 @@ class EventViewModel extends ChangeNotifier {
       showList.add(addItem);
     }
     if (isFirstMapUpdate) {
-      isFirstMapUpdate = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Future.delayed(const Duration(milliseconds: 200), () async {
-          var state = mapKey.currentState as GoogleMapState;
-          state.refreshMarker(eventShowList);
-          isFirstMapUpdate = false;
+          if (mapKey.currentState != null) {
+            var state = mapKey.currentState as GoogleMapState;
+            state.refreshMarker(eventShowList);
+            isFirstMapUpdate = false;
+          }
         });
       });
     }
@@ -301,80 +302,81 @@ class EventViewModel extends ChangeNotifier {
     final itemWidth  = layout.maxWidth / 4.0;
     final itemHeight = itemWidth * 2.0;
     return Container(
-          color: eventListType == EventListType.map ? Colors.white : null,
-          child: Stack(
-          children: [
-            if (eventListType == EventListType.map)...[
-              showGoogleWidget(layout),
-              Align(
-                widthFactor: 1.25,
-                heightFactor: 3.0,
-                child: showDatePicker(),
-              ),
-              BottomLeftAlign(
-                child: Container(
-                  height: itemHeight,
-                  margin: EdgeInsets.only(bottom: UI_MENU_BG_HEIGHT),
-                  child: FutureBuilder(
-                    future: setShowList(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        eventShowList = snapshot.data as List<JSON>;
-                        return ListView(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                          children: showEventMap(itemWidth, itemHeight),
-                        );
-                      } else {
-                        return Container();
-                      }
-                    }
-                  ),
-                ),
-              ),
-            ],
-            if (eventListType == EventListType.list)...[
-              Container(
-                height: layout.maxHeight,
-                padding: EdgeInsets.fromLTRB(0, UI_LIST_TOP_HEIGHT, 0, UI_MENU_HEIGHT),
+      color: eventListType == EventListType.map ? Colors.white : null,
+      child: Stack(
+        children: [
+          if (eventListType == EventListType.map)...[
+            showGoogleWidget(layout),
+            Align(
+              widthFactor: 1.25,
+              heightFactor: 3.0,
+              child: showDatePicker(),
+            ),
+            BottomLeftAlign(
+              child: Container(
+                height: itemHeight,
+                margin: EdgeInsets.only(bottom: UI_MENU_BG_HEIGHT),
                 child: FutureBuilder(
-                    future: setShowList(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        eventShowList = snapshot.data as List<JSON>;
-                        return ListView(
-                          shrinkWrap: true,
-                          padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                          children: showEventList(itemWidth)
-                        );
-                      } else {
-                        return Container();
-                      }
-                    },
-                  ),
-                ),
-            ],
-            TopCenterAlign(
-              child: SizedBox(
-                height: UI_TOP_MENU_HEIGHT * 1.7,
-                child: AppTopMenuBar(MainMenuID.event,
-                  isShowDatePick: !isDatePickerExtend && eventListType == EventListType.map, height: UI_TOP_MENU_HEIGHT,
-                  onCountryChanged: () {
-                    refreshModel();
-                    notifyListeners();
-                  },
-                  onDateChange: () {
-                    isDatePickerExtend = true;
-                    notifyListeners();
-                    dateController.animateToSelection(duration: Duration(milliseconds: 10));
+                  future: setShowList(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      eventShowList = snapshot.data as List<JSON>;
+                      return ListView(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                        children: showEventMap(itemWidth, itemHeight),
+                      );
+                    } else {
+                      return Container();
+                    }
                   }
                 ),
-              )
+              ),
             ),
           ],
-          )
-        );
+          if (eventListType == EventListType.list)...[
+            Container(
+              height: layout.maxHeight,
+              padding: EdgeInsets.fromLTRB(0, UI_LIST_TOP_HEIGHT, 0, UI_MENU_HEIGHT),
+              child: FutureBuilder(
+                future: setShowList(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    eventShowList = snapshot.data as List<JSON>;
+                    return ListView(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                      children: showEventList(itemWidth)
+                    );
+                  } else {
+                    return Container();
+                  }
+                },
+              ),
+            ),
+          ],
+          TopCenterAlign(
+            child: SizedBox(
+              height: UI_TOP_MENU_HEIGHT * 1.7,
+              child: AppTopMenuBar(MainMenuID.event,
+                isShowDatePick: eventListType == EventListType.map, height: UI_TOP_MENU_HEIGHT,
+                isDateOpen: isDateOpen,
+                onCountryChanged: () {
+                  refreshModel();
+                  notifyListeners();
+                },
+                onDateChange: (state) {
+                  isDateOpen = state;
+                  notifyListeners();
+                  dateController.animateToSelection(duration: Duration(milliseconds: 10));
+                }
+              ),
+            )
+          ),
+        ],
+      )
+    );
   }
 
   @override

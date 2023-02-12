@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:video_player/video_player.dart';
 
 import '../data/app_data.dart';
 import '../data/dialogs.dart';
@@ -61,8 +62,40 @@ class ImageScrollViewer extends StatefulWidget {
   ImageScrollViewerState createState() => ImageScrollViewerState();
 }
 
+class VideoControlData {
+  VideoPlayerController? videoController;
+  Future<void>? videoInitialize;
+  bool isPlaying = false;
+  GlobalKey refreshKey = GlobalKey();
+
+  play() {
+    if (videoController == null) return;
+    videoController!.play();
+    isPlaying = true;
+  }
+
+  pause() {
+    if (videoController == null) return;
+    videoController!.pause();
+    isPlaying = false;
+  }
+
+  toggle() {
+    if (videoController == null) return;
+    isPlaying ? pause() : play();
+    LOG('--> VideoControlData toggle : $isPlaying');
+  }
+
+  dispose() {
+    if (videoController == null) return;
+    videoController!.dispose();
+    videoController = null;
+  }
+}
+
 class ImageScrollViewerState extends State<ImageScrollViewer> {
   final PageController _controller = PageController(viewportFraction: 1, keepPage: true);
+  final Map<int, VideoControlData> _videoController = {};
 
   var _isDragging = false;
   var _startPos = Offset(0, 0);
@@ -96,6 +129,35 @@ class ImageScrollViewerState extends State<ImageScrollViewer> {
       if (mounted) _controller.animateToPage(index, duration: Duration(milliseconds: 1), curve: Curves.linear);
     } catch (e) {
       LOG('--> showIndex error : $e');
+    }
+  }
+
+  videoLoading() {
+    if (!mounted) return;
+    for (var index=0; index<widget.itemList.length; index++) {
+      LOG('--> videoLoading : $index');
+      videoLoadingItem(index);
+    }
+  }
+
+  videoLoadingItem(index) {
+    if (!mounted) return;
+    var videoData = VideoControlData();
+    if (widget.itemList[index].runtimeType != String && STR(widget.itemList[index]['videoUrl']).isNotEmpty) {
+      try {
+        if (_videoController[index] == null) {
+          _videoController[index] = videoData;
+          videoData.videoController = VideoPlayerController.network(widget.itemList[index]['videoUrl']);
+        }
+        if (videoData.videoController != null) {
+          videoData.videoInitialize = videoData.videoController!.initialize();
+        }
+      } catch (e) {
+        LOG('--> _videoController error : $e / ${STR(widget.itemList[index]['videoUrl'])}');
+      }
+      // LOG('----> videoLoadingItem done : $index');
+    } else {
+      _videoController[index] = videoData;
     }
   }
 

@@ -16,6 +16,7 @@ import '../models/place_model.dart';
 import '../models/user_model.dart';
 import '../repository/event_repository.dart';
 import '../repository/user_repository.dart';
+import '../services/cache_service.dart';
 import '../utils/utils.dart';
 import '../view/event/event_edit_screen.dart';
 import '../view/profile/target_profile.dart';
@@ -32,6 +33,7 @@ class EventDetailViewModel extends ChangeNotifier {
   final scrollController = AutoScrollController();
   final eventRepo = EventRepository();
   final userRepo  = UserRepository();
+  final cache     = Get.find<CacheService>();
 
   final topHeight = 50.0;
   final botHeight = 70.0;
@@ -45,18 +47,21 @@ class EventDetailViewModel extends ChangeNotifier {
   var isShowReserveBtn = false;
   var isShowReserveList = false;
   var isShowMap = false;
+  var isEdited = false;
 
   JSON? selectReserve;
   JSON? selectInfo;
   EventModel? eventInfo;
+  PlaceModel? placeInfo;
   BuildContext? buildContext;
 
   init(BuildContext context) {
     buildContext = context;
   }
 
-  setEventData(EventModel eventModel) {
+  setEventData(EventModel eventModel, PlaceModel? placeModel) {
     eventInfo = eventModel;
+    placeInfo = placeModel;
     isManager = CheckManager(eventInfo!.toJson());
     LOG('--> setEventData : $isManager / ${eventInfo!.toJson()}');
   }
@@ -74,7 +79,7 @@ class EventDetailViewModel extends ChangeNotifier {
           if (result) {
               eventInfo!.status = eventInfo!.status == 1 ? 2 : 1;
               ShowToast(eventInfo!.status == 1 ? 'Enabled'.tr : 'Disabled'.tr, Theme.of(buildContext!).primaryColor);
-              notifyListeners();
+              updateEventInfo();
           }
         });
       }
@@ -82,10 +87,11 @@ class EventDetailViewModel extends ChangeNotifier {
   }
 
   moveToEventEdit() {
-    Get.to(() => EventEditScreen())!.then((result) {
+    Get.to(() => EventEditScreen(eventInfo: eventInfo, placeInfo: placeInfo))!.then((result) {
       if (result != null) {
         eventInfo = result;
-        notifyListeners();
+        LOG('--> EventEditScreen result : ${eventInfo!.title}');
+        updateEventInfo();
       }
     });
   }
@@ -104,26 +110,17 @@ class EventDetailViewModel extends ChangeNotifier {
         showAlertYesNoDialog(buildContext!, 'Delete'.tr,
             'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((value) {
           if (value == 1) {
-            if (!AppData.isDevMode) {
-              showTextInputDialog(buildContext!, 'Delete confirm'.tr,
-                  'Typing \'delete now\''.tr, 'Alert) Recovery is not possible'.tr, 10, null).then((result) {
-                if (result == 'delete now') {
-                  eventRepo.setEventStatus(eventInfo!.id, 0).then((result) {
-                    if (result) {
-                      eventInfo!.status = 0;
-                      Get.back(result:'deleted');
-                    }
-                  });
-                }
-              });
-            } else {
-              eventRepo.setEventStatus(eventInfo!.id, 0).then((result) {
-                if (result) {
-                  eventInfo!.status = 0;
-                  Get.back(result:'deleted');
-                }
-              });
-            }
+            showTextInputDialog(buildContext!, 'Delete confirm'.tr,
+                'Typing \'delete now\''.tr, 'Alert) Recovery is not possible'.tr, 10, null).then((result) {
+              if (result.toLowerCase() == 'delete now') {
+                eventRepo.setEventStatus(eventInfo!.id, 0).then((result) {
+                  if (result) {
+                    eventInfo!.status = 0;
+                    Get.back(result: eventInfo!);
+                  }
+                });
+              }
+            });
           }
         });
         break;
@@ -166,9 +163,19 @@ class EventDetailViewModel extends ChangeNotifier {
         children: [
           ShareWidget(buildContext!, 'event', eventInfo!.toJson(), showTitle: true),
           SizedBox(width: 10),
-          LikeWidget(buildContext!, 'event', eventInfo!.toJson(), showCount: true),
+          LikeWidget(buildContext!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
+            LOG('--> LikeWidget result : $count');
+            eventInfo!.likeCount = count;
+            updateEventInfo();
+          }),
         ]
     );
+  }
+
+  updateEventInfo() {
+    isEdited = true;
+    cache.setEventItem(eventInfo!);
+    notifyListeners();
   }
 
   showManagerList() {
@@ -208,11 +215,11 @@ class EventDetailViewModel extends ChangeNotifier {
     return TagTextList(buildContext!, eventInfo!.tagData!, headTitle: '#');
   }
 
-  showLocation(PlaceModel placeInfo) {
+  showLocation() {
     return Column(
       children: [
         SubTitle(buildContext!, 'PLACE & LOCATION'.tr, height: 40),
-        ContentItem(placeInfo.toJson(),
+        ContentItem(placeInfo!.toJson(),
           padding: EdgeInsets.zero,
           showType: GoodsItemCardType.place,
           descMaxLine: 2,
@@ -221,7 +228,7 @@ class EventDetailViewModel extends ChangeNotifier {
           titleStyle: ItemTitleLargeStyle(buildContext!),
           descStyle: ItemDescStyle(buildContext!),
           onShowDetail: (id, type) {
-            Get.to(() => PlaceDetailScreen(placeInfo, AppData.currentEventGroup));
+            Get.to(() => PlaceDetailScreen(placeInfo!, AppData.currentEventGroup));
           },
         ),
         SizedBox(height: 5),
@@ -229,12 +236,12 @@ class EventDetailViewModel extends ChangeNotifier {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(placeInfo.address.address1, style: Theme
+            Text(placeInfo!.address.address1, style: Theme
                 .of(buildContext!)
                 .textTheme
                 .bodyText1),
             SizedBox(height: 2),
-            Text(placeInfo.address.address2, style: Theme
+            Text(placeInfo!.address.address2, style: Theme
                 .of(buildContext!)
                 .textTheme
                 .bodyText1),
@@ -259,7 +266,7 @@ class EventDetailViewModel extends ChangeNotifier {
                 SizedBox(width: 5),
                 GestureDetector(
                   onTap: () {
-                    var addr = '${placeInfo.address.address1} ${placeInfo.address.address2}';
+                    var addr = '${placeInfo!.address.address1} ${placeInfo!.address.address2}';
                     LOG('--> clipboard copy : $addr');
                     Clipboard.setData(ClipboardData(text: addr));
                     ShowToast('copied to clipboard'.tr);
@@ -281,7 +288,7 @@ class EventDetailViewModel extends ChangeNotifier {
         if (isShowMap)...[
           SizedBox(height: 10),
           GoogleMapWidget(
-              [placeInfo.toJson()],
+              [placeInfo!.toJson()],
               mapHeight: mapHeight,
               showDirection: true,
               showButtons: true,
@@ -289,7 +296,7 @@ class EventDetailViewModel extends ChangeNotifier {
               onButtonAction: (action) {
                 if (action == MapButtonAction.direction) {
                   var url = Uri.parse(GoogleMapLinkDirectionMake(
-                      placeInfo.title, placeInfo.address.lat, placeInfo.address.lng));
+                      placeInfo!.title, placeInfo!.address.lat, placeInfo!.address.lng));
                   canLaunchUrl(url).then((result) {
                     if (!result) {
                       if (Platform.isIOS) {
@@ -307,7 +314,7 @@ class EventDetailViewModel extends ChangeNotifier {
                     if (AppData.currentLocation != null) {
                       var url = Uri.parse(GoogleMapLinkBusLineMake(
                           'My Location'.tr, AppData.currentLocation!,
-                          placeInfo.title, LATLNG(placeInfo.address.toJson())));
+                          placeInfo!.title, LATLNG(placeInfo!.address.toJson())));
                       canLaunchUrl(url).then((result) {
                         if (!result) {
                           if (Platform.isIOS) {

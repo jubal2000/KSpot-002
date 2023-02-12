@@ -40,7 +40,7 @@ class _EventDetailState extends State<EventDetailScreen> {
   final _viewModel = EventDetailViewModel();
 
   initData() {
-    _viewModel.setEventData(widget.eventInfo);
+    _viewModel.setEventData(widget.eventInfo, widget.placeInfo);
 
     // _eventInfo['reserveDay'] ??= 7;
     // _eventInfo['reserveData'] ??= {};
@@ -108,6 +108,10 @@ class _EventDetailState extends State<EventDetailScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+      if (_viewModel.isEdited) {
+        Get.back(result: _viewModel.eventInfo);
+        return false;
+      }
       return true;
     },
     child: ChangeNotifierProvider<EventDetailViewModel>.value(
@@ -242,7 +246,7 @@ class _EventDetailState extends State<EventDetailScreen> {
                                 ],
                                 if (widget.placeInfo != null)...[
                                   showHorizontalDivider(Size(double.infinity * 0.9, 40), color: LineColor(context)),
-                                  viewModel.showLocation(widget.placeInfo!),
+                                  viewModel.showLocation(),
                                 ],
                               ]
                             )

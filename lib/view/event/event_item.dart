@@ -28,6 +28,7 @@ class EventCardItem extends StatefulWidget {
         this.isShowLike = true,
         this.isPromotion = false,
         this.selectMax = 9,
+        this.onShowDetail,
         this.onRefresh}) : super(key: key);
 
   EventModel itemData;
@@ -44,6 +45,7 @@ class EventCardItem extends StatefulWidget {
   double itemHeight;
   EdgeInsets? itemPadding;
   Function(JSON)? onRefresh;
+  Function(String, int)? onShowDetail;
   AnimationController? animationController;
 
   @override
@@ -84,6 +86,7 @@ class _EventCardItemState extends State<EventCardItem> {
             }
           } else {
             unFocusAll(context);
+            if (widget.onShowDetail != null) widget.onShowDetail!(widget.itemData.id, 0);
             // AppData.uploadEvent = widget.itemData;
             // Navigator.push(
             //     context, MaterialPageRoute(builder: (context) =>

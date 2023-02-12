@@ -13,6 +13,7 @@ import '../data/dialogs.dart';
 import '../data/themes.dart';
 import '../models/etc_model.dart';
 import '../models/user_model.dart';
+import '../services/cache_service.dart';
 import '../services/firebase_service.dart';
 import '../utils/utils.dart';
 import '../models/start_model.dart';
@@ -34,6 +35,7 @@ class MainMenuID {
 const COUNTRY_LOG_MAX = 5;
 
 class AppViewModel extends ChangeNotifier {
+  final cache = Get.find<CacheService>();
   var isShowDialog = false;
   var isCanStart = false;
   BuildContext? buildContext;
@@ -200,8 +202,12 @@ class AppViewModel extends ChangeNotifier {
             LOG("--> selected.index : ${selected.type}");
             switch (selected.type) {
               case DropdownItemType.event:
-                Get.to(() => EventEditScreen())!.then((_) {
-                  notifyListeners();
+                Get.to(() => EventEditScreen())!.then((result) {
+                  if (result != null) {
+                    AppData.eventViewModel.isMapUpdate = true;
+                    cache.setEventItem(result);
+                    notifyListeners();
+                  }
                 });
                 break;
               case DropdownItemType.story:

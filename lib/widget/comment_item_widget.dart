@@ -339,10 +339,10 @@ class CommentListExItemState extends State<CommentListExItem> {
 
     return GestureDetector(
       onTap: () {
-        if (widget.commentType == CommentType.story) {
-          LOG('--> CommentListExItem selected : ${widget.commentData['id']}');
-          Navigator.push(context, MaterialPageRoute(builder: (context) => StoryDetailScreen(widget.commentData)));
-        }
+        // if (widget.commentType == CommentType.story) {
+        //   LOG('--> CommentListExItem selected : ${widget.commentData['id']}');
+        //   Navigator.push(context, MaterialPageRoute(builder: (context) => StoryDetailScreen(widget.commentData)));
+        // }
       },
       child: Container(
         key: _key,

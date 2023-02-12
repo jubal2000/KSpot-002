@@ -24,82 +24,81 @@ class EventEditPlaceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LOG('--> _viewModel : ${_viewModel.stepIndex} / ${_viewModel.placeInfo != null ? _viewModel.placeInfo!.address.toJson() : ''}');
-    return Scaffold(
-      body: ListView(
-        children: [
-          SubTitle(context, 'EVENT GROUP SELECT'.tr),
-          Row(
-            children: [
-              if (AppData.currentEventGroup != null)...[
-                Expanded(
-                  child: ContentItem(AppData.currentEventGroup!.toJson(),
-                      padding: EdgeInsets.zero,
-                      showType: GoodsItemCardType.placeGroup,
-                      descMaxLine: 2,
-                      isShowExtra: false,
-                      outlineColor: Theme.of(context).colorScheme.tertiary,
-                      titleStyle: ItemTitleLargeStyle(context), descStyle: ItemDescStyle(context)),
-                ),
-              ],
-              contentAddButton(context,
-                'GROUP\nSELECT'.tr,
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        SubTitle(context, 'EVENT GROUP SELECT'.tr),
+        Row(
+          children: [
+            if (AppData.currentEventGroup != null)...[
+              Expanded(
+                child: ContentItem(AppData.currentEventGroup!.toJson(),
+                    padding: EdgeInsets.zero,
+                    showType: GoodsItemCardType.placeGroup,
+                    descMaxLine: 2,
+                    isShowExtra: false,
+                    outlineColor: Theme.of(context).colorScheme.tertiary,
+                    titleStyle: ItemTitleLargeStyle(context), descStyle: ItemDescStyle(context)),
+              ),
+            ],
+            contentAddButton(context,
+              'GROUP\nSELECT'.tr,
+              icon: Icons.settings,
+              onPressed: (_) {
+              LOG('--> EventGroupSelectDialog : ${AppData.currentEventGroup} / ${AppData.currentContentType}');
+              EventGroupSelectDialog(context,
+                  AppData.currentEventGroup != null ? AppData.currentEventGroup!.id : '',
+                  AppData.currentContentType ).then((result) {
+                if (result != null) {
+                  LOG('--> EventGroupSelectDialog result : ${result.toJson()}');
+                  _viewModel.setEventGroup(result);
+                }
+              });
+            }),
+          ]
+        ),
+        showHorizontalDivider(Size(Get.width, 30)),
+        SubTitle(context, 'EVENT PLACE SELECT'.tr),
+        Row(
+          children: [
+            if (_viewModel.placeInfo != null)...[
+              Expanded(
+                child: ContentItem(_viewModel.placeInfo!.toJson(),
+                    padding: EdgeInsets.zero,
+                    showType: GoodsItemCardType.normal,
+                    descMaxLine: 2,
+                    isShowExtra: false,
+                    outlineColor: Theme.of(context).colorScheme.tertiary,
+                    titleStyle: ItemTitleLargeStyle(context), descStyle: ItemDescStyle(context)),
+              ),
+            ],
+            contentAddButton(context,
+                'PLACE\nSELECT'.tr,
                 icon: Icons.settings,
                 onPressed: (_) {
-                LOG('--> EventGroupSelectDialog : ${AppData.currentEventGroup} / ${AppData.currentContentType}');
-                EventGroupSelectDialog(context,
-                    AppData.currentEventGroup != null ? AppData.currentEventGroup!.id : '',
-                    AppData.currentContentType ).then((result) {
-                  if (result != null) {
-                    LOG('--> EventGroupSelectDialog result : ${result.toJson()}');
-                    _viewModel.setEventGroup(result);
+                  Map<String, PlaceModel> list = {};
+                  if (_viewModel.placeInfo != null) {
+                    list[_viewModel.placeInfo!.id] = _viewModel.placeInfo!;
                   }
-                });
-              }),
-            ]
-          ),
-          showHorizontalDivider(Size(Get.width, 30)),
-          SubTitle(context, 'EVENT PLACE SELECT'.tr),
-          Row(
-            children: [
-              if (_viewModel.placeInfo != null)...[
-                Expanded(
-                  child: ContentItem(_viewModel.placeInfo!.toJson(),
-                      padding: EdgeInsets.zero,
-                      showType: GoodsItemCardType.normal,
-                      descMaxLine: 2,
-                      isShowExtra: false,
-                      outlineColor: Theme.of(context).colorScheme.tertiary,
-                      titleStyle: ItemTitleLargeStyle(context), descStyle: ItemDescStyle(context)),
-                ),
-              ],
-              contentAddButton(context,
-                  'PLACE\nSELECT'.tr,
-                  icon: Icons.settings,
-                  onPressed: (_) {
-                    Map<String, PlaceModel> list = {};
-                    if (_viewModel.placeInfo != null) {
-                      list[_viewModel.placeInfo!.id] = _viewModel.placeInfo!;
+                  Get.to(() => PlaceListScreen(isSelectable: true, listSelectData: list))!.then((result) {
+                    if (result != null && result.isNotEmpty) {
+                      PlaceModel placeInfo = result.entries.first.value;
+                      LOG('--> PlaceListScreen result : ${placeInfo.toJson()}');
+                      _viewModel.setPlaceInfo(placeInfo);
+                    } else {
+                      _viewModel.setPlaceInfo(null);
                     }
-                    Get.to(() => PlaceListScreen(isSelectable: true, listSelectData: list))!.then((result) {
-                      if (result != null && result.isNotEmpty) {
-                        PlaceModel placeInfo = result.entries.first.value;
-                        LOG('--> PlaceListScreen result : ${placeInfo.toJson()}');
-                        _viewModel.setPlaceInfo(placeInfo);
-                      } else {
-                        _viewModel.setPlaceInfo(null);
-                      }
-                    });
-                  }
-                ),
-              ]
-          ),
-          if (_viewModel.placeInfo != null)...[
-            SizedBox(height: 10),
-            Text(_viewModel.placeInfo!.address.desc, style: DescBodyTextStyle(context)),
-          ],
-          showHorizontalDivider(Size(Get.width, 30)),
-        ]
-      )
+                  });
+                }
+              ),
+            ]
+        ),
+        if (_viewModel.placeInfo != null)...[
+          SizedBox(height: 10),
+          Text(_viewModel.placeInfo!.address.desc, style: DescBodyTextStyle(context)),
+        ],
+        showHorizontalDivider(Size(Get.width, 30)),
+      ]
     );
   }
 }

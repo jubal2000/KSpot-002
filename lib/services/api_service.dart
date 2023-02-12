@@ -931,7 +931,7 @@ class ApiService extends GetxService {
     return query.orderBy('createTime', descending: true).limit(FREE_LOADING_STORY_MAX).snapshots();
   }
 
-  Stream getStoryStreamFromGroupNext(JSON lastTime, String groupId) {
+  Stream getStoryStreamFromGroupNext(String lastTime, String groupId) {
     LOG('------> getStoryStreamFromGroupNext : $lastTime / $groupId');
     var ref = firestore!.collection(StoryCollection);
     var query = ref
@@ -939,7 +939,7 @@ class ApiService extends GetxService {
         .where('groupId', isEqualTo: groupId);
 
     if (JSON_NOT_EMPTY(lastTime)) {
-      var startTime = Timestamp(lastTime['_seconds'], lastTime['_nanoseconds']);
+      var startTime = Timestamp.fromDate(DateTime.parse(lastTime));
       LOG('--> startTime : $startTime');
       query = query.where('createTime', isLessThan: startTime);
     }
@@ -1107,48 +1107,33 @@ class ApiService extends GetxService {
   final ShareCollection = 'data_share';
   final LikeCollection = 'data_like';
 
-  Future<bool> getLikeFromTargetId(JSON user, String targetType, String targetId) async {
-    final userId = STR(user['id']);
+  Future<JSON?> getLikeFromTargetId(JSON user, String targetType, String targetId) async {
     // LOG('--> getLikeFromTargetId [$targetType] : $targetId / $userId / ${AppData.USER_PLACE}');
-    switch(targetType) {
-      case 'placeGroup':
-        return LIST_NOT_EMPTY(user['like_eventGroup']) && user['like_eventGroup'].contains(targetId);
-      case 'event':
-        return LIST_NOT_EMPTY(user['like_event']) && user['like_event'].contains(targetId);
-      case 'story':
-        return LIST_NOT_EMPTY(user['like_story']) && user['like_story'].contains(targetId);
-      case 'user':
-        return LIST_NOT_EMPTY(user['like_user']) && user['like_user'].contains(targetId);
-      // default:
-      //   if (userId.isNotEmpty) {
-      //     var dataRef = firestore!.collection(LikeCollection);
-      //     var snapshot = await dataRef.where('status', isEqualTo: 1)
-      //         .where('targetType', isEqualTo: targetType)
-      //         .where('targetId', isEqualTo: targetId)
-      //         .where('userId', isEqualTo: userId)
-      //         .get();
-      //     if (snapshot.docs.isNotEmpty) {
-      //       switch(targetType) {
-      //         case 'placeGroup':
-      //           user['like_eventGroup'] ??= [];
-      //           if (!user['like_eventGroup'].contains(targetId)) user['like_eventGroup'].add(targetId);
-      //           break;
-      //         case 'event':
-      //           user['like_event'] ??= [];
-      //           if (!user['like_event'].contains(targetId)) user['like_event'].add(targetId);
-      //           break;
-      //         case 'story':
-      //           user['like_story'] ??= [];
-      //           if (!user['like_story'].contains(targetId)) user['like_story'].add(targetId);
-      //           break;
-      //       }
-      //       return true;
-      //     }
-      //   }
+    var ref = firestore!.collection(LikeCollection);
+    try {
+      // get original info..
+      var snapshot = await ref
+          .where('status', isEqualTo: 1)
+          .where('targetType', isEqualTo: targetType)
+          .where('targetId', isEqualTo: targetId)
+          .where('userId', isEqualTo: STR(user['id']))
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        return snapshot.docs.first.data();
+      }
+    } catch (e) {
+      LOG('--> getLikeFromTargetId Error : $e');
     }
-    return false;
+    return null;
   }
-  
+
+  Future<JSON> getLikeJsonFromTargetId(JSON user, String targetType, String targetId) async {
+    final result = await getLikeFromTargetId(user, targetType, targetId);
+    return result ?? {};
+  }
+
   Future<JSON?> addLikeCount(JSON user, String type, String targetId, int status,
       {String targetTitle = '', String targetPic = ''}) async {
     var ref = firestore!.collection(LikeCollection);
@@ -1189,7 +1174,7 @@ class ApiService extends GetxService {
     }
     LOG('--> addLikeCount : $type / $targetId => $status');
     await ref.doc(addData['id']).set(addData);
-    return await setCountData('likes', type, targetId, status == 1);
+    return await setCountData('likeCount', type, targetId, status == 1);
   }
   
   Future<JSON?> setCountData(String type, String targetType, String targetId, bool status) async {
@@ -1239,8 +1224,10 @@ class ApiService extends GetxService {
       if (countNow > 99999999) countNow = 99999999;
       await targetRef.doc(targetId).update({type: countNow});
       data[type] = countNow;
+      LOG('--> setCountData : $type, $targetType, $targetId, $status');
       return data;
     }
+    return null;
   }
   
   

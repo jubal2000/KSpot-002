@@ -13,6 +13,7 @@ import '../services/firebase_service.dart';
 import '../utils/utils.dart';
 import '../view_model/app_view_model.dart';
 import '../view_model/event_view_model.dart';
+import '../view_model/story_view_model.dart';
 
 const SCROLL_SPEED = 250;
 const APP_VERSION = '0.0.1';
@@ -61,6 +62,7 @@ class AppData {
 
   static var appViewModel = AppViewModel();
   static var eventViewModel = EventViewModel();
+  static var storyViewModel = StoryViewModel();
 
   static var defaultInfoID = 'info0001';
 
@@ -147,6 +149,9 @@ class AppData {
 
   // ignore: non_constant_identifier_names
   static bool get IS_ADMIN => USER_STATUS > 1;
+
+  // ignore: non_constant_identifier_names
+  static bool get IS_LOGIN => AppData.userInfo.loginType == 'phone';
 
   // ignore: non_constant_identifier_names
   static String get USER_NICKNAME => AppData.userInfo.nickName;

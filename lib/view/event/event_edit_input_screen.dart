@@ -25,10 +25,8 @@ import '../place/place_item.dart';
 import '../place/place_list_screen.dart';
 
 class EventEditInputScreen extends StatefulWidget {
-  EventEditInputScreen({Key? key, this.eventItem, this.placeInfo, this.parentViewModel}) : super(key: key);
+  EventEditInputScreen({Key? key, this.parentViewModel}) : super(key: key);
 
-  EventModel? eventItem;
-  PlaceModel? placeInfo;
   EventEditViewModel? parentViewModel;
 
   @override
@@ -41,27 +39,17 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
 
   @override
   void initState () {
-    if (widget.eventItem != null) {
-      _viewModel.setEditItem(widget.eventItem!);
-    }
-    if (widget.placeInfo != null) {
-      _viewModel.setPlaceInfo(widget.placeInfo!);
-    }
-    if (AppData.userInfo.id.isEmpty) { // TODO : for Dev..
-      AppData.userInfo.id       = 'lBSiD1qEBhvcPu49W56q';
-      AppData.userInfo.loginId  = 'e0lVUcIw4NV0XM5uX9mDjHdk91m2';
-      AppData.userInfo.nickName = '주발Tester';
-    }
+    // if (AppData.userInfo.id.isEmpty) { // TODO : for Dev..
+    //   AppData.userInfo.id       = 'lBSiD1qEBhvcPu49W56q';
+    //   AppData.userInfo.loginId  = 'e0lVUcIw4NV0XM5uX9mDjHdk91m2';
+    //   AppData.userInfo.nickName = '주발Tester';
+    // }
     super.initState ();
   }
 
   @override
   Widget build(BuildContext context) {
     _viewModel.init(context);
-    if (widget.eventItem != null) {
-      _viewModel.editItem  = widget.eventItem;
-      _viewModel.placeInfo = widget.placeInfo;
-    }
     // auto add manager..
     if (_viewModel.editItem!.managerData == null || _viewModel.editItem!.managerData!.isEmpty) {
       final addItem = ManagerData(
@@ -74,20 +62,10 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
       _viewModel.managerData[addItem.id] = addItem.toJson();
     }
     LOG('--> _viewModel.editManagerToJSON : ${_viewModel.editManagerToJSON}');
-    return Scaffold(
-      // appBar: AppBar(
-      //   title: TopTitleText(context, widget.eventItem != null ? 'Event Edit'.tr : 'Event Information'.tr),
-      //   titleSpacing: 0,
-      //   toolbarHeight: UI_APPBAR_TOOL_HEIGHT,
-      //   backgroundColor: Colors.transparent,
-      //   actions: [
-      //     InkWell(onTap: () {}, child: Padding(padding:EdgeInsets.all(5), child: Icon(Icons.copy, size: 24))),
-      //     InkWell(onTap: () {}, child: Padding(padding:EdgeInsets.all(5), child: Icon(Icons.clear, size: 24))),
-      //   ],
-      // ),
-      body: ListView(
+    return ListView(
+        shrinkWrap: true,
         children: [
-          if (widget.eventItem != null)...[
+          if (_viewModel.isEditMode)...[
             SubTitle(context, 'EVENT PLACE SELECT'.tr),
             Row(
               children: [
@@ -130,7 +108,7 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
           SubTitle(context, 'INFO'.tr),
           SizedBox(height: UI_LIST_TEXT_SPACE_S),
           EditTextField(context, 'TITLE'.tr, _viewModel.editItem!.title, hint: 'Event Title *'.tr, maxLength: TITLE_LENGTH,
-            maxLines: 2, keyboardType: TextInputType.multiline, onChanged: (value) {
+            maxLines: 1, keyboardType: TextInputType.multiline, onChanged: (value) {
               _viewModel.editItem!.title = value;
           }),
           EditTextField(context, 'DESC'.tr, _viewModel.editItem!.desc, hint: 'Event Description'.tr, maxLength: DESC_LENGTH,
@@ -159,7 +137,6 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
               onDataChanged: _viewModel.onSettingChanged),
           SizedBox(height: UI_LIST_TEXT_SPACE_L),
         ],
-      )
     );
   }
 }

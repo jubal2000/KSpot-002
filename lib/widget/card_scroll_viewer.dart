@@ -195,12 +195,12 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                     if (widget.selectText.isNotEmpty) {
                       setState(() {
                         widget.selectedId = item.key;
-                        onSelected('$item.key', 0);
+                        onSelected(item.key, 0);
                       });
                     } else if (widget.isImageExView) {
-                      onSelected('$item.key', 0);
+                      onSelected(item.key, 0);
                     } else if (widget.imageMax == 1) {
-                      onSelected('$item.key', 1);
+                      onSelected(item.key, 1);
                     }
                   },
                   child: Stack(

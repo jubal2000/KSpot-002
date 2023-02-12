@@ -46,6 +46,7 @@ class EventEditViewModel extends ChangeNotifier {
 
   var isShowOnly = false;
   var isEdited = false;
+  var isEditMode = false;
   var agreeChecked = false;
 
   get isNextEnable {
@@ -99,9 +100,9 @@ class EventEditViewModel extends ChangeNotifier {
     isEdited = false;
   }
 
-  setEditItem(EventModel item) {
-    editItem = item;
-    LOG('----> setEditItem: ${editItem!.toJson()}');
+  setEditItem(EventModel eventItem, PlaceModel? placeItem) {
+    editItem   = eventItem;
+    placeInfo  = placeItem;
     if (editItem!.picData != null) {
       for (var item in editItem!.picData!) {
         LOG('  -- ${item.toJson()}');
@@ -111,6 +112,9 @@ class EventEditViewModel extends ChangeNotifier {
         if (item.url.isNotEmpty) jsonItem['url'] = item.url;
         // if (item.data != null) jsonItem['data'] = item.data.toString();
         imageData[item.id] = jsonItem;
+        if (item.url == editItem!.pic) {
+          titlePicKey = item.id;
+        }
       }
     }
     refreshOption();
@@ -354,8 +358,9 @@ class EventEditViewModel extends ChangeNotifier {
         var resizeData = await resizeImage(data!, IMAGE_SIZE_MAX) as Uint8List;
         var key = Uuid().v1();
         imageData[key] = {'id': key, 'type': 0, 'url': '', 'data': resizeData};
-        LOG('----> picLocalImage: ${imageData[key]}');
-        if (editItem!.pic.isEmpty) editItem!.pic = key;
+        LOG('----> picLocalImage: ${imageData[key]} / $key');
+        if (titlePicKey.isEmpty) titlePicKey = key;
+        // if (editItem!.pic.isEmpty) editItem!.pic = key;
       }
       setImageData();
       notifyListeners();
@@ -363,7 +368,7 @@ class EventEditViewModel extends ChangeNotifier {
   }
 
   showImageSelector() {
-    LOG('----> showImageSelector: ${imageData.length}');
+    LOG('----> showImageSelector: ${imageData.length} / $titlePicKey');
     for (var item in imageData.entries) {
       LOG('  -- ${item.value}');
       if (titlePicKey.isEmpty) titlePicKey = item.key;
@@ -378,6 +383,7 @@ class EventEditViewModel extends ChangeNotifier {
         selectTextStyle: TextStyle(fontSize: 11.0, fontWeight: FontWeight.bold, color: Colors.purple,
             shadows: outlinedText(strokeWidth: 1, strokeColor: Colors.white.withOpacity(0.5))),
         onActionCallback: (key, status) {
+          LOG('----> onActionCallback: $key / $status');
           switch (status) {
             case 1: {
               picLocalImage();
@@ -401,18 +407,6 @@ class EventEditViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  moveNextStep() {
-    if (stepIndex + 1 < stepMax) {
-      stepIndex++;
-      notifyListeners();
-    } else {
-      if (checkEditDone(true)) {
-        uploadNewEvent();
-      }
-      // Get.to(() => SignupStepDoneScreen());
-    }
-  }
-
   checkEditDone(showAlert) {
     if (imageData.isEmpty) {
       if (showAlert) showAlertDialog(buildContext!, 'Upload Failed'.tr, 'Please enter select picture..'.tr, '', 'OK'.tr);
@@ -434,7 +428,7 @@ class EventEditViewModel extends ChangeNotifier {
   }
 
   moveBackStep() {
-    if (stepIndex - 1 >= 0) {
+    if (!isEditMode && stepIndex - 1 >= 0) {
       stepIndex--;
       notifyListeners();
     } else {
@@ -442,36 +436,51 @@ class EventEditViewModel extends ChangeNotifier {
     }
   }
 
+  moveNextStep() {
+    if (!isEditMode && stepIndex + 1 < stepMax) {
+      stepIndex++;
+      notifyListeners();
+    } else {
+      if (checkEditDone(true)) {
+        uploadNewEvent();
+      }
+      // Get.to(() => SignupStepDoneScreen());
+    }
+  }
+
   uploadNewEvent() async {
-    LOG('---> uploadNewEvent: $titlePicKey');
+    LOG('---> uploadNewEvent: ${imageData.length}');
     showLoadingDialog(buildContext!, 'Uploading now...'.tr);
     // upload new images..
     editItem!.picData = null;
     if (imageData.isNotEmpty) {
+      editItem!.picData ??= [];
       var upCount = 0;
       for (var item in imageData.entries) {
-        if (item.value['data'] != null && (item.value['url'] == null || item.value['url'].isEmpty)) {
+        if (item.value['data'] != null) {
           var result = await eventRepo.uploadImageInfo(item.value as JSON);
           if (result != null) {
-            editItem!.picData ??= [];
             editItem!.picData!.add(PicData(
               id: item.key,
               type: 0,
               url: result,
             ));
-            if (titlePicKey == item.key) {
-              // set title pic..
-              editItem!.pic = result;
-            }
+            item.value['url'] = result;
             upCount++;
           }
+        } else if (JSON_NOT_EMPTY(item.value['url'])) {
+          editItem!.picData!.add(PicData.fromJson(item.value));
+        }
+        LOG('---> editItem key check : $titlePicKey / ${item.key}');
+        // set title pic..
+        if (titlePicKey == item.key) {
+          editItem!.pic = STR(item.value['url']);
         }
       }
-      LOG('---> image upload done : $upCount');
-    }
-    // set uploaded images url..
-    for (var item in imageData.entries) {
-      if (item.value['url'] != null && item.value['url'].isNotEmpty) editItem!.picData!.add(PicData.fromJson(item.value));
+      LOG('---> image upload done : $upCount / ${editItem!.pic}');
+      if (editItem!.pic.isEmpty) {
+        editItem!.pic = imageData.entries.first.value['url'];
+      }
     }
     // upload customField image..
     if (editItem!.customData != null) {
@@ -508,6 +517,7 @@ class EventEditViewModel extends ChangeNotifier {
     // set search data..
     editItem!.searchData = CreateSearchWordList(editItem!.toJson());
     editItem!.userId = AppData.USER_ID;
+    LOG('---> addEventItem : ${editItem!.toJson()}');
 
     eventRepo.addEventItem(editItem!).then((result) {
       hideLoadingDialog();

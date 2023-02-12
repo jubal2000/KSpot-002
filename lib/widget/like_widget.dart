@@ -8,7 +8,7 @@ import '../data/theme_manager.dart';
 import '../utils/utils.dart';
 
 Widget LikeSmallWidget(BuildContext context, String type, JSON targetInfo,
-    {double iconSize = 20, String title = '', Function(int)? onChangeCount}) {
+    {double iconSize = 18, String title = '', Function(int)? onChangeCount}) {
   return LikeWidget(context, type, targetInfo, iconSize: iconSize, title: title, showCount: false, onChangeCount: onChangeCount);
 }
 
@@ -26,30 +26,31 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
   var api = Get.find<ApiService>();
 
   return FutureBuilder(
-      future: api.getLikeFromTargetId(AppData.userInfo.toJson(), type, targetInfo['id']),
+      future: api.getLikeJsonFromTargetId(AppData.userInfo.toJson(), type, targetInfo['id']),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          var _isLiked = snapshot.data as bool;
+          var likeInfo = snapshot.data as JSON;
+          var _isLiked = JSON_NOT_EMPTY(likeInfo);
           return StatefulBuilder(
               builder: (context, setState) {
                 var _pic = STR(targetInfo['pic']);
                 // LOG('--> ShowLikeWidget imageData [$type] : ${targetInfo['imageData']}');
-                if (type == 'story' && LIST_NOT_EMPTY(targetInfo['imageData'])) {
-                  _pic = STR(targetInfo['imageData'].first is JSON ? targetInfo['imageData'].first['backPic'] : targetInfo['imageData'].first);
+                if (_pic.isEmpty && LIST_NOT_EMPTY(targetInfo['picData'])) {
+                  _pic = STR(targetInfo['picData'].first is JSON ? targetInfo['picData'].first['url'] : targetInfo['picData'].first);
                 }
                 var _title = type == 'story' ? STR(targetInfo['desc']) : type == 'user' ? STR(targetInfo['nickName']) : STR(targetInfo['title']);
-                // LOG('--> ShowLikeWidget isOn [$_title] : $_isLiked');
+                LOG('--> ShowLikeWidget isOn [$_title] : $_isLiked / ${targetInfo['likeCount']}');
                 return GestureDetector(
                   child: Container(
                       width:  35,
                       color: Colors.transparent,
                       padding: padding,
                       child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(_isLiked ? Icons.favorite : Icons.favorite_border, color: _isLiked ? _iconColor0 : _iconColor1, size: iconSize),
                             if (showCount)
-                              Text('${INT(targetInfo['likes'])}', style: ItemDescExStyle(context)),
+                              Text('${INT(targetInfo['likeCount'])}', style: ItemDescExStyle(context)),
                             if (title.isNotEmpty)...[
                               Text(title, style: TextStyle(fontSize: 9, color: _isLiked ? _iconColor0 : _iconColor1))
                             ],
@@ -62,8 +63,10 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
                     api.addLikeCount(AppData.userInfo.toJson(), type, targetInfo['id'], _isLiked ? 1 : 0, targetTitle: _title, targetPic: _pic).then((result) {
                       setState(() {
                         LOG('--> ShowLikeWidget result [$_isLiked] : $result');
-                        // targetInfo = result;
-                        // if (onChangeCount != null) onChangeCount(INT(result['likes']));
+                        if (result != null) {
+                          targetInfo = result;
+                          if (onChangeCount != null) onChangeCount(INT(result['likeCount']));
+                        }
                       });
                     });
                   },
@@ -71,7 +74,12 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
               }
           );
         } else {
-          return showLoadingImageSquare(20);
+          return Container(
+            width: 35,
+            child: Center(
+              child: showLoadingImageSquare(20)
+            )
+          );
         }
       }
   );

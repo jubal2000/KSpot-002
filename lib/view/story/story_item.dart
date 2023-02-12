@@ -3,14 +3,440 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../data/app_data.dart';
+import '../../data/dialogs.dart';
 import '../../data/theme_manager.dart';
+import '../../models/place_model.dart';
 import '../../models/story_model.dart';
+import '../../models/user_model.dart';
 import '../../services/api_service.dart';
 import '../../utils/utils.dart';
+import '../../widget/comment_widget.dart';
+import '../../widget/image_scroll_viewer.dart';
 import '../../widget/like_widget.dart';
+import '../../widget/share_widget.dart';
 import '../../widget/user_item_widget.dart';
+import '../place/place_detail_screen.dart';
+import '../profile/target_profile.dart';
+
+class MainStoryItem extends StatefulWidget {
+  MainStoryItem(this.itemInfo, {Key? key,
+    this.itemHeight = 60, this.bottomSpace = 20, this.isFullScreen = false, this.onItemVisible, this.onItemDeleted}) : super(key: key);
+
+  JSON itemInfo;
+  double itemHeight;
+  double bottomSpace;
+  bool isFullScreen;
+
+  Function(int, bool)? onItemVisible;
+  Function(int)? onItemDeleted;
+
+  getKey() {
+    return STR(itemInfo['key']);
+  }
+
+  @override
+  MainStoryItemState createState() => MainStoryItemState();
+}
+
+class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveClientMixin<MainStoryItem> {
+  final api = Get.find<ApiService>();
+  Future<JSON>? _commentInit;
+  JSON _commentList = {};
+  List<Widget> _commentListWidget = [];
+  var _isOpenComment = false;
+  var _isMyStory = false;
+  var _height = 100.0;
+
+  final _imageKey = GlobalKey();
+
+  loadCommentList() {
+    _commentInit = api.getCommentFromTargetId('story', widget.itemInfo['id']);
+  }
+
+  refreshData(JSON uploadData) {
+    setState(() {
+      _commentList[uploadData['id']] = uploadData;
+      refreshCommentList();
+    });
+  }
+
+  loadVideoData() {
+    if (!mounted) return;
+    LOG('--> loadVideoData : MainStoryItem');
+    var state = _imageKey.currentState as ImageScrollViewerState;
+    state.videoLoading();
+  }
+
+  refreshCommentList() {
+    LOG('--> refreshCommentList : ${_commentList.length}');
+    _commentListWidget = [];
+    if (_commentList.length > 1) {
+      _commentList = JSON_CREATE_TIME_SORT_DESC(_commentList);
+    }
+    for (var item in _commentList.entries) {
+      _commentListWidget.add(StoryCommentItem(item.value));
+    }
+  }
+
+  showUserWidget() {
+    return UserCardWidget(
+        widget.itemInfo,
+        faceCircleSize: 2,
+        onProfileChanged: (result) {
+          LOG('--> UserCardWidget onProfileChanged : $result');
+          widget.itemInfo['userName'] = result['userName'];
+          widget.itemInfo['userPic' ] = result['userPic' ];
+          api.setStoryItemUserInfo(widget.itemInfo['id'], result);
+        },
+        onSelected: (_) async {
+          var userInfo = await api.getUserInfoFromId(widget.itemInfo['userId'] ?? widget.itemInfo['id']);
+          if (JSON_NOT_EMPTY(userInfo)) {
+            Get.to(() => TargetProfileScreen(UserModel.fromJson(userInfo!)))!.then((value) {
+
+            });
+          } else {
+            showUserAlertDialog(context, '${widget.itemInfo['userId']}');
+          }
+        }
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    loadCommentList();
+    _isMyStory = widget.itemInfo['userId'] == AppData.USER_ID;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+        onTap: () {
+          if (!widget.isFullScreen) {
+            // Get.to(() => StoryDetailScreen(widget.itemInfo));
+          }
+        },
+        child: Container(
+          width: double.infinity,
+          margin: EdgeInsets.symmetric(horizontal: 10, vertical: widget.isFullScreen ? 0 : 15),
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: Theme.of(context).canvasColor,
+            boxShadow: [
+              if (!widget.isFullScreen)
+                BoxShadow(
+                  color: Colors.black54,
+                  blurRadius: 5,
+                  offset: Offset(0, 5), // Shadow position
+                ),
+            ],
+          ),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                    padding: EdgeInsets.only(top: widget.isFullScreen ? 5 : 10, left: 5, bottom: 10),
+                    child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          showUserWidget(),
+                          Expanded(child: SizedBox(height: 1)),
+                          Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                DropdownButtonHideUnderline(
+                                  child: DropdownButton2(
+                                    customButton: Container(
+                                      width: 40,
+                                      height: 40,
+                                      alignment: Alignment.topRight,
+                                      color: Colors.transparent,
+                                      child: Icon(Icons.more_vert, color: Theme.of(context).hintColor.withOpacity(0.5)),
+                                    ),
+                                    // customItemsIndexes: const [1],
+                                    // customItemsHeight: 20,
+                                    items: [
+                                      if (_isMyStory && widget.itemInfo['status'] == 1)
+                                        ...DropdownItems.storyItems0.map(
+                                              (item) =>
+                                              DropdownMenuItem<DropdownItem>(
+                                                value: item,
+                                                child: DropdownItems.buildItem(context, item),
+                                              ),
+                                        ),
+                                      if (_isMyStory && widget.itemInfo['status'] != 1)
+                                        ...DropdownItems.storyItems1.map(
+                                              (item) =>
+                                              DropdownMenuItem<DropdownItem>(
+                                                value: item,
+                                                child: DropdownItems.buildItem(context, item),
+                                              ),
+                                        ),
+                                      if (!_isMyStory)
+                                        ...DropdownItems.storyItems2.map(
+                                              (item) =>
+                                              DropdownMenuItem<DropdownItem>(
+                                                value: item,
+                                                child: DropdownItems.buildItem(context, item),
+                                              ),
+                                        ),
+                                    ],
+                                    onChanged: (value) {
+                                      var selected = value as DropdownItem;
+                                      LOG("--> selected.index : ${selected.type}");
+                                      switch (selected.type) {
+                                        case DropdownItemType.enable:
+                                        case DropdownItemType.disable:
+                                          setState(() {
+                                            var _status = selected.type == DropdownItemType.enable ? 1 : 2;
+                                            api.setStoryItemStatus(widget.itemInfo['id'], _status);
+                                            widget.itemInfo['status'] = _status;
+                                          });
+                                          break;
+                                        case DropdownItemType.edit:
+                                          // EditStoryContent(context, widget.itemInfo,
+                                          //     {}, false, (result) {
+                                          //       if (result.isNotEmpty) {
+                                          //         setState(() {
+                                          //           widget.itemInfo = result;
+                                          //           LOG('--> EditStoryContent result : $result');
+                                          //         });
+                                          //       }
+                                          //     });
+                                          break;
+                                        case DropdownItemType.delete:
+                                          showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+                                            if (result == 1) {
+                                              api.deleteStoryItem(widget.itemInfo['id']).then((result) {
+                                                if (result) {
+                                                  if (widget.onItemDeleted != null) widget.onItemDeleted!(INT(widget.itemInfo['index']));
+                                                }
+                                              });
+                                            }
+                                          });
+                                          break;
+                                        case DropdownItemType.report:
+                                          // ShowReportMenu(context, widget.itemInfo, 'story', menuList: [
+                                          //   {'id':'report', 'title':'Report it'},
+                                          // ]);
+                                          break;
+                                      }
+                                    },
+                                    itemHeight: 45,
+                                    dropdownWidth: 190,
+                                    buttonHeight: 22,
+                                    buttonWidth: 22,
+                                    itemPadding: const EdgeInsets.all(10),
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ),
+                                // GestureDetector(
+                                //   onTap: () {
+                                //
+                                //   },
+                                //   child: Container(
+                                //     width: 30,
+                                //     height: 40,
+                                //     color: Colors.transparent,
+                                //     alignment: Alignment.topRight,
+                                //     child: Icon(Icons.more_vert, size: 20)),
+                                // ),
+                                Padding(
+                                  padding: EdgeInsets.only(right: 5),
+                                  child: Text(SERVER_TIME_STR(widget.itemInfo['updateTime'] ?? widget.itemInfo['createTime']),
+                                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.secondary)),
+                                ),
+                              ]
+                          ),
+                        ]
+                    )
+                ),
+                VisibilityDetector(
+                    key: GlobalKey(),
+                    onVisibilityChanged: (info) {
+                      if (widget.onItemVisible != null) widget.onItemVisible!(INT(widget.itemInfo['index']), info.visibleFraction > 0);
+                    },
+                    child: Container(
+                        width: MediaQuery.of(context).size.width - 30,
+                        height: MediaQuery.of(context).size.width - 30,
+                        // padding: EdgeInsets.symmetric(horizontal: 5),
+                        // decoration: BoxDecoration(
+                        //   border: Border.all(
+                        //     width: 2,
+                        //     color: Colors.white10,
+                        //   ),
+                        // ),
+                        child: Stack(
+                            children: [
+                              ImageScrollViewer(
+                                List<dynamic>.from(widget.itemInfo['imageData']),
+                                key: _imageKey,
+                                rowHeight: MediaQuery.of(context).size.width - 45,
+                                showArrow: false,
+                                showPage: true,
+                                autoScroll: false,
+                                imageFit: BoxFit.fill,
+                                onSelected: (selectedId) {
+                                  LOG('--> ImageScrollViewer select item [${widget.isFullScreen}]: ${widget.itemInfo['imageData'].runtimeType} / ${widget.itemInfo['imageData']}');
+                                  showImageSlideDialog(context,
+                                      List<String>.from(widget.itemInfo['imageData'].map((item) {
+                                        LOG('--> imageData item : ${item.runtimeType} / $item');
+                                        return item.runtimeType == String ? STR(item) : item['backPic'] ?? item['image'];
+                                      }).toList()), 0, true);
+                                },
+                              ),
+                              if (INT(widget.itemInfo['status']) != 1)
+                                Positioned(
+                                  top: 10,
+                                  left: 10,
+                                  child: ShadowIcon(Icons.visibility_off_outlined, 30, Colors.white, 3, 3),
+                                )
+                            ]
+                        )
+                    )
+                ),
+                SizedBox(height: 10),
+                if (STR(widget.itemInfo['desc']).isNotEmpty)...[
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(5),
+                    child: Text(DESC(widget.itemInfo['desc'])),
+                  ),
+                ],
+                FutureBuilder(
+                    future: _commentInit,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData || _commentList.isNotEmpty) {
+                        if (_commentList.isEmpty) {
+                          _commentList = snapshot.data as JSON;
+                          refreshCommentList();
+                        }
+                        return Column(
+                            children: [
+                              if (_commentList.isNotEmpty)...[
+                                SizedBox(height: 5),
+                                Container(
+                                    padding: EdgeInsets.all(5),
+                                    constraints: BoxConstraints(
+                                      maxHeight: widget.isFullScreen ? double.infinity : _height,
+                                    ),
+                                    child: ListView.builder(
+                                      shrinkWrap: true,
+                                      // physics: !widget.isFullScreen ? AlwaysScrollableScrollPhysics() : NeverScrollableScrollPhysics(),
+                                      physics: NeverScrollableScrollPhysics(),
+                                      padding: EdgeInsets.zero,
+                                      itemCount: _commentList.length,
+                                      itemBuilder: (context, index) {
+                                        var key = _commentList.keys.elementAt(index);
+                                        var item = _commentList[key];
+                                        return StoryCommentItem(item);
+                                      },
+                                    )
+                                ),
+                              ]
+                            ]
+                        );
+                      } else {
+                        return showLoadingImageSquare(_height);
+                      }
+                    }
+                ),
+                if (!widget.isFullScreen)
+                  showCommentMenu(context, widget.itemInfo, true, 0, (uploadData) {
+                    setState(() {
+                      _commentList[uploadData['id']] = uploadData;
+                      refreshCommentList();
+                    });
+                  },
+                      align: CrossAxisAlignment.end),
+                SizedBox(height: widget.isFullScreen ? 60 : 2),
+              ]
+          ),
+        )
+    );
+  }
+}
+
+
+Widget showCommentMenu(BuildContext context, JSON itemInfo, bool showParent, double padding, Function(JSON) onCommentAdded,
+    { var align = CrossAxisAlignment.center, Function(JSON)? onUpdate }) {
+  final api = Get.find<ApiService>();
+  JSON uploadData = {
+    "status":       1,
+    "desc":         '',
+    "imageData":    [],
+    "targetType":   'story',
+    "targetTitle":  '',
+    "targetId":     itemInfo['id'],
+    "userId":       AppData.USER_ID,
+    "userName":     AppData.USER_NICKNAME,
+    "userPic":      AppData.USER_PIC,
+  };
+  return GestureDetector(
+    onTap: () {
+      showEditCommentDialog(context, CommentType.story, 'Comment'.tr, uploadData, const {}, false, false, false).then((result) {
+        if (result.isNotEmpty) {
+          onCommentAdded(result);
+          itemInfo['comments'] = INT(result['comments']);
+          if (onUpdate != null) onUpdate(itemInfo);
+        }
+      });
+    },
+    child: Container(
+      width: MediaQuery.of(context).size.width - padding,
+      padding: EdgeInsets.symmetric(vertical: 5),
+      color: Colors.transparent,
+      child: Row(
+        crossAxisAlignment: align,
+        children: [
+          Text('COMMENT+'.tr, style: SubTitleStyle(context)),
+          Expanded(child: SizedBox(height: 1)),
+          ShareWidget(context, 'story', itemInfo, showTitle: true, title: 'SHARE'.tr),
+          LikeWidget(context, 'story', itemInfo, showCount: true, onChangeCount: (value) {
+            itemInfo['likes'] = value;
+            if (onUpdate != null) onUpdate(itemInfo);
+          }),
+          if (showParent)...[
+            SizedBox(width: 5),
+            GestureDetector(
+              onTap: () async {
+                if (STR(itemInfo['targetType']) == 'place') {
+                  var placeInfo = await api.getPlaceFromId(itemInfo['targetId']);
+                  if (placeInfo != null) {
+                    Get.to(() => PlaceDetailScreen(PlaceModel.fromJson(placeInfo), null, isShowHome: false))!.then((result) {
+                    });
+                  }
+                } else {
+                  var eventInfo = await api.getEventFromId(itemInfo['targetId']);
+                  // if (eventInfo != null) {
+                  //   Get.to(() => EventDetailScreen(PlaceModel.fromJson(eventInfo), null, isShowHome: false))!.then((result) {
+                  //   });
+                  // }
+                }
+              },
+              child: Container(
+                width: 40,
+                height: 40,
+                color: Colors.transparent,
+                margin: EdgeInsets.only(right: 5, bottom: 5),
+                child: Icon(STR(itemInfo['targetType']) == 'place' ? Icons.place_outlined : Icons.event_available,
+                    size: 45, color: Theme.of(context).primaryColor.withOpacity(0.5)),
+              ),
+            )
+          ]
+        ],
+      ),
+    ),
+  );
+}
 
 class StoryCardItem extends StatefulWidget {
   StoryCardItem(this.itemData,
@@ -147,7 +573,7 @@ class StoryCardItemState extends State<StoryCardItem> {
                                       ],
                                       if (widget.isShowLike)...[
                                         SizedBox(width: 5),
-                                        LikeWidget(context, 'event', widget.itemData.toJSON()),
+                                        LikeWidget(context, 'event', widget.itemData.toJson()),
                                       ],
                                       SizedBox(width: 5),
                                     ]

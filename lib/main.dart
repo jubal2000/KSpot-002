@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flash/flash.dart';
 import 'package:kspot_002/services/auth_service.dart';
+import 'package:kspot_002/services/cache_service.dart';
 import 'package:kspot_002/view/home/home_screen.dart';
 import 'package:kspot_002/view/intro/splash_screen.dart';
 import 'package:kspot_002/view/event/event_edit_input_screen.dart';
@@ -32,6 +33,7 @@ Future<void> main() async {
   final fire  = await Get.putAsync(() => FirebaseService().init());
   final auth  = await Get.putAsync(() => AuthService().init());
   final local = await Get.putAsync(() => LocalService().init());
+  final cache = await Get.putAsync(() => CacheService().init());
 
   api.initFirebase();
 

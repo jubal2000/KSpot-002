@@ -94,5 +94,5 @@ class StoryModel {
   });
 
   factory StoryModel.fromJson(JSON json) => _$StoryModelFromJson(json);
-  JSON toJSON() => _$StoryModelToJson(this);
+  JSON toJson() => _$StoryModelToJson(this);
 }

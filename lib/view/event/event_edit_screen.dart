@@ -6,6 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
+import '../../models/place_model.dart';
 import 'event_edit_input_screen.dart';
 import 'event_screen.dart';
 import 'package:kspot_002/view/story/story_screen.dart';
@@ -26,7 +27,10 @@ import '../../widget/verify_phone_widget.dart';
 import 'event_edit_place_screen.dart';
 
 class EventEditScreen extends StatefulWidget {
-  EventEditScreen({Key? key}) : super(key: key);
+  EventEditScreen({Key? key, this.eventInfo, this.placeInfo}) : super(key: key);
+
+  EventModel? eventInfo;
+  PlaceModel? placeInfo;
 
   @override
   _EventEditScreenState createState ()=> _EventEditScreenState();
@@ -37,7 +41,13 @@ class _EventEditScreenState extends State<EventEditScreen> {
 
   @override
   void initState () {
-    _viewModel.setEditItem(EventModelEx.empty(''));
+    _viewModel.isEditMode = widget.eventInfo != null;
+    LOG('--> EventEditScreen : ${_viewModel.isEditMode}');
+    if (_viewModel.isEditMode) {
+      _viewModel.setEditItem(widget.eventInfo!, widget.placeInfo);
+    } else {
+      _viewModel.setEditItem(EventModelEx.empty(''), null);
+    }
     super.initState ();
   }
 
@@ -54,9 +64,10 @@ class _EventEditScreenState extends State<EventEditScreen> {
               return false;
             },
             child: SafeArea(
+              top: false,
               child:Scaffold(
                 appBar: AppBar(
-                  title: TopTitleText(context, viewModel.titleN[viewModel.stepIndex].tr),
+                  title: TopTitleText(context, viewModel.isEditMode ? 'Event Edit'.tr : viewModel.titleN[viewModel.stepIndex].tr),
                   titleSpacing: 0,
                   toolbarHeight: UI_EDIT_TOOL_HEIGHT.w,
                   backgroundColor: Colors.transparent,
@@ -64,27 +75,37 @@ class _EventEditScreenState extends State<EventEditScreen> {
                 body: Container(
                   child: Column(
                     children: [
-                      PageDotWidget(
-                        viewModel.stepIndex, viewModel.stepMax,
-                        dotType: PageDotType.line,
-                        height: 5.h,
-                        frontColor: Theme.of(context).primaryColor,
-                        width: Get.width - (UI_HORIZONTAL_SPACE.w * 2),
-                      ),
-                      Expanded(
-                        child: Container(
-                          padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE_L.w, UI_TOP_SPACE.w, UI_HORIZONTAL_SPACE_L.w, 0),
-                          child: IndexedStack(
-                            key: ValueKey(viewModel.stepIndex),
-                            index: viewModel.stepIndex,
-                            children: [
-                              showAgreeStep(context, viewModel),
-                              EventEditPlaceScreen(parentViewModel: viewModel),
-                              EventEditInputScreen(parentViewModel: viewModel),
-                            ],
+                      if (viewModel.isEditMode)...[
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE_L),
+                            child: EventEditInputScreen(parentViewModel: viewModel)
                           ),
                         ),
-                      ),
+                      ],
+                      if (!viewModel.isEditMode)...[
+                        PageDotWidget(
+                          viewModel.stepIndex, viewModel.stepMax,
+                          dotType: PageDotType.line,
+                          height: 5.h,
+                          frontColor: Theme.of(context).primaryColor,
+                          width: Get.width - (UI_HORIZONTAL_SPACE.w * 2),
+                        ),
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE_L.w, UI_TOP_SPACE.w, UI_HORIZONTAL_SPACE_L.w, 0),
+                            child: IndexedStack(
+                              key: ValueKey(viewModel.stepIndex),
+                              index: viewModel.stepIndex,
+                              children: [
+                                showAgreeStep(context, viewModel),
+                                EventEditPlaceScreen(parentViewModel: viewModel),
+                                EventEditInputScreen(parentViewModel: viewModel),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                       if (!viewModel.isShowOnly)...[
                         SizedBox(height: UI_LIST_TEXT_SPACE_S),
                         BottomCenterAlign(

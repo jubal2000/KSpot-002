@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../data/app_data.dart';
 import '../../data/common_sizes.dart';
+import '../../services/cache_service.dart';
 import '../../view_model/app_view_model.dart';
 import '../../view_model/event_view_model.dart';
 import '../../widget/title_text_widget.dart';
@@ -16,6 +17,7 @@ import 'event_edit_screen.dart';
 
 class EventScreen extends StatelessWidget {
   EventScreen({Key? key}) : super(key: key);
+  final cache = Get.find<CacheService>();
 
   @override
   Widget build(BuildContext context) {
@@ -31,12 +33,12 @@ class EventScreen extends StatelessWidget {
           builder: (context, layout) {
             return Stack(
               children: [
-                if (AppData.eventViewModel.eventShowList.isEmpty)
+                if (AppData.eventViewModel.showList.isEmpty)
                   FutureBuilder(
                     future: AppData.eventViewModel.getEventList(),
                     builder: (context, snapshot) {
-                      if (AppData.eventViewModel.eventData != null) {
-                        LOG('--> set eventData : ${AppData.eventViewModel.eventData!.length}');
+                      if (cache.eventData != null) {
+                        LOG('--> set eventData : ${cache.eventData!.length}');
                         return ChangeNotifierProvider<EventViewModel>.value(
                             value: AppData.eventViewModel,
                             child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
@@ -49,7 +51,7 @@ class EventScreen extends StatelessWidget {
                       }
                     }
                   ),
-                  if (AppData.eventViewModel.eventShowList.isNotEmpty)
+                  if (AppData.eventViewModel.showList.isNotEmpty)
                     ChangeNotifierProvider<EventViewModel>.value(
                         value: AppData.eventViewModel,
                         child: Consumer<EventViewModel>(builder: (context, viewModel, _) {

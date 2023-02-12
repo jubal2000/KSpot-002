@@ -63,6 +63,7 @@ class Words extends Translations {
       'Disable spot?': '스팟을 비활성화 하시겠습니까?',
       'In the disable state, other users cannot see it': '비활성화 시, 다른 유저에게 보이지 않습니다',
       'Event period has ended': '이벤트 기간이 종료 되었습니다',
+      'Event edited': '이벤트 수정완료',
       'Event duration must be modified': '이벤트 기간을 수정해야 합니다',
       'Enabled': '활성화됨',
       'Disabled': '비활성화됨',

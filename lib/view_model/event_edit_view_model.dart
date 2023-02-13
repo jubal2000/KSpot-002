@@ -442,14 +442,13 @@ class EventEditViewModel extends ChangeNotifier {
       notifyListeners();
     } else {
       if (checkEditDone(true)) {
-        uploadNewEvent();
+        uploadStart();
       }
-      // Get.to(() => SignupStepDoneScreen());
     }
   }
 
-  uploadNewEvent() async {
-    LOG('---> uploadNewEvent: ${imageData.length}');
+  uploadStart() async {
+    LOG('---> uploadStart: ${imageData.length}');
     showLoadingDialog(buildContext!, 'Uploading now...'.tr);
     // upload new images..
     editItem!.picData = null;

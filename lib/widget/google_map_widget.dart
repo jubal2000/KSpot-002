@@ -73,6 +73,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
   double distance = 0.0;
   JSON? targetPosition;
   var isMoveActive = true;
+  String? darkMapStyle;
 
   @override
   bool get wantKeepAlive => true;
@@ -111,7 +112,6 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
     setState(() {
       LOG('--> GoogleDirectionListWidget initMarker : ${widget.showLocation.length} / $isBoundsFresh');
       LatLng? targetLoc;
-
       // add normal marker..
       for (var item in widget.showLocation) {
         var address = item['address'];
@@ -272,6 +272,11 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
     initMarker();
   }
 
+  Future getDarkMapStyle() async {
+    darkMapStyle = await rootBundle.loadString('assets/map_style/dark.json');
+    return darkMapStyle;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -387,6 +392,13 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
                 polylines: Set<Polyline>.of(polylines.values),
                 onMapCreated: (controller) { //method called when map is created
                   widget.mapController = controller;
+                  // if (darkMapStyle == null) {
+                  //   LOG('--> setMapStyle');
+                  //   getDarkMapStyle().then((_) {
+                  //     LOG('--> setMapStyle result : $darkMapStyle');
+                  //     controller.setMapStyle(darkMapStyle);
+                  //   });
+                  // }
                   // markerSize = MediaQuery.of(context).size.width * 0.4;
                   LOG('--> show marker window ready : ${markers.length}');
                   rootBundle.load('assets/ui/map_marker_00.png').then((value) {

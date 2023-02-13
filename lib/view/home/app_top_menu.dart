@@ -143,6 +143,7 @@ class AppTopMenuState extends State<AppTopMenuBar> {
                         child: AppData.appViewModel.showAddMenu(iconColor, iconSize),
                       ),
                       SizedBox(width: 5),
+                      if (AppData.appViewModel.appbarMenuMode == MainMenuID.event)
                       Container(
                         alignment: Alignment.center,
                         padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),

@@ -46,7 +46,7 @@ class _EventEditScreenState extends State<EventEditScreen> {
     if (_viewModel.isEditMode) {
       _viewModel.setEditItem(widget.eventInfo!, widget.placeInfo);
     } else {
-      _viewModel.setEditItem(EventModelEx.empty(''), null);
+      _viewModel.setEditItem(EventModelEx.empty('', 0), null);
     }
     super.initState ();
   }
@@ -135,65 +135,4 @@ class _EventEditScreenState extends State<EventEditScreen> {
     );
   }
 
-  showAgreeStep(BuildContext context, EventEditViewModel viewModel) {
-    var textColor = Theme.of(context).hintColor;
-    return LayoutBuilder(
-        builder: (context, layout) {
-          return Container(
-              height: layout.maxHeight,
-              child: Column(
-                children: [
-                  SizedBox(height: 10),
-                  Expanded(
-                      child: Container(
-                          decoration: BoxDecoration(
-                              color: Theme.of(context).canvasColor,
-                              borderRadius: BorderRadius.circular(12)
-                          ),
-                          child: SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-                              child: FutureBuilder(
-                                  future: loadTerms(),
-                                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                                    if (snapshot.hasData) {
-                                      return Html(
-                                          data: snapshot.data,
-                                          style: {
-                                            "p" : Style(color: textColor),
-                                            "h2": Style(color: textColor),
-                                            "h3": Style(color: textColor),
-                                            "h4": Style(color: textColor),
-                                          }
-                                      );
-                                    } else {
-                                      return showLoadingImageSize(Size(double.infinity, MediaQuery.of(context).size.height * 0.28));
-                                    }
-                                  }
-                              )
-                          )
-                      )
-                  ),
-                  if (!viewModel.isShowOnly)...[
-                    SizedBox(height: 3),
-                    Row(
-                      children: [
-                        Checkbox(
-                            value: viewModel.agreeChecked,
-                            onChanged: (status) {
-                              viewModel.setCheck(status ?? false);
-                            }
-                        ),
-                        Text(
-                          'I agree to the Privacy Policy'.tr,
-                          style: ItemTitleStyle(context),
-                        )
-                      ],
-                    ),
-                  ]
-                ],
-              )
-          );
-        }
-    );
-  }
 }

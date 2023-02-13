@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import '../models/etc_model.dart';
@@ -22,6 +23,7 @@ const ORG_SCREEN_WITH = 411;
 const NICKNAME_LENGTH = 12;
 const TITLE_LENGTH = 24;
 const DESC_LENGTH = 999;
+const STORY_DESC_LENGTH = 500;
 const COMMENT_LENGTH = 999;
 const IMAGE_SIZE_MAX = 512.0;
 const PIN_IMAGE_SIZE_MAX = 12.0;
@@ -51,6 +53,16 @@ enum CommentType {
   story,
 }
 
+enum SearchKeys {
+  events,
+  classes,
+  message,
+  follow0,
+  follow1,
+  goods0,
+  goods1,
+}
+
 class AppData {
   static final AppData _singleton = AppData._internal();
 
@@ -60,7 +72,7 @@ class AppData {
 
   static var isDevMode = true;
 
-  static var appViewModel = AppViewModel();
+  static var appViewModel   = AppViewModel();
   static var eventViewModel = EventViewModel();
   static var storyViewModel = StoryViewModel();
 
@@ -73,6 +85,7 @@ class AppData {
   static JSON listSelectData = {};
   static int? localDataVer;
   static List<String>? localAppData;
+  static List<String> searchHistoryList = [];
 
   static var currentThemeMode = false;
   static var currentThemeIndex = 0;
@@ -114,6 +127,7 @@ class AppData {
   static Map<String, FollowModel>   followData = {};
 
   static BuildContext? topMenuContext;
+  static List<GlobalKey> searchWidgetKey = List.generate(SearchKeys.values.length, (index) => GlobalKey());
 
   static JSON INFO_NOTICE = JSON.from(infoData['notice' ] ??= {});
   static JSON INFO_FAQ = JSON.from(infoData['faq' ] ??= {});
@@ -226,5 +240,13 @@ class AppData {
       var item = infoData['contentType'].entries.first;
       AppData.currentContentType = item.key;
     }
+  }
+
+  static setStatusBarColor([bool isDark = false]) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      statusBarIconBrightness: isDark ? Brightness.dark : Brightness.light,
+    ));
   }
 }

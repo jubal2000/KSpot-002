@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -26,6 +27,7 @@ import '../data/common_sizes.dart';
 import '../data/style.dart';
 import '../models/user_model.dart';
 import '../view/place/place_list_screen.dart';
+import '../view_model/event_edit_view_model.dart';
 import '../widget/event_group_dialog.dart';
 import '../widget/dropdown_widget.dart';
 import '../widget/event_time_edit_widget.dart';
@@ -451,8 +453,14 @@ JSON_INDEX_SORT_ASCE(JSON data) {
   if (data.length < 2) return data;
   return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
     // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
-    return data[a]['index'] != null && data[b]['index'] != null ?
-    INT(data[a]['index']) > INT(data[b]['index']) ? 1 : -1 : 0;
+    if (data[a]['index'] != null) {
+      return data[a]['index'] != null && data[b]['index'] != null ?
+      INT(data[a]['index']) > INT(data[b]['index']) ? 1 : -1 : 0;
+    } else if (data[a]['sortIndex'] != null) {
+      return data[a]['sortIndex'] != null && data[b]['sortIndex'] != null ?
+      INT(data[a]['sortIndex']) > INT(data[b]['sortIndex']) ? 1 : -1 : 0;
+    }
+    return 0;
   }));
 }
 
@@ -2378,3 +2386,65 @@ showDatePickerText(BuildContext context, DateTime date) {
   );
 }
 
+
+showAgreeStep(context, viewModel) {
+  var textColor = Theme.of(context).hintColor;
+  return LayoutBuilder(
+      builder: (context, layout) {
+        return Container(
+            height: layout.maxHeight,
+            child: Column(
+              children: [
+                SizedBox(height: 10),
+                Expanded(
+                    child: Container(
+                        decoration: BoxDecoration(
+                            color: Theme.of(context).canvasColor,
+                            borderRadius: BorderRadius.circular(12)
+                        ),
+                        child: SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            child: FutureBuilder(
+                                future: loadTerms(),
+                                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                                  if (snapshot.hasData) {
+                                    return Html(
+                                        data: snapshot.data,
+                                        style: {
+                                          "p" : Style(color: textColor),
+                                          "h2": Style(color: textColor),
+                                          "h3": Style(color: textColor),
+                                          "h4": Style(color: textColor),
+                                        }
+                                    );
+                                  } else {
+                                    return showLoadingImageSize(Size(double.infinity, MediaQuery.of(context).size.height * 0.28));
+                                  }
+                                }
+                            )
+                        )
+                    )
+                ),
+                if (!viewModel.isShowOnly)...[
+                  SizedBox(height: 3),
+                  Row(
+                    children: [
+                      Checkbox(
+                          value: viewModel.agreeChecked,
+                          onChanged: (status) {
+                            viewModel.setCheck(status ?? false);
+                          }
+                      ),
+                      Text(
+                        'I agree to the Privacy Policy'.tr,
+                        style: ItemTitleStyle(context),
+                      )
+                    ],
+                  ),
+                ]
+              ],
+            )
+        );
+      }
+  );
+}

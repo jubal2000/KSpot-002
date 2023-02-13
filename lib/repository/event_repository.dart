@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:get/get.dart';
 import 'package:kspot_002/models/etc_model.dart';
 import 'package:kspot_002/services/api_service.dart';
@@ -10,6 +12,17 @@ import '../models/user_model.dart';
 
 class EventRepository {
   final api = Get.find<ApiService>();
+
+  // ignore: non_constant_identifier_names
+  Map<String, EventModel> INDEX_SORT_ASC(Map<String, EventModel> data) {
+    // LOG("--> JSON_INDEX_SORT_ASCE : $data");
+    if (JSON_EMPTY(data)) return Map<String, EventModel>.from({});
+    if (data.length < 2) return data;
+    return Map<String, EventModel>.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
+      // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
+      return data[a]!.sortIndex > data[b]!.sortIndex ? 1 : -1;
+    }));
+  }
 
   Future<Map<String, EventModel>> getEventListFromCountry(String groupId, String country, [String countryState = '']) async {
     Map<String, EventModel> result = {};

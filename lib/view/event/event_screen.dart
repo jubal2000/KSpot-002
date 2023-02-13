@@ -22,6 +22,7 @@ class EventScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppData.eventViewModel.init(context);
+
     return Scaffold(
       body: ChangeNotifierProvider<AppViewModel>.value(
         value: AppData.appViewModel,
@@ -53,11 +54,11 @@ class EventScreen extends StatelessWidget {
                   ),
                   if (AppData.eventViewModel.showList.isNotEmpty)
                     ChangeNotifierProvider<EventViewModel>.value(
-                        value: AppData.eventViewModel,
-                        child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-                          LOG('--> EventViewModel 2');
-                          return viewModel.showMainList(layout);
-                        })
+                      value: AppData.eventViewModel,
+                      child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+                        LOG('--> EventViewModel 2');
+                        return viewModel.showMainList(layout);
+                      })
                     )
                   ]
                 );

@@ -10,13 +10,14 @@ import 'etc_model.dart';
 part 'event_model.g.dart';
 
 class EventModelEx extends EventModel {
-  EventModelEx.empty(String id, {
+  EventModelEx.empty(String id, int type, {
       var title = '',
       var desc = '',
     }) :
     super(
       id: id,
       status: 1,
+      type: type,
       title: title,
       titleKr: '',
       desc: desc,
@@ -50,6 +51,7 @@ class EventModelEx extends EventModel {
 class EventModel {
   String  id;
   int     status;         // 상태 (0:removed, 1:active, 2:disable, 3:ready)
+  int     type;           // 타입 (0:event, 1:class)
   String  title;
   String  titleKr;
   String  desc;
@@ -75,9 +77,13 @@ class EventModel {
   List<PromotionData>? promotionData;  // 광고 정보
   List<ManagerData>?   managerData;    // 관리자 목록
 
+  @JsonKey(ignore: true)
+  int sortIndex = 0;
+
   EventModel({
     required this.id,
     required this.status,
+    required this.type,
     required this.title,
     required this.titleKr,
     required this.desc,
@@ -104,6 +110,7 @@ class EventModel {
     this.promotionData,
     this.managerData,
   });
+
   factory EventModel.fromJson(JSON json) => _$EventModelFromJson(json);
   JSON toJson() => _$EventModelToJson(this);
 

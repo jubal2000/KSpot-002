@@ -22,19 +22,20 @@ import '../place/place_detail_screen.dart';
 import '../profile/target_profile.dart';
 
 class MainStoryItem extends StatefulWidget {
-  MainStoryItem(this.itemInfo, {Key? key,
+  MainStoryItem(this.itemInfo, {Key? key, this.index = 0,
     this.itemHeight = 60, this.bottomSpace = 20, this.isFullScreen = false, this.onItemVisible, this.onItemDeleted}) : super(key: key);
 
-  JSON itemInfo;
+  StoryModel itemInfo;
   double itemHeight;
   double bottomSpace;
   bool isFullScreen;
+  int index;
 
   Function(int, bool)? onItemVisible;
   Function(int)? onItemDeleted;
 
   getKey() {
-    return STR(itemInfo['key']);
+    return itemInfo.id;
   }
 
   @override
@@ -53,7 +54,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
   final _imageKey = GlobalKey();
 
   loadCommentList() {
-    _commentInit = api.getCommentFromTargetId('story', widget.itemInfo['id']);
+    _commentInit = api.getCommentFromTargetId('story', widget.itemInfo.id);
   }
 
   refreshData(JSON uploadData) {
@@ -83,22 +84,22 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
 
   showUserWidget() {
     return UserCardWidget(
-        widget.itemInfo,
+        widget.itemInfo.toJson(),
         faceCircleSize: 2,
         onProfileChanged: (result) {
           LOG('--> UserCardWidget onProfileChanged : $result');
-          widget.itemInfo['userName'] = result['userName'];
-          widget.itemInfo['userPic' ] = result['userPic' ];
-          api.setStoryItemUserInfo(widget.itemInfo['id'], result);
+          // widget.itemInfo['userName'] = result['userName'];
+          // widget.itemInfo['userPic' ] = result['userPic' ];
+          api.setStoryItemUserInfo(widget.itemInfo.id, result);
         },
         onSelected: (_) async {
-          var userInfo = await api.getUserInfoFromId(widget.itemInfo['userId'] ?? widget.itemInfo['id']);
+          var userInfo = await api.getUserInfoFromId(widget.itemInfo.userId);
           if (JSON_NOT_EMPTY(userInfo)) {
             Get.to(() => TargetProfileScreen(UserModel.fromJson(userInfo!)))!.then((value) {
 
             });
           } else {
-            showUserAlertDialog(context, '${widget.itemInfo['userId']}');
+            showUserAlertDialog(context, '${widget.itemInfo.userId}');
           }
         }
     );
@@ -110,7 +111,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
   @override
   void initState() {
     loadCommentList();
-    _isMyStory = widget.itemInfo['userId'] == AppData.USER_ID;
+    _isMyStory = widget.itemInfo.userId == AppData.USER_ID;
     super.initState();
   }
 
@@ -164,7 +165,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                                     // customItemsIndexes: const [1],
                                     // customItemsHeight: 20,
                                     items: [
-                                      if (_isMyStory && widget.itemInfo['status'] == 1)
+                                      if (_isMyStory && widget.itemInfo.status == 1)
                                         ...DropdownItems.storyItems0.map(
                                               (item) =>
                                               DropdownMenuItem<DropdownItem>(
@@ -172,7 +173,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                                                 child: DropdownItems.buildItem(context, item),
                                               ),
                                         ),
-                                      if (_isMyStory && widget.itemInfo['status'] != 1)
+                                      if (_isMyStory && widget.itemInfo.status != 1)
                                         ...DropdownItems.storyItems1.map(
                                               (item) =>
                                               DropdownMenuItem<DropdownItem>(
@@ -196,9 +197,9 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                                         case DropdownItemType.enable:
                                         case DropdownItemType.disable:
                                           setState(() {
-                                            var _status = selected.type == DropdownItemType.enable ? 1 : 2;
-                                            api.setStoryItemStatus(widget.itemInfo['id'], _status);
-                                            widget.itemInfo['status'] = _status;
+                                            var status = selected.type == DropdownItemType.enable ? 1 : 2;
+                                            api.setStoryItemStatus(widget.itemInfo.id, status);
+                                            widget.itemInfo.status = status;
                                           });
                                           break;
                                         case DropdownItemType.edit:
@@ -213,15 +214,15 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                                           //     });
                                           break;
                                         case DropdownItemType.delete:
-                                          showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
-                                            if (result == 1) {
-                                              api.deleteStoryItem(widget.itemInfo['id']).then((result) {
-                                                if (result) {
-                                                  if (widget.onItemDeleted != null) widget.onItemDeleted!(INT(widget.itemInfo['index']));
-                                                }
-                                              });
-                                            }
-                                          });
+                                          // showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+                                          //   if (result == 1) {
+                                          //     api.deleteStoryItem(widget.itemInfo.id).then((result) {
+                                          //       if (result) {
+                                          //         if (widget.onItemDeleted != null) widget.onItemDeleted!(INT(widget.itemInfo['index']));
+                                          //       }
+                                          //     });
+                                          //   }
+                                          // });
                                           break;
                                         case DropdownItemType.report:
                                           // ShowReportMenu(context, widget.itemInfo, 'story', menuList: [
@@ -251,7 +252,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                                 // ),
                                 Padding(
                                   padding: EdgeInsets.only(right: 5),
-                                  child: Text(SERVER_TIME_STR(widget.itemInfo['updateTime'] ?? widget.itemInfo['createTime']),
+                                  child: Text(SERVER_TIME_STR(widget.itemInfo.updateTime),
                                       style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.secondary)),
                                 ),
                               ]
@@ -262,7 +263,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                 VisibilityDetector(
                     key: GlobalKey(),
                     onVisibilityChanged: (info) {
-                      if (widget.onItemVisible != null) widget.onItemVisible!(INT(widget.itemInfo['index']), info.visibleFraction > 0);
+                      if (widget.onItemVisible != null) widget.onItemVisible!(widget.index, info.visibleFraction > 0);
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width - 30,
@@ -277,7 +278,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                         child: Stack(
                             children: [
                               ImageScrollViewer(
-                                List<dynamic>.from(widget.itemInfo['imageData']),
+                                List<dynamic>.from(widget.itemInfo.getPicDataList),
                                 key: _imageKey,
                                 rowHeight: MediaQuery.of(context).size.width - 45,
                                 showArrow: false,
@@ -285,15 +286,15 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                                 autoScroll: false,
                                 imageFit: BoxFit.fill,
                                 onSelected: (selectedId) {
-                                  LOG('--> ImageScrollViewer select item [${widget.isFullScreen}]: ${widget.itemInfo['imageData'].runtimeType} / ${widget.itemInfo['imageData']}');
+                                  LOG('--> ImageScrollViewer select item [${widget.isFullScreen}]: ${widget.itemInfo.getPicDataList.length}');
                                   showImageSlideDialog(context,
-                                      List<String>.from(widget.itemInfo['imageData'].map((item) {
+                                      List<String>.from(widget.itemInfo.getPicDataList.map((item) {
                                         LOG('--> imageData item : ${item.runtimeType} / $item');
                                         return item.runtimeType == String ? STR(item) : item['backPic'] ?? item['image'];
                                       }).toList()), 0, true);
                                 },
                               ),
-                              if (INT(widget.itemInfo['status']) != 1)
+                              if (widget.itemInfo.status != 1)
                                 Positioned(
                                   top: 10,
                                   left: 10,
@@ -304,11 +305,11 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                     )
                 ),
                 SizedBox(height: 10),
-                if (STR(widget.itemInfo['desc']).isNotEmpty)...[
+                if (widget.itemInfo.desc.isNotEmpty)...[
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.all(5),
-                    child: Text(DESC(widget.itemInfo['desc'])),
+                    child: Text(DESC(widget.itemInfo.desc), style: ItemDescStyle(context)),
                   ),
                 ],
                 FutureBuilder(
@@ -350,7 +351,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                     }
                 ),
                 if (!widget.isFullScreen)
-                  showCommentMenu(context, widget.itemInfo, true, 0, (uploadData) {
+                  showCommentMenu(context, widget.itemInfo.toJson(), true, 0, (uploadData) {
                     setState(() {
                       _commentList[uploadData['id']] = uploadData;
                       refreshCommentList();
@@ -487,7 +488,7 @@ class StoryCardItemState extends State<StoryCardItem> {
     _imageHeight = widget.itemHeight - widget.itemPadding!.top - widget.itemPadding!.bottom;
 
     if (LIST_NOT_EMPTY(widget.itemData.picData)) {
-      var firstImage = widget.itemData.picData.first;
+      var firstImage = widget.itemData.picData!.first;
       _imagePath = firstImage.runtimeType == String ? firstImage.toString() : firstImage.url;
     }
     LOG('--> widget.itemData : $_imagePath');
@@ -497,10 +498,10 @@ class StoryCardItemState extends State<StoryCardItem> {
           // if (widget.isSelectable) {
           //   if (widget.selectMax == 1) {
           //     AppData.listSelectData.clear();
-          //     AppData.listSelectData[widget.itemData['id']] = widget.itemData;
+          //     AppData.listSelectData[widget.itemData.id] = widget.itemData;
           //     Navigator.of(context).pop();
           //   } else {
-          //     AppData.listSelectData[widget.itemData['id']] = widget.itemData;
+          //     AppData.listSelectData[widget.itemData.id] = widget.itemData;
           //   }
           // } else {
           //   Navigator.push(

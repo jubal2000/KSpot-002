@@ -922,16 +922,23 @@ class ApiService extends GetxService {
         .snapshots();
   }
 
-  Stream getStoryStreamFromGroup(String groupId) {
+  Stream getStoryStreamFromGroup(String groupId, String country, [String countryState = '']) {
     LOG('------> getStoryStreamFromGroup : $groupId');
     var ref = firestore!.collection(StoryCollection);
     var query = ref
         .where('status', isEqualTo: 1)
         .where('groupId', isEqualTo: groupId);
+
+    // if (country.isNotEmpty) {
+    //   query = query.where('country', isEqualTo: country);
+    //   if (countryState.isNotEmpty) {
+    //     query = query.where('countryState', isEqualTo: countryState);
+    //   }
+    // }
     return query.orderBy('createTime', descending: true).limit(FREE_LOADING_STORY_MAX).snapshots();
   }
 
-  Stream getStoryStreamFromGroupNext(String lastTime, String groupId) {
+  Stream getStoryStreamFromGroupNext(String lastTime, String groupId, String country, [String countryState = '']) {
     LOG('------> getStoryStreamFromGroupNext : $lastTime / $groupId');
     var ref = firestore!.collection(StoryCollection);
     var query = ref
@@ -942,6 +949,12 @@ class ApiService extends GetxService {
       var startTime = Timestamp.fromDate(DateTime.parse(lastTime));
       LOG('--> startTime : $startTime');
       query = query.where('createTime', isLessThan: startTime);
+    }
+    if (country.isNotEmpty) {
+      query = query.where('country', isEqualTo: country);
+      if (countryState.isNotEmpty) {
+        query = query.where('countryState', isEqualTo: countryState);
+      }
     }
     return query.orderBy('createTime', descending: true).limit(FREE_LOADING_STORY_MAX).snapshots();
   }

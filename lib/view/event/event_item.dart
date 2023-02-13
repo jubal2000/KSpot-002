@@ -76,35 +76,8 @@ class _EventCardItemState extends State<EventCardItem> {
     final timeData = widget.itemData.getDateTimeData(AppData.currentDate);
     return GestureDetector(
         onTap: () {
-          if (widget.isSelectable) {
-            if (widget.selectMax == 1) {
-              AppData.listSelectData.clear();
-              AppData.listSelectData[widget.itemData.id] = widget.itemData;
-              Navigator.of(context).pop();
-            } else {
-              AppData.listSelectData[widget.itemData.id] = widget.itemData;
-            }
-          } else {
-            unFocusAll(context);
-            if (widget.onShowDetail != null) widget.onShowDetail!(widget.itemData.id, 0);
-            // AppData.uploadEvent = widget.itemData;
-            // Navigator.push(
-            //     context, MaterialPageRoute(builder: (context) =>
-            //     EventDetailScreen(widget.itemData, widget.placeData,
-            //         isShowHome: widget.isShowHomeButton, isShowPlace: widget.isShowPlaceButton))).then((result) {
-            //   if (result == 'home' && Navigator.of(context).canPop()) {
-            //     Navigator.of(context).pop('home');
-            //     return;
-            //   }
-            //   if (result == 'deleted') {
-            //     ShowToast('Deleted'.tr);
-            //   }
-            //   setState(() {
-            //     widget.itemData = AppData.uploadEvent;
-            //     // if (widget.onRefresh != null) widget.onRefresh!(AppData.uploadEvent);
-            //   });
-            // });
-          }
+          unFocusAll(context);
+          if (widget.onShowDetail != null) widget.onShowDetail!(widget.itemData.id, 0);
         },
         child: Container(
           height: widget.itemHeight,

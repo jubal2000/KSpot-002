@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:kspot_002/view/story/story_edit_screen.dart';
 import 'package:kspot_002/view_model/user_view_model.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
@@ -211,6 +212,12 @@ class AppViewModel extends ChangeNotifier {
                 });
                 break;
               case DropdownItemType.story:
+                Get.to(() => StoryEditScreen())!.then((result) {
+                  if (result != null) {
+                    cache.setStoryItem(result);
+                    notifyListeners();
+                  }
+                });
                 break;
             }
           },

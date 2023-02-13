@@ -6,11 +6,13 @@ import 'package:kspot_002/models/story_model.dart';
 import '../data/app_data.dart';
 import '../data/common_sizes.dart';
 import '../models/event_model.dart';
+import '../models/place_model.dart';
 import '../repository/story_repository.dart';
 import '../services/api_service.dart';
 import '../services/cache_service.dart';
 import '../utils/utils.dart';
 import '../view/home/app_top_menu.dart';
+import '../view/place/place_list_screen.dart';
 import '../view/story/story_item.dart';
 import 'app_view_model.dart';
 
@@ -24,9 +26,12 @@ class StoryViewModel extends ChangeNotifier {
 
   var lastUpdateIndex = -1;
 
-  getStoryList() {
+  refreshModel() {
+    cache.storyListItemData.clear();
     showList.clear();
-    cache.eventData = null; // need make null..
+  }
+
+  getStoryList() {
     storyStream = storyRepo.getStoryStreamFromGroup(AppData.currentEventGroup!.id);
   }
 
@@ -38,7 +43,8 @@ class StoryViewModel extends ChangeNotifier {
     for (var item in cache.storyData!.entries) {
       var addItem = cache.eventMapItemData[item.key];
       addItem ??= MainStoryItem(
-        item.value.toJson(),
+        item.value,
+        index: showList.length,
         onItemVisible: (index, status) {
           LOG('--> MainStoryItem visible : $index - $status');
           if (status && index < cache.storyData!.length) {
@@ -67,37 +73,60 @@ class StoryViewModel extends ChangeNotifier {
     }
   }
 
-  showMainList(layout) {
-    if (storyStream == null) {
-      getStoryList();
+  showItemList(snapshot) {
+    LOG('--> showItemList : ${snapshot.hasError} / ${snapshot.connectionState}');
+    if (snapshot.hasError) {
+      return Center(
+        child: Text('Unable to get data'.tr));
     }
-    return StreamBuilder(
-      stream: storyRepo.stream,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Text('Unable to get data'.tr);
-        } else {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-              return Text('Data does not exist'.tr);
-            case ConnectionState.waiting:
-              break;
-            case ConnectionState.active:
-              for (var item in snapshot.data.docs) {
-                var data = JSON.from(FROM_SERVER_DATA(item.data() as JSON));
-                cache.storyData ??= {};
-                cache.storyData![data['id']] = StoryModel.fromJson(data);
-              }
-              break;
-            case ConnectionState.done:
-              break;
-          }
-          refreshShowList();
-          return ListView(
-            children: cache.storyListItemData.entries.map((e) => e.value).toList(),
-          );
+
+    switch (snapshot.connectionState) {
+      case ConnectionState.none:
+        return Center(
+            child: Text('Data does not exist'.tr));
+      case ConnectionState.waiting:
+        return Center(
+            child: Text('Waiting...'.tr));
+      case ConnectionState.active:
+      case ConnectionState.done:
+        for (var item in snapshot.data.docs) {
+          var data = JSON.from(FROM_SERVER_DATA(item.data() as JSON));
+          cache.storyData ??= {};
+          cache.storyData![data['id']] = StoryModel.fromJson(data);
         }
-      },
+        refreshShowList();
+        return ListView(
+          shrinkWrap: true,
+          children: [
+            SizedBox(height: UI_APPBAR_TOOL_HEIGHT),
+            ...cache.storyListItemData.entries.map((e) => e.value).toList(),
+            SizedBox(height: UI_BOTTOM_HEIGHT + 20),
+          ],
+        );
+    }
+    return Center(
+      child: showLoadingCircleSquare(50),
+    );
+  }
+
+  showMainList(layout, snapshot) {
+    return Stack(
+      children: [
+        showItemList(snapshot),
+        TopCenterAlign(
+          child: SizedBox(
+            height: UI_TOP_MENU_HEIGHT * 1.7,
+            child: AppTopMenuBar(
+              MainMenuID.story,
+              isShowDatePick: false,
+              onCountryChanged: () {
+                refreshModel();
+                notifyListeners();
+              },
+            ),
+          )
+        ),
+      ]
     );
   }
 

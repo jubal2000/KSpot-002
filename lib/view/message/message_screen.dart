@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../data/app_data.dart';
 import '../../view_model/message_view_model.dart';
 
 class MessageScreen extends StatelessWidget {

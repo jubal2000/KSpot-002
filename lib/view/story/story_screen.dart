@@ -22,26 +22,35 @@ class StoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppData.eventViewModel.init(context);
-    return Scaffold(
-      body: ChangeNotifierProvider<AppViewModel>.value(
-        value: AppData.appViewModel,
-        child: Consumer<AppViewModel>(
-          builder: (context, appViewModel, _) {
-            LOG('--> AppViewModel');
-            // AppData.eventViewModel.googleWidget = null;
-            return LayoutBuilder(
-              builder: (context, layout) {
-                return ChangeNotifierProvider<StoryViewModel>.value(
-                    value: AppData.storyViewModel,
-                    child: Consumer<StoryViewModel>(builder: (context, viewModel, _) {
-                      LOG('--> StoryViewModel 1');
-                      return viewModel.showMainList(layout);
-                    })
-                );
-              }
-            );
-          }
-        )
+    AppData.storyViewModel.getStoryList();
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        body: ChangeNotifierProvider<AppViewModel>.value(
+          value: AppData.appViewModel,
+          child: Consumer<AppViewModel>(
+            builder: (context, appViewModel, _) {
+              LOG('--> AppViewModel');
+              // AppData.eventViewModel.googleWidget = null;
+              return LayoutBuilder(
+                builder: (context, layout) {
+                  return StreamBuilder(
+                    stream: AppData.storyViewModel.storyStream,
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      return ChangeNotifierProvider<StoryViewModel>.value(
+                        value: AppData.storyViewModel,
+                        child: Consumer<StoryViewModel>(builder: (context, viewModel, _) {
+                          LOG('--> StoryViewModel 1');
+                          return viewModel.showMainList(layout, snapshot);
+                        })
+                      );
+                    }
+                  );
+                }
+              );
+            }
+          )
+        ),
       )
     );
   }

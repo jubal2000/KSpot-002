@@ -9,7 +9,6 @@ class StoryModelEx extends StoryModel {
       String id,
       {
         int    status = 0,
-        String title = '',
         String desc = '',
         String pic = '',
         String groupId = '',
@@ -22,11 +21,6 @@ class StoryModelEx extends StoryModel {
         int commentCount = 0,
         String updateTime = '',
         String createTime = '',
-
-        List<String>  tagData = const [],
-        List<String>  searchData = const [],
-        List<String>  linkUserData = const [],
-        List<PicData> picData = const [],
       }) : super(
     id: id,
     status: status,
@@ -37,15 +31,9 @@ class StoryModelEx extends StoryModel {
     countryState: countryState,
     userId: userId,
     likeCount: likeCount,
-    voteCount: voteCount,
     commentCount: commentCount,
     updateTime: updateTime,
     createTime: createTime,
-
-    tagData: tagData,
-    searchData: searchData,
-    linkUserData: linkUserData,
-    picData: picData,
   );
 }
 
@@ -62,15 +50,14 @@ class StoryModel {
   String  countryState;   // 도시
   String  userId;         // 소유 유저
   int     likeCount;      // 종아요 횟수
-  int     voteCount;      // 추천 횟수
   int     commentCount;   // 댓글 갯수
   String  updateTime;     // 수정 시간
   String  createTime;     // 생성 시간
 
-  List<String>        tagData;        // tag
-  List<String>        searchData;     // 검색어 목록
-  List<String>        linkUserData;   // 유저링크 목록
-  List<PicData>       picData;        // 메인 이지미 목록
+  List<PicData>?    picData;        // 메인 이지미 목록
+  List<OptionData>? optionData;     // 옵션 정보
+  List<String>?     tagData;        // tag
+  List<String>?     searchData;     // 검색어 목록
 
   StoryModel({
     required this.id,
@@ -82,17 +69,85 @@ class StoryModel {
     required this.countryState,
     required this.userId,
     required this.likeCount,
-    required this.voteCount,
     required this.commentCount,
     required this.updateTime,
     required this.createTime,
 
-    required this.tagData,
-    required this.searchData,
-    required this.linkUserData,
-    required this.picData,
+    this.picData,
+    this.optionData,
+    this.tagData,
+    this.searchData,
   });
 
   factory StoryModel.fromJson(JSON json) => _$StoryModelFromJson(json);
   JSON toJson() => _$StoryModelToJson(this);
+
+  //------------------------------------------------------------------------------------------------------
+  //  PicData
+  //
+
+  get getPicDataList {
+    List<JSON> result = [];
+    if (picData != null) {
+      for (var item in picData!) {
+        result.add(item.toJson());
+      }
+    }
+    return result;
+  }
+
+  //------------------------------------------------------------------------------------------------------
+  //  TagData
+  //
+
+  get getTagDataMap {
+    JSON result = {};
+    if (tagData != null) {
+      for (var item in tagData!) {
+        result[item] = item;
+      }
+    }
+    return result;
+  }
+
+  addTagData(String tag) {
+    tagData ??= [];
+    if (!tagData!.contains(tag)) {
+      tagData!.add(tag);
+    }
+    return tagData!.indexOf(tag);
+  }
+
+  //------------------------------------------------------------------------------------------------------
+  //  OptionData
+  //
+
+  get getOptionDataMap {
+    JSON result = {};
+    if (optionData != null) {
+      for (var item in optionData!) {
+        result[item.id] = item.value;
+      }
+    }
+    return result;
+  }
+
+  getOptionValue(String key) {
+    final optionMap = getOptionDataMap;
+    return optionMap[key] != null && optionMap[key] == '1';
+  }
+
+  setOptionDataMap(JSON map) {
+    optionData ??= [];
+    optionData!.clear();
+    if (map.isNotEmpty) {
+      for (var item in map.entries) {
+        optionData!.add(OptionData(
+          id: item.key,
+          value: item.value,
+        ));
+      }
+    }
+    return optionData;
+  }
 }

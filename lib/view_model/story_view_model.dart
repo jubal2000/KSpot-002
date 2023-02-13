@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/models/story_model.dart';
 
@@ -21,40 +22,46 @@ class StoryViewModel extends ChangeNotifier {
   final storyRepo = StoryRepository();
 
   BuildContext? buildContext;
-  List<JSON>    showList = [];
   Stream? storyStream;
 
-  var lastUpdateIndex = -1;
+  // var lastUpdateKey = '';
+  var lastIndex = -1;
+
+  init(context) {
+    buildContext = context;
+    getStoryList();
+  }
 
   refreshModel() {
     cache.storyListItemData.clear();
-    showList.clear();
   }
 
   getStoryList() {
     storyStream = storyRepo.getStoryStreamFromGroup(AppData.currentEventGroup!.id);
   }
 
-  getStoryListNext() {
-    storyStream = storyRepo.getStoryStreamFromGroupNext(cache.storyData!.entries.last.value.createTime, AppData.currentEventGroup!.id);
+  getStoryListNext(item) {
+    storyStream = storyRepo.getStoryStreamFromGroupNext(item.createTime, AppData.currentEventGroup!.id);
   }
 
   refreshShowList() {
+    var count = 0;
     for (var item in cache.storyData!.entries) {
-      var addItem = cache.eventMapItemData[item.key];
+      var addItem = cache.storyListItemData[item.key];
       addItem ??= MainStoryItem(
         item.value,
-        index: showList.length,
+        index: count++,
         onItemVisible: (index, status) {
-          LOG('--> MainStoryItem visible : $index - $status');
+          if (status) LOG('--> MainStoryItem visible : $index - $status / $lastIndex - ${item.key}');
           if (status && index < cache.storyData!.length) {
-            if (index > cache.storyData!.length - FREE_LOADING_STORY_MAX && lastUpdateIndex != index) {
-                lastUpdateIndex = index;
-                getStoryListNext();
+            if (index == cache.storyData!.length - FREE_LOADING_STORY_MAX && lastIndex != index) {
+              lastIndex = index;
+              getStoryListNext(cache.storyData!.entries.last.value);
+              notifyListeners();
             }
             // loading next video..
             if (index+1 < cache.storyData!.length) {
-              LOG('------> MainStoryItem loadVideoData : ${index + 1}');
+              // LOG('------> MainStoryItem loadVideoData : ${index + 1}');
               // if (storyKeyList[index+1].currentState != null) {
               //   var state = storyKeyList[index+1].currentState as MainStoryItemState;
               //   state.loadVideoData();
@@ -69,8 +76,8 @@ class StoryViewModel extends ChangeNotifier {
         }
       );
       cache.storyListItemData[item.key] = addItem;
-      showList.add(item.value.toJson());
     }
+    LOG('------> refreshShowList : ${cache.storyData!.entries.length}');
   }
 
   showItemList(snapshot) {
@@ -79,40 +86,35 @@ class StoryViewModel extends ChangeNotifier {
       return Center(
         child: Text('Unable to get data'.tr));
     }
-
     switch (snapshot.connectionState) {
       case ConnectionState.none:
-        return Center(
-            child: Text('Data does not exist'.tr));
       case ConnectionState.waiting:
-        return Center(
-            child: Text('Waiting...'.tr));
+        break;
       case ConnectionState.active:
-      case ConnectionState.done:
         for (var item in snapshot.data.docs) {
-          var data = JSON.from(FROM_SERVER_DATA(item.data() as JSON));
+          var data = FROM_SERVER_DATA(item.data() as JSON);
           cache.storyData ??= {};
           cache.storyData![data['id']] = StoryModel.fromJson(data);
+          LOG('--> cache.storyData add : ${data['id']} / ${cache.storyData!.length}');
         }
         refreshShowList();
-        return ListView(
+        break;
+      case ConnectionState.done:
+    }
+  }
+
+  showMainList(layout, snapshot) {
+    showItemList(snapshot);
+    return Stack(
+      children: [
+        ListView(
           shrinkWrap: true,
           children: [
             SizedBox(height: UI_APPBAR_TOOL_HEIGHT),
             ...cache.storyListItemData.entries.map((e) => e.value).toList(),
             SizedBox(height: UI_BOTTOM_HEIGHT + 20),
           ],
-        );
-    }
-    return Center(
-      child: showLoadingCircleSquare(50),
-    );
-  }
-
-  showMainList(layout, snapshot) {
-    return Stack(
-      children: [
-        showItemList(snapshot),
+        ),
         TopCenterAlign(
           child: SizedBox(
             height: UI_TOP_MENU_HEIGHT * 1.7,

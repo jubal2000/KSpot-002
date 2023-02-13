@@ -58,7 +58,7 @@ class _UserCardState extends State<UserCardWidget> {
         if (widget.onProfileChanged != null) widget.onProfileChanged!(widget.userInfo);
       }
     }
-    LOG('--> check me [$_isMyProfile] : ${widget.userInfo['userId']} / ${AppData.USER_ID} - ${widget.userInfo['userName']}');
+    // LOG('--> check me [$_isMyProfile] : ${widget.userInfo['userId']} / ${AppData.USER_ID} - ${widget.userInfo['userName']}');
   }
 
   @override

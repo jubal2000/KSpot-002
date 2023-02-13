@@ -24,6 +24,8 @@ class EventRepository {
     }));
   }
 
+  /////////////////////////////////////////////////////////////////////////////////////////////
+
   Future<Map<String, EventModel>> getEventListFromCountry(String groupId, String country, [String countryState = '']) async {
     Map<String, EventModel> result = {};
     try {

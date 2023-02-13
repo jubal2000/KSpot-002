@@ -246,6 +246,9 @@ class StoryEditViewModel extends ChangeNotifier {
             ));
             item.value['url'] = result;
             upCount++;
+          } else {
+            showAlertDialog(buildContext!, 'Upload'.tr, 'Upload has been failed!'.tr, '', 'OK'.tr);
+            return;
           }
         } else if (JSON_NOT_EMPTY(item.value['url'])) {
           editItem!.picData!.add(PicData.fromJson(item.value));
@@ -274,7 +277,7 @@ class StoryEditViewModel extends ChangeNotifier {
       hideLoadingDialog();
       if (result != null) {
         showAlertDialog(buildContext!, 'Upload'.tr, 'Story Upload Complete'.tr, '', 'OK'.tr).then((_) {
-          Get.back(result: editItem);
+          Get.back(result: result);
         });
       } else {
         showAlertDialog(buildContext!, 'Upload'.tr, 'Story Upload Failed'.tr, '', 'OK'.tr);

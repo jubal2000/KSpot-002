@@ -226,7 +226,7 @@ class ImageScrollViewerState extends State<ImageScrollViewer> {
                           },
                           itemBuilder: (context, index) {
                             index = index % widget.itemList.length;
-                            LOG('--> widget.itemList[$index] : ${widget.itemList[index]}');
+                            // LOG('--> widget.itemList[$index] : ${widget.itemList[index]}');
                             return GestureDetector(
                               child: StatefulBuilder(
                                 builder: (context, snapshot) {

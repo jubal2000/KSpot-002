@@ -628,10 +628,10 @@ class Words extends Translations {
 
 
       // dialog
-      'uploading now...': '업로드 중입니다...',
-      'processing now...': '처리 중입니다...',
-      'updating now...': '업데이트 중입니다...',
-      'image downloading...': '이미지 다운로드 중입니다...',
+      'Uploading now...': '업로드 중입니다...',
+      'Processing now...': '처리 중입니다...',
+      'Updating now...': '업데이트 중입니다...',
+      'Image downloading...': '이미지 다운로드 중입니다...',
       'Are you sure you want to delete it?': '삭제하시겠습니까?',
       'Are you sure you want to cancel it?': '취소하시겠습니까?',
       'Are you sure you want to quit the app?': '앱을 종료 하시겠습니까?',
@@ -648,7 +648,8 @@ class Words extends Translations {
       'Banner image select': '배너이미지 선택',
       'Banner': '베너',
       'Do you want to upload?': '업로드 하시겠습니까?',
-      'Upload is complete': '업로드가 완료됬습니다',
+      'Upload has been completed': '업로드가 완료됬습니다',
+      'Upload has been failed!': '업로드에 실패했습니다!',
       'SAVE': '저장하기',
       'User error': '유저 오류',
       'Delete confirm': '삭제 확인',

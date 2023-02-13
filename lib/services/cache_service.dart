@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -33,5 +35,15 @@ class CacheService extends GetxService {
     storyData![storyItem.id] = storyItem;
     storyListItemData.remove(storyItem.id);
     LOG('--> setStoryItem [${storyItem.id}] : ${storyData![storyItem.id]!.desc} / ${storyData!.length}');
+    sortStoryDataCreateTimeDesc();
+  }
+
+  sortStoryDataCreateTimeDesc() {
+    if (JSON_NOT_EMPTY(storyData) && storyData!.length > 1) {
+      storyData = SplayTreeMap<String,StoryModel>.from(storyData!, (a, b) {
+        LOG("--> check : ${storyData![a]!.createTime} > ${storyData![b]!.createTime}");
+        return DateTime.parse(storyData![a]!.createTime).isBefore(DateTime.parse(storyData![b]!.createTime)) ? -1 : 1;
+      });
+    }
   }
 }

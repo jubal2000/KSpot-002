@@ -200,7 +200,6 @@ class AppViewModel extends ChangeNotifier {
             //   return;
             // }
             var selected = value as DropdownItem;
-            LOG("--> selected.index : ${selected.type}");
             switch (selected.type) {
               case DropdownItemType.event:
                 Get.to(() => EventEditScreen())!.then((result) {
@@ -213,9 +212,9 @@ class AppViewModel extends ChangeNotifier {
                 break;
               case DropdownItemType.story:
                 Get.to(() => StoryEditScreen())!.then((result) {
+                  LOG("--> StoryEditScreen result : $result");
                   if (result != null) {
                     cache.setStoryItem(result);
-                    notifyListeners();
                   }
                 });
                 break;

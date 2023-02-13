@@ -940,22 +940,18 @@ class ApiService extends GetxService {
 
   Stream getStoryStreamFromGroupNext(String lastTime, String groupId, String country, [String countryState = '']) {
     LOG('------> getStoryStreamFromGroupNext : $lastTime / $groupId');
+    var startTime = Timestamp.fromDate(DateTime.parse(lastTime));
     var ref = firestore!.collection(StoryCollection);
     var query = ref
         .where('status', isEqualTo: 1)
-        .where('groupId', isEqualTo: groupId);
-
-    if (JSON_NOT_EMPTY(lastTime)) {
-      var startTime = Timestamp.fromDate(DateTime.parse(lastTime));
-      LOG('--> startTime : $startTime');
-      query = query.where('createTime', isLessThan: startTime);
-    }
-    if (country.isNotEmpty) {
-      query = query.where('country', isEqualTo: country);
-      if (countryState.isNotEmpty) {
-        query = query.where('countryState', isEqualTo: countryState);
-      }
-    }
+        .where('groupId', isEqualTo: groupId)
+        .where('createTime', isLessThan: startTime);
+    // if (country.isNotEmpty) {
+    //   query = query.where('country', isEqualTo: country);
+    //   if (countryState.isNotEmpty) {
+    //     query = query.where('countryState', isEqualTo: countryState);
+    //   }
+    // }
     return query.orderBy('createTime', descending: true).limit(FREE_LOADING_STORY_MAX).snapshots();
   }
 

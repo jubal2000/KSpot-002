@@ -17,12 +17,10 @@ import '../../widget/title_text_widget.dart';
 
 class StoryScreen extends StatelessWidget {
   StoryScreen({Key? key}) : super(key: key);
-  final cache = Get.find<CacheService>();
 
   @override
   Widget build(BuildContext context) {
-    AppData.eventViewModel.init(context);
-    AppData.storyViewModel.getStoryList();
+    AppData.storyViewModel.init(context);
     return SafeArea(
       top: false,
       child: Scaffold(
@@ -34,17 +32,17 @@ class StoryScreen extends StatelessWidget {
               // AppData.eventViewModel.googleWidget = null;
               return LayoutBuilder(
                 builder: (context, layout) {
-                  return StreamBuilder(
-                    stream: AppData.storyViewModel.storyStream,
-                    builder: (BuildContext context, AsyncSnapshot snapshot) {
-                      return ChangeNotifierProvider<StoryViewModel>.value(
-                        value: AppData.storyViewModel,
-                        child: Consumer<StoryViewModel>(builder: (context, viewModel, _) {
-                          LOG('--> StoryViewModel 1');
-                          return viewModel.showMainList(layout, snapshot);
-                        })
-                      );
-                    }
+                  return ChangeNotifierProvider<StoryViewModel>.value(
+                    value: AppData.storyViewModel,
+                    child: Consumer<StoryViewModel>(builder: (context, viewModel, _) {
+                      LOG('--> StoryViewModel 1');
+                      return StreamBuilder(
+                      stream: AppData.storyViewModel.storyStream,
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        return viewModel.showMainList(layout, snapshot);
+                        });
+                      }
+                    )
                   );
                 }
               );

@@ -469,7 +469,7 @@ LIST_CREATE_TIME_SORT_DESC(List<JSON> data) {
   if (JSON_EMPTY(data)) return [];
   if (data.length < 2) return data;
   data.sort((a, b) => a['createTime'] != null && b['createTime'] != null ?
-  a['createTime']['_seconds'] > b['createTime']['_seconds'] ? -1 : 1 : 1);
+  DateTime.parse(a['createTime']).isAfter(DateTime.parse(b['createTime'])) ? -1 : 1 : 0);
   return data;
 }
 
@@ -478,17 +478,17 @@ LIST_CREATE_TIME_SORT_ASCE(List<JSON> data) {
   if (JSON_EMPTY(data)) return [];
   if (data.length < 2) return data;
   data.sort((a, b) => a['createTime'] != null && b['createTime'] != null ?
-  a['createTime']['_seconds'] > b['createTime']['_seconds'] ? 1 : -1 : 1);
+  DateTime.parse(a['createTime']).isAfter(DateTime.parse(b['createTime'])) ? 1 : -1 : 0);
   return data;
 }
 
 // ignore: non_constant_identifier_names
 LIST_START_TIME_SORT(List<JSON> data) {
-  LOG("--> LIST_START_TIME_SORT : $data");
+  // LOG("--> LIST_START_TIME_SORT : $data");
   if (JSON_EMPTY(data)) return [];
   if (data.length < 2) return data;
   data.sort((a, b) => a['startTime'] != null && b['startTime'] != null ?
-  a['startTime']['_seconds'] > b['startTime']['_seconds'] ? 1 : -1 : 1);
+  DateTime.parse(a['startTime']).isAfter(DateTime.parse(b['startTime'])) ? 1 : -1 : 0);
   return data;
 }
 

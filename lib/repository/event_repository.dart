@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:get/get.dart';
 import 'package:kspot_002/models/etc_model.dart';
 import 'package:kspot_002/services/api_service.dart';
+import 'package:kspot_002/services/cache_service.dart';
 
 import '../data/app_data.dart';
 import '../models/event_model.dart';
@@ -11,7 +12,8 @@ import '../utils/utils.dart';
 import '../models/user_model.dart';
 
 class EventRepository {
-  final api = Get.find<ApiService>();
+  final cache = Get.find<CacheService>();
+  final api   = Get.find<ApiService>();
 
   // ignore: non_constant_identifier_names
   Map<String, EventModel> INDEX_SORT_ASC(Map<String, EventModel> data) {
@@ -42,7 +44,7 @@ class EventRepository {
 
   Future<EventModel?> getEventFromId(String eventId) async {
     try {
-      if (AppData.eventData.containsKey(eventId)) return AppData.eventData[eventId];
+      if (JSON_NOT_EMPTY(cache.eventData!) && cache.eventData!.containsKey(eventId)) return cache.eventData![eventId];
       final response = await api.getEventFromId(eventId);
       if (response != null) {
         final eventData = EventModel.fromJson(FROM_SERVER_DATA(response));

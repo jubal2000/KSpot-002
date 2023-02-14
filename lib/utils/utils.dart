@@ -794,34 +794,6 @@ Widget showImageWidget(dynamic imagePath, BoxFit fit, {Color? color}) {
   return Image.asset(NO_IMAGE);
 }
 
-Widget showLoadingImage() {
-  return showLoadingImageSquare(50.0);
-}
-
-Widget showLoadingImageSize(Size size) {
-  return Container(
-    width: size.width,
-    height: size.height,
-    padding: EdgeInsets.all(10),
-    decoration: BoxDecoration(
-        color: Colors.blueGrey.withOpacity(0.2),
-        borderRadius: BorderRadius.all(Radius.circular(8))
-    ),
-  );
-}
-
-Widget showLoadingImageSquare(double size) {
-  return Container(
-    width: size,
-    height: size,
-    padding: EdgeInsets.all(10),
-    decoration: BoxDecoration(
-        color: Colors.blueGrey.withOpacity(0.2),
-        borderRadius: BorderRadius.all(Radius.circular(8))
-    ),
-  );
-}
-
 Widget showLoadingCircleSquare(double size) {
   return Container(
       child: Center(
@@ -2418,7 +2390,9 @@ showAgreeStep(context, viewModel) {
                                         }
                                     );
                                   } else {
-                                    return showLoadingImageSize(Size(double.infinity, MediaQuery.of(context).size.height * 0.28));
+                                    return Center(
+                                      child: showLoadingCircleSquare(50),
+                                    );
                                   }
                                 }
                             )

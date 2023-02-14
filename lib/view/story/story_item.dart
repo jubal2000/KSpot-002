@@ -3,6 +3,8 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
+import 'package:kspot_002/models/event_model.dart';
+import 'package:kspot_002/repository/event_repository.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../data/app_data.dart';
@@ -18,6 +20,7 @@ import '../../widget/image_scroll_viewer.dart';
 import '../../widget/like_widget.dart';
 import '../../widget/share_widget.dart';
 import '../../widget/user_item_widget.dart';
+import '../event/event_detail_screen.dart';
 import '../place/place_detail_screen.dart';
 import '../profile/target_profile.dart';
 
@@ -225,9 +228,23 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                                           // });
                                           break;
                                         case DropdownItemType.report:
-                                          // ShowReportMenu(context, widget.itemInfo, 'story', menuList: [
+                                          // showReportMenu(context, widget.itemInfo.toJson(), 'story', menuList: [
                                           //   {'id':'report', 'title':'Report it'},
                                           // ]);
+                                          final checkKey = 'story-${widget.itemInfo.id}';
+                                          final reportInfo = AppData.reportList[checkKey];
+                                          if (reportInfo == null) {
+                                            showReportDialog(context, ReportType.report,
+                                                'Report'.tr, 'story', widget.itemInfo.toJson(), subTitle: 'Please write what you want to report'.tr).then((result) async {
+                                              if (result.isNotEmpty) {
+                                                final checkKey2 = 'story-${widget.itemInfo.id}';
+                                                AppData.reportList[checkKey2] = result;
+                                                showAlertDialog(context, 'Report'.tr, 'Report has been completed'.tr, '', 'OK'.tr);
+                                              }
+                                            });
+                                          } else {
+                                            showAlertDialog(context, 'Report'.tr, 'Already reported'.tr, '', 'OK');
+                                          }
                                           break;
                                       }
                                     },
@@ -266,7 +283,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                       if (widget.onItemVisible != null) widget.onItemVisible!(widget.index, info.visibleFraction > 0);
                     },
                     child: Container(
-                        width: MediaQuery.of(context).size.width - 30,
+                        width:  MediaQuery.of(context).size.width - 30,
                         height: MediaQuery.of(context).size.width - 30,
                         // padding: EdgeInsets.symmetric(horizontal: 5),
                         // decoration: BoxDecoration(
@@ -288,10 +305,10 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                                 onSelected: (selectedId) {
                                   LOG('--> ImageScrollViewer select item [${widget.isFullScreen}]: ${widget.itemInfo.getPicDataList.length}');
                                   showImageSlideDialog(context,
-                                      List<String>.from(widget.itemInfo.getPicDataList.map((item) {
-                                        LOG('--> imageData item : ${item.runtimeType} / $item');
-                                        return item.runtimeType == String ? STR(item) : item['backPic'] ?? item['image'];
-                                      }).toList()), 0, true);
+                                    List<String>.from(widget.itemInfo.getPicDataList.map((item) {
+                                      LOG('--> imageData item : ${item.runtimeType} / $item');
+                                      return item.runtimeType == String ? STR(item) : item['url'] ?? item['image'];
+                                    }).toList()), 0, true);
                                 },
                               ),
                               if (widget.itemInfo.status != 1)
@@ -346,7 +363,9 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                             ]
                         );
                       } else {
-                        return showLoadingImageSquare(_height);
+                        return Center(
+                          child: showLoadingCircleSquare(50),
+                        );
                       }
                     }
                 ),
@@ -357,7 +376,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                       refreshCommentList();
                     });
                   },
-                      align: CrossAxisAlignment.end),
+                align: CrossAxisAlignment.end),
                 SizedBox(height: widget.isFullScreen ? 60 : 2),
               ]
           ),
@@ -369,7 +388,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
 
 Widget showCommentMenu(BuildContext context, JSON itemInfo, bool showParent, double padding, Function(JSON) onCommentAdded,
     { var align = CrossAxisAlignment.center, Function(JSON)? onUpdate }) {
-  final api = Get.find<ApiService>();
+  final eventRepo = EventRepository();
   JSON uploadData = {
     "status":       1,
     "desc":         '',
@@ -401,26 +420,19 @@ Widget showCommentMenu(BuildContext context, JSON itemInfo, bool showParent, dou
           Text('COMMENT+'.tr, style: SubTitleStyle(context)),
           Expanded(child: SizedBox(height: 1)),
           ShareWidget(context, 'story', itemInfo, showTitle: true, title: 'SHARE'.tr),
+          SizedBox(width: 5),
           LikeWidget(context, 'story', itemInfo, showCount: true, onChangeCount: (value) {
             itemInfo['likes'] = value;
             if (onUpdate != null) onUpdate(itemInfo);
           }),
           if (showParent)...[
-            SizedBox(width: 5),
+            SizedBox(width: 10),
             GestureDetector(
               onTap: () async {
-                if (STR(itemInfo['targetType']) == 'place') {
-                  var placeInfo = await api.getPlaceFromId(itemInfo['targetId']);
-                  if (placeInfo != null) {
-                    Get.to(() => PlaceDetailScreen(PlaceModel.fromJson(placeInfo), null, isShowHome: false))!.then((result) {
-                    });
-                  }
-                } else {
-                  var eventInfo = await api.getEventFromId(itemInfo['targetId']);
-                  // if (eventInfo != null) {
-                  //   Get.to(() => EventDetailScreen(PlaceModel.fromJson(eventInfo), null, isShowHome: false))!.then((result) {
-                  //   });
-                  // }
+                var eventInfo = await eventRepo.getEventFromId(itemInfo['eventId']);
+                if (eventInfo != null) {
+                  Get.to(() => EventDetailScreen(eventInfo, null, isShowHome: false))!.then((result) {
+                  });
                 }
               },
               child: Container(
@@ -428,7 +440,8 @@ Widget showCommentMenu(BuildContext context, JSON itemInfo, bool showParent, dou
                 height: 40,
                 color: Colors.transparent,
                 margin: EdgeInsets.only(right: 5, bottom: 5),
-                child: Icon(STR(itemInfo['targetType']) == 'place' ? Icons.place_outlined : Icons.event_available,
+                child: JSON_NOT_EMPTY(itemInfo['eventPic']) ? showSizedRoundImage(itemInfo['eventPic'], 45, 5) :
+                Icon(Icons.event_available,
                     size: 45, color: Theme.of(context).primaryColor.withOpacity(0.5)),
               ),
             )
@@ -784,7 +797,7 @@ class StoryVerCardItemState extends State<StoryVerCardItem> {
                     height: _imageSize,
                     child: Stack(
                         children: [
-                          showImage(STR(widget.itemData['backPic']), Size(_imageSize, _imageSize)),
+                          showImage(STR(widget.itemData['url']), Size(_imageSize, _imageSize)),
                           if (INT(widget.itemData['status']) == 2)
                             ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, 3, 3),
                           if (_isExpired)

@@ -54,21 +54,22 @@ class _UserCardState extends State<UserCardWidget> {
   var _isMyProfile = false;
 
   refreshData() {
+    LOG('--> UserCardWidget : ${widget.userInfo}');
     _isMyProfile = false;
-    if (STR(widget.userInfo['userName']).isEmpty && STR(widget.userInfo['nickName']).isNotEmpty) {
-      widget.userInfo['userName'] = widget.userInfo['nickName'];
-    }
-    if (STR(widget.userInfo['userPic']).isEmpty && STR(widget.userInfo['pic']).isNotEmpty) {
-      widget.userInfo['userPic'] = widget.userInfo['pic'];
-    }
-    if (STR(widget.userInfo['userId']) == AppData.USER_ID) {
+    // if (STR(widget.userInfo['userName']).isEmpty && STR(widget.userInfo['nickName']).isNotEmpty) {
+    //   widget.userInfo['userName'] = widget.userInfo['nickName'];
+    // }
+    // if (STR(widget.userInfo['userPic']).isEmpty && STR(widget.userInfo['pic']).isNotEmpty) {
+    //   widget.userInfo['userPic'] = widget.userInfo['pic'];
+    // }
+    if (STR(widget.userInfo['userId'] ?? widget.userInfo['id']) == AppData.USER_ID) {
       _isMyProfile = true;
-      if (widget.userInfo['userPic'] != AppData.USER_PIC || widget.userInfo['userName'] != AppData.USER_NICKNAME) {
-        // LOG('--> UserCardWidget Pic Update : ${widget.userInfo['userPic']} / ${AppData.USER_PIC}');
-        widget.userInfo['userPic' ] = AppData.USER_PIC;
-        widget.userInfo['userName'] = AppData.USER_NICKNAME;
-        if (widget.onProfileChanged != null) widget.onProfileChanged!(widget.userInfo);
-      }
+      // if (widget.userInfo['userPic'] != AppData.USER_PIC || widget.userInfo['userName'] != AppData.USER_NICKNAME) {
+      //   // LOG('--> UserCardWidget Pic Update : ${widget.userInfo['userPic']} / ${AppData.USER_PIC}');
+      //   widget.userInfo['userPic' ] = AppData.USER_PIC;
+      //   widget.userInfo['userName'] = AppData.USER_NICKNAME;
+      //   if (widget.onProfileChanged != null) widget.onProfileChanged!(widget.userInfo);
+      // }
     }
     // LOG('--> check me [$_isMyProfile] : ${widget.userInfo['userId']} / ${AppData.USER_ID} - ${widget.userInfo['userName']}');
   }
@@ -107,7 +108,7 @@ class _UserCardState extends State<UserCardWidget> {
                           color: widget.backgroundColor,
                         ),
                         child: ClipOval(
-                          child: showImageFit(widget.userInfo['pic'] ?? widget.userInfo['userPic']),
+                          child: showImageFit(widget.userInfo['userPic'] ?? widget.userInfo['pic']),
                         ),
                       ),
                       if (widget.isShowName && widget.isBottomName)...[
@@ -115,7 +116,7 @@ class _UserCardState extends State<UserCardWidget> {
                             width: double.infinity,
                             height: widget.nameHeight,
                             padding: EdgeInsets.only(top: 5),
-                            child: Text(STR(widget.userInfo['userName']), textAlign: TextAlign.center, maxLines: 1,
+                            child: Text(STR(widget.userInfo['userName'] ?? widget.userInfo['nickName']), textAlign: TextAlign.center, maxLines: 1,
                               style: ItemDescBoldStyle(context),
                             )
                         )
@@ -131,7 +132,7 @@ class _UserCardState extends State<UserCardWidget> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(STR(widget.userInfo['userName']), style: _isMyProfile ? DescNameMyStyle(context) : DescNameStyle(context)),
+                      Text(STR(widget.userInfo['userName'] ?? widget.userInfo['nickName']), style: _isMyProfile ? DescNameMyStyle(context) : DescNameStyle(context)),
                       if (widget.isCanFollow && !_isMyProfile)...[
                         SizedBox(height: 3),
                         UserFollowWidget(widget.userInfo),
@@ -580,7 +581,9 @@ class _UserInfoListCardState extends State<UserInfoListCardWidget> {
                             )
                         );
                       } else {
-                        return showLoadingImageSquare(widget.size.height);
+                        return Center(
+                          child: showLoadingCircleSquare(30),
+                        );
                       }
                     }
                 )

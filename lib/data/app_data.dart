@@ -118,6 +118,7 @@ class AppData {
   static JSON infoData = {};
   static JSON timeData = {};
   static JSON serviceQnAData = {};
+  static JSON reportList = {};
 
   static Map<String, PlaceModel>    placeData = {};
   static Map<String, EventModel>    eventData = {};

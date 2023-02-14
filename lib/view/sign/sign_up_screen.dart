@@ -47,7 +47,7 @@ class SignUpScreen extends StatelessWidget {
                         viewModel.stepIndex, viewModel.stepMax,
                         dotType: PageDotType.line,
                         height: 5.h,
-                        frontColor: Theme.of(context).primaryColor,
+                        activeColor: Theme.of(context).primaryColor,
                         width: Get.width - (UI_HORIZONTAL_SPACE.w * 2),
                       ),
                       Expanded(
@@ -130,7 +130,9 @@ class SignUpScreen extends StatelessWidget {
                             }
                         );
                       } else {
-                        return showLoadingImageSize(Size(double.infinity, MediaQuery.of(context).size.height * 0.28));
+                        return Center(
+                          child: showLoadingCircleSquare(50),
+                        );
                       }
                     }
                   )
@@ -185,7 +187,9 @@ class SignUpScreen extends StatelessWidget {
                             }
                           );
                         } else {
-                          return showLoadingImageSize(Size(double.infinity, MediaQuery.of(context).size.height * 0.28));
+                          return Center(
+                            child: showLoadingCircleSquare(50),
+                          );
                         }
                       }
                     )

@@ -260,8 +260,10 @@ class StoryEditViewModel extends ChangeNotifier {
     if (eventInfo != null) {
       editItem!.country       = eventInfo!.country;
       editItem!.countryState  = eventInfo!.countryState;
-      editItem!.eventId       = eventInfo!.id;
       editItem!.groupId       = eventInfo!.groupId;
+      editItem!.eventId       = eventInfo!.id;
+      editItem!.eventTitle    = eventInfo!.title;
+      editItem!.eventPic      = eventInfo!.pic;
     } else {
       editItem!.country       = AppData.currentCountry;
       editItem!.countryState  = AppData.currentState;
@@ -271,6 +273,8 @@ class StoryEditViewModel extends ChangeNotifier {
     // set search data..
     editItem!.searchData  = CreateSearchWordList(editItem!.toJson());
     editItem!.userId      = AppData.USER_ID;
+    editItem!.userName    = AppData.USER_NICKNAME;
+    editItem!.userPic     = AppData.USER_PIC;
     LOG('---> addEventItem : ${editItem!.toJson()}');
 
     storyRepo.addStoryItem(editItem!).then((result) {

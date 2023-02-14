@@ -33,6 +33,7 @@ enum USER_INFO_OPTION {
 const FREE_LOADING_STORY_MAX = 3;
 const FREE_LOADING_QNA_MAX = 10;
 const SEARCH_ITEM_MAX = 20;
+const STORY_ITEM_MAX = 10;
 
 
 // ignore: non_constant_identifier_names
@@ -712,13 +713,9 @@ class ApiService extends GetxService {
     LOG('--> getEventFromId : $eventId');
     try {
       var ref = firestore!.collection(EventCollection);
-      var snapshot = await ref.where('status', isGreaterThan: 0)
-          .where('id', isEqualTo: eventId)
-          .limit(1)
-          .get();
-
-      if (snapshot.docs.isNotEmpty) {
-        JSON result = FROM_SERVER_DATA(snapshot.docs.first.data());
+      var snapshot = await ref.doc(eventId).get();
+      if (snapshot.data() != null) {
+        JSON result = FROM_SERVER_DATA(snapshot.data());
         LOG('--> getEventFromId result : $result');
         return result;
       }
@@ -881,12 +878,21 @@ class ApiService extends GetxService {
     return result;
   }
 
-  Future<JSON> getStoryFromTargetId(String parentID) async {
+  Future<JSON> getStoryFromTargetId(String eventId, {DateTime? lastTime, int limit = 0}) async {
     JSON result = {};
-
-    var snapshot = await firestore!.collection(StoryCollection)
+    var ref = firestore!.collection(StoryCollection);
+    var query = ref
         .where('status', isEqualTo: 1)
-        .where('targetId', isEqualTo: parentID)
+        .where('eventId', isEqualTo: eventId);
+
+    if (lastTime != null) {
+      var startTime = Timestamp.fromDate(lastTime);
+      query = query.where('createTime', isLessThan: startTime);
+    }
+    if (limit > 0) {
+      query = query.limit(limit);
+    }
+    var snapshot = await query.orderBy('createTime', descending: true)
         .get();
 
     for (var doc in snapshot.docs) {
@@ -894,7 +900,7 @@ class ApiService extends GetxService {
       result[item['id']] = item;
     }
     result = JSON_CREATE_TIME_SORT_DESC(result);
-    LOG('--> getStoryFromParentId Result : ${result.length}');
+    LOG('--> getStoryFromParentId Result [$eventId] : ${result.length}');
     return result;
   }
 

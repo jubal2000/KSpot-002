@@ -13,7 +13,8 @@ class PageDotWidget extends StatefulWidget {
     this.height = 30,
     this.circleSize = 8,
     this.space = 2,
-    this.frontColor = Colors.black,
+    this.activeColor  = Colors.white,
+    this.disableColor = Colors.black,
     this.outlineColor = Colors.white,
     this.onPageChanged}) : super(key: key);
 
@@ -26,7 +27,8 @@ class PageDotWidget extends StatefulWidget {
   double height;
   double circleSize;
   double space;
-  Color frontColor;
+  Color activeColor;
+  Color disableColor;
   Color outlineColor;
 
   @override
@@ -50,7 +52,8 @@ class PageDotWidgetState extends State<PageDotWidget> {
               Positioned(
                 right: 1,
                 top: 1,
-                child: Icon(widget.now == i ? Icons.circle : Icons.circle_outlined, size: widget.circleSize, color: widget.frontColor),
+                child: Icon(widget.now == i ? Icons.circle : Icons.circle_outlined,
+                    size: widget.circleSize, color: widget.now == i ? widget.activeColor : widget.disableColor),
               ),
             ],
             if (widget.dotType == PageDotType.line)...[
@@ -58,7 +61,7 @@ class PageDotWidgetState extends State<PageDotWidget> {
                 width: widget.width / widget.max - widget.space,
                 height: widget.height,
                 decoration: BoxDecoration(
-                  color: widget.frontColor.withOpacity(i <= widget.now ? 1.0 : 0.2),
+                  color: widget.activeColor.withOpacity(i <= widget.now ? 1.0 : 0.2),
                   borderRadius: BorderRadius.circular(widget.height / 2),
                 ),
               )

@@ -765,7 +765,9 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                       ]
                     );
                   } else {
-                      return showLoadingImageSquare(widget.imageHeight);
+                      return Center(
+                        child: showLoadingCircleSquare(50),
+                      );
                   }
                 }
               ),
@@ -875,7 +877,9 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                             )
                         );
                       } else {
-                        return showLoadingImageSquare(widget.imageHeight);
+                        return Center(
+                          child: showLoadingCircleSquare(50),
+                        );
                       }
                     }
                 )
@@ -981,7 +985,9 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                     )
                 );
               } else {
-                  return showLoadingImageSquare(widget.imageHeight);
+                  return Center(
+                    child: showLoadingCircleSquare(50),
+                  );
               }
             }
           )

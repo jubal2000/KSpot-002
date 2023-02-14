@@ -386,7 +386,7 @@ class EventDetailViewModel extends ChangeNotifier {
           'title'     : eventInfo!.title,
           'targetType': 'event',
           'targetId'  : eventInfo!.id,
-          'targetDate': DATE_STR(AppData.currentDate!),
+          'targetDate': DATE_STR(AppData.currentDate),
           'userId'    : AppData.USER_ID,
           'userName'  : AppData.USER_NICKNAME,
           'userPic'   : AppData.USER_PIC,

@@ -667,10 +667,10 @@ class MyProfileTab extends StatelessWidget {
                                 physics: NeverScrollableScrollPhysics(),
                                 itemBuilder: (BuildContext context, int index) {
                                   var item = _showList[index];
-                                  if (JSON_NOT_EMPTY(item['imageData'])) {
-                                    var firstImage = item['imageData'].first;
-                                    item['backPic'] = firstImage.runtimeType != String ? firstImage['backPic'] : firstImage;
-                                    // LOG('--> image data : ${item['pic']} / ${item['imageData']}');
+                                  if (JSON_NOT_EMPTY(item['picData'])) {
+                                    var firstImage = item['picData'].first;
+                                    item['url'] = firstImage.runtimeType != String ? firstImage['url'] : firstImage;
+                                    // LOG('--> image data : ${item['pic']} / ${item['picData']}');
                                   }
                                   return StoryCardItem(
                                       StoryModel.fromJson(item),
@@ -749,10 +749,10 @@ class MyProfileTab extends StatelessWidget {
                 //         padding: EdgeInsets.only(left: 20),
                 //         itemBuilder: (BuildContext context, int index) {
                 //           var item = _showList[index];
-                //           if (JSON_NOT_EMPTY(item['imageData'])) {
-                //             var firstImage = item['imageData'].first;
-                //             item['backPic'] = firstImage.runtimeType != String ? firstImage['backPic'] : firstImage;
-                //             // LOG('--> image data : ${item['pic']} / ${item['imageData']}');
+                //           if (JSON_NOT_EMPTY(item['picData'])) {
+                //             var firstImage = item['picData'].first;
+                //             item['url'] = firstImage.runtimeType != String ? firstImage['url'] : firstImage;
+                //             // LOG('--> image data : ${item['pic']} / ${item['picData']}');
                 //           }
                 //           return Row(
                 //             children: [

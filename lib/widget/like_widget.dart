@@ -34,7 +34,7 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
           return StatefulBuilder(
               builder: (context, setState) {
                 var _pic = STR(targetInfo['pic']);
-                // LOG('--> ShowLikeWidget imageData [$type] : ${targetInfo['imageData']}');
+                // LOG('--> ShowLikeWidget imageData [$type] : ${targetInfo['picData']}');
                 if (_pic.isEmpty && LIST_NOT_EMPTY(targetInfo['picData'])) {
                   _pic = STR(targetInfo['picData'].first is JSON ? targetInfo['picData'].first['url'] : targetInfo['picData'].first);
                 }
@@ -77,7 +77,7 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
           return Container(
             width: 35,
             child: Center(
-              child: showLoadingImageSquare(20)
+              child: showLoadingCircleSquare(20),
             )
           );
         }

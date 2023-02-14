@@ -2,11 +2,13 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
@@ -277,9 +279,10 @@ Future showImageSlideDialog(BuildContext context, List<String> imageData, int st
                   imageData,
                   startIndex: startIndex,
                   rowHeight: MediaQuery.of(context).size.width - 30,
+                  backgroundColor: Colors.transparent,
                   imageFit: BoxFit.contain,
                   showArrow: true,
-                  showPage: true,
+                  showPage: false,
                   autoScroll: false,
                 ),
               ),
@@ -1835,7 +1838,7 @@ Future<JSON> showEditCommentDialog(BuildContext context, CommentType type, Strin
   var _isChanged  = false;
 
   refreshImage() {
-    jsonData['imageData'] = _imageData.entries.map((e) => e.value['backPic']).toList();
+    jsonData['picData'] = _imageData.entries.map((e) => e.value['url']).toList();
   }
 
   refreshGallery() {
@@ -1852,7 +1855,7 @@ Future<JSON> showEditCommentDialog(BuildContext context, CommentType type, Strin
         var imageUrl = await ShowImageCroper(image.path);
         var imageData = await ReadFileByte(imageUrl);
         var key = Uuid().v1();
-        _imageData[key] = {'id': key, 'image': imageData};
+        _imageData[key] = {'id': key, 'data': imageData};
       }
       refreshGallery();
     }
@@ -1869,11 +1872,11 @@ Future<JSON> showEditCommentDialog(BuildContext context, CommentType type, Strin
   }
 
   initData() {
-    if (jsonData['imageData'] != null) {
+    if (jsonData['picData'] != null) {
       _imageData = {};
-      for (var item in jsonData['imageData']) {
+      for (var item in jsonData['picData']) {
         var key = Uuid().v1();
-        _imageData[key] = JSON.from(jsonDecode('{"id": "$key", "backPic": "$item"}'));
+        _imageData[key] = JSON.from(jsonDecode('{"id": "$key", "url": "$item"}'));
       }
     }
     _editController.text    = STR(jsonData['desc']);
@@ -2053,18 +2056,18 @@ Future<JSON> showEditCommentDialog(BuildContext context, CommentType type, Strin
                               for (var item in _imageData.entries) {
                                 var result = await api.uploadImageData(item.value as JSON, 'comment_img');
                                 if (result != null) {
-                                  _imageData[item.key]['backPic'] = result;
+                                  _imageData[item.key]['url'] = result;
                                   upCount++;
                                 }
                               }
                               LOG('---> upload upCount : $upCount');
                               if (type == CommentType.comment) jsonData['vote'] = _voteNow;
                               jsonData['desc'] = _descText;
-                              jsonData['imageData'] = [];
+                              jsonData['picData'] = [];
                               for (var item in _imageData.entries) {
-                                if (item.value['backPic'] != null) jsonData['imageData'].add(item.value['backPic']);
+                                if (item.value['url'] != null) jsonData['picData'].add(item.value['url']);
                               }
-                              LOG('---> image upload done : ${jsonData['imageData'].length} / ${targetUserInfo['id']}');
+                              LOG('---> image upload done : ${jsonData['picData'].length} / ${targetUserInfo['id']}');
                               jsonData = TO_SERVER_DATA(jsonData);
                               LOG('---> jsonData : $jsonData');
 
@@ -2124,7 +2127,7 @@ Future<JSON> showEditCommentMultiSendDialog(BuildContext context, CommentType ty
   var _isChanged  = false;
 
   refreshImage() {
-    jsonData['imageData'] = _imageData.entries.map((e) => e.value['backPic']).toList();
+    jsonData['picData'] = _imageData.entries.map((e) => e.value['url']).toList();
   }
 
   refreshGallery() {
@@ -2158,9 +2161,9 @@ Future<JSON> showEditCommentMultiSendDialog(BuildContext context, CommentType ty
   }
 
   initData() {
-    if (jsonData['imageData'] != null) {
+    if (jsonData['picData'] != null) {
       _imageData = {};
-      for (var item in jsonData['imageData']) {
+      for (var item in jsonData['picData']) {
         var key = Uuid().v1();
         _imageData[key] = JSON.from(jsonDecode('{"id": "$key", "backPic": "$item"}'));
       }
@@ -2326,18 +2329,18 @@ Future<JSON> showEditCommentMultiSendDialog(BuildContext context, CommentType ty
                               for (var item in _imageData.entries) {
                                 var result = await api.uploadImageData(item.value as JSON, 'comment_img');
                                 if (result != null) {
-                                  _imageData[item.key]['backPic'] = result;
+                                  _imageData[item.key]['url'] = result;
                                   upCount++;
                                 }
                               }
                               LOG('---> upload upCount : $upCount');
                               if (type == CommentType.comment) jsonData['vote'] = _voteNow;
                               jsonData['desc'] = _descText;
-                              jsonData['imageData'] = [];
+                              jsonData['picData'] = [];
                               for (var item in _imageData.entries) {
-                                if (item.value['backPic'] != null) jsonData['imageData'].add(item.value['backPic']);
+                                if (item.value['url'] != null) jsonData['picData'].add(item.value['url']);
                               }
-                              LOG('---> image upload done : ${jsonData['imageData'].length} / $upCount');
+                              LOG('---> image upload done : ${jsonData['picData'].length} / $upCount');
                               JSON? upResult;
                               for (var item in targetUserList) {
                                 var targetUserInfo = await api.getUserInfoFromId(item);
@@ -2512,6 +2515,139 @@ showColorSelectorDialog(BuildContext context, String title, Color selectColor) a
   );
 }
 
+ThemeData getThemeData(bool mode, int index) {
+  // LOG("--> getThemeData : $mode / $index");
+  return mode ? FlexThemeData.light(
+    scheme: schemeList[index],
+    surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+    blendLevel: 20,
+    appBarOpacity: 0.95,
+    subThemesData: const FlexSubThemesData(
+      blendOnLevel: 20,
+      blendOnColors: false,
+    ),
+    keyColors: const FlexKeyColors(),
+    visualDensity: FlexColorScheme.comfortablePlatformDensity,
+    useMaterial3: true,
+    fontFamily: GoogleFonts.notoSans().fontFamily,
+    textTheme: GoogleFonts.notoSansTextTheme(),
+  ) : FlexThemeData.dark(
+    scheme: schemeList[index],
+    surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+    blendLevel: 15,
+    appBarStyle: FlexAppBarStyle.surface,
+    appBarOpacity: 0.90,
+    subThemesData: const FlexSubThemesData(
+      blendOnLevel: 30,
+    ),
+    keyColors: const FlexKeyColors(),
+    visualDensity: FlexColorScheme.comfortablePlatformDensity,
+    useMaterial3: true,
+    fontFamily: GoogleFonts.notoSans().fontFamily,
+    textTheme: GoogleFonts.notoSansTextTheme(),
+  );
+}
+
+showThemeSelectorDialog(BuildContext context, String title, bool themeMode, int themeIndex) async {
+  var _themeColor = '';
+  return await showDialog(
+      context: context,
+      barrierColor: Colors.black87,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title, style: DialogTitleStyle(context)),
+          titleTextStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).primaryColor),
+          contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          insetPadding: EdgeInsets.all(10),
+          backgroundColor: DialogBackColor(context),
+          content: StatefulBuilder(
+              builder: (context, setState) {
+                return Container(
+                  width: Get.width * 0.85,
+                  height: Get.width,
+                  child: GridView.builder(
+                      itemCount: schemeList.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 6, //1 개의 행에 보여줄 item 개수
+                        mainAxisSpacing: 2, //수평 Padding
+                        crossAxisSpacing: 2, //수직 Padding
+                      ),
+                      itemBuilder: (BuildContext context, int index) {
+                        var _theme = getThemeData(themeMode, index);
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              themeIndex = index;
+                              _themeColor = COL2STR(_theme.primaryColor);
+                            });
+                          },
+                          child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                                border: Border.all(
+                                  color: themeIndex == index ? Theme.of(context).colorScheme.inverseSurface : Colors.transparent,
+                                  width: 4.0,
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                              child: Container(
+                                                color: _theme.colorScheme.primary,
+                                              )
+                                          ),
+                                          Expanded(
+                                              child: Container(
+                                                color: _theme.colorScheme.primaryContainer,
+                                              )
+                                          ),
+                                        ],
+                                      )
+                                  ),
+                                  Expanded(
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                              child: Container(
+                                                color: _theme.colorScheme.secondary,
+                                              )
+                                          ),
+                                          Expanded(
+                                              child: Container(
+                                                color: _theme.cardColor,
+                                              )
+                                          ),
+                                        ],
+                                      )
+                                  ),
+                                  Expanded(
+                                      child: Text(schemeShotTextList[index], style: ItemDescExStyle(context), maxLines: 1)
+                                  )
+                                ],
+                              )
+                          ),
+                        );
+                      }
+                  ),
+                );
+              }
+          ),
+          actions: [
+            TextButton(
+              child: Text('Done'.tr),
+              onPressed: () {
+                Navigator.of(context).pop({'color': _themeColor, 'index': themeIndex});
+              },
+            ),
+          ],
+        );
+      }
+  );
+}
+
 Future showButtonDialog(BuildContext context,
     String title,
     String message1,
@@ -2667,6 +2803,250 @@ Future<JSON> showJsonMultiSelectDialog(BuildContext context, String title, JSON 
         );
       }
   ) ?? '';
+}
+
+enum ReportType {
+  normal,
+  report,
+  ownership,
+}
+
+showReportDialog(BuildContext context, ReportType type, String title, String targetType,
+    JSON targetData, {JSON jsonOrgData = const {}, String subTitle = ''}) async {
+  final api = Get.find<ApiService>();
+  final _editController   = TextEditingController();
+  final _editControllerEx = TextEditingController();
+  final _imageGalleryKey = GlobalKey();
+
+  JSON _imageData = {};
+  JSON _jsonData = {};
+  var _descText = '';
+  var _isChanged = false;
+
+  refreshImage() {
+    _jsonData['picData'] = _imageData.entries.map((e) => e.value['url']).toList();
+  }
+
+  refreshGallery() {
+    var gallery = _imageGalleryKey.currentState as CardScrollViewerState;
+    gallery.refresh();
+    refreshImage();
+  }
+
+  picLocalImage() async {
+    List<XFile>? pickList = await ImagePicker().pickMultiImage();
+    if (pickList != null) {
+      for (var i=0; i<pickList.length; i++) {
+        var image = pickList[i];
+        var imageUrl = await ShowImageCroper(image.path);
+        var imageData = await ReadFileByte(imageUrl);
+        var key = Uuid().v1();
+        _imageData[key] = {'id': key, 'image': imageData};
+      }
+      refreshGallery();
+    }
+  }
+
+  initData() {
+    if (_jsonData['picData'] != null) {
+      _imageData = {};
+      for (var item in _jsonData['picData']) {
+        var key = Uuid().v1();
+        _imageData[key] = JSON.from(jsonDecode('{"id": "$key", "url": "$item"}'));
+      }
+    }
+    _editController.text    = STR(_jsonData['desc']);
+    _editControllerEx.text  = STR(_jsonData['descOrg']);
+  }
+
+  initData();
+
+  return await showDialog(
+      context: context,
+      builder: (BuildContext _context) {
+        return PointerInterceptor(
+          child: StatefulBuilder(
+              builder: (context, setState) {
+                return AlertDialog(
+                  scrollable: true,
+                  title: Text(title.tr, style: DialogTitleStyle(context)),
+                  // titleTextStyle: type == CommentType.message ? _titleText2 : _titleText,
+                  insetPadding: EdgeInsets.all(15),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                  // backgroundColor: Colors.white,
+                  backgroundColor: DialogBackColor(context),
+                  content: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                      constraints: BoxConstraints(
+                        minWidth: MediaQuery.of(context).size.width,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ImageEditScrollViewer(
+                              _imageData,
+                              key: _imageGalleryKey,
+                              title: 'IMAGE SELECT'.tr,
+                              isEditable: true,
+                              itemWidth: 80,
+                              itemHeight: 80,
+                              onActionCallback: (key, status) {
+                                setState(() {
+                                  switch (status) {
+                                    case 1: {
+                                      picLocalImage();
+                                      break;
+                                    }
+                                    case 2: {
+                                      _imageData.remove(key);
+                                      refreshGallery();
+                                      break;
+                                    }
+                                  }
+                                });
+                              }
+                          ),
+                          SizedBox(height: 5),
+                          if (STR(_jsonData['descOrg']).isNotEmpty)...[
+                            TextFormField(
+                              controller: _editControllerEx,
+                              decoration: inputLabel(context, '', ''),
+                              keyboardType: TextInputType.multiline,
+                              maxLines: 5,
+                              maxLength: COMMENT_LENGTH,
+                              enabled: false,
+                              // style: _editText,
+                              onChanged: (value) {
+                                setState(() {
+                                  _descText = value;
+                                  _isChanged = true;
+                                });
+                              },
+                            ),
+                            SizedBox(height: 10),
+                          ],
+                          if (subTitle.isNotEmpty)...[
+                            SubTitle(context, subTitle),
+                            SizedBox(height: 5),
+                          ],
+                          TextFormField(
+                            controller: _editController,
+                            decoration: inputLabel(context, 'Description'.tr, ''),
+                            keyboardType: TextInputType.multiline,
+                            maxLines: 5,
+                            maxLength: COMMENT_LENGTH,
+                            // style: _editText,
+                            onChanged: (value) {
+                              setState(() {
+                                _descText = value;
+                                _isChanged = true;
+                              });
+                            },
+                          ),
+                        ],
+                      )
+                  ),
+                  actions: [
+                    TextButton(
+                      child: Text('Cancel'.tr),
+                      onPressed: () {
+                        Navigator.pop(_context, {});
+                      },
+                    ),
+                    TextButton(
+                        child: Text('OK'.tr),
+                        onPressed: () {
+                          if (type == ReportType.ownership && _imageData.isEmpty) {
+                            showAlertDialog(context, 'Error'.tr, 'Please select one or more images'.tr, '', 'OK'.tr);
+                            return;
+                          }
+                          showAlertYesNoDialog(context, 'Report'.tr, 'Would you like to send a report?'.tr,
+                              '', 'Cancel'.tr, 'OK'.tr).then((value) {
+                            if (value == 0) return;
+                            int upCount = 0;
+                            showLoadingDialog(context, 'uploading now...'.tr);
+                            Future.delayed(Duration(milliseconds: 200), () async {
+                              for (var item in _imageData.entries) {
+                                var result = await api.uploadImageData(item.value as JSON, 'report_img');
+                                if (result != null) {
+                                  _imageData[item.key]['backPic'] = result;
+                                  upCount++;
+                                }
+                              }
+                              LOG('---> upload upCount : $upCount');
+                              _jsonData['userId'      ] = AppData.USER_ID;
+                              _jsonData['type'        ] = type == ReportType.report ? 'report' : 'owner';
+                              _jsonData['targetType'  ] = targetType;
+                              _jsonData['targetId'    ] = STR(targetData['id']);
+                              _jsonData['targetTitle' ] = STR(targetData['title'] ?? targetData['desc']);
+                              _jsonData['desc'        ] = _descText;
+                              _jsonData['replayType'  ] = 'ready';
+                              _jsonData['replayName'  ] = '';
+                              _jsonData['replayDesc'  ] = '';
+                              _jsonData['replayTime'  ] = '';
+                              _jsonData['imageData'   ] = [];
+                              _jsonData['pic'         ] = '';
+                              for (var item in _imageData.entries) {
+                                if (item.value['backPic'] != null) {
+                                  _jsonData['imageData'].add(item.value['backPic']);
+                                  if (STR(_jsonData['pic']).isEmpty) _jsonData['pic'] = item.value['backPic'];
+                                }
+                              }
+                              JSON upResult = {};
+                              final result = await api.addReportItemEx(_jsonData, AppData.reportList);
+                              if (result.isNotEmpty) {
+                                upResult = FROM_SERVER_DATA(_jsonData);
+                              }
+                              Navigator.of(dialogContext!).pop();
+                              Future.delayed(Duration(milliseconds: 200), () async {
+                                Navigator.pop(_context, upResult);
+                              });
+                            });
+                          });
+                        }
+                    )
+                  ],
+                );
+              }
+          ),
+        );
+      }
+  );
+}
+
+showReportMenu(BuildContext context, JSON targetInfo, String type, {List<JSON> menuList = const [
+  {'id':'report', 'title':'Report content'},
+  {'id':'ownership', 'title':'Change to Ownership'},
+]}) {
+  showJsonButtonSelectDialog(context, 'Report type'.tr, menuList).then((result) {
+    var targetId = STR(targetInfo['id']);
+    switch (result) {
+      case 'report':
+        if (AppData.reportList.containsKey('report') && AppData.reportList['report'].containsKey(targetId)) {
+          showAlertDialog(context, TR(menuList[0]['title']), 'Already reported'.tr, '', 'OK'.tr);
+        } else {
+          showReportDialog(context, ReportType.report,
+              TR(menuList[0]['title']), type, targetInfo, subTitle: 'Please write what you want to report'.tr).then((result) async {
+            if (result.isNotEmpty) {
+              showAlertDialog(context, TR(menuList[0]['title']), 'Report has been completed'.tr, '', 'OK'.tr);
+            }
+          });
+        }
+        break;
+      case 'ownership':
+        if (AppData.reportList.containsKey('owner') && AppData.reportList['owner'].containsKey(targetId)) {
+          showAlertDialog(context, TR(menuList[1]['title']), 'Already reported'.tr, '', 'OK'.tr);
+        } else {
+          showReportDialog(context, ReportType.ownership,
+              TR(menuList[1]['title']), type, targetInfo, subTitle: 'Please add supporting documents'.tr).then((result) async {
+            if (result.isNotEmpty) {
+              showAlertDialog(context, TR(menuList[1]['title']), 'Report has been completed'.tr, '', 'OK'.tr);
+            }
+          });
+        }
+        break;
+    }
+  });
 }
 
 Future<String> showJsonButtonSelectDialog(BuildContext context, String title, List<JSON> jsonData) async {

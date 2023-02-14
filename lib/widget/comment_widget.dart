@@ -178,15 +178,15 @@ class CommentGroupTabState extends State<CommentGroupTab> {
 
   initData() {
     switch(widget.commentType) {
+      case CommentType.story:
+        initListData = api.getStoryFromTargetId(widget.parentInfo['id']);
+        break;
       case CommentType.comment:
         LOG("--> getCommentFromTargetId [${widget.type}] : ${widget.parentInfo['id']}");
         initListData = api.getCommentFromTargetId(widget.type, widget.parentInfo['id']);
         break;
       case CommentType.qna:
         initListData = api.getQnaFromTargetId(widget.type, widget.parentInfo['id']);
-        break;
-      case CommentType.story:
-        initListData = api.getStoryFromTargetId(widget.parentInfo['id']);
         break;
     }
   }
@@ -212,7 +212,9 @@ class CommentGroupTabState extends State<CommentGroupTab> {
           commentKey.add(GlobalKey());
           commentList.add(CommentListExItem(
             item,
-            widget.commentType, widget.parentInfo, isShowDivider: commentList.isNotEmpty, key: commentKey.last,
+            widget.commentType, widget.parentInfo,
+            key: commentKey.last,
+            isShowDivider: commentList.isNotEmpty,
             paddingSide: 10,
             isAuthor: item['userId'] == widget.parentInfo['userId'],
             isShowMenu: widget.commentType != CommentType.story,
@@ -299,7 +301,6 @@ class CommentGroupTabState extends State<CommentGroupTab> {
           refreshList();
           LOG("--> refreshList done [${widget.commentType}]: $maxPage / ${listData.length}");
           return Container(
-            height: double.infinity,
               padding: _padding,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,

@@ -79,7 +79,7 @@ class _StoryEditScreenState extends State<StoryEditScreen> {
                           viewModel.stepIndex, viewModel.stepMax,
                           dotType: PageDotType.line,
                           height: 5,
-                          frontColor: Theme.of(context).primaryColor,
+                          activeColor: Theme.of(context).primaryColor,
                           width: Get.width - (UI_HORIZONTAL_SPACE * 2),
                         ),
                         Expanded(
@@ -183,13 +183,13 @@ class _StoryEditScreenState extends State<StoryEditScreen> {
               //                             String? result1;
               //                             String? result2;
               //                             if (item.value['type'] == 'video' && STR(item.value['video']).isNotEmpty) {
-              //                               result1 = await api.uploadImageFile(File(item.value['backPic']), 'placeStory_mov_p', item.key);
+              //                               result1 = await api.uploadImageFile(File(item.value['url']), 'placeStory_mov_p', item.key);
               //                               result2 = await api.uploadVideoData(item.value, 'placeStory_mov');
               //                             } else if (item.value['type'] == 'image' && STR(item.value['image']).isNotEmpty) {
               //                               result1 = await api.uploadImageData(item.value, 'placeStory_img');
               //                             }
               //                             if (result1 != null) {
-              //                               _imageData[item.key]['backPic'] = result1;
+              //                               _imageData[item.key]['url'] = result1;
               //                               upCount++;
               //                             }
               //                             if (result2 != null) {
@@ -198,11 +198,11 @@ class _StoryEditScreenState extends State<StoryEditScreen> {
               //                           }
               //                           LOG('---> upload upCount : $upCount / $_imageData');
               //                           widget.jsonData['desc'] = _descText;
-              //                           widget.jsonData['imageData'] = [];
+              //                           widget.jsonData['picData'] = [];
               //                           for (var item in _imageData.entries) {
-              //                             if (item.value['backPic'] != null) {
-              //                               widget.jsonData['imageData'].add({
-              //                                 'backPic' : STR(item.value['backPic']),
+              //                             if (item.value['url'] != null) {
+              //                               widget.jsonData['picData'].add({
+              //                                 'url' : STR(item.value['url']),
               //                                 'videoUrl': STR(item.value['videoUrl'])
               //                               });
               //                             }

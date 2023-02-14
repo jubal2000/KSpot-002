@@ -169,7 +169,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
         widget.selectedId = widget.itemList.keys.first;
       }
       // for (var item in widget.itemList.entries) {
-      //   LOG('--> CardScrollViewerState item.value : ${item.value} / ${item.value['backPic'] is String}');
+      //   LOG('--> CardScrollViewerState item.value : ${item.value} / ${item.value['url'] is String}');
       // }
       _cardList = widget.itemList.entries.map((item) =>
           Container(

@@ -88,7 +88,7 @@ class _EventEditScreenState extends State<EventEditScreen> {
                           viewModel.stepIndex, viewModel.stepMax,
                           dotType: PageDotType.line,
                           height: 5.h,
-                          frontColor: Theme.of(context).primaryColor,
+                          activeColor: Theme.of(context).primaryColor,
                           width: Get.width - (UI_HORIZONTAL_SPACE.w * 2),
                         ),
                         Expanded(

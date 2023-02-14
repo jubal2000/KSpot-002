@@ -124,6 +124,7 @@ class ThemeNotifier with ChangeNotifier {
 
   var _themeData = ThemeData();
   ThemeData getTheme() => _themeData;
+  int getThemeIndex() => _schemeIndex;
   bool getMode() => _schemeMode;
 
   var _schemeIndex = 0;
@@ -188,9 +189,13 @@ class ThemeNotifier with ChangeNotifier {
 
   String setFlexSchemeRotate() {
     if (++_schemeIndex >= schemeList.length) _schemeIndex = 0;
+    return refreshFlexScheme(_schemeIndex);
+  }
+
+  refreshFlexScheme(index) {
     if (_schemeMode) {
       _themeData = FlexThemeData.light(
-        scheme: schemeList[_schemeIndex],
+        scheme: schemeList[index],
         surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
         blendLevel: 15,
         appBarStyle: FlexAppBarStyle.surface,
@@ -207,7 +212,7 @@ class ThemeNotifier with ChangeNotifier {
       );
     } else {
       _themeData = FlexThemeData.dark(
-        scheme: schemeList[_schemeIndex],
+        scheme: schemeList[index],
         surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
         blendLevel: 15,
         appBarStyle: FlexAppBarStyle.surface,
@@ -223,9 +228,9 @@ class ThemeNotifier with ChangeNotifier {
             .fontFamily,
       );
     }
-    AppData.currentThemeIndex = _schemeIndex;
-    var title = schemeTextList[_schemeIndex];
-    StorageManager.saveData('SchemeIndex', _schemeIndex);
+    AppData.currentThemeIndex = index;
+    var title = schemeTextList[index];
+    StorageManager.saveData('SchemeIndex', index);
     notifyListeners();
     return title;
   }

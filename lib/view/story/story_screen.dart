@@ -28,14 +28,14 @@ class StoryScreen extends StatelessWidget {
           value: AppData.appViewModel,
           child: Consumer<AppViewModel>(
             builder: (context, appViewModel, _) {
-              LOG('--> AppViewModel');
-              // AppData.eventViewModel.googleWidget = null;
+              LOG('--> AppViewModel refresh');
+              AppData.storyViewModel.getStoryList();
               return LayoutBuilder(
                 builder: (context, layout) {
                   return ChangeNotifierProvider<StoryViewModel>.value(
                     value: AppData.storyViewModel,
                     child: Consumer<StoryViewModel>(builder: (context, viewModel, _) {
-                      LOG('--> StoryViewModel 1');
+                      LOG('--> StoryViewModel refresh');
                       return StreamBuilder(
                       stream: AppData.storyViewModel.storyStream,
                       builder: (BuildContext context, AsyncSnapshot snapshot) {

@@ -213,9 +213,10 @@ class AppViewModel extends ChangeNotifier {
               case DropdownItemType.story:
                 Get.to(() => StoryEditScreen())!.then((result) {
                   LOG("--> StoryEditScreen result : $result");
-                  if (result != null) {
-                    cache.setStoryItem(result);
-                  }
+                  // if (result != null) {
+                  //   cache.setStoryItem(result);
+                  // }
+                  notifyListeners();
                 });
                 break;
             }

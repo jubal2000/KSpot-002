@@ -26,8 +26,8 @@ import '../../view_model/event_view_model.dart';
 import '../../widget/user_item_widget.dart';
 import '../event/event_edit_screen.dart';
 
-class AppTopMenuBar extends StatefulWidget {
-  AppTopMenuBar(this.menuMode, {Key? key, this.isShowDatePick = true, this.isDateOpen = true, this.height = 65.0, this.onCountryChanged, this.onDateChange}) : super(key: key);
+class HomeTopMenuBar extends StatefulWidget {
+  HomeTopMenuBar(this.menuMode, {Key? key, this.isShowDatePick = true, this.isDateOpen = true, this.height = 65.0, this.onCountryChanged, this.onDateChange}) : super(key: key);
   int menuMode;
   double height;
   bool isShowDatePick;
@@ -36,10 +36,10 @@ class AppTopMenuBar extends StatefulWidget {
   Function(bool)? onDateChange;
 
   @override
-  AppTopMenuState createState() => AppTopMenuState();
+  HomeTopMenuBarState createState() => HomeTopMenuBarState();
 }
 
-class AppTopMenuState extends State<AppTopMenuBar> {
+class HomeTopMenuBarState extends State<HomeTopMenuBar> {
   var iconSize = 24.0;
 
   @override
@@ -157,6 +157,20 @@ class AppTopMenuState extends State<AppTopMenuBar> {
                         ),
                         child: AppData.eventViewModel.showEventListType(),
                       ),
+                      // if (AppData.appViewModel.appbarMenuMode == MainMenuID.story)
+                      //   Container(
+                      //     alignment: Alignment.center,
+                      //     padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),
+                      //     constraints: BoxConstraints(
+                      //       maxHeight: widget.height * 0.8,
+                      //       minWidth: widget.height * 0.8,
+                      //     ),
+                      //     decoration: BoxDecoration(
+                      //       borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
+                      //       color: Theme.of(context).canvasColor.withOpacity(0.55),
+                      //     ),
+                      //     child: AppData.storyViewModel.showStoryListType(),
+                      //   ),
                     ],
                     if (AppData.appViewModel.appbarMenuMode == MainMenuID.my)
                       Container(

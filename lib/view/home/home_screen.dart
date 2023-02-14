@@ -18,7 +18,7 @@ import '../../utils/utils.dart';
 import '../../view_model/app_view_model.dart';
 import '../../widget/event_group_dialog.dart';
 import '../message/message_screen.dart';
-import 'app_top_menu.dart';
+import 'home_top_menu.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({Key? key}) : super(key: key);
@@ -240,16 +240,19 @@ class HomeScreen extends StatelessWidget {
                         ),
                         GestureDetector(
                             onTap: () {
-                              var mode = theme.setFlexSchemeRotate();
-                              Fluttertoast.showToast(
-                                  msg: mode,
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.CENTER,
-                                  timeInSecForIosWeb: 1,
-                                  backgroundColor: theme.getMode() ? Colors.white : Colors.black,
-                                  textColor: theme.getMode() ? Colors.black : Colors.white,
-                                  fontSize: 16.0.sp
-                              );
+                              showThemeSelectorDialog(context, '', theme.getMode(), theme.getThemeIndex()).then((result) {
+                                LOG('--> showThemeSelectorDialog : $result');
+                                var mode = theme.refreshFlexScheme(INT(result['index']));
+                                Fluttertoast.showToast(
+                                    msg: mode,
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    timeInSecForIosWeb: 1,
+                                    backgroundColor: theme.getMode() ? Colors.white : Colors.black,
+                                    textColor: theme.getMode() ? Colors.black : Colors.white,
+                                    fontSize: 16.0.sp
+                                );
+                              });
                             },
                             child: SizedBox(
                               height: _height,

@@ -72,9 +72,9 @@ Widget ShowCustomField(BuildContext context, JSON customList) {
           _rowAlignment = CrossAxisAlignment.start;
           descItem = GestureDetector(
               onTap: () {
-                showImageDialog(context, item.value['backPic']);
+                showImageDialog(context, item.value['url']);
               },
-              child: showImage(item.value['backPic'], Size(_height,_height))
+              child: showImage(item.value['url'], Size(_height,_height))
           );
           break;
         default:

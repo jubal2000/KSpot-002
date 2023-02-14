@@ -37,10 +37,14 @@ Future<void> main() async {
 
   api.initFirebase();
 
+  Future getInfoData() async {
+    return api.getInfoData();
+  }
+
   runApp(ChangeNotifierProvider<ThemeNotifier>(
     create: (_) => ThemeNotifier(),
     child: FutureBuilder(
-      future: api.getInfoData(),
+      future: getInfoData(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           AppData.initStartInfo(snapshot.data as JSON);

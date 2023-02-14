@@ -16,7 +16,7 @@ import '../models/event_model.dart';
 import '../repository/place_repository.dart';
 import '../services/cache_service.dart';
 import '../utils/utils.dart';
-import '../view/home/app_top_menu.dart';
+import '../view/home/home_top_menu.dart';
 import '../view/event/event_detail_screen.dart';
 import '../widget/content_item_card.dart';
 import '../widget/google_map_widget.dart';
@@ -363,7 +363,7 @@ class EventViewModel extends ChangeNotifier {
           TopCenterAlign(
             child: SizedBox(
               height: UI_TOP_MENU_HEIGHT * 1.7,
-              child: AppTopMenuBar(MainMenuID.event,
+              child: HomeTopMenuBar(MainMenuID.event,
                 isShowDatePick: eventListType == EventListType.map, height: UI_TOP_MENU_HEIGHT,
                 isDateOpen: isDateOpen,
                 onCountryChanged: () {

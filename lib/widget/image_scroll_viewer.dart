@@ -4,6 +4,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
+import 'package:kspot_002/widget/page_dot_widget.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:video_player/video_player.dart';
 
@@ -193,130 +194,130 @@ class ImageScrollViewerState extends State<ImageScrollViewer> {
         });
       }
       return Stack(
-          children: [
-            Column(
-              children: [
-                if (widget.title.isNotEmpty)
-                  Container(
-                    height: widget.titleHeight,
-                    color: widget.titleBackColor,
-                    alignment: widget.titleAlign,
-                    child: Text(
-                        widget.title,
-                        style: widget.titleStyle
-                    ),
-                  ),
+        children: [
+          Column(
+            children: [
+              if (widget.title.isNotEmpty)
                 Container(
-                  height: widget.rowHeight + 10,
-                  color: widget.backgroundColor,
-                  margin: widget.margin,
-                  child: Stack(
-                      children: [
-                        PageView.builder(
-                          controller: _controller,
-                          itemCount: widget.itemList.length,
-                          physics: NeverScrollableScrollPhysics(),
-                          scrollDirection: Axis.horizontal,
-                          onPageChanged: (index) {
-                            setState(() {
-                              // log("--> onPageChanged : $index");
-                              widget.currentPage = index;
-                              if (widget.onPageChanged != null) widget.onPageChanged!(index);
-                            });
-                          },
-                          itemBuilder: (context, index) {
-                            index = index % widget.itemList.length;
-                            // LOG('--> widget.itemList[$index] : ${widget.itemList[index]}');
-                            return GestureDetector(
-                              child: StatefulBuilder(
-                                builder: (context, snapshot) {
-                                  return Container(
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    color: Colors.black,
-                                    child: showImageWidget(
-                                        widget.itemList[index].runtimeType == String ? widget.itemList[index] :
-                                        widget.itemList[index]['url'] ?? widget.itemList[index]['pic'], widget.imageFit
-                                    )
-                                  );
-                                }
-                              ),
-                              onHorizontalDragStart: (pos) {
-                                if (widget.itemList.length < 2) return;
-                                _startPos = pos.localPosition;
-                                _isDragging = true;
-                              },
-                              onHorizontalDragUpdate: (pos) {
-                                if (widget.itemList.length < 2) return;
-                                if (!_isDragging) return;
-                                if (_startPos.dx < pos.localPosition.dx) {
-                                  moveBack();
-                                } else {
-                                  moveNext();
-                                }
-                                _isDragging = false;
-                              },
-                              onTap: () {
-                                if (widget.onSelected != null) {
-                                  if (widget.itemList[index].runtimeType == String) {
-                                    widget.onSelected!(widget.itemList[index]);
-                                  } else {
-                                    widget.onSelected!(widget.itemList[index]['id']);
-                                  }
-                                }
-                              },
-                            );
-                          },
-                        ),
-                        if (widget.showArrow)...[
-                          SizedBox(
-                              height: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.arrow_back_ios,
-                                        color: widget.currentPage - 1 >= 0 ? Colors.white : Colors.transparent),
-                                    onPressed: () {
-                                      moveBack();
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.arrow_forward_ios,
-                                        color: widget.currentPage + 1 < widget.itemList.length ? Colors.white : Colors
-                                            .transparent),
-                                    onPressed: () {
-                                      moveNext();
-                                    },
-                                  ),
-                                ],
-                              )
-                          ),
-                        ]
-                      ]
+                  height: widget.titleHeight,
+                  color: widget.titleBackColor,
+                  alignment: widget.titleAlign,
+                  child: Text(
+                      widget.title,
+                      style: widget.titleStyle
                   ),
                 ),
-              ],
-            ),
-            if (widget.showPage && _pageMax > 1)
-              BottomCenterAlign(
-                heightFactor: 13.7,
-                // child: PageDotWidget(widget.currentPage, _pageMax),
-              )
-            // Positioned(
-            //   right: 10,
-            //   bottom: 15,
-            //   child: Row(
-            //     children: [
-            //       Text('${widget.currentPage + 1} ', style: _pageTextStyle0),
-            //       Text('/ $_pageMax', style: _pageTextStyle1),
-            //     ],
-            //   ),
-            // ),
-          ]
+              Container(
+                height: widget.rowHeight + 10,
+                color: widget.backgroundColor,
+                margin: widget.margin,
+                child: Stack(
+                  children: [
+                    PageView.builder(
+                      controller: _controller,
+                      itemCount: widget.itemList.length,
+                      physics: NeverScrollableScrollPhysics(),
+                      scrollDirection: Axis.horizontal,
+                      onPageChanged: (index) {
+                        setState(() {
+                          // log("--> onPageChanged : $index");
+                          widget.currentPage = index;
+                          if (widget.onPageChanged != null) widget.onPageChanged!(index);
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        index = index % widget.itemList.length;
+                        // LOG('--> widget.itemList[$index] : ${widget.itemList[index]}');
+                        return GestureDetector(
+                          child: StatefulBuilder(
+                            builder: (context, snapshot) {
+                              return Container(
+                                width: double.infinity,
+                                height: double.infinity,
+                                child: showImageWidget(
+                                  widget.itemList[index].runtimeType == String ? widget.itemList[index] :
+                                  widget.itemList[index]['url'] ?? widget.itemList[index]['pic'], widget.imageFit
+                                )
+                              );
+                            }
+                          ),
+                          onHorizontalDragStart: (pos) {
+                            if (widget.itemList.length < 2) return;
+                            _startPos = pos.localPosition;
+                            _isDragging = true;
+                          },
+                          onHorizontalDragUpdate: (pos) {
+                            if (widget.itemList.length < 2) return;
+                            if (!_isDragging) return;
+                            if (_startPos.dx < pos.localPosition.dx) {
+                              moveBack();
+                            } else {
+                              moveNext();
+                            }
+                            _isDragging = false;
+                          },
+                          onTap: () {
+                            if (widget.onSelected != null) {
+                              LOG('--> image widget.onSelected [$index] : ${widget.itemList[index]}');
+                              if (widget.itemList[index].runtimeType == String) {
+                                widget.onSelected!(widget.itemList[index]);
+                              } else {
+                                widget.onSelected!(widget.itemList[index]['id']);
+                              }
+                            }
+                          },
+                        );
+                      },
+                    ),
+                    if (widget.showArrow)...[
+                      SizedBox(
+                          height: MediaQuery
+                              .of(context)
+                              .size
+                              .height,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.arrow_back_ios,
+                                    color: widget.currentPage - 1 >= 0 ? Colors.white : Colors.transparent),
+                                onPressed: () {
+                                  moveBack();
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.arrow_forward_ios,
+                                    color: widget.currentPage + 1 < widget.itemList.length ? Colors.white : Colors
+                                        .transparent),
+                                onPressed: () {
+                                  moveNext();
+                                },
+                              ),
+                            ],
+                          )
+                      ),
+                    ]
+                  ]
+                ),
+              ),
+            ],
+          ),
+          if (widget.showPage && _pageMax > 1)
+            BottomCenterAlign(
+              heightFactor: 13.7,
+              child: PageDotWidget(widget.currentPage, _pageMax, circleSize: 6),
+            )
+          // Positioned(
+          //   right: 10,
+          //   bottom: 15,
+          //   child: Row(
+          //     children: [
+          //       Text('${widget.currentPage + 1} ', style: _pageTextStyle0),
+          //       Text('/ $_pageMax', style: _pageTextStyle1),
+          //     ],
+          //   ),
+          // ),
+        ]
       );
     }
   }

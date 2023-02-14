@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/widget/csc_picker/csc_picker.dart';
 import 'package:kspot_002/widget/scrollview_widget.dart';
 import 'package:kspot_002/widget/vote_widget.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -68,8 +69,8 @@ class CommentListItemState extends State<CommentListItem> {
   }
 
   refreshImage() {
-    if (widget.commentData['imageData'] != null) {
-      _imageList = List<String>.from(widget.commentData['imageData']
+    if (widget.commentData['picData'] != null) {
+      _imageList = List<String>.from(widget.commentData['picData']
           .map((value) => value.toString())
           .toList());
     }
@@ -184,7 +185,7 @@ class CommentListItemState extends State<CommentListItem> {
                               _addData = {};
                               _addData['status'] = 1;
                               _addData['desc'] = '';
-                              _addData['imageData']   = [];
+                              _addData['picData']   = [];
                               _addData['targetType']  = widget.commentData['targetType'];
                               _addData['targetId']    = widget.commentData['targetId'];
                               _addData['parentId']    = widget.commentData['id'];
@@ -308,8 +309,8 @@ class CommentListExItemState extends State<CommentListExItem> {
   }
 
   refreshImage() {
-    if (widget.commentData['imageData'] != null) {
-      _imageList = widget.commentData['imageData'].toList();
+    if (widget.commentData['picData'] != null) {
+      _imageList = widget.commentData['picData'].toList();
     }
   }
 
@@ -344,172 +345,176 @@ class CommentListExItemState extends State<CommentListExItem> {
         //   Navigator.push(context, MaterialPageRoute(builder: (context) => StoryDetailScreen(widget.commentData)));
         // }
       },
-      child: Container(
+      child: LayoutBuilder(
+      builder: (context, layout) {
+      return Container(
         key: _key,
+        width: Get.width,
         margin: EdgeInsets.symmetric(vertical: 3),
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(10)),
           color: Theme.of(context).cardColor,
         ),
-        child: Column(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (_isParent && widget.isShowDivider)...[
-                showHorizontalDivider(Size(double.infinity, 2), color: Theme.of(context).secondaryHeaderColor),
-                SizedBox(height: 10),
+              if (!_isParent) ...[
+                Image.asset('assets/ui/sub_line_01.png', width: 30, height: 25, color: Theme.of(context).hintColor),
+                SizedBox(width: 5),
               ],
-              Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (!_isParent) ...[
-                      Image.asset('assets/ui/sub_line_01.png', width: 30, height: 25, color: Theme.of(context).hintColor),
-                      SizedBox(width: 5),
-                    ],
-                    Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (_isParent && !widget.isAuthor && widget.commentType == CommentType.comment) ...[
-                            SizedBox(width: 10),
-                            VoteWidget(widget.commentData['vote'] ?? 1),
+              // if (JSON_NOT_EMPTY(widget.commentData['picData']))...[
+              //   showImage(widget.commentData['picData'].first.runtimeType == String ?
+              //     widget.commentData['picData'].first : widget.commentData['picData'].first['url'],
+              //     Size(widget.height - 20, widget.height - 20)),
+              // ],
+              // SizedBox(width: 10),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (_imageList.isNotEmpty && (!BOL(widget.commentData['isHidden']) || AppData.USER_LEVEL > 1))...[
+                    SizedBox(
+                      width: layout.maxWidth - 20 - (!_isParent ? 35 : 0),
+                      child: CommentImageScrollViewer(_imageList),
+                    ),
+                  ],
+                  if (_isParent && !widget.isAuthor && widget.commentType == CommentType.comment) ...[
+                    SizedBox(width: 10),
+                    VoteWidget(widget.commentData['vote'] ?? 1),
+                  ],
+                  if (widget.commentData['desc'] != null)...[
+                    if (BOL(widget.commentData['isHidden']) && AppData.USER_LEVEL < 2)...[
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            Icon(Icons.lock, size: 20, color: Theme.of(context).errorColor),
+                            SizedBox(width: 5),
+                            Text('This is a secret...'.tr, style: _descStyle, maxLines: 1),
                           ],
-                          if (_imageList.isNotEmpty && (!BOL(widget.commentData['isHidden']) || AppData.USER_LEVEL > 1))...[
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width - (_isParent ? 30 : 60) - widget.paddingSide,
-                              child: CommentImageScrollViewer(_imageList),
-                            ),
-                          ],
-                          if (widget.commentData['desc'] != null)...[
-                            if (BOL(widget.commentData['isHidden']) && AppData.USER_LEVEL < 2)...[
-                              Container(
-                                padding: EdgeInsets.symmetric(vertical: 8),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.lock, size: 20, color: Theme.of(context).errorColor),
-                                    SizedBox(width: 5),
-                                    Text('This is a secret...'.tr, style: _descStyle, maxLines: 1),
-                                  ],
-                                ),
-                              ),
-                            ],
-                            if (!BOL(widget.commentData['isHidden']) || AppData.USER_LEVEL > 1)...[
-                              Container(
-                                padding: EdgeInsets.symmetric(vertical: 8),
-                                child: Row(
-                                  children: [
-                                    if (AppData.USER_LEVEL > 1 && BOL(widget.commentData['isHidden']))...[
-                                      Icon(Icons.lock, color: Colors.black, size: 20),
-                                      SizedBox(width: 5),
-                                    ],
-                                    Text(DESC(widget.commentData['desc']), style: _descStyle, maxLines: widget.maxLine),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ],
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(SERVER_TIME_STR(widget.commentData['updateTime'] ?? widget.commentData['createTime']),
-                                  style: _dateStyle),
-                              SizedBox(width: 10),
-                              if (widget.isShowAuthor)
-                                  Text(widget.isAuthor ? '[${'MANAGER'.tr}]' : STR(widget.commentData['userName']),
-                                      style: widget.isAuthor ? _authorStyle : _isWriter ? SubTitleExStyle(context) : _nameStyle),
-                              if (widget.isShowMenu)...[
-                                SizedBox(width: 10),
-                                if (_isParent && (widget.commentType != CommentType.serviceQnA || AppData.USER_LEVEL > 1)) ...[
-                                  GestureDetector(
-                                    child: Text(widget.commentType == CommentType.qna ? '[Answer]'.tr : '[Comment]'.tr, style: _editStyle),
-                                    onTap: () async {
-                                      log('--> showEditCommentDialog : ${widget.commentData} / ${widget.targetData}');
-                                      var targetUser = await api.getUserInfoFromId(widget.targetData['userId']);
-                                      if (targetUser != null) {
-                                        _addData = {};
-                                        _addData['status'] = 1;
-                                        _addData['desc'] = '';
-                                        _addData['imageData'] = [];
-                                        _addData['targetType'] = widget.commentData['targetType'];
-                                        _addData['targetId'] = widget.commentData['targetId'];
-                                        _addData['parentId'] = widget.commentData['id'];
-                                        _addData['descOrg'] = widget.commentData['desc'];
-                                        _addData['userId'] = AppData.USER_ID;
-                                        _addData['userName'] = AppData.USER_NICKNAME;
-                                        showEditCommentDialog(
-                                          context,
-                                          widget.commentType,
-                                          widget.commentType == CommentType.qna ? 'Answer'.tr : 'Comment'.tr,
-                                          _addData,
-                                          targetUser,
-                                          false,
-                                          false,
-                                          widget.commentType != CommentType.story).then((result) {
-                                        log('--> showEditCommentDialog result : $result');
-                                        if (result.isNotEmpty) {
-                                          setState(() {
-                                            _addData = result;
-                                            onChangeValue(_addData, 1);
-                                          });
-                                        }
-                                      });
-                                    } else {
-                                      showAlertDialog(context, 'Error'.tr, 'Can not find user information'.tr, '', 'OK'.tr);
-                                    }
-                                  },
-                                ),
-                              ],
-                              // if (!widget.isAuthor) ...[
-                              //   GestureDetector(
-                              //     child: Text('[신고/차단]', style: _dateStyle),
-                              //     onTap: () {
-                              //     },
-                              //   ),
-                              // ],
-                              SizedBox(width: 5),
-                              if (_isWriter) ...[
-                                GestureDetector(
-                                  child: Text('[Del/Edit]'.tr, style: _editStyle),
-                                  onTap: () async {
-                                    log('--> showEditCommentDialog : ${widget.commentData}');
-                                    var targetUser = await api.getUserInfoFromId(widget.targetData['userId']);
-                                    if (targetUser != null) {
-                                      showEditCommentDialog(
-                                          context,
-                                          widget.commentType,
-                                          'Comment'.tr,
-                                          widget.commentData,
-                                          targetUser,
-                                          widget.commentType != CommentType.story,
-                                          !_isParent,
-                                          true).then((result) {
-                                        log('--> showEditCommentDialog result : $result');
-                                        if (result.isNotEmpty) {
-                                          setState(() {
-                                            if (result['delete'] != null) {
-                                              onChangeValue(widget.commentData, 2);
-                                            } else {
-                                              widget.commentData = result;
-                                              refreshImage();
-                                              log('--> widget.infoData[newId] : ${widget.commentData}');
-                                              onChangeValue(widget.commentData, 0);
-                                            }
-                                          });
-                                        }
-                                      });
-                                    } else {
-                                      showAlertDialog(context, 'Error'.tr, 'Can not find user information'.tr, '', 'OK'.tr);
-                                    }
-                                  },
-                                ),
-                              ],
-                            ]
-                          ]
+                        ),
                       ),
+                    ],
+                    if (!BOL(widget.commentData['isHidden']) || AppData.IS_ADMIN)...[
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            if (AppData.IS_ADMIN && BOL(widget.commentData['isHidden']))...[
+                              Icon(Icons.lock, color: Colors.black, size: 20),
+                              SizedBox(width: 5),
+                            ],
+                            Text(DESC(widget.commentData['desc']), style: _descStyle, maxLines: widget.maxLine),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(SERVER_TIME_STR(widget.commentData['updateTime'] ?? widget.commentData['createTime']),
+                          style: _dateStyle),
+                      SizedBox(width: 10),
+                      if (widget.isShowAuthor)
+                        Text(widget.isAuthor ? '[${'MANAGER'.tr}]' : STR(widget.commentData['userName']),
+                            style: widget.isAuthor ? _authorStyle : _isWriter ? SubTitleExStyle(context) : _nameStyle),
+                      if (widget.isShowMenu)...[
+                        SizedBox(width: 10),
+                        if (_isParent && (widget.commentType != CommentType.serviceQnA || AppData.USER_LEVEL > 1)) ...[
+                          GestureDetector(
+                            child: Text(widget.commentType == CommentType.qna ? '[Answer]'.tr : '[Comment]'.tr, style: _editStyle),
+                            onTap: () async {
+                              log('--> showEditCommentDialog : ${widget.commentData} / ${widget.targetData}');
+                              var targetUser = await api.getUserInfoFromId(widget.targetData['userId']);
+                              if (targetUser != null) {
+                                _addData = {};
+                                _addData['status'] = 1;
+                                _addData['desc'] = '';
+                                _addData['picData'] = [];
+                                _addData['targetType'] = widget.commentData['targetType'];
+                                _addData['targetId'] = widget.commentData['targetId'];
+                                _addData['parentId'] = widget.commentData['id'];
+                                _addData['descOrg'] = widget.commentData['desc'];
+                                _addData['userId'] = AppData.USER_ID;
+                                _addData['userName'] = AppData.USER_NICKNAME;
+                                showEditCommentDialog(
+                                  context,
+                                  widget.commentType,
+                                  widget.commentType == CommentType.qna ? 'Answer'.tr : 'Comment'.tr,
+                                  _addData,
+                                  targetUser,
+                                  false,
+                                  false,
+                                  widget.commentType != CommentType.story).then((result) {
+                                log('--> showEditCommentDialog result : $result');
+                                if (result.isNotEmpty) {
+                                  setState(() {
+                                    _addData = result;
+                                    onChangeValue(_addData, 1);
+                                  });
+                                }
+                              });
+                            } else {
+                              showAlertDialog(context, 'Error'.tr, 'Can not find user information'.tr, '', 'OK'.tr);
+                            }
+                          },
+                        ),
+                      ],
+                      // if (!widget.isAuthor) ...[
+                      //   GestureDetector(
+                      //     child: Text('[신고/차단]', style: _dateStyle),
+                      //     onTap: () {
+                      //     },
+                      //   ),
+                      // ],
+                      SizedBox(width: 5),
+                      if (_isWriter) ...[
+                        GestureDetector(
+                          child: Text('[Del/Edit]'.tr, style: _editStyle),
+                          onTap: () async {
+                            log('--> showEditCommentDialog : ${widget.commentData}');
+                            var targetUser = await api.getUserInfoFromId(widget.targetData['userId']);
+                            if (targetUser != null) {
+                              showEditCommentDialog(
+                                  context,
+                                  widget.commentType,
+                                  'Comment'.tr,
+                                  widget.commentData,
+                                  targetUser,
+                                  widget.commentType != CommentType.story,
+                                  !_isParent,
+                                  true).then((result) {
+                                log('--> showEditCommentDialog result : $result');
+                                if (result.isNotEmpty) {
+                                  setState(() {
+                                    if (result['delete'] != null) {
+                                      onChangeValue(widget.commentData, 2);
+                                    } else {
+                                      widget.commentData = result;
+                                      refreshImage();
+                                      log('--> widget.infoData[newId] : ${widget.commentData}');
+                                      onChangeValue(widget.commentData, 0);
+                                    }
+                                  });
+                                }
+                              });
+                            } else {
+                              showAlertDialog(context, 'Error'.tr, 'Can not find user information'.tr, '', 'OK'.tr);
+                            }
+                          },
+                        ),
+                      ],
                     ]
-                  )
-                ]
-              )
-            ]
+                  ]
+                ),
+              ]
+            )
+          ]
         )
+      );
+    }
       )
     );
   }

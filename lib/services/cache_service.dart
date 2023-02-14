@@ -35,15 +35,17 @@ class CacheService extends GetxService {
     storyData![storyItem.id] = storyItem;
     storyListItemData.remove(storyItem.id);
     LOG('--> setStoryItem [${storyItem.id}] : ${storyData![storyItem.id]!.desc} / ${storyData!.length}');
-    sortStoryDataCreateTimeDesc();
   }
 
-  sortStoryDataCreateTimeDesc() {
+  Future sortStoryDataCreateTimeDesc() async {
     if (JSON_NOT_EMPTY(storyData) && storyData!.length > 1) {
       storyData = SplayTreeMap<String,StoryModel>.from(storyData!, (a, b) {
         LOG("--> check : ${storyData![a]!.createTime} > ${storyData![b]!.createTime}");
-        return DateTime.parse(storyData![a]!.createTime).isBefore(DateTime.parse(storyData![b]!.createTime)) ? -1 : 1;
+        final aDate = DateTime.parse(storyData![a]!.createTime);
+        final bDate = DateTime.parse(storyData![b]!.createTime);
+        return aDate != bDate && aDate.isBefore(bDate) ? -1 : 1;
       });
     }
+    return true;
   }
 }

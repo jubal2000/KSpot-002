@@ -123,7 +123,7 @@ class RowScrollViewer extends StatelessWidget {
     JSON itemJson = {};
     for (var i=0; i<itemList.length; i++) {
       itemJson['$i'] = {'id': i,
-        "backPic": STR(itemList[i]).contains('backPic') ? itemList[i]['backPic'] : itemList[i]};
+        "url": STR(itemList[i]).contains('url') ? itemList[i]['url'] : itemList[i]};
     }
 
     return CardScrollViewer(itemJson,
@@ -287,7 +287,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
       //   });
       // }
       // for (var item in widget.itemList.entries) {
-      //   LOG('--> CardScrollViewerState item.value : ${item.value} / ${item.value['backPic'] is String}');
+      //   LOG('--> CardScrollViewerState item.value : ${item.value} / ${item.value['url'] is String}');
       // }
       _cardList = widget.itemList.entries.map((item) =>
           Container(
@@ -320,9 +320,9 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                     var keyList = widget.itemList.keys.toList();
                     int index = keyList.indexOf(item.key);
                     showImageSlideDialog(context,
-                        List<String>.from(widget.itemList.entries.map((item) => item.value['linkPic'] ?? item.value['backPic'] ?? item.value['image']).toList()),
+                        List<String>.from(widget.itemList.entries.map((item) => item.value['linkPic'] ?? item.value['url'] ?? item.value['image']).toList()),
                         index, widget.isCanDownload);
-                    // showImageDialog(context, widget.itemList[item.key]['backPic'] ?? widget.itemList[item.key]['image']);
+                    // showImageDialog(context, widget.itemList[item.key]['url'] ?? widget.itemList[item.key]['image']);
                   } else if (widget.imageMax == 1) {
                     onSelected('', 1);
                   }
@@ -334,7 +334,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                         padding: EdgeInsets.symmetric(horizontal: widget.isVerticalScroll ? 0 : 2.5, vertical: widget.isVerticalScroll ? 5 : 0),
                         child: Column(
                           children: [
-                            if (item.value['image'] != null || (widget.isThumbShow && item.value['thumb'] != null) || item.value['backPic'] != null)
+                            if (item.value['image'] != null || (widget.isThumbShow && item.value['thumb'] != null) || item.value['url'] != null)
                               SizedBox(
                                 width: widget.itemWidth,
                                 height: widget.itemHeight,
@@ -345,9 +345,9 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                                       item.value['image'] != null
                                       ? Image.memory(item.value['image'], fit: widget.backFit)
                                     //: showImageWidget(
-                                    //     item.value['backPic'] != null ? (STR(item.value['backPic']).contains('backPic') ?
-                                    //     JSON.from(jsonDecode(STR(item.value['backPic'])))['backPic'] : item.value['backPic']) : item.value['pic'], widget.backFit)
-                                    : showImageWidget(item.value['backPic'], widget.backFit),
+                                    //     item.value['url'] != null ? (STR(item.value['url']).contains('url') ?
+                                    //     JSON.from(jsonDecode(STR(item.value['url'])))['url'] : item.value['url']) : item.value['pic'], widget.backFit)
+                                    : showImageWidget(item.value['url'], widget.backFit),
                                 ),
                               ),
                             if (item.value['title'] != null)
@@ -738,7 +738,9 @@ class CardDataScrollViewerState extends State<CardDataScrollViewer> {
                         ]
                       );
                     } else {
-                      return showLoadingImageSize(Size(widget.itemWidth, widget.itemHeight));
+                      return Center(
+                        child: showLoadingCircleSquare(30),
+                      );
                     }
                   }
               ),

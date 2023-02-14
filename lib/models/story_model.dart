@@ -13,9 +13,13 @@ class StoryModelEx extends StoryModel {
         String pic = '',
         String groupId = '',
         String eventId = '',
+        String eventTitle = '',
+        String eventPic = '',
         String country = '',
         String countryState = '',
         String userId = '',
+        String userName = '',
+        String userPic = '',
         int likeCount = 0,
         int voteCount = 0,
         int commentCount = 0,
@@ -27,9 +31,13 @@ class StoryModelEx extends StoryModel {
     desc: desc,
     groupId: groupId,
     eventId: eventId,
+    eventTitle: eventTitle,
+    eventPic: eventPic,
     country: country,
     countryState: countryState,
     userId: userId,
+    userName: userName,
+    userPic: userPic,
     likeCount: likeCount,
     commentCount: commentCount,
     updateTime: updateTime,
@@ -46,9 +54,15 @@ class StoryModel {
   String  desc;
   String  groupId;        // 그룹 ID
   String  eventId;        // 이벤트 링크 ID
+  @JsonKey(defaultValue: '')
+  String  eventTitle;     // 이벤트 링크 Title
+  @JsonKey(defaultValue: '')
+  String  eventPic;       // 이벤트 링크 Pic
   String  country;        // 국가
   String  countryState;   // 도시
   String  userId;         // 소유 유저
+  String  userName;       // 소유 유저 name
+  String  userPic;        // 소유 유저 pic
   int     likeCount;      // 종아요 횟수
   int     commentCount;   // 댓글 갯수
   String  updateTime;     // 수정 시간
@@ -65,9 +79,13 @@ class StoryModel {
     required this.desc,
     required this.groupId,
     required this.eventId,
+    required this.eventTitle,
+    required this.eventPic,
     required this.country,
     required this.countryState,
     required this.userId,
+    required this.userName,
+    required this.userPic,
     required this.likeCount,
     required this.commentCount,
     required this.updateTime,

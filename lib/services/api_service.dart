@@ -1619,23 +1619,22 @@ class ApiService extends GetxService {
   
   final BlockCollection = 'data_block';
   
-  Future<JSON> getBlockList(JSON user, String type) async {
-    LOG('------> getBlockList : $type');
+  Future<JSON> getBlockData(String userId) async {
+    LOG('------> getBlockData : $userId');
     JSON result = {};
     try {
       var snapshot = await firestore!.collection(BlockCollection)
           .where('status', isEqualTo: 1)
-          .where('type', isEqualTo: type)
-          .where('userId', isEqualTo: STR(user['id']))
+          .where('userId', isEqualTo: userId)
           .get();
       for (var item in snapshot.docs) {
         var addItem = FROM_SERVER_DATA(item.data());
         result[addItem['targetId']] = addItem;
       }
       // AppData.isBlockDataReady = true;
-      LOG('--> getBlockList result :$result');
+      LOG('--> getBlockData result :$result');
     } catch (e) {
-      LOG('--> getBlockList error : $e');
+      LOG('--> getBlockData error : $e');
     }
     return result;
   }
@@ -1696,33 +1695,33 @@ class ApiService extends GetxService {
   
   final ReportCollection = 'data_report';
   
-  Future<JSON> getReportList(JSON user, JSON reportData) async {
+  Future<JSON> getReportData(String userId) async {
     JSON result = {};
     try {
       var snapshot = await firestore!.collection(ReportCollection)
           .where('status', isEqualTo: 1)
-          .where('userId', isEqualTo: STR(user['id']))
+          .where('userId', isEqualTo: userId)
           .get();
 
       for (var item in snapshot.docs) {
         var addItem = FROM_SERVER_DATA(item.data());
         var type = STR(addItem['type']);
-        if (!reportData.containsKey(type)) {
-          reportData[type] = {};
+        if (!result.containsKey(type)) {
+          result[type] = {};
         }
         var targetID = STR(addItem['targetId']);
         if (targetID.isNotEmpty) {
-          reportData[type][targetID] = addItem;
+          result[type][targetID] = addItem;
         }
       }
-      for (var type in reportData.keys) {
-        reportData[type] = JSON_CREATE_TIME_SORT_DESC(reportData[type]);
+      for (var type in result.keys) {
+        result[type] = JSON_CREATE_TIME_SORT_DESC(result[type]);
       }
-      LOG('------> getReportList result : ${reportData.length}');
+      LOG('------> getReportList result : ${result.length}');
     } catch (e) {
       LOG('--> getReportList error : $e');
     }
-    return reportData;
+    return result;
   }
   
   Future<JSON> addReportItem(JSON user, JSON reportData, String type, String targetId, String desc) async {
@@ -1856,32 +1855,33 @@ class ApiService extends GetxService {
     return result;
   }
   
-  Future<JSON> getMessageData(JSON user, JSON messageData) async {
+  Future<JSON> getMessageData(String userId) async {
+    JSON result = {};
     var ref = firestore!.collection(MessageCollection);
     var snapshot0 = await ref
         .where('status', isEqualTo: 1)
-        .where('senderId', isEqualTo: STR(user['id']))
+        .where('senderId', isEqualTo: userId)
         .get();
     for (var doc in snapshot0.docs) {
       var item = FROM_SERVER_DATA(doc.data());
       item['type'] = 1;
-      messageData[item['id']] = item;
+      result[item['id']] = item;
     }
     var snapshot1 = await ref
         .where('status', isEqualTo: 1)
-        .where('targetId', isEqualTo: STR(user['id']))
+        .where('targetId', isEqualTo: userId)
         .get();
     for (var doc in snapshot1.docs) {
       var item = FROM_SERVER_DATA(doc.data());
       item['type'] = 0;
-      messageData[item['id']] = item;
+      result[item['id']] = item;
     }
     // AppData.isMessageDataReady = true;
-    messageData = JSON_CREATE_TIME_SORT_DESC(messageData);
-    LOG('--> getMessageData Result : $messageData');
-    return messageData;
+    result = JSON_CREATE_TIME_SORT_DESC(result);
+    LOG('--> getMessageData Result : ${result.length}');
+    return result;
   }
-  
+
   Future<bool> setMessageStatus(String targetId, int status) async {
     try {
       var dataRef2 = firestore!.collection(MessageCollection);
@@ -1907,35 +1907,36 @@ class ApiService extends GetxService {
     }
     return false;
   }
-  
-  StreamSubscription<QuerySnapshot>? messageStream;
-  
-  startMessageStream(JSON user, targetId, Function(JSON) onChanged) async {
+
+
+  Stream startMessageStreamToMe(String userId) {
+    LOG('------> startMessageStreamToMe : $userId');
+    return firestore!.collection(MessageCollection)
+        .where('status', isEqualTo: 1)
+        .where('targetId', isEqualTo: userId)
+        .orderBy('updateTime', descending: true).snapshots();
+  }
+
+  startMessageStream(String userId, targetId, Function(JSON) onChanged) {
+    LOG('------> startMessageStream : $userId / $targetId');
     JSON result = {};
     var ref = firestore!.collection(MessageCollection)
         .where('status'  , isEqualTo: 1)
         .where('senderId', isEqualTo: targetId)
-        .where('targetId', isEqualTo: STR(user['id']))
+        .where('targetId', isEqualTo: userId)
         .orderBy('updateTime', descending: true);
 
-    messageStream = ref.snapshots().listen((QuerySnapshot querySnapshot) {
-          for (var doc in querySnapshot.docs) {
-            var item = FROM_SERVER_DATA(doc.data() as JSON);
-            result[item['id']] = item;
-          }
-          onChanged(result); // TODO: need messageData add.. (messageData[item['id']] = item;)
+    return ref.snapshots().listen((QuerySnapshot querySnapshot) {
+        for (var doc in querySnapshot.docs) {
+          var item = FROM_SERVER_DATA(doc.data() as JSON);
+          LOG('--> listen item : $item');
+          result[item['id']] = item;
         }
+        onChanged(result);
+      }
     );
   }
-  
-  stopMessageStream() {
-    LOG('------> stopMessageStream : ${messageStream != null}');
-    if (messageStream != null) {
-      messageStream!.cancel();
-      messageStream = null;
-    }
-  }
-  
+
 
   //----------------------------------------------------------------------------------------
   //

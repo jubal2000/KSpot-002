@@ -23,48 +23,51 @@ class EventScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     AppData.eventViewModel.init(context);
 
-    return Scaffold(
-      body: ChangeNotifierProvider<AppViewModel>.value(
-        value: AppData.appViewModel,
-        child: Consumer<AppViewModel>(
-        builder: (context, appViewModel, _) {
-        LOG('--> AppViewModel');
-        // AppData.eventViewModel.googleWidget = null;
-        return LayoutBuilder(
-          builder: (context, layout) {
-            return Stack(
-              children: [
-                if (AppData.eventViewModel.showList.isEmpty)
-                  FutureBuilder(
-                    future: AppData.eventViewModel.getEventList(),
-                    builder: (context, snapshot) {
-                      if (cache.eventData != null) {
-                        LOG('--> set eventData : ${cache.eventData!.length}');
-                        return ChangeNotifierProvider<EventViewModel>.value(
-                            value: AppData.eventViewModel,
-                            child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-                              LOG('--> EventViewModel 1');
-                          return viewModel.showMainList(layout);
-                          })
-                        );
-                      } else {
-                        return showLoadingFullPage(context);
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        body: ChangeNotifierProvider<AppViewModel>.value(
+          value: AppData.appViewModel,
+          child: Consumer<AppViewModel>(
+          builder: (context, appViewModel, _) {
+          LOG('--> AppViewModel');
+          // AppData.eventViewModel.googleWidget = null;
+          return LayoutBuilder(
+            builder: (context, layout) {
+              return Stack(
+                children: [
+                  if (AppData.eventViewModel.showList.isEmpty)
+                    FutureBuilder(
+                      future: AppData.eventViewModel.getEventList(),
+                      builder: (context, snapshot) {
+                        if (cache.eventData != null) {
+                          LOG('--> set eventData : ${cache.eventData!.length}');
+                          return ChangeNotifierProvider<EventViewModel>.value(
+                              value: AppData.eventViewModel,
+                              child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+                                LOG('--> EventViewModel 1');
+                            return viewModel.showMainList(layout);
+                            })
+                          );
+                        } else {
+                          return showLoadingFullPage(context);
+                        }
                       }
-                    }
-                  ),
-                  if (AppData.eventViewModel.showList.isNotEmpty)
-                    ChangeNotifierProvider<EventViewModel>.value(
-                      value: AppData.eventViewModel,
-                      child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-                        LOG('--> EventViewModel 2');
-                        return viewModel.showMainList(layout);
-                      })
-                    )
-                  ]
-                );
-              }
-            );
-          }
+                    ),
+                    if (AppData.eventViewModel.showList.isNotEmpty)
+                      ChangeNotifierProvider<EventViewModel>.value(
+                        value: AppData.eventViewModel,
+                        child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+                          LOG('--> EventViewModel 2');
+                          return viewModel.showMainList(layout);
+                        })
+                      )
+                    ]
+                  );
+                }
+              );
+            }
+          )
         )
       )
     );

@@ -42,6 +42,9 @@ class AuthService extends GetxService {
         if (result != null) {
           AppData.userInfo = result;
           LOG('--> getStartUserInfo done! : ${AppData.userInfo.id}');
+          AppData.reportData = await userRepo.getReportData();
+          AppData.blockData  = await userRepo.getBlockData();
+          LOG('--> AppData.reportData : ${AppData.reportData.toString()} / ${AppData.blockData.toString()}');
           Get.offAllNamed(Routes.HOME);
         } else {
           LOG('--> getStartUserInfo failed! : ${AppData.loginInfo.loginId} / ${AppData.loginInfo.loginType}');

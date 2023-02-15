@@ -1021,20 +1021,21 @@ class DropdownItem {
   final bool alert;
 
   const DropdownItem(
-      this.type,
-      {
-        this.text,
-        this.icon,
-        this.isLine = false,
-        this.height = 40,
-        this.color = false,
-        this.alert = false,
-      }
-      );
+    this.type,
+    {
+      this.text,
+      this.icon,
+      this.isLine = false,
+      this.height = 40,
+      this.color = false,
+      this.alert = false,
+    }
+  );
 }
 
 class DropdownItems {
   static const List<DropdownItem> eventAddItem    = [placeGroup, place, event];
+  static const List<DropdownItem> messageAddItem  = [message];
   static const List<DropdownItem> storyAddItem    = [story];
   static const List<DropdownItem> homeAddItems    = [placeGroup, place, event];
   static const List<DropdownItem> homeAddItem0    = [event, story];
@@ -1069,6 +1070,7 @@ class DropdownItems {
   static const place        = DropdownItem(DropdownItemType.place, text: 'SPOT +', icon: Icons.place_outlined);
   static const event        = DropdownItem(DropdownItemType.event, text: 'EVENT +', icon: Icons.event_available);
   static const story        = DropdownItem(DropdownItemType.story, text: 'STORY +', icon: Icons.school_outlined);
+  static const message      = DropdownItem(DropdownItemType.message, text: 'MESSAGE +', icon: Icons.mail_outlined);
 
   static const historyLink  = DropdownItem(DropdownItemType.historyLink, text: 'HISTORY LINK', icon: Icons.link);
   static const goodsLink    = DropdownItem(DropdownItemType.goodsLink, text: 'GOODS LINK', icon: Icons.link);
@@ -2420,5 +2422,30 @@ showAgreeStep(context, viewModel) {
             )
         );
       }
+  );
+}
+
+inputChatSuffix(BuildContext context) {
+  return InputDecoration(
+    filled: true,
+    isDense: true,
+    fillColor: Theme.of(context).dividerColor,
+    contentPadding: EdgeInsets.all(10),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+      borderSide: BorderSide(color: Theme.of(context).indicatorColor.withOpacity(0.5)),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+      borderSide: BorderSide(color: Theme.of(context).indicatorColor.withOpacity(0.8)),
+    ),
+    disabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+      borderSide: BorderSide(color: Theme.of(context).indicatorColor.withOpacity(0.5)),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+      borderSide: BorderSide(color: Theme.of(context).errorColor),
+    ),
   );
 }

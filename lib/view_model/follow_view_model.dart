@@ -14,7 +14,7 @@ class FollowViewModel extends ChangeNotifier {
   }
 
   Future<Map<String, FollowModel>> getFollowList(String userId) async {
-    AppData.followData = await repo.getFollowListFromUserId(userId);
+    AppData.followData = await repo.getFollowList(userId);
     return AppData.followData;
   }
 }

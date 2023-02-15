@@ -37,7 +37,7 @@ class StoryScreen extends StatelessWidget {
                     child: Consumer<StoryViewModel>(builder: (context, viewModel, _) {
                       LOG('--> StoryViewModel refresh');
                       return StreamBuilder(
-                      stream: AppData.storyViewModel.storyStream,
+                      stream: AppData.storyViewModel.stream,
                       builder: (BuildContext context, AsyncSnapshot snapshot) {
                         return viewModel.showMainList(layout, snapshot);
                         });

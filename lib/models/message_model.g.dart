@@ -18,9 +18,9 @@ MessageModel _$MessageModelFromJson(Map<String, dynamic> json) => MessageModel(
       senderPic: json['senderPic'] as String,
       updateTime: json['updateTime'] as String,
       createTime: json['createTime'] as String,
-      imageData: (json['imageData'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+      isOpened: json['isOpened'] as bool,
+      picData:
+          (json['picData'] as List<dynamic>?)?.map((e) => e as String).toList(),
     );
 
 Map<String, dynamic> _$MessageModelToJson(MessageModel instance) =>
@@ -36,5 +36,26 @@ Map<String, dynamic> _$MessageModelToJson(MessageModel instance) =>
       'senderPic': instance.senderPic,
       'updateTime': instance.updateTime,
       'createTime': instance.createTime,
-      'imageData': instance.imageData,
+      'isOpened': instance.isOpened,
+      'picData': instance.picData,
+    };
+
+MessageGroupModel _$MessageGroupModelFromJson(Map<String, dynamic> json) =>
+    MessageGroupModel(
+      id: json['id'] as String,
+      lastMessage: json['lastMessage'] as String,
+      userId: json['userId'] as String,
+      userName: json['userName'] as String,
+      userPic: json['userPic'] as String,
+      updateTime: json['updateTime'] as String,
+    );
+
+Map<String, dynamic> _$MessageGroupModelToJson(MessageGroupModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'lastMessage': instance.lastMessage,
+      'userId': instance.userId,
+      'userName': instance.userName,
+      'userPic': instance.userPic,
+      'updateTime': instance.updateTime,
     };

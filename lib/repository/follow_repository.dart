@@ -9,12 +9,12 @@ import '../utils/utils.dart';
 class FollowRepository {
   final api = Get.find<ApiService>();
 
-  Future<Map<String, FollowModel>> getFollowListFromUserId(String userId) async {
+  Future<Map<String, FollowModel>> getFollowList(String userId) async {
     Map<String, FollowModel> result = {};
     try {
       final response = await api.getFollowList(userId);
       for (var item in response.entries) {
-        result[item.key] = FollowModel.fromJson(item.value);
+        result[item.key] = FollowModel.fromJson(FROM_SERVER_DATA(item.value));
         LOG('--> getFollowListFromUserId item : ${result[item.key]!.toJson()}');
       }
     } catch (e) {

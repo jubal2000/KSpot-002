@@ -44,7 +44,8 @@ class SignUpScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       PageDotWidget(
-                        viewModel.stepIndex, viewModel.stepMax,
+                        viewModel.stepIndex,
+                        viewModel.stepMax,
                         dotType: PageDotType.line,
                         height: 5.h,
                         activeColor: Theme.of(context).primaryColor,
@@ -240,7 +241,7 @@ class SignUpScreen extends StatelessWidget {
               Container(
                 padding: EdgeInsets.only(top: UI_ITEM_SPACE.w),
                 child: VerifyPhoneWidget(
-                  AppData.loginInfo.mobile,
+                  '010',
                   onCheckComplete: (userValue) async {
                     LOG('--> userValue : $userValue');
                     if (userValue != null && userValue.user != null) {

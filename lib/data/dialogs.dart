@@ -2993,7 +2993,7 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
                                 }
                               }
                               JSON upResult = {};
-                              final result = await api.addReportItemEx(_jsonData, AppData.reportList);
+                              final result = await api.addReportItemEx(_jsonData, AppData.reportData);
                               if (result.isNotEmpty) {
                                 upResult = FROM_SERVER_DATA(_jsonData);
                               }
@@ -3022,7 +3022,7 @@ showReportMenu(BuildContext context, JSON targetInfo, String type, {List<JSON> m
     var targetId = STR(targetInfo['id']);
     switch (result) {
       case 'report':
-        if (AppData.reportList.containsKey('report') && AppData.reportList['report'].containsKey(targetId)) {
+        if (JSON_NOT_EMPTY(AppData.reportData['report']) && AppData.reportData['report'].containsKey(targetId)) {
           showAlertDialog(context, TR(menuList[0]['title']), 'Already reported'.tr, '', 'OK'.tr);
         } else {
           showReportDialog(context, ReportType.report,
@@ -3034,7 +3034,7 @@ showReportMenu(BuildContext context, JSON targetInfo, String type, {List<JSON> m
         }
         break;
       case 'ownership':
-        if (AppData.reportList.containsKey('owner') && AppData.reportList['owner'].containsKey(targetId)) {
+        if (JSON_NOT_EMPTY(AppData.reportData['owner']) && AppData.reportData['owner'].containsKey(targetId)) {
           showAlertDialog(context, TR(menuList[1]['title']), 'Already reported'.tr, '', 'OK'.tr);
         } else {
           showReportDialog(context, ReportType.ownership,

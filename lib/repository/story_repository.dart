@@ -29,6 +29,11 @@ class StoryRepository {
     return null;
   }
 
+  Future<bool> deleteStoryItem(String targetId) async {
+    return await api.deleteStoryItem(targetId);
+  }
+
+
   /////////////////////////////////////////////////////////////////////////////////////////////
 
   Future<String?> uploadImageInfo(JSON imageInfo, [String path = 'story_img']) async {

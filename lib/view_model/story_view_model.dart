@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:collection';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -32,7 +34,7 @@ class StoryViewModel extends ChangeNotifier {
   final storyRepo = StoryRepository();
 
   BuildContext? buildContext;
-  Stream? storyStream;
+  Stream? stream;
 
   // var lastUpdateKey = '';
   var lastIndex = -1;
@@ -47,11 +49,18 @@ class StoryViewModel extends ChangeNotifier {
   }
 
   getStoryList() {
-    storyStream = storyRepo.getStoryStreamFromGroup(AppData.currentEventGroup!.id);
+    stream = storyRepo.getStoryStreamFromGroup(AppData.currentEventGroup!.id);
   }
 
   getStoryListNext(item) {
-    storyStream = storyRepo.getStoryStreamFromGroupNext(item.createTime, AppData.currentEventGroup!.id);
+    stream = storyRepo.getStoryStreamFromGroupNext(item.createTime, AppData.currentEventGroup!.id);
+  }
+
+  stopStoryStream() {
+    LOG('------> stopStoryStream : ${stream != null}');
+    if (stream != null) {
+      stream = null;
+    }
   }
 
   showStoryListType() {
@@ -70,8 +79,7 @@ class StoryViewModel extends ChangeNotifier {
     // await cache.sortStoryDataCreateTimeDesc();
     List<Widget> showList = [];
     for (var item in cache.storyData!.entries) {
-      final checkKey = 'story-${item.key}';
-      if (!AppData.reportList.containsKey(checkKey)) {
+      if (JSON_EMPTY(AppData.reportData['report']) || !AppData.reportData['report'].containsKey(item.key)) {
         var addItem = cache.storyListItemData[item.key];
         addItem ??= MainStoryItem(
           item.value,
@@ -94,10 +102,12 @@ class StoryViewModel extends ChangeNotifier {
               }
             }
           },
-          onItemDeleted: (index) {
+          onItemDeleted: (key) {
             // var item = _showData[_currentTab][index];
-            // LOG('--> onItemDeleted : $index / ${item['id']}');
+            LOG('--> onItemDeleted : $key');
             // _storyData.remove(item['id']);
+            cache.storyData!.remove(key);
+            notifyListeners();
           }
         );
         cache.storyListItemData[item.key] = addItem;
@@ -105,10 +115,10 @@ class StoryViewModel extends ChangeNotifier {
       }
     }
     LOG('------> refreshShowList : ${showList.length} ${cache.storyData!.entries.length}');
-    return sortStoryDataCreateTimeDesc(showList);
+    return sortDataCreateTimeDesc(showList);
   }
 
-  sortStoryDataCreateTimeDesc(showList) {
+  sortDataCreateTimeDesc(showList) {
     for (var a=0; a<showList.length-1; a++) {
       for (var b=a+1; b<showList.length; b++) {
         final aDate = DateTime.parse(showList[a].itemInfo.createTime);

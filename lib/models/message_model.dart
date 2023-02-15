@@ -15,8 +15,9 @@ class MessageModel {
   String  senderPic;
   String  updateTime;     // 수정 시간
   String  createTime;     // 생성 시간
+  bool    isOpened;       // 읽음
 
-  List<String>? imageData;
+  List<String>? picData;
 
   MessageModel({
     required this.id,
@@ -30,9 +31,31 @@ class MessageModel {
     required this.senderPic,
     required this.updateTime,
     required this.createTime,
+    required this.isOpened,
 
-    this.imageData,
+    this.picData,
   });
   factory MessageModel.fromJson(JSON json) => _$MessageModelFromJson(json);
   JSON toJson() => _$MessageModelToJson(this);
+}
+
+@JsonSerializable()
+class MessageGroupModel {
+  String  id;
+  String  lastMessage;
+  String  userId;
+  String  userName;
+  String  userPic;
+  String  updateTime;     // 수신 시간
+
+  MessageGroupModel({
+    required this.id,
+    required this.lastMessage,
+    required this.userId,
+    required this.userName,
+    required this.userPic,
+    required this.updateTime,
+  });
+  factory MessageGroupModel.fromJson(JSON json) => _$MessageGroupModelFromJson(json);
+  JSON toJson() => _$MessageGroupModelToJson(this);
 }

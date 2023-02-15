@@ -70,7 +70,8 @@ class UserRepository {
       final response = await api.getStartUserInfo(loginId);
       LOG("--> getStartUserInfo result: $response");
       if (response != null) {
-        return UserModel.fromJson(FROM_SERVER_DATA(response));
+        final result = UserModel.fromJson(FROM_SERVER_DATA(response));
+        return result;
       }
     } catch (e) {
       LOG("--> getStartUserInfo error: $e");
@@ -139,6 +140,15 @@ class UserRepository {
   Future<UserModel?> addFollowTarget(UserModel targetInfo) async {
     final response = await api.addFollowTarget(AppData.userInfo.toJson(), targetInfo.toJson());
     return response.isNotEmpty ? UserModel.fromJson(response) : null;
+  }
+
+
+  Future<JSON> getReportData() async {
+    return await api.getReportData(AppData.USER_ID);
+  }
+
+  Future<JSON> getBlockData() async {
+    return await api.getBlockData(AppData.USER_ID);
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////

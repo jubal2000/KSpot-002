@@ -74,9 +74,10 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
   final pinController = TextEditingController();
 
   refreshData() {
-    _phone = widget.phoneNumber;
+    LOG('--> VerifyPhoneWidget refreshData : ${widget.phoneNumber}');
+    _phone = widget.phoneNumber.isNotEmpty ? widget.phoneNumber : '010';
     _phoneCheck = widget.isSignIn;
-    _textController[SignUpPhoneText.phone.index].text = widget.phoneNumber;
+    _textController[SignUpPhoneText.phone.index].text = _phone;
     _textController[SignUpPhoneText.phoneCheck.index].text = '';
   }
 

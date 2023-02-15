@@ -35,7 +35,7 @@ class MainStoryItem extends StatefulWidget {
   int index;
 
   Function(int, bool)? onItemVisible;
-  Function(int)? onItemDeleted;
+  Function(String)? onItemDeleted;
 
   getKey() {
     return itemInfo.id;
@@ -217,28 +217,24 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                                           //     });
                                           break;
                                         case DropdownItemType.delete:
-                                          // showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
-                                          //   if (result == 1) {
-                                          //     api.deleteStoryItem(widget.itemInfo.id).then((result) {
-                                          //       if (result) {
-                                          //         if (widget.onItemDeleted != null) widget.onItemDeleted!(INT(widget.itemInfo['index']));
-                                          //       }
-                                          //     });
-                                          //   }
-                                          // });
+                                          showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+                                            if (result == 1) {
+                                              api.deleteStoryItem(widget.itemInfo.id).then((result) {
+                                                if (result) {
+                                                  if (widget.onItemDeleted != null) widget.onItemDeleted!(widget.itemInfo.id);
+                                                }
+                                              });
+                                            }
+                                          });
                                           break;
                                         case DropdownItemType.report:
-                                          // showReportMenu(context, widget.itemInfo.toJson(), 'story', menuList: [
-                                          //   {'id':'report', 'title':'Report it'},
-                                          // ]);
-                                          final checkKey = 'story-${widget.itemInfo.id}';
-                                          final reportInfo = AppData.reportList[checkKey];
+                                          final reportInfo = AppData.reportData['report'] != null ? AppData.reportData['report'][widget.itemInfo.id] : null;
                                           if (reportInfo == null) {
                                             showReportDialog(context, ReportType.report,
                                                 'Report'.tr, 'story', widget.itemInfo.toJson(), subTitle: 'Please write what you want to report'.tr).then((result) async {
                                               if (result.isNotEmpty) {
-                                                final checkKey2 = 'story-${widget.itemInfo.id}';
-                                                AppData.reportList[checkKey2] = result;
+                                                AppData.reportData['report'] ??= {};
+                                                AppData.reportData['report'][widget.itemInfo.id] = result;
                                                 showAlertDialog(context, 'Report'.tr, 'Report has been completed'.tr, '', 'OK'.tr);
                                               }
                                             });

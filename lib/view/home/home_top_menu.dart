@@ -73,34 +73,35 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
               if (AppData.appViewModel.appbarMenuMode != MainMenuID.back)
                 Row(
                   children: [
-                    if (AppData.appViewModel.appbarMenuMode == MainMenuID.event || AppData.appViewModel.appbarMenuMode == MainMenuID.story)...[
-                      GestureDetector(
-                        child: Container(
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 12 : 0),
-                          constraints: BoxConstraints(
-                            maxHeight: widget.height * 0.8,
-                            minWidth: widget.height * 0.8,
+                    if (AppData.appViewModel.appbarMenuMode != MainMenuID.my)...[
+                      if (AppData.appViewModel.appbarMenuMode != MainMenuID.message)
+                        GestureDetector(
+                          child: Container(
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 12 : 0),
+                            constraints: BoxConstraints(
+                              maxHeight: widget.height * 0.8,
+                              minWidth: widget.height * 0.8,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
+                              color: Theme.of(context).canvasColor.withOpacity(0.55),
+                            ),
+                            child: Row(
+                              children: [
+                                Text(STR_FLAG_ONLY(AppData.currentCountryFlag), style: TextStyle(fontSize: 26)),
+                                if (AppData.currentState.isNotEmpty)...[
+                                  SizedBox(width: 5),
+                                  Text(AppData.currentState, style: ItemTitleBoldStyle(context), maxLines: 2),
+                                ],
+                              ]
+                            )
                           ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
-                            color: Theme.of(context).canvasColor.withOpacity(0.55),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(STR_FLAG_ONLY(AppData.currentCountryFlag), style: TextStyle(fontSize: 26)),
-                              if (AppData.currentState.isNotEmpty)...[
-                                SizedBox(width: 5),
-                                Text(AppData.currentState, style: ItemTitleBoldStyle(context), maxLines: 2),
-                              ],
-                            ]
-                          )
+                          onTap: () {
+                            LOG('--> showCountrySelect');
+                            AppData.appViewModel.showCountrySelect(context, widget.onCountryChanged);
+                          },
                         ),
-                        onTap: () {
-                          LOG('--> showCountrySelect');
-                          AppData.appViewModel.showCountrySelect(context, widget.onCountryChanged);
-                        },
-                      ),
                       SizedBox(width: 5),
                       if (widget.isShowDatePick)
                         GestureDetector(

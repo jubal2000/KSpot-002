@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:kspot_002/view/follow/follow_screen.dart';
 import 'package:kspot_002/view/story/story_edit_screen.dart';
 import 'package:kspot_002/view_model/user_view_model.dart';
 import 'package:package_info/package_info.dart';
@@ -22,6 +23,7 @@ import '../repository/user_repository.dart';
 import '../services/api_service.dart';
 import '../services/local_service.dart';
 import '../view/event/event_edit_screen.dart';
+import '../view/message/chatting_screen.dart';
 import '../widget/event_group_dialog.dart';
 
 class MainMenuID {
@@ -29,8 +31,9 @@ class MainMenuID {
   static int get back     => 1;
   static int get event    => 2;
   static int get story    => 3;
-  static int get my       => 4;
-  static int get max      => 5;
+  static int get message  => 4;
+  static int get my       => 5;
+  static int get max      => 6;
 }
 
 const COUNTRY_LOG_MAX = 5;
@@ -56,7 +59,19 @@ class AppViewModel extends ChangeNotifier {
 
   setMainIndex(index) {
     menuIndex = index;
-    appbarMenuMode = index == 0 ? MainMenuID.event : MainMenuID.story;
+    switch(index) {
+      case 0:
+        appbarMenuMode = MainMenuID.event;
+        break;
+      case 1:
+        appbarMenuMode = MainMenuID.story;
+        break;
+      case 2:
+        appbarMenuMode = MainMenuID.message;
+        break;
+      default:
+        appbarMenuMode = MainMenuID.my;
+    }
     LOG('--> setMainIndex : $index');
     notifyListeners();
   }
@@ -157,80 +172,90 @@ class AppViewModel extends ChangeNotifier {
   }
 
   showAddMenu(iconColor, iconSize) {
-    if (appbarMenuMode == MainMenuID.event || appbarMenuMode == MainMenuID.story || appbarMenuMode == MainMenuID.my) {
-      return DropdownButtonHideUnderline(
-        child: DropdownButton2(
-          customButton: Center(
-            child: Icon(Icons.add, color: iconColor),
-          ),
-          items: [
-            if (appbarMenuMode == MainMenuID.event)
-              ...DropdownItems.eventAddItem.map(
-                    (item) =>
-                    DropdownMenuItem<DropdownItem>(
-                      value: item,
-                      child: DropdownItems.buildItem(buildContext!, item),
-                    ),
-              ),
-            if (appbarMenuMode == MainMenuID.story)
-              ...DropdownItems.storyAddItem.map(
-                    (item) =>
-                    DropdownMenuItem<DropdownItem>(
-                      value: item,
-                      child: DropdownItems.buildItem(buildContext!, item),
-                    ),
-              ),
-            if (appbarMenuMode == MainMenuID.my)
-              ...DropdownItems.homeAddItems.map(
-                    (item) =>
-                    DropdownMenuItem<DropdownItem>(
-                      value: item,
-                      child: DropdownItems.buildItem(buildContext!, item),
-                    ),
-              ),
-          ],
-          onChanged: (value) {
-            // if (!isCreatorMode()) {
-            //   showAlertYesNoDialog(context, 'CREATOR MODE', 'You need creator mode ON', 'Move to setting screen?', 'No', 'Yes').then((result) {
-            //     if (result == 1) {
-            //       Navigator.of(AppData.topMenuContext!).popUntil((r) => r.isFirst);
-            //       Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupScreen(moveTo: 'creator')));
-            //     }
-            //   });
-            //   return;
-            // }
-            var selected = value as DropdownItem;
-            switch (selected.type) {
-              case DropdownItemType.event:
-                Get.to(() => EventEditScreen())!.then((result) {
-                  if (result != null) {
-                    AppData.eventViewModel.isMapUpdate = true;
-                    cache.setEventItem(result);
-                    notifyListeners();
-                  }
-                });
-                break;
-              case DropdownItemType.story:
-                Get.to(() => StoryEditScreen())!.then((result) {
-                  LOG("--> StoryEditScreen result : $result");
-                  // if (result != null) {
-                  //   cache.setStoryItem(result);
-                  // }
-                  notifyListeners();
-                });
-                break;
-            }
-          },
-          itemHeight: 45,
-          dropdownWidth: 190,
-          buttonHeight: iconSize,
-          buttonWidth: iconSize,
-          offset: const Offset(0, 5),
+    return DropdownButtonHideUnderline(
+      child: DropdownButton2(
+        customButton: Center(
+          child: Icon(Icons.add, color: iconColor),
         ),
-      );
-    } else {
-      return Container();
-    }
+        items: [
+          if (appbarMenuMode == MainMenuID.event)
+            ...DropdownItems.eventAddItem.map(
+                  (item) =>
+                  DropdownMenuItem<DropdownItem>(
+                    value: item,
+                    child: DropdownItems.buildItem(buildContext!, item),
+                  ),
+            ),
+          if (appbarMenuMode == MainMenuID.story)
+            ...DropdownItems.storyAddItem.map(
+                  (item) =>
+                  DropdownMenuItem<DropdownItem>(
+                    value: item,
+                    child: DropdownItems.buildItem(buildContext!, item),
+                  ),
+            ),
+          if (appbarMenuMode == MainMenuID.message)
+            ...DropdownItems.messageAddItem.map(
+                  (item) =>
+                  DropdownMenuItem<DropdownItem>(
+                    value: item,
+                    child: DropdownItems.buildItem(buildContext!, item),
+                  ),
+            ),
+          if (appbarMenuMode == MainMenuID.my)
+            ...DropdownItems.homeAddItems.map(
+                  (item) =>
+                  DropdownMenuItem<DropdownItem>(
+                    value: item,
+                    child: DropdownItems.buildItem(buildContext!, item),
+                  ),
+            ),
+        ],
+        onChanged: (value) {
+          // if (!isCreatorMode()) {
+          //   showAlertYesNoDialog(context, 'CREATOR MODE', 'You need creator mode ON', 'Move to setting screen?', 'No', 'Yes').then((result) {
+          //     if (result == 1) {
+          //       Navigator.of(AppData.topMenuContext!).popUntil((r) => r.isFirst);
+          //       Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupScreen(moveTo: 'creator')));
+          //     }
+          //   });
+          //   return;
+          // }
+          var selected = value as DropdownItem;
+          switch (selected.type) {
+            case DropdownItemType.event:
+              Get.to(() => EventEditScreen())!.then((result) {
+                if (result != null) {
+                  AppData.eventViewModel.isMapUpdate = true;
+                  cache.setEventItem(result);
+                  notifyListeners();
+                }
+              });
+              break;
+            case DropdownItemType.story:
+              Get.to(() => StoryEditScreen())!.then((result) {
+                notifyListeners();
+              });
+              break;
+            case DropdownItemType.message:
+              Get.to(() => FollowScreen(AppData.userInfo, isSelectable: true))!.then((result) {
+                if (JSON_NOT_EMPTY(result)) {
+                  final targetInfo = result.entries.first.value as JSON;
+                  Get.to(() => ChattingScreen(targetInfo['id'], targetInfo['nickName'], targetInfo['pic']))!.then((_) {
+                    notifyListeners();
+                  });
+                }
+              });
+              break;
+          }
+        },
+        itemHeight: 45,
+        dropdownWidth: 190,
+        buttonHeight: iconSize,
+        buttonWidth: iconSize,
+        offset: const Offset(0, 5),
+      ),
+    );
   }
 
   Future<int> showAppUpdateDialog(BuildContext context, String desc, String? msg, {bool isForceUpdate = false }) async {

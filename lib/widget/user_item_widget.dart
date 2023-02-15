@@ -162,14 +162,18 @@ class UserFollowWidget extends StatefulWidget {
 }
 
 class _UserFollowState extends State<UserFollowWidget> {
+  final userRepo = UserRepository();
   final api = Get.find<ApiService>();
+  
   var _followType = 0;
   var _userId = '';
   onFollowButton() {
     LOG('--> addFollowTarget : ${widget.userInfo}');
-    showAlertYesNoDialog(context, 'Follow'.tr, 'Would you like to follow?'.tr, '${'Target'.tr}: ${STR(widget.userInfo['userName'] ?? widget.userInfo['nickName'])}', '아니오', '예').then((result) async {
+    showAlertYesNoDialog(context, 'Follow'.tr, 
+      'Would you like to follow?'.tr, '${'Target'.tr}: ${STR(widget.userInfo['userName'] ?? widget.userInfo['nickName'])}', 
+      'No'.tr, 'OK'.tr).then((result) async {
       if (result == 1) {
-        var addItem = await api.addFollowTarget(AppData.userInfo.toJson(), widget.userInfo);
+        var addItem = await userRepo.addFollowTarget(UserModel.fromJson(widget.userInfo));
         if (addItem != null) {
           setState(() {
             _followType = _followType == 2 ? 3 : 2;

@@ -14,6 +14,7 @@ import '../services/firebase_service.dart';
 import '../utils/utils.dart';
 import '../view_model/app_view_model.dart';
 import '../view_model/event_view_model.dart';
+import '../view_model/message_view_model.dart';
 import '../view_model/story_view_model.dart';
 
 const SCROLL_SPEED = 250;
@@ -72,9 +73,10 @@ class AppData {
 
   static var isDevMode = true;
 
-  static var appViewModel   = AppViewModel();
-  static var eventViewModel = EventViewModel();
-  static var storyViewModel = StoryViewModel();
+  static var appViewModel     = AppViewModel();
+  static var eventViewModel   = EventViewModel();
+  static var storyViewModel   = StoryViewModel();
+  static var messageViewModel = MessageViewModel();
 
   static var defaultInfoID = 'info0001';
 
@@ -118,7 +120,8 @@ class AppData {
   static JSON infoData = {};
   static JSON timeData = {};
   static JSON serviceQnAData = {};
-  static JSON reportList = {};
+  static JSON reportData = {};
+  static JSON blockData = {};
 
   static Map<String, PlaceModel>    placeData = {};
   static Map<String, EventModel>    eventData = {};

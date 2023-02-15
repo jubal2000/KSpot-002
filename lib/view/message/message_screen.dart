@@ -3,51 +3,58 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/app_data.dart';
+import '../../utils/utils.dart';
+import '../../view_model/app_view_model.dart';
 import '../../view_model/message_view_model.dart';
 
 class MessageScreen extends StatelessWidget {
   MessageScreen({Key? key}) : super(key: key);
-  final _viewModel = MessageViewModel();
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<MessageViewModel>.value(
-      value: _viewModel,
-      child: Consumer<MessageViewModel>(builder: (context, appViewModel, _) {
-        _viewModel.init(context);
-        return Scaffold(
-            body: Stack(
-                children: [
-                  // FutureBuilder(
-                  //     future: _viewModel.initData,
-                  //     builder: (context, snapshot) {
-                  //       if (snapshot.hasData) {
-                  //         _viewModel.eventData = snapshot.data;
-                  //         return FutureBuilder(
-                  //             future: _viewModel.setShowList(),
-                  //             builder: (context, snapshot2) {
-                  //               if (snapshot2.hasData) {
-                  //                 _viewModel.eventShowList = snapshot2.data!;
-                  //                 return ChangeNotifierProvider<EventViewModel>.value(
-                  //                     value: _viewModel,
-                  //                     child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-                  //                       return viewModel.showMainList();
-                  //                     })
-                  //                 );
-                  //               } else {
-                  //                 return showLoadingFullPage(context);
-                  //               }
-                  //             }
-                  //         );
-                  //       } else {
-                  //         return showLoadingFullPage(context);
-                  //       }
-                  //     }
-                  // ),
-                ]
-            )
-        );
-      }),
+    AppData.messageViewModel.init(context);
+    AppData.messageViewModel.startMessageStreamToMe();
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        body: FutureBuilder(
+          future: AppData.messageViewModel.getMessageData(),
+            builder:(context, snapshot) {
+              if (snapshot.hasData) {
+                AppData.messageViewModel.setMessageData(snapshot.data as JSON);
+                return ChangeNotifierProvider<AppViewModel>.value(
+                  value: AppData.appViewModel,
+                  child: Consumer<AppViewModel>(
+                    builder: (context, appViewModel, _) {
+                      LOG('--> AppViewModel');
+                      return LayoutBuilder(
+                        builder: (context, layout) {
+                          return ChangeNotifierProvider<MessageViewModel>.value(
+                            value: AppData.messageViewModel,
+                            child: Consumer<MessageViewModel>(builder: (context, viewModel, _) {
+                              LOG('--> MessageViewModel refresh');
+                              return StreamBuilder(
+                                stream: viewModel.stream!,
+                                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                                  return viewModel.showMainList(layout, snapshot);
+                                }
+                              );
+                            }
+                          )
+                        );
+                      }
+                    );
+                  }
+                )
+              );
+            } else {
+              return Center(
+                child: showLoadingCircleSquare(50),
+              );
+            }
+          }
+        )
+      )
     );
   }
 }

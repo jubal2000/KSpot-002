@@ -284,6 +284,7 @@ class Words extends Translations {
       'KSpot의 많은 서비스와 혜택을 체험해보세요',
       'Congratulations on your membership': '회원가입을 축하합니다',
       'Select Done': '선택 완료',
+      'CHECK': '코드확인',
 
       // slide_timepicker_screen
       'Select Time Range': '시간 범위 선택',
@@ -592,7 +593,7 @@ class Words extends Translations {
       'If you are not the actual owner of the spot, the owner may be forcibly changed later': '해당 스팟의 실제 소유자가 아닐경우, 추후 소유자가 강제변경 될 수 있습니다',
       'Create a new event': '새로운 이벤트를 추가합니다',
       'If you are not the actual owner of the event, the owner may be forcibly changed later': '해당 이벤트의 실제 소유자가 아닐경우, 추후 소유자가 강제변경 될 수 있습니다',
-
+      'No message': '메시지가 없습니다',
 
       // main_top
       'COUNTRY SELECT': '지역 선택',

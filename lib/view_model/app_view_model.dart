@@ -250,7 +250,7 @@ class AppViewModel extends ChangeNotifier {
           }
         },
         itemHeight: 45,
-        dropdownWidth: 190,
+        dropdownWidth: 150,
         buttonHeight: iconSize,
         buttonWidth: iconSize,
         offset: const Offset(0, 5),

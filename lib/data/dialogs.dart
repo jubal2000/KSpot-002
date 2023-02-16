@@ -13,9 +13,9 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:kspot_002/services/api_service.dart';
+import 'package:kspot_002/services/cache_service.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:uuid/uuid.dart';
@@ -28,10 +28,8 @@ import '../widget/csc_picker/csc_picker.dart';
 import '../widget/dropdown_widget.dart';
 import '../widget/edit/edit_text_input_widget.dart';
 import '../widget/image_scroll_viewer.dart';
-import '../widget/main_list_item.dart';
 import '../widget/vote_widget.dart';
 import 'app_data.dart';
-import 'common_colors.dart';
 import '../utils/utils.dart';
 import '../data/style.dart';
 
@@ -2025,6 +2023,7 @@ Future<JSON> showEditCommentDialog(BuildContext context, CommentType type, Strin
                                     onDeleteResult(_context, result);
                                   });
                                   break;
+                                default:
                               }
                             }
                           });
@@ -2092,6 +2091,7 @@ Future<JSON> showEditCommentDialog(BuildContext context, CommentType type, Strin
                                 case CommentType.story:
                                   upResult = await api.addStoryItem(jsonData);
                                   break;
+                                default:
                               }
                               Navigator.of(dialogContext!).pop();
                               Future.delayed(Duration(milliseconds: 200), () async {
@@ -2302,6 +2302,7 @@ Future<JSON> showEditCommentMultiSendDialog(BuildContext context, CommentType ty
                                     onDeleteResult(_context, result);
                                   });
                                   break;
+                                default:
                               }
                             }
                           });
@@ -2364,6 +2365,7 @@ Future<JSON> showEditCommentMultiSendDialog(BuildContext context, CommentType ty
                                     upResult = await api.addServiceQnAItem(jsonData);
                                     AppData.serviceQnAData[jsonData['id']] = jsonData;
                                     break;
+                                  default:
                                 }
                               }
                               Navigator.of(dialogContext!).pop();
@@ -2813,7 +2815,9 @@ enum ReportType {
 
 showReportDialog(BuildContext context, ReportType type, String title, String targetType,
     JSON targetData, {JSON jsonOrgData = const {}, String subTitle = ''}) async {
-  final api = Get.find<ApiService>();
+  final api   = Get.find<ApiService>();
+  final cache = Get.find<CacheService>();
+
   final _editController   = TextEditingController();
   final _editControllerEx = TextEditingController();
   final _imageGalleryKey = GlobalKey();
@@ -2993,7 +2997,7 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
                                 }
                               }
                               JSON upResult = {};
-                              final result = await api.addReportItemEx(_jsonData, AppData.reportData);
+                              final result = await api.addReportItemEx(_jsonData, cache.reportData);
                               if (result.isNotEmpty) {
                                 upResult = FROM_SERVER_DATA(_jsonData);
                               }
@@ -3018,11 +3022,13 @@ showReportMenu(BuildContext context, JSON targetInfo, String type, {List<JSON> m
   {'id':'report', 'title':'Report content'},
   {'id':'ownership', 'title':'Change to Ownership'},
 ]}) {
+  final cache = Get.find<CacheService>();
+  
   showJsonButtonSelectDialog(context, 'Report type'.tr, menuList).then((result) {
     var targetId = STR(targetInfo['id']);
     switch (result) {
       case 'report':
-        if (JSON_NOT_EMPTY(AppData.reportData['report']) && AppData.reportData['report'].containsKey(targetId)) {
+        if (JSON_NOT_EMPTY(cache.reportData['report']) && cache.reportData['report'].containsKey(targetId)) {
           showAlertDialog(context, TR(menuList[0]['title']), 'Already reported'.tr, '', 'OK'.tr);
         } else {
           showReportDialog(context, ReportType.report,
@@ -3034,7 +3040,7 @@ showReportMenu(BuildContext context, JSON targetInfo, String type, {List<JSON> m
         }
         break;
       case 'ownership':
-        if (JSON_NOT_EMPTY(AppData.reportData['owner']) && AppData.reportData['owner'].containsKey(targetId)) {
+        if (JSON_NOT_EMPTY(cache.reportData['owner']) && cache.reportData['owner'].containsKey(targetId)) {
           showAlertDialog(context, TR(menuList[1]['title']), 'Already reported'.tr, '', 'OK'.tr);
         } else {
           showReportDialog(context, ReportType.ownership,

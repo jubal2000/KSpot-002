@@ -31,9 +31,9 @@ Future<void> main() async {
   await GetStorage.init();
   final api   = await Get.putAsync(() => ApiService().init());
   final fire  = await Get.putAsync(() => FirebaseService().init());
+  final cache = await Get.putAsync(() => CacheService().init());
   final auth  = await Get.putAsync(() => AuthService().init());
   final local = await Get.putAsync(() => LocalService().init());
-  final cache = await Get.putAsync(() => CacheService().init());
 
   api.initFirebase();
 
@@ -91,17 +91,17 @@ class MyApp extends StatelessWidget {
             theme: theme.getTheme(),
             // darkTheme: darkTheme,
             // themeMode: ThemeMode.system,
-            builder: (context, _) {
-              var child = _!;
-              final navigatorKey = GlobalKey<NavigatorState>();
-              // final navigatorKey = child.key as GlobalKey<NavigatorState>;
-              child = Toast(
-                navigatorKey: navigatorKey,
-                alignment: Alignment(0, 0.8),
-                child: child,
-              );
-              return child;
-            },
+            // builder: (context, _) {
+            //   var child = _!;
+            //   final navigatorKey = GlobalKey<NavigatorState>();
+            //   // final navigatorKey = child.key as GlobalKey<NavigatorState>;
+            //   child = Toast(
+            //     navigatorKey: navigatorKey,
+            //     alignment: Alignment(0, 0.8),
+            //     child: child,
+            //   );
+            //   return child;
+            // },
             initialRoute: Routes.SPLASH,
             getPages: [
               GetPage(

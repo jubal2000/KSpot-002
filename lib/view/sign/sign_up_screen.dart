@@ -222,6 +222,7 @@ class SignUpScreen extends StatelessWidget {
   }
 
   showPhoneStep(context, viewModel) {
+    AppData.isSignUpMode = true;
     return LayoutBuilder(
       builder: (context, layout) {
         return Container(

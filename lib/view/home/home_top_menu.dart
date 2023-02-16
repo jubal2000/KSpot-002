@@ -27,7 +27,7 @@ import '../../widget/user_item_widget.dart';
 import '../event/event_edit_screen.dart';
 
 class HomeTopMenuBar extends StatefulWidget {
-  HomeTopMenuBar(this.menuMode, {Key? key, this.isShowDatePick = true, this.isDateOpen = true, this.height = 65.0, this.onCountryChanged, this.onDateChange}) : super(key: key);
+  HomeTopMenuBar(this.menuMode, {Key? key, this.isShowDatePick = true, this.isDateOpen = true, this.height = UI_TOP_MENU_HEIGHT, this.onCountryChanged, this.onDateChange}) : super(key: key);
   int menuMode;
   double height;
   bool isShowDatePick;

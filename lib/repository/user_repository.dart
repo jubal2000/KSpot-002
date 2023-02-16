@@ -128,18 +128,23 @@ class UserRepository {
 
   Future<Map<String, StoryModel>> getStoryFromUserId(String userId) async {
     Map<String, StoryModel> result = {};
+    try {
     final response = await api.getStoryFromUserId(userId);
-    if (response.isNotEmpty) {
+    if (JSON_NOT_EMPTY(response)) {
       for (var item in response.entries) {
+        LOG('--> response item : ${item.value.toString()}');
         result[item.key] = StoryModel.fromJson(item.value);
       }
+    }
+    LOG('--> StoryModel result : ${result.length}');
+    } catch (e) {
+      LOG('--> StoryModel error : ${e.toString()}');
     }
     return result;
   }
 
-  Future<UserModel?> addFollowTarget(UserModel targetInfo) async {
-    final response = await api.addFollowTarget(AppData.userInfo.toJson(), targetInfo.toJson());
-    return response.isNotEmpty ? UserModel.fromJson(response) : null;
+  Future<JSON?> addFollowTarget(JSON targetInfo) async {
+    return await api.addFollowTarget(AppData.userInfo.toJson(), targetInfo);
   }
 
 

@@ -2,6 +2,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/models/message_model.dart';
 import 'package:kspot_002/services/cache_service.dart';
 
@@ -35,6 +36,11 @@ class MessageGroupItemState extends State<MessageGroupItem> {
   final userRepo = UserRepository();
   var followType = -1;
 
+  refresh() {
+    setState(() {
+    });
+  }
+
   @override
   void initState() {
     followType = CheckFollowUser(widget.targetId);
@@ -45,15 +51,20 @@ class MessageGroupItemState extends State<MessageGroupItem> {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 50,
-      margin: EdgeInsets.symmetric(vertical: 7),
-      color: Colors.transparent,
+      height: 65,
+      margin: EdgeInsets.symmetric(vertical: 3),
+      padding: EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(UI_ROUND_RADIUS)),
+        color: Theme.of(context).cardColor
+      ),
       child: Row(
         children: [
+          SizedBox(width: 5),
           GestureDetector(
             onTap: () async {
               var userInfo = await userRepo.getUserInfo(widget.targetId);
-              if (JSON_NOT_EMPTY(userInfo)) {
+              if (userInfo != null) {
                 Get.to(() => TargetProfileScreen(userInfo!))!.then((value) {});
               } else {
                 showUserAlertDialog(context, '${'Target user'.tr} : ${widget.targetName}');
@@ -77,7 +88,7 @@ class MessageGroupItemState extends State<MessageGroupItem> {
               child: Container(
                 color: Colors.transparent,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
@@ -86,61 +97,64 @@ class MessageGroupItemState extends State<MessageGroupItem> {
                         Expanded(
                           child: Row(
                               children: [
-                                Text(STR(widget.targetName), style: Theme.of(context).textTheme.subtitle1),
-                                if (followType > 0)...[
+                                Text(STR(widget.targetName), style: ItemTitleStyle(context)),
+                                if (followType == 2)...[
                                   SizedBox(width: 5),
                                   Container(
-                                    padding: EdgeInsets.all(3),
+                                    width: 14,
+                                    height: 14,
+                                    padding: EdgeInsets.zero,
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                                      color: Theme.of(context).colorScheme.secondary,
+                                      borderRadius: BorderRadius.all(Radius.circular(3.0)),
+                                      color: Theme.of(context).colorScheme.tertiary,
                                     ),
-                                    child: Text(followType == 1 ? 'Following'.tr : followType == 2 ? 'Follower'.tr : 'Follow'.tr,
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.white,
-                                        )
+                                    child: Center(
+                                      child: Text('F', style: ItemDescBoldStyle(context)),
                                     ),
-                                  )
+                                    // child: Text(followType == 1 ? 'Following'.tr : followType == 2 ? 'Follower'.tr : 'Follow'.tr,
+                                    //     style: TextStyle(
+                                    //       fontSize: 10,
+                                    //       color: Colors.white,
+                                    //     )
+                                    // ),
+                                  ),
                                 ],
                               ]
                           ),
                         ),
-                        Text(widget.messageItem.createTime, style: ItemDescExStyle(context)),
+                        Text(SERVER_TIME_STR(widget.messageItem.updateTime, true), style: ItemDescExStyle(context)),
                       ],
                     ),
-                    Expanded(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Text(DESC(widget.messageItem.desc), maxLines: 2, style: ItemDescStyle(context)),
-                          ),
-                          if (widget.unOpenCount > 0)
-                            Container(
-                              height: 20,
-                              alignment: Alignment.center,
-                              padding: EdgeInsets.all(3),
-                              constraints: BoxConstraints(
-                                minWidth: 20,
-                              ),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15.0),
-                                  color: Theme.of(context).colorScheme.primary
-                              ),
-                              child: Text('${widget.unOpenCount}',
-                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600,
-                                      color: AppData.currentThemeMode ? Colors.white : Colors.black)),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(DESC(widget.messageItem.desc), maxLines: 1, style: ItemDescStyle(context), overflow: TextOverflow.ellipsis),
+                        ),
+                        if (widget.unOpenCount > 0)...[
+                          SizedBox(width: 10),
+                          Container(
+                            alignment: Alignment.center,
+                            constraints: BoxConstraints(
+                              minWidth: 18,
+                              minHeight: 18,
                             ),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15.0),
+                                color: Theme.of(context).colorScheme.error
+                            ),
+                            child: Text('${widget.unOpenCount}',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800,
+                                    color: Theme.of(context).cardColor)),
+                          ),
                         ],
-                      ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          SizedBox(width: 5),
           DropdownButtonHideUnderline(
             child: DropdownButton2(
               customButton: Container(

@@ -184,12 +184,17 @@ TIME_DATA_DESC(dynamic data, [String defaultValue = '']) {
 }
 
 // ignore: non_constant_identifier_names
-String SERVER_TIME_STR(value) {
+String SERVER_TIME_STR(value, [bool isTodayCut = false]) {
   if (value == null) return '';
-  var format = DateFormat('yyyy-MM-dd hh:mm:ss');
-  var date = TME(value);
+  var format1 = DateFormat('yyyy-MM-dd hh:mm:ss');
+  var format2 = DateFormat('hh:mm:ss');
+  DateTime? date = TME(value);
   if (date != null) {
-    return format.format(date).toString();
+    if (isTodayCut && date.isToday()) {
+      return format2.format(date).toString();
+    } else {
+      return format1.format(date).toString();
+    }
   }
   return '';
 }

@@ -7,6 +7,7 @@ import '../models/event_model.dart';
 import '../models/message_model.dart';
 import '../models/story_model.dart';
 import '../utils/utils.dart';
+import '../view/message/message_group_item.dart';
 
 class CacheService extends GetxService {
   Map<String, EventModel>? eventData;
@@ -18,14 +19,14 @@ class CacheService extends GetxService {
 
   Map<String, MessageModel>? messageData;
   Map<String, MessageGroupModel>? messageGroupData;
-  Map<String, Widget> messageListItemData = {};
 
+  JSON reportData = {};
+  JSON blockData = {};
 
   Future<CacheService> init() async {
     eventListItemData = {};
     eventMapItemData  = {};
     storyListItemData = {};
-    messageListItemData = {};
     return this;
   }
 

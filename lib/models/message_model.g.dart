@@ -18,7 +18,7 @@ MessageModel _$MessageModelFromJson(Map<String, dynamic> json) => MessageModel(
       senderPic: json['senderPic'] as String,
       updateTime: json['updateTime'] as String,
       createTime: json['createTime'] as String,
-      isOpened: json['isOpened'] as bool,
+      openTime: json['openTime'] as String? ?? '',
       picData:
           (json['picData'] as List<dynamic>?)?.map((e) => e as String).toList(),
     );
@@ -36,7 +36,7 @@ Map<String, dynamic> _$MessageModelToJson(MessageModel instance) =>
       'senderPic': instance.senderPic,
       'updateTime': instance.updateTime,
       'createTime': instance.createTime,
-      'isOpened': instance.isOpened,
+      'openTime': instance.openTime,
       'picData': instance.picData,
     };
 

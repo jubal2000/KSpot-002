@@ -27,6 +27,8 @@ linter:
 
     prefer_const_constructors: false
     constant_identifier_names: false
+    missing_enum_constant_in_switch: false
+
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

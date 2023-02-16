@@ -1,4 +1,4 @@
-package com.jhfactory.kspot002.kspot_002
+package com.jhfactory.kspot002
 
 import io.flutter.embedding.android.FlutterActivity
 

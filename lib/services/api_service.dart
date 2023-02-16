@@ -737,7 +737,7 @@ class ApiService extends GetxService {
       result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
     }
     result = await cleanEventExpire(result, addExpiredItem);
-    LOG('--> getEventFromUserId result : $result');
+    LOG('--> getEventFromUserId result : ${result.length}');
     return result;
   }
 

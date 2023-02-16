@@ -15,7 +15,8 @@ class MessageModel {
   String  senderPic;
   String  updateTime;     // 수정 시간
   String  createTime;     // 생성 시간
-  bool    isOpened;       // 읽음
+  @JsonKey(defaultValue: false)
+  String  openTime;       // 읽은 시간
 
   List<String>? picData;
 
@@ -31,7 +32,7 @@ class MessageModel {
     required this.senderPic,
     required this.updateTime,
     required this.createTime,
-    required this.isOpened,
+    required this.openTime,
 
     this.picData,
   });

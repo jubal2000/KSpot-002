@@ -7,25 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:662991987486:android:bbe2d068c8dbef0f6ddf0f",
+        "mobilesdk_app_id": "1:662991987486:android:ce426d922ddf32da6ddf0f",
         "android_client_info": {
-          "package_name": "com.jhfactory.kspot002.android"
+          "package_name": "com.jhfactory.kspot002"
         }
       },
       "oauth_client": [
         {
-          "client_id": "662991987486-hhlakmhq53m5c417fdu2q2vj81fvi2sk.apps.googleusercontent.com",
+          "client_id": "662991987486-bo1g21mhmmj0ihb23pb2r9tiu0ss9fcg.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.jhfactory.kspot002.android",
-            "certificate_hash": "fb438841ddc60686cf1a491debf3c9bebade62e6"
-          }
-        },
-        {
-          "client_id": "662991987486-n3kjc6erecdt9dc0dd9t3cha3t4has00.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.jhfactory.kspot002.android",
+            "package_name": "com.jhfactory.kspot002",
             "certificate_hash": "49aff302c10c9cb5047f4603b370284179dd59c3"
           }
         },
@@ -45,6 +37,14 @@
             {
               "client_id": "662991987486-l55fi8278t6od6hb8oeqv5hmj5v2ppuc.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "662991987486-gcqkque6uf9s37ok1bv67bvouou7bpsb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.jhfactory.kspot002",
+                "app_store_id": "1672170106"
+              }
             }
           ]
         }

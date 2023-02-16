@@ -30,6 +30,7 @@ class UserViewModel extends ChangeNotifier {
 
   var currentTab = 0;
   var isMyProfile = false;
+  var tabListHeight = 0.0;
 
   initUserModel(UserModel user) {
     userInfo = user;
@@ -57,19 +58,11 @@ class UserViewModel extends ChangeNotifier {
   }
 
   getEventData(bool addExpired) {
-    Map<String, EventModel> result = {};
-    if (userInfo != null) {
-      return repo.getEventFromUserId(userInfo!.id, addExpired);
-    }
-    return result;
+    return repo.getEventFromUserId(userInfo!.id, addExpired);
   }
 
   getStoryData() {
-    Map<String, StoryModel> result = {};
-    if (userInfo != null) {
-      return repo.getStoryFromUserId(userInfo!.id);
-    }
-    return result;
+    return repo.getStoryFromUserId(userInfo!.id);
   }
 
   @override

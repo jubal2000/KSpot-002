@@ -112,6 +112,7 @@ class AppData {
 
   static var isEventGroupGridMode = true;
   static var isMainActive = true;
+  static var isSignUpMode = false;
 
   static JSON selectEventTime = {};
   static JSON messageReadLog = {};
@@ -120,8 +121,6 @@ class AppData {
   static JSON infoData = {};
   static JSON timeData = {};
   static JSON serviceQnAData = {};
-  static JSON reportData = {};
-  static JSON blockData = {};
 
   static Map<String, PlaceModel>    placeData = {};
   static Map<String, EventModel>    eventData = {};

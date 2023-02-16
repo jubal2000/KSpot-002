@@ -173,7 +173,7 @@ class _UserFollowState extends State<UserFollowWidget> {
       'Would you like to follow?'.tr, '${'Target'.tr}: ${STR(widget.userInfo['userName'] ?? widget.userInfo['nickName'])}', 
       'No'.tr, 'OK'.tr).then((result) async {
       if (result == 1) {
-        var addItem = await userRepo.addFollowTarget(UserModel.fromJson(widget.userInfo));
+        var addItem = await userRepo.addFollowTarget(widget.userInfo);
         if (addItem != null) {
           setState(() {
             _followType = _followType == 2 ? 3 : 2;

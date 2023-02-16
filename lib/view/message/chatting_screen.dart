@@ -24,6 +24,9 @@ class ChattingScreen extends StatefulWidget {
   String targetName;
   String targetPic;
 
+  final textController   = TextEditingController();
+  final scrollController = ScrollController();
+
   @override
   ChattingScreenState createState() => ChattingScreenState();
 }
@@ -34,8 +37,6 @@ class ChattingScreenState extends State<ChattingScreen> {
   final api      = Get.find<ApiService>();
   final cache    = Get.find<CacheService>();
 
-  final _textController   = TextEditingController();
-  final _scrollController = ScrollController();
   final _formKey          = GlobalKey<FormState>();
   final _minText          = 1;
   final _iconSize         = 24.0;
@@ -51,7 +52,7 @@ class ChattingScreenState extends State<ChattingScreen> {
     _showList = {};
     if (JSON_NOT_EMPTY(cache.messageData)) {
       for (var item in cache.messageData!.entries) {
-        _showList[item.key] = item;
+        _showList[item.key] = item.value.toJson();
       }
     }
     LOG('--> initData :${_showList.length}');
@@ -135,7 +136,7 @@ class ChattingScreenState extends State<ChattingScreen> {
   refreshList() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       Future.delayed(Duration(milliseconds: 200), () {
-        _scrollController.jumpTo(0);
+        widget.scrollController.jumpTo(0);
       });
     });
   }
@@ -196,7 +197,7 @@ class ChattingScreenState extends State<ChattingScreen> {
                                 Expanded(
                                   child: SingleChildScrollView(
                                       reverse: true,
-                                      controller: _scrollController,
+                                      controller: widget.scrollController,
                                       child: Column(
                                         children: [
                                           for (var item in _showList.entries)
@@ -252,7 +253,7 @@ class ChattingScreenState extends State<ChattingScreen> {
                                               children: [
                                                 Expanded(
                                                     child: TextFormField(
-                                                      controller: _textController,
+                                                      controller: widget.textController,
                                                       decoration: inputChatSuffix(context),
                                                       keyboardType: TextInputType.multiline,
                                                       maxLines: null,
@@ -260,7 +261,7 @@ class ChattingScreenState extends State<ChattingScreen> {
                                                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Theme.of(context).primaryColor),
                                                       onChanged: (value) {
                                                         _sendText = value;
-                                                        _scrollController.jumpTo(0);
+                                                        widget.scrollController.jumpTo(0);
                                                       },
                                                     )
                                                 ),
@@ -279,14 +280,14 @@ class ChattingScreenState extends State<ChattingScreen> {
                                                           AppData.isMainActive = false;
                                                           createAddItem();
                                                           _addItem['desc'] = _sendText;
-                                                          _addItem['imageData'] = [];
+                                                          _addItem['picData'] = [];
                                                           _addItem['thumbData'] = [];
                                                           _addItem['createTime'] = CURRENT_SERVER_TIME();
                                                           var upCount = 0;
                                                           for (var item in _imageData.entries) {
                                                             var result = await api.uploadImageData(item.value as JSON, 'message_img');
                                                             if (result != null) {
-                                                              _addItem['imageData'].add(result);
+                                                              _addItem['picData'].add(result);
                                                               upCount++;
                                                             }
                                                           }
@@ -294,7 +295,7 @@ class ChattingScreenState extends State<ChattingScreen> {
                                                           upCount = 0;
                                                           for (var item in _imageData.entries) {
                                                             var result = await api.uploadImageData(
-                                                                {'id': item.key, 'image': item.value['thumb']}, 'message_img_p');
+                                                                {'id': item.key, 'data': item.value['thumb']}, 'message_img_p');
                                                             if (result != null) {
                                                               _addItem['thumbData'].add(result);
                                                               upCount++;
@@ -305,7 +306,7 @@ class ChattingScreenState extends State<ChattingScreen> {
                                                             setState(() {
                                                               _showList[result['id']] = result;
                                                               _showList = JSON_CREATE_TIME_SORT_ASCE(_showList);
-                                                              AppData.messageData[result['id']] = MessageModel.fromJson(result);
+                                                              cache.setMessageItem(MessageModel.fromJson(result));
                                                               AppData.isMainActive = true;
                                                               LOG('--------> add message result [${result['id']}]');
                                                             });
@@ -346,7 +347,7 @@ class ChattingScreenState extends State<ChattingScreen> {
                                                           //     });
                                                           //     break;
                                                           // }
-                                                          _textController.text = '';
+                                                          widget.textController.text = '';
                                                           _sendText = '';
                                                           _imageData.clear();
                                                         },
@@ -396,7 +397,7 @@ class ChattingScreenState extends State<ChattingScreen> {
                                           ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
                                           if (cdata != null) {
                                             _sendText = cdata.text.toString();
-                                            _textController.text = _sendText;
+                                            widget.textController.text = _sendText;
                                           }
                                         },
                                         child: Icon(Icons.paste, size: _iconSize, color: Theme.of(context).primaryColor.withOpacity(0.5)),
@@ -467,9 +468,9 @@ class MessageItemState extends State<MessageItem> {
       widget.messageItem['thumbData'].forEach((item) {
         var index = widget.messageItem['thumbData'].indexOf(item);
         var key = Uuid().v1();
-        _imageData[key] = {'id': key, 'backPic': item};
-        if (widget.messageItem['imageData'][index] != null) {
-          _imageData[key]['linkPic'] = widget.messageItem['imageData'][index];
+        _imageData[key] = {'id': key, 'url': item};
+        if (widget.messageItem['picData'][index] != null) {
+          _imageData[key]['linkPic'] = widget.messageItem['data'][index];
         }
       });
     }

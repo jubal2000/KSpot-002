@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/models/message_model.dart';
 
 import '../data/app_data.dart';
 import '../services/api_service.dart';
@@ -11,8 +12,13 @@ class MessageRepository {
   final api = Get.find<ApiService>();
   StreamSubscription<QuerySnapshot>? stream;
 
-  getMessageData() {
-    return api.getMessageData(AppData.USER_ID);
+  getMessageData() async {
+    Map<String, MessageModel> result = {};
+    final data = await api.getMessageData(AppData.USER_ID);
+    for (var item in data.entries) {
+      result[item.key] = MessageModel.fromJson(item.value);
+    }
+    return result;
   }
 
   startMessageStreamToMe() {

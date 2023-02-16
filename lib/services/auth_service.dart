@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/repository/user_repository.dart';
+import 'package:kspot_002/services/cache_service.dart';
+import '../repository/message_repository.dart';
 import 'firebase_service.dart';
 
 import '../data/app_data.dart';
@@ -15,8 +17,10 @@ class AuthService extends GetxService {
     return this;
   }
 
-  final fire = Get.find<FirebaseService>();
-  final userRepo = UserRepository();
+  final fire      = Get.find<FirebaseService>();
+  final cache     = Get.find<CacheService>();
+  final userRepo  = UserRepository();
+  final msgRepo   = MessageRepository();
   Function? onSignIn;
   Function? onSignOut;
   Function(int)? onError;
@@ -36,21 +40,24 @@ class AuthService extends GetxService {
         Get.offAllNamed(Routes.INTRO);
         if (onSignOut != null) onSignOut!();
       } else {
-        LOG('------> User is signed in!');
+        LOG('------> User is signed in! : ${AppData.isSignUpMode}');
         setLoginUserInfo(user);
-        final result = await userRepo.getStartUserInfo(AppData.loginInfo.loginId);
-        if (result != null) {
-          AppData.userInfo = result;
-          LOG('--> getStartUserInfo done! : ${AppData.userInfo.id}');
-          AppData.reportData = await userRepo.getReportData();
-          AppData.blockData  = await userRepo.getBlockData();
-          LOG('--> AppData.reportData : ${AppData.reportData.toString()} / ${AppData.blockData.toString()}');
-          Get.offAllNamed(Routes.HOME);
-        } else {
-          LOG('--> getStartUserInfo failed! : ${AppData.loginInfo.loginId} / ${AppData.loginInfo.loginType}');
-          if (onError != null) onError!(0);
+        if (!AppData.isSignUpMode) {
+          final result = await userRepo.getStartUserInfo(AppData.loginInfo.loginId);
+          if (result != null) {
+            AppData.userInfo = result;
+            LOG('--> getStartUserInfo done! : ${AppData.userInfo.id}');
+            cache.reportData  = await userRepo.getReportData();
+            cache.blockData   = await userRepo.getBlockData();
+            cache.messageData = await msgRepo.getMessageData();
+            LOG('--> AppData.reportData : ${cache.reportData.toString()} / ${cache.blockData.toString()}');
+            Get.offAllNamed(Routes.HOME);
+          } else {
+            LOG('--> getStartUserInfo failed! : ${AppData.loginInfo.loginId} / ${AppData.loginInfo.loginType}');
+            if (onError != null) onError!(0);
+          }
+          if (onSignIn != null) onSignIn!();
         }
-        if (onSignIn != null) onSignIn!();
       }
       isLoginCheckDone = true;
     });

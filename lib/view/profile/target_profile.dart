@@ -33,7 +33,7 @@ class TargetProfileState extends State<TargetProfileScreen> {
     var target = 'Target'.tr;
     showAlertYesNoDialog(context, 'Follow'.tr, 'Would you like to follow?'.tr, '$target: ${widget.userInfo.nickName}', 'Cancel'.tr, 'OK'.tr).then((result) async {
       if (result == 1) {
-        var addItem = await repo.addFollowTarget(widget.userInfo);
+        var addItem = await repo.addFollowTarget(widget.userInfo.toJson());
         if (addItem != null) {
           setState(() {
             _followType = 2;

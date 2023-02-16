@@ -14,6 +14,7 @@ import '../../models/place_model.dart';
 import '../../models/story_model.dart';
 import '../../models/user_model.dart';
 import '../../services/api_service.dart';
+import '../../services/cache_service.dart';
 import '../../utils/utils.dart';
 import '../../widget/comment_widget.dart';
 import '../../widget/image_scroll_viewer.dart';
@@ -46,7 +47,9 @@ class MainStoryItem extends StatefulWidget {
 }
 
 class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveClientMixin<MainStoryItem> {
-  final api = Get.find<ApiService>();
+  final api   = Get.find<ApiService>();
+  final cache = Get.find<CacheService>();
+
   Future<JSON>? _commentInit;
   JSON _commentList = {};
   List<Widget> _commentListWidget = [];
@@ -228,13 +231,13 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                                           });
                                           break;
                                         case DropdownItemType.report:
-                                          final reportInfo = AppData.reportData['report'] != null ? AppData.reportData['report'][widget.itemInfo.id] : null;
+                                          final reportInfo = cache.reportData['report'] != null ? cache.reportData['report'][widget.itemInfo.id] : null;
                                           if (reportInfo == null) {
                                             showReportDialog(context, ReportType.report,
                                                 'Report'.tr, 'story', widget.itemInfo.toJson(), subTitle: 'Please write what you want to report'.tr).then((result) async {
                                               if (result.isNotEmpty) {
-                                                AppData.reportData['report'] ??= {};
-                                                AppData.reportData['report'][widget.itemInfo.id] = result;
+                                                cache.reportData['report'] ??= {};
+                                                cache.reportData['report'][widget.itemInfo.id] = result;
                                                 showAlertDialog(context, 'Report'.tr, 'Report has been completed'.tr, '', 'OK'.tr);
                                               }
                                             });

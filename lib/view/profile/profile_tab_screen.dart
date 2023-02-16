@@ -76,7 +76,7 @@ class MainMyTabState extends State<MainMyTab> {
       if (imageUrl != null) {
         showLoadingDialog(context, 'uploading now...'.tr);
         var imageData = await ReadFileByte(imageUrl);
-        JSON imageInfo = {'id': widget.userViewModel.userInfo!.id, 'image': imageData};
+        JSON imageInfo = {'id': widget.userViewModel.userInfo!.id, 'data': imageData};
         var upResult = await widget.userViewModel.repo.uploadImageData(imageInfo, 'user_img');
         if (upResult == null) {
           showAlertDialog(context, 'Profile image'.tr, 'Image update is failed'.tr, '', 'OK'.tr);
@@ -460,7 +460,7 @@ class MainMyTabState extends State<MainMyTab> {
                       ),
                       Container(
                         key: _tabviewKey,
-                        height: _tabviewHeight,
+                        height: widget.userViewModel.tabListHeight,
                         padding: EdgeInsets.symmetric(vertical: 10),
                         child: TabBarView(
                           physics: NeverScrollableScrollPhysics(),
@@ -501,7 +501,8 @@ class MainMyTabState extends State<MainMyTab> {
 }
 
 class MyProfileTab extends StatelessWidget {
-  MyProfileTab(this.selectedTab, this.title, this.userViewModel, {Key? key, this.isSelectable = false, this.onRefresh})
+  MyProfileTab(this.selectedTab, this.title, this.userViewModel,
+      {Key? key, this.isSelectable = false, this.onRefresh})
       : super(key: key);
 
   ProfileContentTab selectedTab;
@@ -509,8 +510,8 @@ class MyProfileTab extends StatelessWidget {
   UserViewModel userViewModel;
   Function(int)? onRefresh;
 
-  var tabHeight = 40.0;
-  var isSelectable;
+  var tabHeight    = 40.0;
+  var isSelectable = false;
 
   Widget getTab() {
     return Tab(text: title, height: tabHeight);
@@ -539,26 +540,25 @@ class MyProfileTab extends StatelessWidget {
     LOG('--> loadExtraData : $selectedTab');
   }
 
-  // refreshShowList([double itemHeight = DEFAULT_ITEM_HEIGHT]) {
-  //   _showList.clear();
-  //   for (var i=0; i<_pageShowMax; i++) {
-  //     var itemIndex = _pageNow * _pageShowMax + i;
-  //     if (itemIndex >= _itemList!.length) break;
-  //     var key = _itemList!.keys.elementAt(itemIndex);
-  //     _showList.add(_itemList![key]);
-  //   }
-  //   _pageMax = (_itemList!.length / _pageShowMax).floor() + (_itemList!.length % _pageShowMax > 0 ? 1 : 0);
-  //   LOG('--> refreshShowList : ${_itemList!.length} - $_pageNow / $_pageMax - ${_showList.length}');
-  //   AppData.myProfileTabViewHeight[selectedTab.index] = itemHeight * _showList.length + (_isMyProfile ? 155 : 80);
-  //   refreshTabHeight();
-  // }
+  refreshShowList([double itemHeight = UI_ITEM_HEIGHT]) {
+    _showList.clear();
+    for (var i=0; i<_pageShowMax; i++) {
+      var itemIndex = _pageNow * _pageShowMax + i;
+      if (itemIndex >= _itemList!.length) break;
+      var key = _itemList!.keys.elementAt(itemIndex);
+      _showList.add(_itemList![key].toJson());
+    }
+    _pageMax = (_itemList!.length / _pageShowMax).floor() + (_itemList!.length % _pageShowMax > 0 ? 1 : 0);
+    LOG('--> refreshShowList : ${_itemList!.length} - $_pageNow / $_pageMax - ${userViewModel.isMyProfile}');
+    userViewModel.tabListHeight = (itemHeight * _showList.length + (userViewModel.isMyProfile ? 155.0 : 80.0) + 120.0);
+    refreshTabHeight();
+  }
   //
-  // refreshTabHeight() {
-  //   LOG('--> refreshTabHeight : ${selectedTab.index} / ${AppData.myProfileTabViewHeight[selectedTab.index]}');
-  //   Future.delayed(Duration(milliseconds: 200), () {
-  //     if (onRefresh != null) onRefresh!(selectedTab.index);
-  //   });
-  // }
+  refreshTabHeight() {
+    Future.delayed(Duration(milliseconds: 200), () {
+      if (onRefresh != null) onRefresh!(selectedTab.index);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -571,34 +571,35 @@ class MyProfileTab extends StatelessWidget {
               if (snapshot.hasData) {
                 _itemList = snapshot.data as JSON;
                 LOG('--> ProfileContentTab.placeEvent [${selectedTab.index}] : ${_itemList!.length}');
+                refreshShowList();
                 return StatefulBuilder(
                     builder: (context, setState) {
                       return Column(
                           children: [
                             ListView.builder(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                padding: _edgeInsets,
-                                itemCount: _showList.length,
-                                itemBuilder: (context, index) {
-                                  var item = _showList[index];
-                                  // var controller = AnimationController(duration: const Duration(milliseconds: 150), vsync: this);
-                                  return EventCardItem(
-                                    EventModel.fromJson(item),
-                                    // animationController: controller,
-                                    isShowTheme: false,
-                                    isShowUser: false,
-                                    isShowHomeButton: false,
-                                    isShowLike: false,
-                                    itemHeight: UI_ITEM_HEIGHT,
-                                    onRefresh: (updateData) {
-                                      setState(() {
-                                        // _itemList![key] = updateData;
-                                        if (onRefresh != null) onRefresh!(selectedTab.index);
-                                      });
-                                    },
-                                  );
-                                }
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              padding: _edgeInsets,
+                              itemCount: _showList.length,
+                              itemBuilder: (context, index) {
+                                var item = _showList[index];
+                                // var controller = AnimationController(duration: const Duration(milliseconds: 150), vsync: this);
+                                return EventCardItem(
+                                  EventModel.fromJson(item),
+                                  // animationController: controller,
+                                  isShowTheme: false,
+                                  isShowUser: false,
+                                  isShowHomeButton: false,
+                                  isShowLike: false,
+                                  itemHeight: 80,
+                                  onRefresh: (updateData) {
+                                    setState(() {
+                                      // _itemList![key] = updateData;
+                                      if (onRefresh != null) onRefresh!(selectedTab.index);
+                                    });
+                                  },
+                                );
+                              }
                             ),
                             if (userViewModel.isMyProfile)...[
                               Container(
@@ -652,8 +653,10 @@ class MyProfileTab extends StatelessWidget {
         return FutureBuilder(
             future: _dataInit,
             builder: (context, snapshot) {
+              LOG('--> snapshot : ${snapshot.hasData}');
               if (snapshot.hasData) {
                 _itemList = snapshot.data as JSON;
+                refreshShowList();
                 return StatefulBuilder(
                     builder: (context, setState) {
                       // refreshShowList(_itemHeight);
@@ -696,20 +699,20 @@ class MyProfileTab extends StatelessWidget {
                                   child:
                                   Row(
                                       children: [
-                                        Expanded(
-                                          child: contentAddButton(context, 'SPOT\nSTORY ADD'.tr, padding: EdgeInsets.symmetric(vertical: 5), onPressed: (_) {
-                                            // AddStoryContent(context, true, (result) {
-                                            //   if (result.isNotEmpty) {
-                                            //     setState(() {
-                                            //       LOG('--> AddStoryContent result [SPOT] : $result');
-                                            //       _itemList![result['id']] = result;
-                                            //       if (onRefresh != null) onRefresh!(selectedTab.index);
-                                            //     });
-                                            //   }
-                                            // });
-                                          }),
-                                        ),
-                                        SizedBox(width: 5),
+                                        // Expanded(
+                                        //   child: contentAddButton(context, 'SPOT\nSTORY ADD'.tr, padding: EdgeInsets.symmetric(vertical: 5), onPressed: (_) {
+                                        //     // AddStoryContent(context, true, (result) {
+                                        //     //   if (result.isNotEmpty) {
+                                        //     //     setState(() {
+                                        //     //       LOG('--> AddStoryContent result [SPOT] : $result');
+                                        //     //       _itemList![result['id']] = result;
+                                        //     //       if (onRefresh != null) onRefresh!(selectedTab.index);
+                                        //     //     });
+                                        //     //   }
+                                        //     // });
+                                        //   }),
+                                        // ),
+                                        // SizedBox(width: 5),
                                         Expanded(
                                           child: contentAddButton(context, 'EVENT\nSTORY ADD'.tr, padding: EdgeInsets.symmetric(vertical: 5), onPressed: (_) {
                                             // AddStoryContent(context, false, (result) {

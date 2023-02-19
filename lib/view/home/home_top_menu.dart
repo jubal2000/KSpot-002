@@ -13,6 +13,7 @@ import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
+import 'package:kspot_002/view/message/message_screen.dart';
 import 'package:kspot_002/view/profile/profile_screen.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
@@ -145,19 +146,19 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                       ),
                       SizedBox(width: 5),
                       if (AppData.appViewModel.appbarMenuMode == MainMenuID.event)
-                      Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),
-                        constraints: BoxConstraints(
-                          maxHeight: widget.height * 0.8,
-                          minWidth: widget.height * 0.8,
+                        Container(
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),
+                          constraints: BoxConstraints(
+                            maxHeight: widget.height * 0.8,
+                            minWidth: widget.height * 0.8,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
+                            color: Theme.of(context).canvasColor.withOpacity(0.55),
+                          ),
+                          child: AppData.eventViewModel.showEventListType(),
                         ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
-                          color: Theme.of(context).canvasColor.withOpacity(0.55),
-                        ),
-                        child: AppData.eventViewModel.showEventListType(),
-                      ),
                       // if (AppData.appViewModel.appbarMenuMode == MainMenuID.story)
                       //   Container(
                       //     alignment: Alignment.center,
@@ -173,7 +174,19 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                       //     child: AppData.storyViewModel.showStoryListType(),
                       //   ),
                     ],
-                    if (AppData.appViewModel.appbarMenuMode == MainMenuID.my)
+                    if (AppData.appViewModel.appbarMenuMode == MainMenuID.my)...[
+                      Container(
+                        // color: Colors.red,
+                          height: iconSize,
+                          width: iconSize,
+                          child: IconButton(
+                            icon: Icon(Icons.mail_outline_outlined, color: iconColor),
+                            onPressed: () {
+                              Get.to(() => MessageScreen());
+                            },
+                          )
+                      ),
+                      SizedBox(width: 5),
                       Container(
                         // color: Colors.red,
                         height: iconSize,
@@ -184,6 +197,7 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                           },
                         )
                       ),
+                    ],
                     // Container(
                     //   child: Row(
                     //      mainAxisAlignment: MainAxisAlignment.end,

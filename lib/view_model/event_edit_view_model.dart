@@ -142,6 +142,7 @@ class EventEditViewModel extends ChangeNotifier {
         addTimeItem();
         break;
       case EditListType.manager:
+      case EditListType.member:
         Get.to(() => FollowScreen(AppData.userInfo, selectData: editItem!.getManagerDataMap, isShowMe: true, isSelectable: true))!.then((value) {
           LOG("-->  FollowScreen result : $value");
           if (value == null) return;
@@ -156,7 +157,7 @@ class EventEditViewModel extends ChangeNotifier {
                 'pic': STR(item.value['pic'])
               };
               managerData[item.key] = addItem;
-              editItem!.managerData!.add(ManagerData.fromJson(addItem));
+              editItem!.managerData!.add(MemberData.fromJson(addItem));
               LOG("--> managerData add [${item.key}] : ${editItem!.managerData}");
             }
           }
@@ -212,6 +213,7 @@ class EventEditViewModel extends ChangeNotifier {
         }
         break;
       case EditListType.manager:
+      case EditListType.member:
         if (status == 0) {
           var userInfo = await userRepo.getUserInfo(managerData[key]['id']);
           if (userInfo != null) {

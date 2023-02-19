@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../models/chat_model.dart';
 import '../models/event_model.dart';
 import '../models/message_model.dart';
 import '../models/story_model.dart';
@@ -20,6 +21,9 @@ class CacheService extends GetxService {
   Map<String, MessageModel>? messageData;
   Map<String, MessageGroupModel>? messageGroupData;
 
+  Map<String, ChatModel>? chatData;
+  Map<String, ChatRoomModel> chatRoomData = {};
+
   JSON reportData = {};
   JSON blockData = {};
 
@@ -27,6 +31,7 @@ class CacheService extends GetxService {
     eventListItemData = {};
     eventMapItemData  = {};
     storyListItemData = {};
+    chatRoomData      = {};
     return this;
   }
 
@@ -50,6 +55,18 @@ class CacheService extends GetxService {
     messageData![addItem.id] = addItem;
     storyListItemData.remove(addItem.id);
     LOG('--> setMessageItem [${addItem.id}] : ${messageData![addItem.id]!.desc} / ${messageData!.length}');
+  }
+
+  setChatItem(ChatModel addItem) {
+    chatData ??= {};
+    chatData![addItem.id] = addItem;
+    LOG('--> setChatItem [${addItem.id}] : ${chatData![addItem.id]!.desc} / ${chatData!.length}');
+  }
+
+  setChatRoomItem(ChatRoomModel addItem) {
+    chatRoomData ??= {};
+    chatRoomData![addItem.id] = addItem;
+    LOG('--> setChatRoomItem [${addItem.id}] : ${chatRoomData![addItem.id]!.title} / ${chatRoomData!.length}');
   }
 
   Future sortStoryDataCreateTimeDesc() async {

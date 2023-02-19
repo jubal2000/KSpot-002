@@ -1815,13 +1815,65 @@ class ApiService extends GetxService {
     }
     return reportData;
   }
-  
+
   //----------------------------------------------------------------------------------------
   //
-  //    message info..
+  //    Chat info..
   //
-  
-  final MessageCollection = 'data_message';
+
+  final ChatRoomCollection = 'data_chatRoom';
+
+  Stream getChatRoomStreamData(String userId) {
+    LOG('------> getChatRoomStreamData : $userId');
+    return firestore!.collection(ChatRoomCollection)
+        .where('status', isEqualTo: 1)
+        .where('memberList', arrayContainsAny: [userId])
+        .orderBy('updateTime', descending: true)
+        .snapshots();
+
+    // JSON result = {};
+    // var snapshot = await firestore!.collection(ChatRoomCollection)
+    //     .where('status', isEqualTo: 1)
+    //     .where('memberList', arrayContainsAny: [userId])
+    //     .orderBy('updateTime', descending: true)
+    //     .get();
+    //
+    // for (var doc in snapshot.docs) {
+    //   var item = FROM_SERVER_DATA(doc.data());
+    //   result[item['id']] = item;
+    // }
+    // return result;
+  }
+
+  Stream startChatStreamToMe(String userId) {
+    LOG('------> startChatStreamToMe : $userId');
+    return firestore!.collection(ChatRoomCollection)
+        .where('status', isEqualTo: 1)
+        .where('targetId', isEqualTo: userId)
+        .orderBy('updateTime', descending: true).snapshots();
+  }
+
+  Future<JSON?> addRoomItem(JSON addItem) async {
+    var dataRef = firestore!.collection(ChatRoomCollection);
+    var key = STR(addItem['id']).toString();
+    if (key.isEmpty) {
+      key = dataRef.doc().id;
+      addItem['id'] = key;
+      addItem['createTime'] = CURRENT_SERVER_TIME();
+    }
+    addItem['updateTime'] = CURRENT_SERVER_TIME();
+    LOG('--> addRoomItem key : ${addItem['id']}');
+    await dataRef.doc(key).set(Map<String, dynamic>.from(addItem));
+    var result = FROM_SERVER_DATA(addItem);
+    return result;
+  }
+
+  //----------------------------------------------------------------------------------------
+  //
+  //    Message info..
+  //
+
+  final MessageCollection  = 'data_message';
 
 
   Future<JSON> addMessageItem(JSON addItem, JSON targetUserInfo) async {
@@ -1907,7 +1959,6 @@ class ApiService extends GetxService {
     }
     return false;
   }
-
 
   Stream startMessageStreamToMe(String userId) {
     LOG('------> startMessageStreamToMe : $userId');

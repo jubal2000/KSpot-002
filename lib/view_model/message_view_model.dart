@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/models/message_model.dart';
-import 'package:kspot_002/view/message/chatting_screen.dart';
+import 'package:kspot_002/view/message/message_talk_screen.dart';
 import 'package:kspot_002/view/message/message_group_item.dart';
 
 import '../data/app_data.dart';
@@ -33,19 +33,7 @@ class MessageViewModel extends ChangeNotifier {
     buildContext = context;
   }
 
-  // getMessageData() {
-  //   return repo.getMessageData();
-  // }
-
-  // setMessageData(JSON eventData) {
-  //   for (var item in eventData.entries) {
-  //     cache.setMessageItem(MessageModel.fromJson(item.value));
-  //   }
-  //   LOG('--> setMessageData result : ${cache.messageData!.length}');
-  //   refreshShowList();
-  // }
-
-  startMessageStreamToMe() {
+  getMessageData() {
     stream = repo.startMessageStreamToMe();
   }
 
@@ -90,7 +78,7 @@ class MessageViewModel extends ChangeNotifier {
         item.value.desc       = descList[targetId].desc;
         item.value.updateTime = descList[targetId].updateTime;
         addGroup = MessageGroupItem(targetId, targetName, targetPic, item.value, unOpenCount: unOpenCount[targetId], onSelected: (key) {
-          Get.to(() => ChattingScreen(targetId, targetName, targetPic));
+          Get.to(() => MessageTalkScreen(targetId, targetName, targetPic));
         });
         messageListItemData[targetId] = addGroup;
         showList.add(addGroup);
@@ -141,45 +129,29 @@ class MessageViewModel extends ChangeNotifier {
 
   showMainList(layout, snapshot) {
     onSnapshotAction(snapshot);
-    return Stack(
-      children: [
-        FutureBuilder(
-          future: refreshShowList(),
-          builder: (context, snapshot) {
-            LOG('--> snapshot.hasData : ${snapshot.hasData}');
-            if (snapshot.hasData) {
-              mainShowList = snapshot.data!;
-              return Container(
-                padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                  child: ListView(
+    return FutureBuilder(
+      future: refreshShowList(),
+      builder: (context, snapshot) {
+        LOG('--> snapshot.hasData : ${snapshot.hasData}');
+        if (snapshot.hasData) {
+          mainShowList = snapshot.data!;
+          return Container(
+              padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+              child: ListView(
                   shrinkWrap: true,
                   children: [
-                    SizedBox(height: UI_APPBAR_TOOL_HEIGHT + 10),
+                    SizedBox(height: 10),
                     ...mainShowList,
                     SizedBox(height: UI_BOTTOM_HEIGHT + 20),
                   ]
-                )
-              );
-            } else {
-              return Center(
-                child: Text('No message'.tr),
-              );
-            }
-          }
-        ),
-        TopCenterAlign(
-          child: SizedBox(
-            height: UI_TOP_MENU_HEIGHT * 1.7,
-            child: HomeTopMenuBar(
-              MainMenuID.message,
-              isShowDatePick: false,
-              onCountryChanged: () {
-                notifyListeners();
-              },
-            ),
-          )
-        ),
-      ]
+              )
+          );
+        } else {
+          return Center(
+            child: Text('No message'.tr),
+          );
+        }
+      }
     );
   }
 }

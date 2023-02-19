@@ -52,11 +52,11 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
     _viewModel.init(context);
     // auto add manager..
     if (_viewModel.editItem!.managerData == null || _viewModel.editItem!.managerData!.isEmpty) {
-      final addItem = ManagerData(
+      final addItem = MemberData(
         id: AppData.userInfo.id,
+        status: 1,
         nickName: AppData.userInfo.nickName,
         pic: AppData.userInfo.pic,
-        status: 1,
       );
       _viewModel.editItem!.managerData = [addItem];
       _viewModel.managerData[addItem.id] = addItem.toJson();

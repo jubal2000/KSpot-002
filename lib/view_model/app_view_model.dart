@@ -23,7 +23,7 @@ import '../repository/user_repository.dart';
 import '../services/api_service.dart';
 import '../services/local_service.dart';
 import '../view/event/event_edit_screen.dart';
-import '../view/message/chatting_screen.dart';
+import '../view/message/message_talk_screen.dart';
 import '../widget/event_group_dialog.dart';
 
 class MainMenuID {
@@ -241,7 +241,7 @@ class AppViewModel extends ChangeNotifier {
               Get.to(() => FollowScreen(AppData.userInfo, isSelectable: true))!.then((result) {
                 if (JSON_NOT_EMPTY(result)) {
                   final targetInfo = result.entries.first.value as JSON;
-                  Get.to(() => ChattingScreen(targetInfo['id'], targetInfo['nickName'], targetInfo['pic']))!.then((_) {
+                  Get.to(() => MessageTalkScreen(targetInfo['id'], targetInfo['nickName'], targetInfo['pic']))!.then((_) {
                     notifyListeners();
                   });
                 }

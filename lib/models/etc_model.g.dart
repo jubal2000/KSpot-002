@@ -102,6 +102,25 @@ Map<String, dynamic> _$PicDataToJson(PicData instance) => <String, dynamic>{
       'url': instance.url,
     };
 
+RoomFileData _$RoomFileDataFromJson(Map<String, dynamic> json) => RoomFileData(
+      id: json['id'] as String,
+      type: json['type'] as int,
+      url: json['url'] as String,
+      pic: json['pic'] as String,
+      userId: json['userId'] as String,
+      createTime: json['createTime'] as String,
+    );
+
+Map<String, dynamic> _$RoomFileDataToJson(RoomFileData instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'type': instance.type,
+      'url': instance.url,
+      'pic': instance.pic,
+      'userId': instance.userId,
+      'createTime': instance.createTime,
+    };
+
 CountryData _$CountryDataFromJson(Map<String, dynamic> json) => CountryData(
       country: json['country'] as String,
       countryState: json['countryState'] as String,
@@ -143,19 +162,25 @@ Map<String, dynamic> _$AddressDataToJson(AddressData instance) =>
       'lng': instance.lng,
     };
 
-ManagerData _$ManagerDataFromJson(Map<String, dynamic> json) => ManagerData(
+MemberData _$MemberDataFromJson(Map<String, dynamic> json) => MemberData(
       id: json['id'] as String,
       status: json['status'] as int,
       nickName: json['nickName'] as String,
       pic: json['pic'] as String,
+      updateTime: json['updateTime'] as String?,
+      inTime: json['inTime'] as String?,
+      outTime: json['outTime'] as String?,
     );
 
-Map<String, dynamic> _$ManagerDataToJson(ManagerData instance) =>
+Map<String, dynamic> _$MemberDataToJson(MemberData instance) =>
     <String, dynamic>{
       'id': instance.id,
       'status': instance.status,
       'nickName': instance.nickName,
       'pic': instance.pic,
+      'updateTime': instance.updateTime,
+      'inTime': instance.inTime,
+      'outTime': instance.outTime,
     };
 
 DescData _$DescDataFromJson(Map<String, dynamic> json) => DescData(

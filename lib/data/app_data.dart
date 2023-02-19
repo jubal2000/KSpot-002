@@ -13,6 +13,7 @@ import '../models/user_model.dart';
 import '../services/firebase_service.dart';
 import '../utils/utils.dart';
 import '../view_model/app_view_model.dart';
+import '../view_model/chat_view_model.dart';
 import '../view_model/event_view_model.dart';
 import '../view_model/message_view_model.dart';
 import '../view_model/story_view_model.dart';
@@ -23,6 +24,7 @@ const APP_VERSION = '0.0.1';
 const ORG_SCREEN_WITH = 411;
 const NICKNAME_LENGTH = 12;
 const TITLE_LENGTH = 24;
+const PASSWORD_LENGTH = 12;
 const DESC_LENGTH = 999;
 const STORY_DESC_LENGTH = 500;
 const COMMENT_LENGTH = 999;
@@ -73,10 +75,11 @@ class AppData {
 
   static var isDevMode = true;
 
-  static var appViewModel     = AppViewModel();
-  static var eventViewModel   = EventViewModel();
-  static var storyViewModel   = StoryViewModel();
-  static var messageViewModel = MessageViewModel();
+  static var appViewModel       = AppViewModel();
+  static var eventViewModel     = EventViewModel();
+  static var storyViewModel     = StoryViewModel();
+  static var chatViewModel      = ChatViewModel();
+  static var messageViewModel   = MessageViewModel();
 
   static var defaultInfoID = 'info0001';
 

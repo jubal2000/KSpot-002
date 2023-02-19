@@ -3055,17 +3055,19 @@ showReportMenu(BuildContext context, JSON targetInfo, String type, {List<JSON> m
   });
 }
 
+showChattingMenu(BuildContext context, {List<JSON> menuList = const [
+  {'id':'public'  , 'title':'Public chat room', 'desc': '',},
+  {'id':'private' , 'title':'Private chat room'},
+  {'id':'message' , 'title':'1:1 Message send'},
+]}) async {
+  return await showJsonButtonSelectExDialog(context, 'Chatting type'.tr, menuList, null, itemHeight: 60.0);
+}
+
 Future<String> showJsonButtonSelectDialog(BuildContext context, String title, List<JSON> jsonData) async {
   return await showJsonButtonSelectExDialog(context, title, jsonData, null);
 }
 
-Future<String> showJsonButtonSelectExDialog(BuildContext context, String title, List<JSON> jsonData, List<JSON>? exButton) async {
-  TextStyle _titleText        = TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Colors.black);
-  TextStyle _itemTitleText    = TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black);
-  TextStyle _itemTitleText2   = TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.black);
-  TextStyle _itemDescText     = TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.grey);
-  TextStyle _itemDisableText  = TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.purple);
-  var _itemHeight = 70.0;
+Future<String> showJsonButtonSelectExDialog(BuildContext context, String title, List<JSON> jsonData, List<JSON>? exButton, {var itemHeight = 70.0}) async {
   return await showDialog(
       context: context,
       builder: (BuildContext _context) {
@@ -3080,13 +3082,13 @@ Future<String> showJsonButtonSelectExDialog(BuildContext context, String title, 
                     content: Container(
                       constraints: BoxConstraints(
                         minWidth: 400,
-                        maxHeight: jsonData.length * (_itemHeight + 10) + 10,
+                        maxHeight: jsonData.length * (itemHeight + 10) + 10,
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: jsonData.map((item) =>
                             Container(
-                              height: _itemHeight,
+                              height: itemHeight,
                               width: double.infinity,
                               margin: EdgeInsets.fromLTRB(15, 5, 15, 5),
                               child: ElevatedButton(
@@ -3095,6 +3097,16 @@ Future<String> showJsonButtonSelectExDialog(BuildContext context, String title, 
                                     Navigator.pop(_context, item['id']);
                                   }
                                 },
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Theme.of(context).primaryColor.withOpacity(0.2),
+                                    minimumSize: Size.zero, // Set this
+                                    padding: EdgeInsets.all(15), // and this
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        side: BorderSide(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 2)
+                                    )
+                                ),
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 30),
                                   child: Row(
@@ -3102,9 +3114,9 @@ Future<String> showJsonButtonSelectExDialog(BuildContext context, String title, 
                                     children: [
                                       if (item['icon'] != null)...[
                                         if (item['icon'] == 'video')
-                                          Icon(Icons.movie_creation_outlined, size: _itemHeight * 0.5, color: Theme.of(context).primaryColor),
+                                          Icon(Icons.movie_creation_outlined, size: itemHeight * 0.5, color: Theme.of(context).primaryColor),
                                         if (item['icon'] == 'image')
-                                          Icon(Icons.photo_size_select_actual_outlined, size: _itemHeight * 0.5, color: Theme.of(context).primaryColor),
+                                          Icon(Icons.photo_size_select_actual_outlined, size: itemHeight * 0.5, color: Theme.of(context).primaryColor),
                                         if (item['icon'] != 'video' && item['icon'] != 'image')
                                           showImage(item['icon'], Size(30,30)),
                                         SizedBox(width: 10),
@@ -3129,16 +3141,6 @@ Future<String> showJsonButtonSelectExDialog(BuildContext context, String title, 
                                       ),
                                     ],
                                   ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: Theme.of(context).primaryColor.withOpacity(0.2),
-                                    minimumSize: Size.zero, // Set this
-                                    padding: EdgeInsets.all(15), // and this
-                                    shadowColor: Colors.transparent,
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                        side: BorderSide(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 2)
-                                    )
                                 ),
                               ),
                             )

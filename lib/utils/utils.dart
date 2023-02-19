@@ -1011,6 +1011,9 @@ enum DropdownItemType {
   reject,
   confirm,
 
+  exit,
+  sExit,
+
   promotion,
   stop,
   pay,
@@ -1945,6 +1948,7 @@ class UserMenuItems {
   static const List<DropdownItem> followingMenu = [message, delete];
   static const List<DropdownItem> followerMenu  = [message];
   static const List<DropdownItem> messageMenu   = [msgBlock, msgAlarm];
+  static const List<DropdownItem> chatRoomMenu  = [exit, sExit];
   static const List<DropdownItem> blockMenu     = [unblock];
   static const List<DropdownItem> declarMenu    = [showDeclar, reDeclar, unDeclar];
 
@@ -1956,6 +1960,8 @@ class UserMenuItems {
   static const showDeclar = DropdownItem(DropdownItemType.showDeclar, text: '신고내용보기', icon: Icons.announcement_outlined);
   static const reDeclar   = DropdownItem(DropdownItemType.reDeclar, text: '신고결과보기', icon: Icons.announcement);
   static const unDeclar   = DropdownItem(DropdownItemType.unDeclar, text: '신고취소'   , icon: Icons.clear);
+  static const exit       = DropdownItem(DropdownItemType.exit, text: '나가기'        , icon: Icons.exit_to_app);
+  static const sExit      = DropdownItem(DropdownItemType.sExit, text: '조용히 나가기'   , icon: Icons.exit_to_app);
   static const line       = DropdownItem(DropdownItemType.none, isLine: true);
 
   static Widget buildItem(DropdownItem item) {

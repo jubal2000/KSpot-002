@@ -46,7 +46,7 @@ EventModel _$EventModelFromJson(Map<String, dynamic> json) => EventModel(
           ?.map((e) => PromotionData.fromJson(e as Map<String, dynamic>))
           .toList(),
       managerData: (json['managerData'] as List<dynamic>?)
-          ?.map((e) => ManagerData.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => MemberData.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 

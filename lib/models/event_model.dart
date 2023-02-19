@@ -76,7 +76,7 @@ class EventModel {
   List<OptionData>?    optionData;     // 옵션 정보
   List<CustomData>?    customData;     // 사용자 설정 정보
   List<PromotionData>? promotionData;  // 광고 정보
-  List<ManagerData>?   managerData;    // 관리자 목록
+  List<MemberData>?    managerData;    // 관리자 목록
 
   @JsonKey(ignore: true)
   int sortIndex = 0;
@@ -255,7 +255,7 @@ class EventModel {
   }
 
   //------------------------------------------------------------------------------------------------------
-  //  TimeData
+  //  ManagerData
   //
 
   get getManagerDataMap {
@@ -285,7 +285,7 @@ class EventModel {
     managerData!.clear();
     if (map.isNotEmpty) {
       for (var item in map.entries) {
-        managerData!.add(ManagerData.fromJson(item.value));
+        managerData!.add(MemberData.fromJson(item.value));
       }
     }
     return managerData;

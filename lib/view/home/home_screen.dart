@@ -17,6 +17,7 @@ import '../../data/theme_manager.dart';
 import '../../utils/utils.dart';
 import '../../view_model/app_view_model.dart';
 import '../../widget/event_group_dialog.dart';
+import '../chatting/chatting_screen.dart';
 import '../message/message_screen.dart';
 import 'home_top_menu.dart';
 
@@ -30,7 +31,7 @@ class HomeScreen extends StatelessWidget {
   List<Widget> pages = [
     EventScreen(),
     StoryScreen(),
-    MessageScreen(),
+    ChattingScreen(),
     ProfileScreen(),
   ];
 
@@ -151,12 +152,6 @@ class HomeScreen extends StatelessWidget {
                                               child: showImageWidget(AppData.currentEventGroup!.pic, BoxFit.fill),
                                             )
                                           ),
-                                          // BottomCenterAlign(
-                                          //   child: Text(AppData.currentEventGroup!.title,
-                                          //       style: GroupTitleOutlineStyle(context, Theme.of(context).bottomAppBarColor),
-                                          //       maxLines: 4,
-                                          //       textAlign: TextAlign.center),
-                                          // )
                                         ],
                                       ),
                                     ),
@@ -174,186 +169,69 @@ class HomeScreen extends StatelessWidget {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                                     children: [
-                                      NavigatorButton(context, viewModel, 2, Icons.message_outlined, 'MESSAGE'.tr),
+                                      NavigatorButton(context, viewModel, 2, Icons.message_outlined, 'CHATTING'.tr),
                                       NavigatorButton(context, viewModel, 3, Icons.account_circle_outlined, 'MY'.tr),
                                     ],
                                   )
                                 )
                               )
-                              //     child: BottomNavigationBar(
-                              //       onTap: (index) {
-                              //         viewModel.setMainIndex(index);
-                              //       },
-                              //       type: BottomNavigationBarType.fixed,
-                              //       currentIndex: viewModel.menuIndex,
-                              //       selectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w600),
-                              //       unselectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w400),
-                              //       items: [
-                              //         BottomNavigationBarItem(
-                              //           icon: Icon(Icons.event_available_outlined),
-                              //           label: 'EVENT'.tr,
-                              //         ),
-                              //         BottomNavigationBarItem(
-                              //           icon: Icon(Icons.photo_library_outlined),
-                              //           label: 'STORY'.tr,
-                              //         ),
-                              //         BottomNavigationBarItem(
-                              //           icon: Icon(Icons.message_outlined),
-                              //           label: 'MESSAGE'.tr,
-                              //         ),
-                              //         BottomNavigationBarItem(
-                              //           icon: Icon(Icons.account_circle_outlined),
-                              //           label: 'MY'.tr,
-                              //         ),
-                              //       ]
-                              //   ),
-                              // ),
                             ]
                           )
                         )
                       )
                     ),
-                    BottomRightAlign(
-                      heightFactor: 19.0,
-                      child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        SizedBox(width: 30.w),
-                        GestureDetector(
-                            onTap: () {
-                              var mode = theme.toggleSchemeMode();
-                              Fluttertoast.showToast(
-                                  msg: mode,
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.CENTER,
-                                  timeInSecForIosWeb: 1,
-                                  backgroundColor: theme.getMode() ? Colors.white : Colors.black,
-                                  textColor: theme.getMode() ? Colors.black : Colors.white,
-                                  fontSize: 16.0.sp
-                              );
-                            },
-                            child: SizedBox(
-                              height: _height,
-                              width: _height,
-                              child: Icon(Icons.visibility_outlined, color: Colors.black),
-                            )
-                        ),
-                        GestureDetector(
-                            onTap: () {
-                              showThemeSelectorDialog(context, '', theme.getMode(), theme.getThemeIndex()).then((result) {
-                                LOG('--> showThemeSelectorDialog : $result');
-                                var mode = theme.refreshFlexScheme(INT(result['index']));
-                                Fluttertoast.showToast(
-                                    msg: mode,
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    timeInSecForIosWeb: 1,
-                                    backgroundColor: theme.getMode() ? Colors.white : Colors.black,
-                                    textColor: theme.getMode() ? Colors.black : Colors.white,
-                                    fontSize: 16.0.sp
-                                );
-                              });
-                            },
-                            child: SizedBox(
-                              height: _height,
-                              width: _height,
-                              child: Icon(Icons.color_lens_outlined, color: Colors.black),
-                            )
-                        ),
-                      ],
-                    ),
-                    )
+                //     BottomLeftAlign(
+                //       heightFactor: 19.0,
+                //       child: Row(
+                //       mainAxisAlignment: MainAxisAlignment.end,
+                //       children: [
+                //         SizedBox(width: 30.w),
+                //         GestureDetector(
+                //             onTap: () {
+                //               var mode = theme.toggleSchemeMode();
+                //               Fluttertoast.showToast(
+                //                   msg: mode,
+                //                   toastLength: Toast.LENGTH_SHORT,
+                //                   gravity: ToastGravity.CENTER,
+                //                   timeInSecForIosWeb: 1,
+                //                   backgroundColor: theme.getMode() ? Colors.white : Colors.black,
+                //                   textColor: theme.getMode() ? Colors.black : Colors.white,
+                //                   fontSize: 16.0.sp
+                //               );
+                //             },
+                //             child: SizedBox(
+                //               height: _height,
+                //               width: _height,
+                //               child: Icon(Icons.visibility_outlined, color: Colors.black),
+                //             )
+                //         ),
+                //         GestureDetector(
+                //             onTap: () {
+                //               showThemeSelectorDialog(context, '', theme.getMode(), theme.getThemeIndex()).then((result) {
+                //                 LOG('--> showThemeSelectorDialog : $result');
+                //                 var mode = theme.refreshFlexScheme(INT(result['index']));
+                //                 Fluttertoast.showToast(
+                //                     msg: mode,
+                //                     toastLength: Toast.LENGTH_SHORT,
+                //                     gravity: ToastGravity.CENTER,
+                //                     timeInSecForIosWeb: 1,
+                //                     backgroundColor: theme.getMode() ? Colors.white : Colors.black,
+                //                     textColor: theme.getMode() ? Colors.black : Colors.white,
+                //                     fontSize: 16.0.sp
+                //                 );
+                //               });
+                //             },
+                //             child: SizedBox(
+                //               height: _height,
+                //               width: _height,
+                //               child: Icon(Icons.color_lens_outlined, color: Colors.black),
+                //             )
+                //         ),
+                //       ],
+                //     ),
+                //     )
                   ]
                 ),
-                // floatingActionButton: Row(
-                //   mainAxisAlignment: MainAxisAlignment.end,
-                //   children: [
-                //     SizedBox(width: 30.w),
-                //     GestureDetector(
-                //       onTap: () {
-                //         var mode = theme.toggleSchemeMode();
-                //         Fluttertoast.showToast(
-                //             msg: mode,
-                //             toastLength: Toast.LENGTH_SHORT,
-                //             gravity: ToastGravity.CENTER,
-                //             timeInSecForIosWeb: 1,
-                //             backgroundColor: theme.getMode() ? Colors.white : Colors.black,
-                //             textColor: theme.getMode() ? Colors.black : Colors.white,
-                //             fontSize: 16.0.sp
-                //         );
-                //       },
-                //       child: SizedBox(
-                //         height: _height,
-                //         width: _height,
-                //         child: Icon(Icons.visibility_outlined),
-                //       )
-                //   ),
-                //   SizedBox(width: 5.w),
-                //   GestureDetector(
-                //       onTap: () {
-                //         var mode = theme.setFlexSchemeRotate();
-                //         Fluttertoast.showToast(
-                //             msg: mode,
-                //             toastLength: Toast.LENGTH_SHORT,
-                //             gravity: ToastGravity.CENTER,
-                //             timeInSecForIosWeb: 1,
-                //             backgroundColor: theme.getMode() ? Colors.white : Colors.black,
-                //             textColor: theme.getMode() ? Colors.black : Colors.white,
-                //             fontSize: 16.0.sp
-                //         );
-                //       },
-                //       child: SizedBox(
-                //         height: _height,
-                //         width: _height,
-                //         child: Icon(Icons.color_lens_outlined),
-                //       )
-                //     ),
-                //   ],
-                // ),
-                // bottomNavigationBar: Container(
-                //   height: UI_MENU_HEIGHT,
-                //   color: Colors.transparent,
-                //   child: Row(
-                //     mainAxisAlignment: MainAxisAlignment.center,
-                //     children: [
-                //       SizedBox(
-                //         width: 80,
-                //         child: Icon(Icons.photo_library_outlined),
-                //       ),
-                //       SizedBox(
-                //         width: 300,
-                //         child: BottomNavigationBar(
-                //             onTap: (index) {
-                //               viewModel.setMainIndex(index);
-                //             },
-                //             type: BottomNavigationBarType.fixed,
-                //             currentIndex: viewModel.menuIndex,
-                //             selectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w600),
-                //             unselectedLabelStyle: TextStyle(fontSize: UI_FONT_SIZE_SS, fontWeight: FontWeight.w400),
-                //             backgroundColor: Colors.transparent,
-                //             items: [
-                //               BottomNavigationBarItem(
-                //                 icon: Icon(Icons.event_available_outlined),
-                //                 label: 'EVENT'.tr,
-                //               ),
-                //               BottomNavigationBarItem(
-                //                 icon: Icon(Icons.photo_library_outlined),
-                //                 label: 'STORY'.tr,
-                //               ),
-                //               BottomNavigationBarItem(
-                //                 icon: Icon(Icons.message_outlined),
-                //                 label: 'MESSAGE'.tr,
-                //               ),
-                //               BottomNavigationBarItem(
-                //                 icon: Icon(Icons.account_circle_outlined),
-                //                 label: 'MY'.tr,
-                //               ),
-                //             ]
-                //           ),
-                //       ),
-                //     ]
-                //   )
-                // )
               )
             );
           }),

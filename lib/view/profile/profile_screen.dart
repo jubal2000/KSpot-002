@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/data/dialogs.dart';
 import 'package:kspot_002/services/auth_service.dart';
+import 'package:kspot_002/view/message/message_screen.dart';
 import 'package:kspot_002/view_model/user_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -49,6 +50,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   toolbarHeight: UI_APPBAR_TITLE_SPACE,
                   automaticallyImplyLeading: widget.isShowBack,
                   actions: [
+                    IconButton(
+                        onPressed: () {
+                          Get.to(() => MessageScreen());
+                        },
+                        icon: Icon(Icons.mail_outline)
+                    ),
                     IconButton(
                       onPressed: () {
                         showAlertYesNoDialog(context, 'SIGN OUT'.tr, 'Would you like to sign out now?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {

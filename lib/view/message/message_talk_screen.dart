@@ -17,8 +17,8 @@ import '../../utils/local_utils.dart';
 import '../../utils/utils.dart';
 import '../../widget/card_scroll_viewer.dart';
 
-class ChattingScreen extends StatefulWidget {
-  ChattingScreen(this.targetId, this.targetName, this.targetPic, {Key? key}) : super(key: key);
+class MessageTalkScreen extends StatefulWidget {
+  MessageTalkScreen(this.targetId, this.targetName, this.targetPic, {Key? key}) : super(key: key);
 
   String targetId;
   String targetName;
@@ -28,10 +28,10 @@ class ChattingScreen extends StatefulWidget {
   final scrollController = ScrollController();
 
   @override
-  ChattingScreenState createState() => ChattingScreenState();
+  MessageTalkScreenState createState() => MessageTalkScreenState();
 }
 
-class ChattingScreenState extends State<ChattingScreen> {
+class MessageTalkScreenState extends State<MessageTalkScreen> {
   final userRepo = UserRepository();
   final msgRepo  = MessageRepository();
   final api      = Get.find<ApiService>();
@@ -186,10 +186,10 @@ class ChattingScreenState extends State<ChattingScreen> {
                     ],
                   ),
                   titleSpacing: 0,
-                  toolbarHeight: 50,
+                  toolbarHeight: 55,
                 ),
                 body: Container(
-                    height: MediaQuery.of(context).size.height,
+                    height: Get.height,
                     child: Stack(
                         children: [
                           Column(
@@ -202,13 +202,13 @@ class ChattingScreenState extends State<ChattingScreen> {
                                         children: [
                                           for (var item in _showList.entries)
                                             MessageItem(item.value),
+                                          SizedBox(height: 10),
                                         ],
                                       )
                                   ),
                                 ),
-                                SizedBox(height: 20),
                                 Container(
-                                    width: MediaQuery.of(context).size.width,
+                                    width: Get.width,
                                     constraints: BoxConstraints(
                                       minHeight: _imageData.isEmpty ? 90 : 140,
                                     ),

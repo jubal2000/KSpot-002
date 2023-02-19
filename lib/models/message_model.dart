@@ -15,7 +15,7 @@ class MessageModel {
   String  senderPic;
   String  updateTime;     // 수정 시간
   String  createTime;     // 생성 시간
-  @JsonKey(defaultValue: false)
+  @JsonKey(defaultValue: '')
   String  openTime;       // 읽은 시간
 
   List<String>? picData;

@@ -24,6 +24,7 @@ enum EditListType {
   info,
   sns,
   manager,
+  member,
   instructor,
   extend,
   timeRange,
@@ -78,22 +79,37 @@ class EditListWidget extends StatefulWidget {
 }
 
 class _EditListSortState extends State<EditListWidget> {
-  var titleText = ['ADDRESS LINK', 'FOLLOW LINK', 'SPOT LINK', 'EVENT LINK', 'GOODS LINK',
-    'GOODS DESCRIPTION', 'CATEGORY', 'GOODS INFO', 'SNS LINK', 'MANAGER', 'INSTRUCTOR',
-    'EVENT FIELD', 'TIME SETTING', 'DATE SELECT', 'EXCEPT DATE SELECT', 'RESERVATION', 'CUSTOM FIELD'];
+  var titleText = [
+    'ADDRESS LINK', 'FOLLOW LINK', 'SPOT LINK', 'EVENT LINK',
+    'GOODS LINK', 'GOODS DESCRIPTION', 'CATEGORY', 'GOODS INFO',
+    'SNS LINK', 'MANAGER', 'MEMBER', 'INSTRUCTOR',
+    'EVENT FIELD', 'TIME SETTING', 'DATE SELECT', 'EXCEPT DATE SELECT',
+    'RESERVATION', 'CUSTOM FIELD'
+  ];
 
-  var descText  = ['', '', '', '', '', '', '', '', '', '', '', '핫플에서 이벤트 추가시 기본으로 입력할 수 있는 필드(예: 파티 DJ)', '', '', '', '', ''];
+  var descText = [
+    '', '', '', '',
+    '', '', '', '',
+    '', '', '', '',
+    '핫플에서 이벤트 추가시 기본으로 입력할 수 있는 필드(예: 파티 DJ)', '', '', '',
+    '', ''
+  ];
 
-  // var addText   = ['장소 링크 추가', '친구 링크 추가', 'SPOT LINK ADD', 'EVENT LINK ADD', 'GOODS LINK ADD',
-  //   '상품 내용 추가', '카테고리 추가', '상품 정보 추가', 'SNS 링크 추가', 'Manager Add', 'Instructor Add',
-  //   'Event Field Add', 'Time Range Add', 'Day Select', 'Except Day Select', 'Reservation Add', 'Custom Field Add'];
+  var showTextField = [
+    'address1', 'nickName', 'title', 'title',
+    'title', 'title', 'title', 'title',
+    'link', 'nickName', 'nickName', 'nickName',
+    'titleEx', 'title', 'date', 'date',
+    'descEx', 'title'
+  ];
 
-  var showTextField  = ['address1', 'nickName', 'title', 'title', 'title', 'title', 'title', 'title',
-    'link', 'nickName', 'nickName', 'titleEx', 'title', 'date', 'date', 'descEx', 'title'];
-
-  var itemIcon  = [Icons.location_on_outlined, Icons.person, Icons.link, Icons.link, Icons.link,
-    Icons.description_outlined, Icons.category_outlined, Icons.info_outline, Icons.share, Icons.account_circle_rounded, Icons.account_circle_rounded,
-    Icons.text_fields, Icons.access_time, Icons.event_available, Icons.event_busy_outlined, Icons.event_available_outlined, Icons.text_fields];
+  var itemIcon = [
+    Icons.location_on_outlined, Icons.person, Icons.link, Icons.link,
+    Icons.link, Icons.description_outlined, Icons.category_outlined, Icons.info_outline,
+    Icons.share, Icons.person, Icons.person, Icons.person,
+    Icons.text_fields, Icons.access_time, Icons.event_available, Icons.event_busy_outlined,
+    Icons.event_available_outlined, Icons.text_fields
+  ];
 
   List<JSON> _listData = [];
   List<Widget> _itemList = [];
@@ -242,6 +258,7 @@ class _EditListSortState extends State<EditListWidget> {
         );
       }).toList();
     }
+    LOG('----> _itemList result : ${_itemList.length}');
   }
 
   picLocalImage(String key) async {

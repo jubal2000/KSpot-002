@@ -1,5 +1,6 @@
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:kspot_002/models/user_model.dart';
 import '../utils/utils.dart';
 
 part 'etc_model.g.dart';
@@ -23,6 +24,7 @@ class TimeData {
   List<String>? week;       // 주간 선택 (첫째주, 마지막주..)
   List<String>? exceptDay;  // 제외 날 선택
   List<dynamic>? customData; // 사용자 설정 데이터
+
   TimeData({
     required this.id,
     required this.status,
@@ -54,6 +56,7 @@ class PromotionData {
   String endDate;          // 종료일
   String startTime;        // 시작시간
   String endTime;          // 종료시간
+
   PromotionData({
     required this.id,
     required this.status,
@@ -77,6 +80,7 @@ class CustomData {
   String? desc;
   String? url;
   String? data;
+
   CustomData({
     required this.id,
     required this.title,
@@ -95,6 +99,7 @@ class PicData {
   String  id;
   int     type; // 이미지 종류 (0:photo or picture, 1:movie..)
   String  url;
+
   PicData({
     required this.id,
     required this.type,
@@ -105,11 +110,33 @@ class PicData {
 }
 
 @JsonSerializable()
+class RoomFileData {
+  String  id;
+  int     type; // 파일 종류
+  String  url;
+  String  pic;
+  String  userId;
+  String  createTime;
+
+  RoomFileData({
+    required this.id,
+    required this.type,
+    required this.url,
+    required this.pic,
+    required this.userId,
+    required this.createTime,
+  });
+  factory RoomFileData.fromJson(JSON json) => _$RoomFileDataFromJson(json);
+  JSON toJson() => _$RoomFileDataToJson(this);
+}
+
+@JsonSerializable()
 class CountryData {
   String    country;
   String    countryState;
   String    countryFlag;
   String    createTime;
+
   CountryData({
     required this.country,
     required this.countryState,
@@ -125,6 +152,7 @@ class CountryData {
 class OptionData {
   String id;
   String value;
+
   OptionData({
     required this.id,
     required this.value,
@@ -139,6 +167,7 @@ class AddressData {
   String address2;
   double lat;
   double lng;
+
   AddressData({
     required this.address1,
     required this.address2,
@@ -154,19 +183,35 @@ class AddressData {
 }
 
 @JsonSerializable()
-class ManagerData {
-  String id;            // user id
-  int    status;
-  String nickName;
-  String pic;
-  ManagerData({
+class MemberData {
+  String  id;            // user id
+  int     status;
+  String  nickName;
+  String  pic;
+  String? updateTime;
+  String? inTime;
+  String? outTime;
+
+  MemberData({
     required this.id,
     required this.status,
     required this.nickName,
     required this.pic,
+    this.updateTime,
+    this.inTime,
+    this.outTime,
   });
-  factory ManagerData.fromJson(JSON json) => _$ManagerDataFromJson(json);
-  JSON toJson() => _$ManagerDataToJson(this);
+
+  factory MemberData.fromJson(JSON json) => _$MemberDataFromJson(json);
+  JSON toJson() => _$MemberDataToJson(this);
+
+  setFromUserModel(UserModel user) {
+    id          = user.id;
+    status      = 1;
+    nickName    = user.nickName;
+    pic         = user.pic;
+    updateTime  = DateTime.now().toString();
+  }
 }
 
 @JsonSerializable()

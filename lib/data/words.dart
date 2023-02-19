@@ -46,6 +46,8 @@ class Words extends Translations {
       'MY': '내정보',
       'OPEN CHAT': '공개 대화',
       'CLOSED CHAT': '비공개 대화',
+      'Alert On': '알림 켜기',
+      'Alert Off': '알림 끄기',
 
       // intro_screen
       'SIGN IN': '로그인',

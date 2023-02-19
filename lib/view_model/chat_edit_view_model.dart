@@ -45,7 +45,12 @@ class ChatEditViewModel extends ChangeNotifier {
   }
 
   get createButtonEnable {
-    return editItem!.title.isNotEmpty;
+    switch(type) {
+      case 0:
+        return editItem!.title.isNotEmpty;
+      default:
+        return memberData.isNotEmpty && editItem!.password.isNotEmpty;
+    }
   }
 
   init(context, selectedTab) {

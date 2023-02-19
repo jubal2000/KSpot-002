@@ -88,8 +88,8 @@ class ChatViewModel extends ChangeNotifier {
     }
     // create group..
     for (var item in cache.chatRoomData.entries) {
-      LOG('--> cache.chatRoomData item : ${item.value.toJson()}');
       if (item.value.type == currentTab) {
+        LOG('--> cache.chatRoomData item : ${item.value.memberData}');
         var addGroup = ChatGroupItem(item.value, unOpenCount: unOpenCount[item.key] ?? 0, onSelected: (key) {
           // Get.to(() => ChattingTalkScreen(targetId, targetName, targetPic));
         });
@@ -130,7 +130,7 @@ class ChatViewModel extends ChangeNotifier {
         for (var item in snapshot.data.docs) {
           var data = FROM_SERVER_DATA(item.data() as JSON);
           cache.setChatRoomItem(ChatRoomModel.fromJson(data));
-          LOG('--> cache.messageData : ${data['id']} / ${cache.chatRoomData.length}');
+          LOG('--> cache.setChatRoomItem : ${data['id']} / ${cache.chatRoomData.length}');
         }
         return true;
       case ConnectionState.done:

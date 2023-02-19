@@ -767,6 +767,13 @@ Widget showImageWidget(dynamic imagePath, BoxFit fit, {Color? color}) {
           .toString()
           .isNotEmpty) {
         var url = imagePath.toString();
+        if (url == 'empty') {
+          return Container(
+            width: 30,
+            height: 30,
+            color: Colors.transparent,
+          );
+        }
         if (url.contains("http")) {
           return CachedNetworkImage(
               fit: fit,
@@ -778,8 +785,8 @@ Widget showImageWidget(dynamic imagePath, BoxFit fit, {Color? color}) {
               progressIndicatorBuilder: (context, url, progress) =>
                   Center(
                     child: SizedBox(
-                      width: 40,
-                      height: 40,
+                      width: 20,
+                      height: 20,
                       child: CircularProgressIndicator(value: progress.progress),
                     ),
                   )
@@ -1948,7 +1955,8 @@ class UserMenuItems {
   static const List<DropdownItem> followingMenu = [message, delete];
   static const List<DropdownItem> followerMenu  = [message];
   static const List<DropdownItem> messageMenu   = [msgBlock, msgAlarm];
-  static const List<DropdownItem> chatRoomMenu  = [exit, sExit];
+  static const List<DropdownItem> chatRoomMenu0 = [exit, sExit, alarmOn];
+  static const List<DropdownItem> chatRoomMenu1 = [exit, sExit, alarmOff];
   static const List<DropdownItem> blockMenu     = [unblock];
   static const List<DropdownItem> declarMenu    = [showDeclar, reDeclar, unDeclar];
 
@@ -1962,6 +1970,8 @@ class UserMenuItems {
   static const unDeclar   = DropdownItem(DropdownItemType.unDeclar, text: '신고취소'   , icon: Icons.clear);
   static const exit       = DropdownItem(DropdownItemType.exit, text: '나가기'        , icon: Icons.exit_to_app);
   static const sExit      = DropdownItem(DropdownItemType.sExit, text: '조용히 나가기'   , icon: Icons.exit_to_app);
+  static const alarmOn    = DropdownItem(DropdownItemType.sExit, text: '알림 켜기'     , icon: Icons.notifications_active);
+  static const alarmOff   = DropdownItem(DropdownItemType.sExit, text: '알림 끄기'     , icon: Icons.notifications_off_outlined);
   static const line       = DropdownItem(DropdownItemType.none, isLine: true);
 
   static Widget buildItem(DropdownItem item) {

@@ -2,8 +2,11 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
+import 'package:helpers/helpers/widgets/widgets.dart';
 import 'package:kspot_002/data/common_sizes.dart';
+import 'package:kspot_002/models/etc_model.dart';
 import 'package:kspot_002/models/message_model.dart';
 import 'package:kspot_002/services/cache_service.dart';
 
@@ -18,7 +21,7 @@ import '../../view_model/chat_view_model.dart';
 import '../../widget/user_item_widget.dart';
 import '../profile/target_profile.dart';
 
-class ChatGroupItem extends StatefulWidget {
+class ChatGroupItem extends StatelessWidget {
   ChatGroupItem(this.groupItem,
       {Key? key, this.unOpenCount = 0, this.onMenuSelected, this.onSelected}) : super(key: key);
 
@@ -28,26 +31,25 @@ class ChatGroupItem extends StatefulWidget {
   Function(DropdownItemType, String)? onMenuSelected;
   Function(String)? onSelected;
 
-  @override
-  ChatGroupItemState createState() => ChatGroupItemState();
-}
+  final showMemberMax = 4;
+  final itemHeight = 65.0.w;
+  List<MemberData> showList = [];
 
-class ChatGroupItemState extends State<ChatGroupItem> {
-  refresh() {
-    setState(() {
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
+  showUserList() {
+    LOG('--> showUserList [${groupItem!.id}] : ${groupItem!.memberData.length}');
+    showList.clear();
+    for (var i=0; i<groupItem!.memberData.length; i++) {
+      if (i > showMemberMax) return;
+      showList.add(groupItem!.memberData[i]);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    showUserList();
     return Container(
       width: double.infinity,
-      height: 65.w,
+      height: itemHeight,
       margin: EdgeInsets.symmetric(vertical: 3),
       padding: EdgeInsets.all(5.sp),
       decoration: BoxDecoration(
@@ -56,7 +58,7 @@ class ChatGroupItemState extends State<ChatGroupItem> {
       ),
       child: Row(
         children: [
-          if (widget.groupItem!.pic.isNotEmpty)...[
+          if (groupItem!.type == 0 && groupItem!.pic.isNotEmpty)...[
             GestureDetector(
               onTap: () async {
                 // var userInfo = await userRepo.getUserInfo(widget.targetId);
@@ -68,15 +70,68 @@ class ChatGroupItemState extends State<ChatGroupItem> {
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: showImageFit(widget.groupItem!.pic),
+                child: showImageFit(groupItem!.pic),
               ),
             ),
-            SizedBox(width: 10),
           ],
+        if (groupItem!.type == 1 && groupItem!.memberData.length != 2)...[
+          Container(
+            width: itemHeight - 10.sp,
+            height: itemHeight - 10.sp,
+            child: MasonryGridView.count(
+              shrinkWrap: true,
+              itemCount: showList.length,
+              crossAxisCount: 2,
+              mainAxisSpacing: 2,
+              crossAxisSpacing: 2,
+              itemBuilder: (BuildContext context, int index) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                  child: showImageWidget(showList[index].pic, BoxFit.fill),
+                );
+              }
+            ),
+          )
+        ],
+        if (groupItem!.type == 1 && groupItem!.memberData.length == 2)...[
+          Container(
+            width: itemHeight - 10.sp,
+            height: itemHeight - 10.sp,
+            child: Stack(
+              children: [
+                TopLeftAlign(
+                  child: SizedBox(
+                    width: itemHeight * 0.5,
+                    height: itemHeight * 0.5,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                      child: showImageWidget(showList[0].pic, BoxFit.fill),
+                    )
+                  )
+                ),
+                BottomRightAlign(
+                  child: Container(
+                    width: itemHeight * 0.5,
+                    height: itemHeight * 0.5,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                      border: Border.all(color: Theme.of(context).cardColor)
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                      child: showImageWidget(showList[1].pic, BoxFit.fill),
+                    )
+                  )
+                )
+              ],
+            ),
+          )
+        ],
+        SizedBox(width: 10),
           Expanded(
             child: GestureDetector(
               onTap: () {
-                if (widget.onSelected != null) widget.onSelected!(widget.groupItem!.id);
+                if (onSelected != null) onSelected!(groupItem!.id);
               },
               child: Container(
                 color: Colors.transparent,
@@ -87,19 +142,34 @@ class ChatGroupItemState extends State<ChatGroupItem> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Expanded(
-                          child: Text(STR(widget.groupItem!.title), style: ItemTitleStyle(context), maxLines: 1),
-                        ),
-                        Text(SERVER_TIME_STR(widget.groupItem!.updateTime, true), style: ItemDescExStyle(context)),
-                      ],
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Text(DESC(widget.groupItem!.lastMessage), maxLines: 1, style: ItemDescStyle(context), overflow: TextOverflow.ellipsis),
-                        ),
-                        if (widget.unOpenCount > 0)...[
+                        if (groupItem!.type == 0)
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Text(STR(groupItem!.title), style: ItemTitleStyle(context), maxLines: 1),
+                                SizedBox(width: 10),
+                                Text('${groupItem!.memberData.length}', style: ItemTitleBoldStyle(context)),
+                              ]
+                            )
+                          ),
+                        if (groupItem!.type == 1)
+                          Expanded(
+                            child: Row(
+                              children: [
+                                for (var item in showList)
+                                  // Row(
+                                  //   children: [
+                                  //     UserCardWidget(item.toJson(), faceSize: FACE_CIRCLE_SIZE_SE, faceCircleSize: 1.0, isShowName: false),
+                                  //     Text(item.nickName, style: ItemTitleBoldStyle(context)),
+                                  //   ]
+                                  // ),
+                                  Text(showList.indexOf(item) > 0 ? ', ${item.nickName}' : item.nickName, style: ItemTitleStyle(context)),
+                                SizedBox(width: 10),
+                                Text('${groupItem!.memberData.length}', style: ItemTitleBoldStyle(context)),
+                              ],
+                            ),
+                          ),
+                        if (unOpenCount > 0)...[
                           SizedBox(width: 10),
                           Container(
                             alignment: Alignment.center,
@@ -111,11 +181,20 @@ class ChatGroupItemState extends State<ChatGroupItem> {
                                 borderRadius: BorderRadius.circular(15.0),
                                 color: Theme.of(context).colorScheme.error
                             ),
-                            child: Text('${widget.unOpenCount}',
+                            child: Text('$unOpenCount',
                                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800,
                                     color: Theme.of(context).cardColor)),
                           ),
                         ],
+                      ],
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(DESC(groupItem!.lastMessage), maxLines: 1, style: ItemDescStyle(context), overflow: TextOverflow.ellipsis),
+                        ),
+                        Text(SERVER_TIME_STR(groupItem!.updateTime, true), style: ItemDescExStyle(context)),
                       ],
                     ),
                   ],
@@ -140,14 +219,14 @@ class ChatGroupItemState extends State<ChatGroupItem> {
               itemPadding: const EdgeInsets.only(left: 12, right: 12),
               offset: const Offset(0, 8),
               items: [
-                ...UserMenuItems.chatRoomMenu.map((item) => DropdownMenuItem<DropdownItem>(
+                ...UserMenuItems.chatRoomMenu0.map((item) => DropdownMenuItem<DropdownItem>(
                   value: item,
                   child: UserMenuItems.buildItem(item),
                 )),
               ],
               onChanged: (value) {
                 var selected = value as DropdownItem;
-                if (widget.onMenuSelected != null) widget.onMenuSelected!(selected.type, widget.groupItem!.id);
+                if (onMenuSelected != null) onMenuSelected!(selected.type, groupItem!.id);
               },
             ),
           )

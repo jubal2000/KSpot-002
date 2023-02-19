@@ -64,9 +64,8 @@ class CacheService extends GetxService {
   }
 
   setChatRoomItem(ChatRoomModel addItem) {
-    chatRoomData ??= {};
-    chatRoomData![addItem.id] = addItem;
-    LOG('--> setChatRoomItem [${addItem.id}] : ${chatRoomData![addItem.id]!.title} / ${chatRoomData!.length}');
+    chatRoomData[addItem.id] = addItem;
+    LOG('--> setChatRoomItem [${addItem.id}] : ${chatRoomData[addItem.id]!.title} / ${chatRoomData.length}');
   }
 
   Future sortStoryDataCreateTimeDesc() async {

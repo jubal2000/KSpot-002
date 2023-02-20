@@ -22,14 +22,6 @@ class MessageRepository {
     return result;
   }
 
-  getChatRoomStreamData() {
-    return api.getChatRoomStreamData(AppData.USER_ID);
-  }
-
-  startChatStreamToMe() {
-    return api.startChatStreamToMe(AppData.USER_ID);
-  }
-
   startMessageStreamToMe() {
     return api.startMessageStreamToMe(AppData.USER_ID);
   }

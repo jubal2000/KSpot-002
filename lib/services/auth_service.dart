@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/repository/user_repository.dart';
 import 'package:kspot_002/services/cache_service.dart';
+import '../repository/chat_repository.dart';
 import '../repository/message_repository.dart';
 import 'firebase_service.dart';
 
@@ -21,6 +22,7 @@ class AuthService extends GetxService {
   final cache     = Get.find<CacheService>();
   final userRepo  = UserRepository();
   final msgRepo   = MessageRepository();
+  final chatRepo  = ChatRepository();
   Function? onSignIn;
   Function? onSignOut;
   Function(int)? onError;
@@ -47,9 +49,9 @@ class AuthService extends GetxService {
           if (result != null) {
             AppData.userInfo = result;
             LOG('--> getStartUserInfo done! : ${AppData.userInfo.id}');
-            cache.reportData  = await userRepo.getReportData();
-            cache.blockData   = await userRepo.getBlockData();
-            cache.messageData = await msgRepo.getMessageData();
+            cache.reportData    = await userRepo.getReportData();
+            cache.blockData     = await userRepo.getBlockData();
+            cache.messageData   = await msgRepo.getMessageData();
             LOG('--> AppData.reportData : ${cache.reportData.toString()} / ${cache.blockData.toString()}');
             Get.offAllNamed(Routes.HOME);
           } else {

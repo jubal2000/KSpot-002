@@ -120,6 +120,7 @@ class AppData {
   static var isSignUpMode = false;
 
   static JSON selectEventTime = {};
+  static JSON chatReadLog = {};
   static JSON messageReadLog = {};
   static JSON startInfoData = {};
   static JSON localInfo = {};

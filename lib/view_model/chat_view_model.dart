@@ -13,6 +13,7 @@ import '../data/app_data.dart';
 import '../data/common_sizes.dart';
 import '../models/chat_model.dart';
 import '../models/event_model.dart';
+import '../repository/chat_repository.dart';
 import '../repository/message_repository.dart';
 import '../services/api_service.dart';
 import '../services/cache_service.dart';
@@ -31,7 +32,7 @@ enum ChatType {
 }
 
 class ChatViewModel extends ChangeNotifier {
-  final repo  = MessageRepository();
+  final chatRepo = ChatRepository();
   final cache = Get.find<CacheService>();
   final api   = Get.find<ApiService>();
   BuildContext? buildContext;
@@ -42,9 +43,11 @@ class ChatViewModel extends ChangeNotifier {
   List<ChatTabScreen> tabList = [];
   List<GlobalKey> tabKeyList = [];
 
-  init(context) {
+  init(context) async {
     buildContext = context;
     initMessageTab();
+    cache.chatRoomData = await chatRepo.getChatRoomData();
+    return true;
   }
 
   initMessageTab() {
@@ -60,12 +63,8 @@ class ChatViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  getChatRoomData() {
-    stream = repo.getChatRoomStreamData();
-  }
-
-  getMessageData() {
-    stream = repo.startChatStreamToMe();
+  getChatStreamData() {
+    stream ??= chatRepo.getChatStreamData();
   }
 
   Future<List<ChatGroupItem>> refreshShowList() async {
@@ -78,7 +77,8 @@ class ChatViewModel extends ChangeNotifier {
         final targetId = item.value.roomId;
         var desc = descList[targetId];
         if (desc == null || DateTime.parse(desc.updateTime).isBefore(DateTime.parse(item.value.updateTime))) {
-          descList[targetId] = item.value;
+          descList[targetId] = item.value.desc;
+          LOG('--> descList item add [$targetId] : ${item.value.desc}');
         }
         var open = unOpenCount[targetId];
         if (open == null) {
@@ -89,9 +89,12 @@ class ChatViewModel extends ChangeNotifier {
     // create group..
     for (var item in cache.chatRoomData.entries) {
       if (item.value.type == currentTab) {
-        LOG('--> cache.chatRoomData item : ${item.value.memberData}');
+        item.value.lastMessage = descList[item.value.id] ?? '';
+        LOG('--> cache.chatRoomData item : ${item.value.memberData.length} / ${item.value.lastMessage}');
         var addGroup = ChatGroupItem(item.value, unOpenCount: unOpenCount[item.key] ?? 0, onSelected: (key) {
-          // Get.to(() => ChattingTalkScreen(targetId, targetName, targetPic));
+          Get.to(() => ChattingTalkScreen(item.value))!.then((_) {
+            notifyListeners();
+          });
         });
         showList.add(addGroup);
       }
@@ -129,8 +132,15 @@ class ChatViewModel extends ChangeNotifier {
       case ConnectionState.active:
         for (var item in snapshot.data.docs) {
           var data = FROM_SERVER_DATA(item.data() as JSON);
-          cache.setChatRoomItem(ChatRoomModel.fromJson(data));
-          LOG('--> cache.setChatRoomItem : ${data['id']} / ${cache.chatRoomData.length}');
+          final chatItem = ChatModel.fromJson(data);
+          cache.setChatItem(chatItem);
+          if (!cache.chatRoomData.containsKey(chatItem.roomId)) {
+            final roomItem = await chatRepo.getChatRoomInfo();
+            if (roomItem != null) {
+              cache.setChatRoomItem(ChatRoomModel.fromJson(roomItem));
+              LOG('--> cache.setChatRoomItem add : ${roomItem.id} / ${cache.chatRoomData.length}');
+            }
+          }
         }
         return true;
       case ConnectionState.done:

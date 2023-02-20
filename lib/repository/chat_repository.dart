@@ -12,24 +12,36 @@ class ChatRepository {
   final api = Get.find<ApiService>();
   StreamSubscription<QuerySnapshot>? stream;
 
-  getChatData() async {
-    Map<String, ChatModel> result = {};
-    final data = await api.getMessageData(AppData.USER_ID);
+  getChatRoomData() async {
+    Map<String, ChatRoomModel> result = {};
+    final data = await api.getChatRoomData(AppData.USER_ID);
     for (var item in data.entries) {
-      result[item.key] = ChatModel.fromJson(item.value);
+      result[item.key] = ChatRoomModel.fromJson(item.value);
     }
     return result;
   }
 
-  startChatStreamToMe() {
-    return api.startChatStreamToMe(AppData.USER_ID);
+  getChatRoomInfo() async {
+    return await api.getChatRoomFromId(AppData.USER_ID);
   }
 
-  startChatStreamData(String targetId, Function(JSON) onChanged) {
+  getChatRoomStreamData() {
+    return api.getChatRoomStreamData(AppData.USER_ID);
+  }
+
+  getChatStreamData() {
+    return api.getChatStreamData(AppData.USER_ID);
+  }
+
+  startChatStreamData(String roomId, Function(JSON) onChanged) {
     if (stream != null) {
       stopChatStreamData();
     }
-    stream = api.startMessageStream(AppData.USER_ID, targetId, onChanged);
+    stream = api.startChatStreamData(roomId, onChanged);
+  }
+
+  addChatItem(JSON addItem, List<JSON> targetList) async {
+    return await api.addChatItem(addItem, targetList);
   }
 
   stopChatStreamData() {

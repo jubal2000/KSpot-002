@@ -3,13 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kspot_002/models/etc_model.dart';
 import 'package:kspot_002/repository/user_repository.dart';
 import 'package:uuid/uuid.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../data/app_data.dart';
 import '../../data/dialogs.dart';
 import '../../data/theme_manager.dart';
+import '../../models/chat_model.dart';
 import '../../models/message_model.dart';
+import '../../repository/chat_repository.dart';
 import '../../repository/message_repository.dart';
 import '../../services/api_service.dart';
 import '../../services/cache_service.dart';
@@ -18,66 +22,64 @@ import '../../utils/utils.dart';
 import '../../widget/card_scroll_viewer.dart';
 
 class ChattingTalkScreen extends StatefulWidget {
-  ChattingTalkScreen(this.targetId, this.targetName, this.targetPic, {Key? key}) : super(key: key);
+  ChattingTalkScreen(this.roomInfo, {Key? key, this.roomTitle = ''}) : super(key: key);
 
-  String targetId;
-  String targetName;
-  String targetPic;
+  ChatRoomModel roomInfo;
+  String roomTitle;
 
-  final textController   = TextEditingController();
-  final scrollController = ScrollController();
+  final textController    = TextEditingController();
+  final scrollController  = ScrollController();
 
   @override
   ChattingTalkScreenState createState() => ChattingTalkScreenState();
 }
 
 class ChattingTalkScreenState extends State<ChattingTalkScreen> {
-  final userRepo = UserRepository();
-  final msgRepo  = MessageRepository();
-  final api      = Get.find<ApiService>();
-  final cache    = Get.find<CacheService>();
-
+  final userRepo          = UserRepository();
+  final chatRepo          = ChatRepository();
+  final api               = Get.find<ApiService>();
+  final cache             = Get.find<CacheService>();
   final _formKey          = GlobalKey<FormState>();
   final _minText          = 1;
   final _iconSize         = 24.0;
   final _imageMax         = 3;
 
-  String _sendText = '';
+  var  _sendText = '';
   JSON _addItem = {};
-  JSON _targetUser = {};
   JSON _showList = {};
   JSON _imageData = {};
 
+
   initData() {
     _showList = {};
-    if (JSON_NOT_EMPTY(cache.messageData)) {
-      for (var item in cache.messageData!.entries) {
+    if (JSON_NOT_EMPTY(cache.chatData)) {
+      for (var item in cache.chatData!.entries) {
         _showList[item.key] = item.value.toJson();
       }
     }
     LOG('--> initData :${_showList.length}');
-    msgRepo.startMessageStreamData(widget.targetId, (result) {
+    chatRepo.startChatStreamData(widget.roomInfo.id, (result) {
       if (mounted) {
-        _showList.addAll(result);
+        _showList = result;
         if (_showList.isNotEmpty) {
           setState(() {
             _showList = JSON_CREATE_TIME_SORT_ASCE(_showList);
             AppData.isMainActive = true;
             var lastItem = _showList.entries.last.value as JSON;
-            var lastKey = widget.targetId;
-            AppData.messageReadLog[lastKey] = {'id': lastKey, 'lastId': lastItem['id'], 'createTime': SERVER_TIME_STR(lastItem['createTime'])};
-            AppData.localInfo['messageReadLog'] = {};
-            AppData.localInfo['messageReadLog'].addAll(AppData.messageReadLog);
-            LOG('--> startMessageStream result : ${_showList.length}');
-            writeLocalInfo();
-            _showList.forEach((key, value) async {
-              LOG('--> _showList item : ${CheckOwner(value['senderId'])} / ${value['senderId']} / ${STR(value['openTime'])}');
-              if (!CheckOwner(value['senderId']) && STR(value['openTime']).isEmpty) {
-                await api.setMessageInfo(key, {
-                  'openTime': CURRENT_SERVER_TIME(),
-                });
-              }
-            });
+            var lastKey = widget.roomInfo.id;
+            AppData.chatReadLog[lastKey] = {'id': lastKey, 'lastId': lastItem['id'], 'createTime': SERVER_TIME_STR(lastItem['createTime'])};
+            // AppData.localInfo['chatReadLog'] ??= {};
+            // AppData.localInfo['chatReadLog'].addAll(AppData.messageReadLog);
+            // LOG('--> startChatStreamData result : ${_showList.length}');
+            // writeLocalInfo();
+            // _showList.forEach((key, value) async {
+            //   LOG('--> _showList item : ${CheckOwner(value['id'])} / ${value['memberData']}');
+            //   if (STR(value['openTime']).isEmpty) {
+            //     await api.setChatInfo(key, {
+            //       'openTime': CURRENT_SERVER_TIME(),
+            //     });
+            //   }
+            // });
           });
         }
       }
@@ -87,43 +89,14 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
   createAddItem() {
     _addItem = {
       "status":     1,
+      "roomId":     widget.roomInfo.id,
       "senderId":   STR(AppData.USER_ID),
       "senderName": STR(AppData.USER_NICKNAME),
       "senderPic":  STR(AppData.USER_PIC),
-      "targetId":   widget.targetId,
-      "targetName": widget.targetName,
-      "targetPic":  widget.targetPic,
-      "imageData":  [],
+      "picData":  [],
+      "fileData":  [], // TODO: need file add..
       "desc": "",
     };
-    // switch (widget.tabIndex) {
-    //   case 0:
-    //     _addItem = {
-    //       "status":     1,
-    //       "senderId":   STR(AppData.USER_ID),
-    //       "senderName": STR(AppData.USER_NICKNAME),
-    //       "senderPic":  STR(AppData.USER_PIC),
-    //       "targetId":   widget.targetId,
-    //       "targetName": widget.targetName,
-    //       "targetPic":  widget.targetPic,
-    //       "imageData":  [],
-    //       "desc": "",
-    //     };
-    //     break;
-    //   default:
-    //     _addItem = {
-    //       "status":       1,
-    //       "userId":       STR(AppData.USER_ID),
-    //       "userName":     STR(AppData.USER_NICKNAME),
-    //       "userPic":      STR(AppData.USER_PIC),
-    //       "parentId":     widget.messageList.first['id'],
-    //       "targetId":     widget.messageList.first['targetId'],
-    //       "targetTitle":  widget.messageList.first['targetTitle'],
-    //       "targetType":   widget.messageList.first['targetType'],
-    //       "imageData":    [],
-    //       "desc": "",
-    //     };
-    // }
   }
 
   refresh(JSON pushData) {
@@ -142,12 +115,25 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
   }
 
   getUserInfo() async {
-    var result = await userRepo.getUserInfo(widget.targetId);
-    if (result != null) {
-      _targetUser = result.toJson();
+    for (var item in widget.roomInfo.memberData) {
+      var result = await userRepo.getUserInfo(item.id);
+      if (result != null) {
+        item = MemberData.fromJson(result.toJson());
+      }
     }
-    if (widget.targetName.isEmpty) widget.targetName = _targetUser['nickName'];
-    if (widget.targetPic.isEmpty ) widget.targetPic  = _targetUser['pic'];
+    // if (widget.targetName.isEmpty) widget.targetName = _targetUser['nickName'];
+    // if (widget.targetPic.isEmpty ) widget.targetPic  = _targetUser['pic'];
+  }
+
+  showMemberList() {
+    return Row(
+      children: [
+        for (var item in widget.roomInfo.memberData)
+          Text(widget.roomInfo.memberData.indexOf(item) > 0 ? ', ${item.nickName}' : item.nickName, style: ItemDescStyle(context)),
+        SizedBox(width: 10),
+        Text('${widget.roomInfo.memberData.length}', style: ItemTitleBoldStyle(context)),
+      ],
+    );
   }
 
   @override
@@ -164,25 +150,48 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
         top: false,
         child: WillPopScope(
             onWillPop: () async {
-              msgRepo.stopMessageStreamData();
+              chatRepo.stopChatStreamData();
               return true;
             },
             child: Scaffold(
                 appBar: AppBar(
                   title: Row(
                     children: [
-                      if (widget.targetPic.isNotEmpty)...[
-                        SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(150),
-                            child: showImageFit(widget.targetPic),
+                      if (widget.roomInfo.type == 0)...[
+                        if (widget.roomInfo.pic.isNotEmpty)...[
+                          SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: showImageFit(widget.roomInfo.pic),
+                            ),
                           ),
+                          SizedBox(width: 10),
+                        ],
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(STR(widget.roomInfo.title), style: AppBarTitleStyle(context)),
+                            showMemberList(),
+                          ]
                         ),
-                        SizedBox(width: 10),
                       ],
-                      Text(STR(widget.targetName), style: AppBarTitleStyle(context))
+                      if (widget.roomInfo.type == 1)...[
+                        if (widget.roomInfo.pic.isNotEmpty)...[
+                          SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(150),
+                              child: showImageFit(widget.roomInfo.pic),
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                        ],
+                        showMemberList(),
+                      ],
                     ],
                   ),
                   titleSpacing: 0,
@@ -281,72 +290,45 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                                                           createAddItem();
                                                           _addItem['desc'] = _sendText;
                                                           _addItem['picData'] = [];
+                                                          _addItem['fileData'] = [];
                                                           _addItem['thumbData'] = [];
+                                                          _addItem['memberList'] = widget.roomInfo.memberList;
                                                           _addItem['createTime'] = CURRENT_SERVER_TIME();
                                                           var upCount = 0;
                                                           for (var item in _imageData.entries) {
-                                                            var result = await api.uploadImageData(item.value as JSON, 'message_img');
+                                                            var result = await api.uploadImageData(item.value as JSON, 'chat_img');
                                                             if (result != null) {
                                                               _addItem['picData'].add(result);
                                                               upCount++;
                                                             }
                                                           }
-                                                          LOG('----> upload image result : $upCount / ${_addItem['imageData']}');
+                                                          LOG('--> upload image result : $upCount / ${_addItem['picData']}');
                                                           upCount = 0;
                                                           for (var item in _imageData.entries) {
                                                             var result = await api.uploadImageData(
-                                                                {'id': item.key, 'data': item.value['thumb']}, 'message_img_p');
+                                                                {'id': item.key, 'data': item.value['thumb']}, 'chat_img_p');
                                                             if (result != null) {
                                                               _addItem['thumbData'].add(result);
                                                               upCount++;
                                                             }
                                                           }
-                                                          LOG('----> upload thumb result : $upCount / ${_addItem['thumbData']}');
-                                                          api.addMessageItem(_addItem, _targetUser).then((result) {
+                                                          LOG('--> upload thumb result : $upCount / ${_addItem['thumbData']}');
+                                                          List<JSON> targetUser = [];
+                                                          for (var item in widget.roomInfo.memberData) {
+                                                            if (item.id != AppData.USER_ID) {
+                                                              targetUser.add(item.toJson());
+                                                            }
+                                                            LOG('--> targetUser : ${targetUser.length} / ${targetUser.toString()}');
+                                                          }
+                                                          chatRepo.addChatItem(_addItem, targetUser).then((result) {
                                                             setState(() {
                                                               _showList[result['id']] = result;
                                                               _showList = JSON_CREATE_TIME_SORT_ASCE(_showList);
-                                                              cache.setMessageItem(MessageModel.fromJson(result));
+                                                              cache.setChatItem(ChatModel.fromJson(result));
                                                               AppData.isMainActive = true;
-                                                              LOG('--------> add message result [${result['id']}]');
+                                                              LOG('--------> add chat result [${result['id']}]');
                                                             });
                                                           });
-
-                                                          // switch(widget.tabIndex) {
-                                                          //   case 0:
-                                                          //     api.addMessageItem(_addItem, _targetUser).then((result) {
-                                                          //       setState(() {
-                                                          //         _showList[result['id']] = result;
-                                                          //         _showList = JSON_CREATE_TIME_SORT_ASCE(_showList);
-                                                          //         AppData.messageData[result['id']] = result;
-                                                          //         AppData.isMainActive = true;
-                                                          //         LOG('--------> add message result [${result['id']}]');
-                                                          //       });
-                                                          //     });
-                                                          //     break;
-                                                          //   case 1:
-                                                          //     api.addCommentItem(_addItem, _targetUser).then((result) {
-                                                          //       setState(() {
-                                                          //         _showList[result['id']] = result;
-                                                          //         _showList = JSON_CREATE_TIME_SORT_ASCE(_showList);
-                                                          //         AppData.commentData[result['id']] = result;
-                                                          //         AppData.isMainActive = true;
-                                                          //         LOG('--------> add comment result [${result['id']}]');
-                                                          //       });
-                                                          //     });
-                                                          //     break;
-                                                          //   case 2:
-                                                          //     api.addQnAItem(_addItem, _targetUser).then((result) {
-                                                          //       setState(() {
-                                                          //         _showList[result['id']] = result;
-                                                          //         _showList = JSON_CREATE_TIME_SORT_ASCE(_showList);
-                                                          //         AppData.qnaData[result['id']] = result;
-                                                          //         AppData.isMainActive = true;
-                                                          //         LOG('--------> add qna result [${result['id']}]');
-                                                          //       });
-                                                          //     });
-                                                          //     break;
-                                                          // }
                                                           widget.textController.text = '';
                                                           _sendText = '';
                                                           _imageData.clear();
@@ -425,7 +407,7 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
         var imageData = await ReadFileByte(image.path);
         var thumbData = await resizeImage(imageData!.buffer.asUint8List(), 256) as Uint8List;
         var key = Uuid().v1();
-        _imageData[key] = {'id': key, 'image': imageData, 'thumb': thumbData};
+        _imageData[key] = {'id': key, 'data': imageData, 'thumb': thumbData};
       }
       Navigator.of(dialogContext!).pop();
       refreshImageData();
@@ -455,6 +437,7 @@ class MessageItem extends StatefulWidget {
 class MessageItemState extends State<MessageItem> {
   // final _descStyle = TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w400);
   // final _timeStyle = TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.5), fontWeight: FontWeight.w400);
+  final api = Get.find<ApiService>();
   final _radiusSize = 18.0;
   final _imageSize = 80.0;
   final JSON _imageData = {};
@@ -462,8 +445,7 @@ class MessageItemState extends State<MessageItem> {
 
   @override
   void initState() {
-    _isOwner = widget.messageItem['senderId'] != null ?
-    CheckOwner(widget.messageItem['senderId']) : CheckOwner(widget.messageItem['userId']);
+    _isOwner = CheckOwner(widget.messageItem['senderId']);
     if (LIST_NOT_EMPTY(widget.messageItem['thumbData'])) {
       widget.messageItem['thumbData'].forEach((item) {
         var index = widget.messageItem['thumbData'].indexOf(item);
@@ -484,7 +466,17 @@ class MessageItemState extends State<MessageItem> {
         onTap: () {
           // TODO: 메시지 터치했을경우 처리 필요.. (삭제/수정등)
         },
-        child: Row(
+        child: VisibilityDetector(
+          onVisibilityChanged: (value) {
+            if (STR(widget.messageItem['openTime']).isEmpty) {
+              widget.messageItem['openTime'] = CURRENT_SERVER_TIME();
+              api.setChatInfo(widget.messageItem['id'], {
+                'openTime': widget.messageItem['openTime'],
+              });
+            }
+          },
+          key: GlobalKey(),
+          child: Row(
             children: [
               if (_isOwner)
                 Expanded(child: SizedBox(height: 1)),
@@ -556,6 +548,7 @@ class MessageItemState extends State<MessageItem> {
                 Expanded(child: SizedBox(height: 1)),
             ]
         )
+      )
     );
   }
 }

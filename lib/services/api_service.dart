@@ -1822,6 +1822,25 @@ class ApiService extends GetxService {
   //
 
   final ChatRoomCollection = 'data_chatRoom';
+  final ChatCollection = 'data_chat';
+
+  Future<JSON> getChatRoomData(String userId) async {
+    JSON result = {};
+    try {
+      var snapshot = await firestore!.collection(ChatRoomCollection)
+          .where('status', isEqualTo: 1)
+          .where('memberList', arrayContainsAny: [userId])
+          .get();
+
+      for (var doc in snapshot.docs) {
+        var item = FROM_SERVER_DATA(doc.data());
+        result[item['id']] = item;
+      }
+    } catch (e) {
+      LOG('--> getCommentFromUserId error : $e');
+    }
+    return result;
+  }
 
   Stream getChatRoomStreamData(String userId) {
     LOG('------> getChatRoomStreamData : $userId');
@@ -1830,27 +1849,6 @@ class ApiService extends GetxService {
         .where('memberList', arrayContainsAny: [userId])
         .orderBy('updateTime', descending: true)
         .snapshots();
-
-    // JSON result = {};
-    // var snapshot = await firestore!.collection(ChatRoomCollection)
-    //     .where('status', isEqualTo: 1)
-    //     .where('memberList', arrayContainsAny: [userId])
-    //     .orderBy('updateTime', descending: true)
-    //     .get();
-    //
-    // for (var doc in snapshot.docs) {
-    //   var item = FROM_SERVER_DATA(doc.data());
-    //   result[item['id']] = item;
-    // }
-    // return result;
-  }
-
-  Stream startChatStreamToMe(String userId) {
-    LOG('------> startChatStreamToMe : $userId');
-    return firestore!.collection(ChatRoomCollection)
-        .where('status', isEqualTo: 1)
-        .where('targetId', isEqualTo: userId)
-        .orderBy('updateTime', descending: true).snapshots();
   }
 
   Future<JSON?> addRoomItem(JSON addItem) async {
@@ -1863,6 +1861,72 @@ class ApiService extends GetxService {
     }
     addItem['updateTime'] = CURRENT_SERVER_TIME();
     LOG('--> addRoomItem key : ${addItem['id']}');
+    await dataRef.doc(key).set(Map<String, dynamic>.from(addItem));
+    var result = FROM_SERVER_DATA(addItem);
+    return result;
+  }
+
+  Stream getChatStreamData(String userId) {
+    LOG('------> getChatStreamData : $userId');
+    return firestore!.collection(ChatCollection)
+        .where('status', isEqualTo: 1)
+        .where('memberList', arrayContainsAny: [userId])
+        .orderBy('updateTime', descending: true)
+        .snapshots();
+  }
+
+  getChatRoomFromId(String roomId) async {
+    LOG('------> getChatRoomFromId : $roomId');
+    var snapshot = await firestore!.collection(ChatCollection)
+        .doc(roomId)
+        .get();
+
+    if (snapshot.data() != null) {
+      return snapshot.data() as JSON;
+    }
+    return null;
+  }
+
+  startChatStreamData(String roomId, Function(JSON) onChanged) {
+    LOG('------> startChatStreamData : $roomId');
+    JSON result = {};
+    var ref = firestore!.collection(ChatCollection)
+        .where('status'  , isEqualTo: 1)
+        .where('roomId', isEqualTo: roomId)
+        .orderBy('updateTime', descending: true);
+
+    return ref.snapshots().listen((QuerySnapshot querySnapshot) {
+      for (var doc in querySnapshot.docs) {
+        var item = FROM_SERVER_DATA(doc.data() as JSON);
+        LOG('--> listen item : $item');
+        result[item['id']] = item;
+      }
+      onChanged(result);
+    });
+  }
+
+  Future<bool> setChatInfo(String targetId, JSON updateInfo) async {
+    LOG('------> setChatInfo : $targetId - $updateInfo');
+    try {
+      var ref = firestore!.collection(ChatCollection);
+      await ref.doc(targetId).update(Map<String, dynamic>.from(updateInfo));
+      return true;
+    } catch (e) {
+      LOG('--> setChatInfo error : $e');
+    }
+    return false;
+  }
+
+  Future<JSON> addChatItem(JSON addItem, List<JSON> targetUserInfo) async {
+    LOG('------> addChatItem : $addItem / ${targetUserInfo.toString()}');
+    var dataRef = firestore!.collection(ChatCollection);
+    var key = STR(addItem['id']).toString();
+    if (key.isEmpty) {
+      key = dataRef.doc().id;
+      addItem['id'] = key;
+      addItem['createTime'] = CURRENT_SERVER_TIME();
+    }
+    addItem['updateTime'] = CURRENT_SERVER_TIME();
     await dataRef.doc(key).set(Map<String, dynamic>.from(addItem));
     var result = FROM_SERVER_DATA(addItem);
     return result;
@@ -1936,8 +2000,8 @@ class ApiService extends GetxService {
 
   Future<bool> setMessageStatus(String targetId, int status) async {
     try {
-      var dataRef2 = firestore!.collection(MessageCollection);
-      await dataRef2.doc(targetId).update({
+      var ref = firestore!.collection(MessageCollection);
+      await ref.doc(targetId).update({
         'status': status,
         'updateTime': CURRENT_SERVER_TIME()
       });
@@ -1951,8 +2015,8 @@ class ApiService extends GetxService {
   Future<bool> setMessageInfo(String targetId, JSON updateInfo) async {
     LOG('------> setMessageInfo : $targetId - $updateInfo');
     try {
-      var dataRef2 = firestore!.collection(MessageCollection);
-      await dataRef2.doc(targetId).update(Map<String, dynamic>.from(updateInfo));
+      var ref = firestore!.collection(MessageCollection);
+      await ref.doc(targetId).update(Map<String, dynamic>.from(updateInfo));
       return true;
     } catch (e) {
       LOG('--> setMessageInfo error : $e');

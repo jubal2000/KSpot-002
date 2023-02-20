@@ -192,7 +192,7 @@ class ChatGroupItem extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
-                          child: Text(DESC(groupItem!.lastMessage), maxLines: 1, style: ItemDescStyle(context), overflow: TextOverflow.ellipsis),
+                          child: Text(STR(groupItem!.lastMessage), maxLines: 1, style: ItemDescStyle(context), overflow: TextOverflow.ellipsis),
                         ),
                         Text(SERVER_TIME_STR(groupItem!.updateTime, true), style: ItemDescExStyle(context)),
                       ],

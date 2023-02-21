@@ -20,6 +20,7 @@ class ChatModel {
   String  openTime;       // 읽은 시간
 
   List<String>? picData;
+  List<String>? thumbData;
   List<String>? fileData;
 
   ChatModel({
@@ -35,6 +36,7 @@ class ChatModel {
     required this.openTime,
 
     this.picData,
+    this.thumbData,
     this.fileData,
   });
   factory ChatModel.fromJson(JSON json) => _$ChatModelFromJson(json);

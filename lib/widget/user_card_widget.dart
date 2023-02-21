@@ -15,7 +15,8 @@ class UserCardWidget extends StatefulWidget {
     this.onProfileChanged,
     this.isEditable = false,
     this.isCanFollow = true,
-    this.isBottomName = false,
+    this.isBottomNameShow = false,
+    this.isSideNameShow = false,
     this.isShowTime = false,
   }) : super(key: key);
 
@@ -31,7 +32,8 @@ class UserCardWidget extends StatefulWidget {
 
   bool isEditable;
   bool isCanFollow;
-  bool isBottomName;
+  bool isBottomNameShow;
+  bool isSideNameShow;
   bool isShowTime;
 
   @override
@@ -84,8 +86,8 @@ class _UserCardState extends State<UserCardWidget> {
                   child: Column(
                     children: [
                       Container(
-                        width:  widget.faceSize - (widget.isBottomName ? widget.nameHeight : 0),
-                        height: widget.faceSize - (widget.isBottomName ? widget.nameHeight : 0),
+                        width:  widget.faceSize - (widget.isBottomNameShow ? widget.nameHeight : 0),
+                        height: widget.faceSize - (widget.isBottomNameShow ? widget.nameHeight : 0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(widget.faceSize)),
                           border: Border.all(
@@ -97,7 +99,7 @@ class _UserCardState extends State<UserCardWidget> {
                           child: showImageFit(widget.userInfo['pic'] ?? widget.userInfo['userPic']),
                         ),
                       ),
-                      if (widget.isBottomName)...[
+                      if (widget.isBottomNameShow)...[
                         Container(
                             width: double.infinity,
                             height: widget.nameHeight,
@@ -110,8 +112,8 @@ class _UserCardState extends State<UserCardWidget> {
                     ],
                   ),
                 ),
-                SizedBox(width: 10),
-                if (!widget.isBottomName)...[
+                if (!widget.isSideNameShow)...[
+                  SizedBox(width: 10),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,

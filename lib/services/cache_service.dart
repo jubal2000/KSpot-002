@@ -54,13 +54,29 @@ class CacheService extends GetxService {
     messageData ??= {};
     messageData![addItem.id] = addItem;
     storyListItemData.remove(addItem.id);
-    LOG('--> setMessageItem [${addItem.id}] : ${messageData![addItem.id]!.desc} / ${messageData!.length}');
+    // LOG('--> setMessageItem [${addItem.id}] : ${messageData![addItem.id]!.desc} / ${messageData!.length}');
   }
 
   setChatItem(ChatModel addItem) {
     chatData ??= {};
     chatData![addItem.id] = addItem;
-    LOG('--> setChatItem [${addItem.id}] : ${chatData![addItem.id]!.desc} / ${chatData!.length}');
+    // LOG('--> setChatItem [${addItem.id}] : ${chatData![addItem.id]!.desc} / ${chatData!.length}');
+  }
+
+  setChatItemData(JSON addData) {
+    chatData ??= {};
+    for (var item in addData.entries) {
+      setChatItem(ChatModel.fromJson(item.value));
+    }
+    // LOG('--> setChatItem : ${addData.length} / ${chatData!.length}');
+  }
+
+  setChatItemList(List<JSON> addData) {
+    chatData ??= {};
+    for (var item in addData) {
+      setChatItem(ChatModel.fromJson(item));
+    }
+    // LOG('--> setChatItem : ${addData.length} / ${chatData!.length}');
   }
 
   setChatRoomItem(ChatRoomModel addItem) {

@@ -2,9 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:helpers/helpers.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/models/etc_model.dart';
 import 'package:kspot_002/repository/user_repository.dart';
+import 'package:kspot_002/widget/user_card_widget.dart';
 import 'package:uuid/uuid.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -44,29 +47,22 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
   final _iconSize         = 24.0;
   final _imageMax         = 3;
 
-  var  _sendText = '';
-  JSON _addItem = {};
-  JSON _showList = {};
-  JSON _imageData = {};
-
+  var  sendText = '';
+  JSON showList = {};
+  JSON imageData = {};
+  JSON chatItemData = {};
 
   initData() {
-    _showList = {};
-    if (JSON_NOT_EMPTY(cache.chatData)) {
-      for (var item in cache.chatData!.entries) {
-        _showList[item.key] = item.value.toJson();
-      }
-    }
-    LOG('--> initData :${_showList.length}');
+    LOG('--> initData :${showList.length}');
     chatRepo.startChatStreamData(widget.roomInfo.id, (result) {
       if (mounted) {
-        _showList = result;
-        if (_showList.isNotEmpty) {
+        showList = result;
+        if (showList.isNotEmpty) {
           setState(() {
-            _showList = JSON_CREATE_TIME_SORT_ASCE(_showList);
-            AppData.isMainActive = true;
-            var lastItem = _showList.entries.last.value as JSON;
+            cache.setChatItemData(result);
+            var lastItem = showList.entries.last.value as JSON;
             var lastKey = widget.roomInfo.id;
+            AppData.isMainActive = true;
             AppData.chatReadLog[lastKey] = {'id': lastKey, 'lastId': lastItem['id'], 'createTime': SERVER_TIME_STR(lastItem['createTime'])};
             // AppData.localInfo['chatReadLog'] ??= {};
             // AppData.localInfo['chatReadLog'].addAll(AppData.messageReadLog);
@@ -84,19 +80,6 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
         }
       }
     });
-  }
-
-  createAddItem() {
-    _addItem = {
-      "status":     1,
-      "roomId":     widget.roomInfo.id,
-      "senderId":   STR(AppData.USER_ID),
-      "senderName": STR(AppData.USER_NICKNAME),
-      "senderPic":  STR(AppData.USER_PIC),
-      "picData":  [],
-      "fileData":  [], // TODO: need file add..
-      "desc": "",
-    };
   }
 
   refresh(JSON pushData) {
@@ -136,11 +119,25 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
     );
   }
 
+  showChatList() {
+    List<Widget> result = [];
+    var parentId = '';
+    // showList = JSON_CREATE_TIME_SORT_ASCE(showList);
+    for (var item in showList.entries) {
+      var addItem = chatItemData[item.key];
+      addItem ??= ChatItem(item.value, isShowInfo: parentId != item.value['senderId']);
+      result.add(addItem);
+      chatItemData[item.key] = addItem;
+      parentId = item.value['senderId'];
+    }
+    return result;
+  }
+
   @override
   void initState() {
     initData();
     refreshList();
-    getUserInfo();
+    // getUserInfo();
     super.initState();
   }
 
@@ -209,8 +206,8 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                                       controller: widget.scrollController,
                                       child: Column(
                                         children: [
-                                          for (var item in _showList.entries)
-                                            MessageItem(item.value),
+                                          SizedBox(height: 10),
+                                          ...showChatList(),
                                           SizedBox(height: 10),
                                         ],
                                       )
@@ -219,17 +216,17 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                                 Container(
                                     width: Get.width,
                                     constraints: BoxConstraints(
-                                      minHeight: _imageData.isEmpty ? 90 : 140,
+                                      minHeight: imageData.isEmpty ? 90 : 140,
                                     ),
                                     padding: EdgeInsets.all(10),
                                     color: Theme.of(context).canvasColor,
                                     child: Column(
                                         children: [
-                                          if (_imageData.isNotEmpty)...[
+                                          if (imageData.isNotEmpty)...[
                                             Row(
                                               children: [
                                                 ImageEditScrollViewer(
-                                                  _imageData,
+                                                  imageData,
                                                   itemWidth: 40.0,
                                                   itemHeight: 40.0,
                                                   isEditable: true,
@@ -237,7 +234,7 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                                                   onActionCallback: (key, status) {
                                                     LOG('--> onActionCallback : $key / $status');
                                                     if (status == 2) {
-                                                      _imageData.remove(key);
+                                                      imageData.remove(key);
                                                       refreshImageData();
                                                     }
                                                   },
@@ -246,7 +243,7 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                                                   onPressed: () {
                                                     showAlertDialog(context, 'Remove'.tr, 'Remove all images?'.tr, '', 'OK'.tr).then((result) {
                                                       if (result == 1) {
-                                                        _imageData.clear();
+                                                        imageData.clear();
                                                         refreshImageData();
                                                       }
                                                     });
@@ -269,7 +266,7 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                                                       maxLength: 500,
                                                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Theme.of(context).primaryColor),
                                                       onChanged: (value) {
-                                                        _sendText = value;
+                                                        sendText = value;
                                                         widget.scrollController.jumpTo(0);
                                                       },
                                                     )
@@ -280,39 +277,44 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                                                     padding: EdgeInsets.only(left: 10),
                                                     child: ElevatedButton(
                                                         onPressed: () async {
-                                                          if (!AppData.isMainActive || (_sendText.isEmpty && _imageData.isEmpty)) return;
-                                                          if (_imageData.length >= _imageMax) {
+                                                          if (!AppData.isMainActive || (sendText.isEmpty && imageData.isEmpty)) return;
+                                                          if (imageData.length >= _imageMax) {
                                                             showAlertDialog(context, 'Image'.tr,
                                                                 'You can\'t add any more'.tr, '${'Max'.tr}: $_imageMax', 'OK'.tr);
                                                             return;
                                                           }
                                                           AppData.isMainActive = false;
-                                                          createAddItem();
-                                                          _addItem['desc'] = _sendText;
-                                                          _addItem['picData'] = [];
-                                                          _addItem['fileData'] = [];
-                                                          _addItem['thumbData'] = [];
-                                                          _addItem['memberList'] = widget.roomInfo.memberList;
-                                                          _addItem['createTime'] = CURRENT_SERVER_TIME();
+                                                          var addItem = {
+                                                            'status':     1,
+                                                            'roomId':     widget.roomInfo.id,
+                                                            'senderId':   STR(AppData.USER_ID),
+                                                            'senderName': STR(AppData.USER_NICKNAME),
+                                                            'senderPic':  STR(AppData.USER_PIC),
+                                                            'desc':       sendText,
+                                                            'memberList': widget.roomInfo.memberList,
+                                                            'createTime': CURRENT_SERVER_TIME(),
+                                                          };
                                                           var upCount = 0;
-                                                          for (var item in _imageData.entries) {
+                                                          for (var item in imageData.entries) {
                                                             var result = await api.uploadImageData(item.value as JSON, 'chat_img');
                                                             if (result != null) {
-                                                              _addItem['picData'].add(result);
+                                                              addItem['picData'] ??= [];
+                                                              addItem['picData'].add(result);
                                                               upCount++;
                                                             }
                                                           }
-                                                          LOG('--> upload image result : $upCount / ${_addItem['picData']}');
+                                                          LOG('--> upload image result : $upCount / ${addItem['picData']}');
                                                           upCount = 0;
-                                                          for (var item in _imageData.entries) {
+                                                          for (var item in imageData.entries) {
                                                             var result = await api.uploadImageData(
                                                                 {'id': item.key, 'data': item.value['thumb']}, 'chat_img_p');
                                                             if (result != null) {
-                                                              _addItem['thumbData'].add(result);
+                                                              addItem['thumbData'] ??= [];
+                                                              addItem['thumbData'].add(result);
                                                               upCount++;
                                                             }
                                                           }
-                                                          LOG('--> upload thumb result : $upCount / ${_addItem['thumbData']}');
+                                                          LOG('--> upload thumb result : $upCount / ${addItem['thumbData']}');
                                                           List<JSON> targetUser = [];
                                                           for (var item in widget.roomInfo.memberData) {
                                                             if (item.id != AppData.USER_ID) {
@@ -320,18 +322,19 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                                                             }
                                                             LOG('--> targetUser : ${targetUser.length} / ${targetUser.toString()}');
                                                           }
-                                                          chatRepo.addChatItem(_addItem, targetUser).then((result) {
-                                                            setState(() {
-                                                              _showList[result['id']] = result;
-                                                              _showList = JSON_CREATE_TIME_SORT_ASCE(_showList);
-                                                              cache.setChatItem(ChatModel.fromJson(result));
-                                                              AppData.isMainActive = true;
-                                                              LOG('--------> add chat result [${result['id']}]');
-                                                            });
+                                                          chatRepo.addChatItem(addItem, targetUser).then((result) {
+                                                            AppData.isMainActive = true;
+                                                            // setState(() {
+                                                            //   showList[result['id']] = result;
+                                                            //   showList = JSON_CREATE_TIME_SORT_ASCE(showList);
+                                                            //   cache.setChatItem(ChatModel.fromJson(result));
+                                                            //   AppData.isMainActive = true;
+                                                            //   LOG('--------> add chat result [${result['id']}]');
+                                                            // });
                                                           });
                                                           widget.textController.text = '';
-                                                          _sendText = '';
-                                                          _imageData.clear();
+                                                          sendText = '';
+                                                          imageData.clear();
                                                         },
                                                         style: ButtonStyle(
                                                           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -378,8 +381,8 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                                           // paste..
                                           ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
                                           if (cdata != null) {
-                                            _sendText = cdata.text.toString();
-                                            widget.textController.text = _sendText;
+                                            sendText = cdata.text.toString();
+                                            widget.textController.text = sendText;
                                           }
                                         },
                                         child: Icon(Icons.paste, size: _iconSize, color: Theme.of(context).primaryColor.withOpacity(0.5)),
@@ -397,17 +400,20 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
   }
 
   addSendImages(BuildContext context) async {
+    if (AppData.isMainActive) return;
     AppData.isMainActive = false;
-    _imageData.clear();
+    imageData.clear();
     List<XFile>? imageList = await ImagePicker().pickMultiImage();
     if (LIST_NOT_EMPTY(imageList)) {
       showLoadingDialog(context, 'Processing now...'.tr);
       for (var i = 0; i < imageList.length; i++) {
         var image = imageList[i];
-        var imageData = await ReadFileByte(image.path);
-        var thumbData = await resizeImage(imageData!.buffer.asUint8List(), 256) as Uint8List;
-        var key = Uuid().v1();
-        _imageData[key] = {'id': key, 'data': imageData, 'thumb': thumbData};
+        var data = await ReadFileByte(image.path);
+        if (data != null) {
+          var thumbData = await resizeImage(data.buffer.asUint8List(), 256) as Uint8List;
+          var key = Uuid().v1();
+          imageData[key] = {'id': key, 'data': data, 'thumb': thumbData};
+        }
       }
       Navigator.of(dialogContext!).pop();
       refreshImageData();
@@ -426,129 +432,195 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
   }
 }
 
-class MessageItem extends StatefulWidget {
-  MessageItem(this.messageItem, {Key? key}) : super(key: key);
+class ChatItem extends StatefulWidget {
+  ChatItem(this.messageItem, {Key? key, this.isShowInfo = true}) : super(key: key);
   JSON messageItem;
+  bool isShowInfo;
 
   @override
-  MessageItemState createState() => MessageItemState();
+  ChatItemState createState() => ChatItemState();
 }
 
-class MessageItemState extends State<MessageItem> {
+class ChatItemState extends State<ChatItem> {
   // final _descStyle = TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w400);
   // final _timeStyle = TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.5), fontWeight: FontWeight.w400);
   final api = Get.find<ApiService>();
-  final _radiusSize = 18.0;
+  final _radiusSize = 12.0;
   final _imageSize = 80.0;
+  final _faceSize = 40.0;
   final JSON _imageData = {};
   var _isOwner = true;
 
-  @override
-  void initState() {
+  init() {
     _isOwner = CheckOwner(widget.messageItem['senderId']);
     if (LIST_NOT_EMPTY(widget.messageItem['thumbData'])) {
+      LOG("--> thumbData : ${widget.messageItem['thumbData']}");
       widget.messageItem['thumbData'].forEach((item) {
+        LOG("--> thumbData item : $item");
         var index = widget.messageItem['thumbData'].indexOf(item);
         var key = Uuid().v1();
         _imageData[key] = {'id': key, 'url': item};
         if (widget.messageItem['picData'][index] != null) {
-          _imageData[key]['linkPic'] = widget.messageItem['data'][index];
+          _imageData[key]['linkPic'] = widget.messageItem['picData'][index];
         }
       });
     }
-    LOG("--> _imageData : $_imageData / ${widget.messageItem}");
+    LOG("--> initState : $_isOwner / ${widget.messageItem}");
+  }
+
+  @override
+  void initState() {
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    init();
     return GestureDetector(
         onTap: () {
           // TODO: 메시지 터치했을경우 처리 필요.. (삭제/수정등)
         },
-        child: VisibilityDetector(
-          onVisibilityChanged: (value) {
-            if (STR(widget.messageItem['openTime']).isEmpty) {
-              widget.messageItem['openTime'] = CURRENT_SERVER_TIME();
-              api.setChatInfo(widget.messageItem['id'], {
-                'openTime': widget.messageItem['openTime'],
-              });
-            }
-          },
-          key: GlobalKey(),
-          child: Row(
-            children: [
-              if (_isOwner)
-                Expanded(child: SizedBox(height: 1)),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal:20, vertical:10),
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: Container(
-                      padding: EdgeInsets.fromLTRB(15, 10, 15, 5),
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _isOwner ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.inversePrimary,
-                        borderRadius:  BorderRadius.only(
-                          topLeft:     Radius.circular(_radiusSize),
-                          topRight:    Radius.circular(_radiusSize),
-                          bottomLeft:  Radius.circular(_isOwner ? _radiusSize : 0),
-                          bottomRight: Radius.circular(_isOwner ? 0 : _radiusSize),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.35),
-                            spreadRadius: 0,
-                            blurRadius: 3,
-                            offset: Offset(0, 2), // changes position of shadow
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                          crossAxisAlignment: _isOwner ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                          children: [
-                            if (_imageData.isNotEmpty)...[
-                              Container(
-                                width: _imageData.length * _imageSize,
-                                child: CardScrollViewer(
-                                  _imageData,
-                                  itemWidth: _imageSize,
-                                  itemHeight: _imageSize,
-                                  itemRound: 3,
-                                  sidePadding: 0,
-                                  backgroundPadding: EdgeInsets.zero,
-                                  onActionCallback: (key, status) {
-                                    LOG('--> onActionCallback : $key / $status');
-                                  },
-                                ),
-                              ),
-                              SizedBox(height: 5),
-                            ],
-                            Text(DESC(widget.messageItem['desc']), maxLines: null, style: Theme.of(context).textTheme.bodyText2),
+        child: Container(
+            padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE_ES, 0, UI_HORIZONTAL_SPACE_ES, 5),
+            child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (_isOwner)
+                    Expanded(child: SizedBox(height: 1)),
+                  if (!_isOwner)...[
+                    if (widget.isShowInfo)
+                      showUserPic(context),
+                    SizedBox(width: widget.isShowInfo ? 5 : _faceSize + 5),
+                  ],
+                  FittedBox(
+                    fit: BoxFit.cover,
+                    child: Column(
+                        crossAxisAlignment: _isOwner ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        children: [
+                          if (widget.isShowInfo)...[
+                            Text(STR(widget.messageItem['senderName']), style: ItemChatNameStyle(context, _isOwner)),
                             SizedBox(height: 5),
-                            FittedBox(
-                                child: Row(
-                                  children: [
-                                    Text(SERVER_TIME_STR(widget.messageItem['createTime']), style: Theme.of(context).textTheme.bodySmall),
-                                    if (!_isOwner && STR(widget.messageItem['openTime']).isNotEmpty)...[
-                                      SizedBox(width: 5),
-                                      Text('READ'.tr, style: ItemDescEx2Style(context))
-                                    ]
-                                  ],
-                                )
-                            )
-                          ]
-                      )
+                          ],
+                          Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                if (_isOwner)...[
+                                  Row(
+                                    children: [
+                                      if (STR(widget.messageItem['openTime']).isNotEmpty)...[
+                                        Text('READ'.tr, style: ItemChatReadStyle(context)),
+                                        SizedBox(width: 5),
+                                      ],
+                                      Text(SERVER_TIME_STR(widget.messageItem['createTime'], true), style: ItemChatTimeStyle(context)),
+                                      SizedBox(width: 10),
+                                    ],
+                                  )
+                                ],
+                                Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                    constraints: BoxConstraints(
+                                      maxWidth: MediaQuery.of(context).size.width * 0.65,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _isOwner ? Theme.of(context).colorScheme.inversePrimary : Theme.of(context).colorScheme.secondaryContainer,
+                                      borderRadius:  BorderRadius.only(
+                                        topLeft:     Radius.circular(_isOwner ? _radiusSize : 0),
+                                        topRight:    Radius.circular(_isOwner ? 0 : _radiusSize),
+                                        bottomLeft:  Radius.circular(_radiusSize),
+                                        bottomRight: Radius.circular(_radiusSize),
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.35),
+                                          spreadRadius: 0,
+                                          blurRadius: 3,
+                                          offset: Offset(0, 2), // changes position of shadow
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                        crossAxisAlignment: _isOwner ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                                        children: [
+                                          if (_imageData.isNotEmpty)...[
+                                            SizedBox(
+                                              width: _imageData.length * _imageSize,
+                                              child: CardScrollViewer(
+                                                _imageData,
+                                                itemWidth: _imageSize,
+                                                itemHeight: _imageSize,
+                                                itemRound: _radiusSize,
+                                                sidePadding: 0,
+                                                isImageExView: true,
+                                                backgroundPadding: EdgeInsets.zero,
+                                                onActionCallback: (key, status) {
+                                                  LOG('--> onActionCallback : $key / $status');
+                                                  showImageSlideDialog(context,
+                                                      List<String>.from(widget.messageItem['picData'].map((item) {
+                                                        LOG('--> imageData item : ${item.runtimeType} / $item');
+                                                        return item.runtimeType == String ? STR(item) : item['url'] ?? item['image'];
+                                                      }).toList()), 0, true);
+                                                },
+                                              ),
+                                            ),
+                                            SizedBox(height: 5),
+                                          ],
+                                          VisibilityDetector(
+                                            onVisibilityChanged: (value) {
+                                              if (!_isOwner && STR(widget.messageItem['openTime']).isEmpty) {
+                                                widget.messageItem['openTime'] = CURRENT_SERVER_TIME();
+                                                api.setChatInfo(widget.messageItem['id'], {
+                                                  'openTime': widget.messageItem['openTime'],
+                                                });
+                                              }
+                                            },
+                                            key: GlobalKey(),
+                                            child: Text(DESC(widget.messageItem['desc']), maxLines: null, style: Theme.of(context).textTheme.bodyText2),
+                                          ),
+                                        ]
+                                    )
+                                ),
+                                if (!_isOwner)...[
+                                  Row(
+                                    children: [
+                                      SizedBox(width: 10),
+                                      Text(SERVER_TIME_STR(widget.messageItem['createTime'], true), style: ItemChatTimeStyle(context)),
+                                      if (STR(widget.messageItem['openTime']).isNotEmpty)...[
+                                        SizedBox(width: 5),
+                                        Text('READ'.tr, style: ItemChatReadStyle(context))
+                                      ]
+                                    ],
+                                  )
+                                ],
+                              ]
+                          )
+                        ]
+                    ),
                   ),
-                ),
-              ),
-              if (!_isOwner)
-                Expanded(child: SizedBox(height: 1)),
-            ]
+                  if (_isOwner)...[
+                    SizedBox(width: widget.isShowInfo ? 5 : _faceSize + 5),
+                    if (widget.isShowInfo)
+                      showUserPic(context),
+                  ],
+                ]
+            )
         )
-      )
+    );
+  }
+
+  showUserPic(context) {
+    return Container(
+      width:  _faceSize,
+      height: _faceSize,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(100)),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withOpacity(0.8),
+          width: 2,
+        ),
+      ),
+      child: ClipOval(
+        child: showImageFit(widget.messageItem['senderPic']),
+      ),
     );
   }
 }

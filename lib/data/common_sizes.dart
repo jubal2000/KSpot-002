@@ -21,6 +21,7 @@ const double UI_AUTH_ITEM_SPACE = 10.0;
 const double UI_SETTING_HORIZONTAL_SPACE = 16.0;
 const double UI_HORIZONTAL_SPACE = 10.0;
 const double UI_HORIZONTAL_SPACE_S = 8.0;
+const double UI_HORIZONTAL_SPACE_ES = 5.0;
 const double UI_HORIZONTAL_SPACE_M = 24.0;
 const double UI_HORIZONTAL_SPACE_L = 32.0;
 const double UI_VERTICAL_SPACE = 40.0;

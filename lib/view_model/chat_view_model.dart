@@ -43,11 +43,10 @@ class ChatViewModel extends ChangeNotifier {
   List<ChatTabScreen> tabList = [];
   List<GlobalKey> tabKeyList = [];
 
-  init(context) async {
+  init(context) {
     buildContext = context;
     initMessageTab();
-    cache.chatRoomData = await chatRepo.getChatRoomData();
-    return true;
+    getChatStreamData();
   }
 
   initMessageTab() {
@@ -67,7 +66,8 @@ class ChatViewModel extends ChangeNotifier {
     stream ??= chatRepo.getChatStreamData();
   }
 
-  Future<List<ChatGroupItem>> refreshShowList() async {
+  refreshShowList() {
+    LOG('--> refreshShowList');
     List<ChatGroupItem> showList = [];
     JSON descList = {};
     JSON unOpenCount = {};
@@ -77,20 +77,28 @@ class ChatViewModel extends ChangeNotifier {
         final targetId = item.value.roomId;
         var desc = descList[targetId];
         if (desc == null || DateTime.parse(desc.updateTime).isBefore(DateTime.parse(item.value.updateTime))) {
-          descList[targetId] = item.value.desc;
-          LOG('--> descList item add [$targetId] : ${item.value.desc}');
+          descList[targetId] = item.value;
+          // LOG('--> descList item add [$targetId] : ${item.value}');
         }
-        var open = unOpenCount[targetId];
-        if (open == null) {
-          unOpenCount[targetId] = 0;
+        if (STR(item.value.openTime).isEmpty) {
+          var open = unOpenCount[targetId];
+          LOG('--> unOpenCount add [$targetId] : ${item.value.openTime} => ${open == null}');
+          if (open == null) {
+            unOpenCount[targetId] = 0;
+          }
+          unOpenCount[targetId]++;
+          LOG('--> unOpenCount [$targetId] : ${unOpenCount[targetId]}');
         }
       }
     }
     // create group..
     for (var item in cache.chatRoomData.entries) {
       if (item.value.type == currentTab) {
-        item.value.lastMessage = descList[item.value.id] ?? '';
-        LOG('--> cache.chatRoomData item : ${item.value.memberData.length} / ${item.value.lastMessage}');
+        if (descList[item.value.id] != null) {
+          item.value.lastMessage = descList[item.value.id].desc ?? '';
+        }
+        // LOG('--> cache.chatRoomData item : ${descList.length} / ${item.value.lastMessage}');
+        LOG('--> ChatGroupItem [${item.key}] : ${unOpenCount[item.key]}');
         var addGroup = ChatGroupItem(item.value, unOpenCount: unOpenCount[item.key] ?? 0, onSelected: (key) {
           Get.to(() => ChattingTalkScreen(item.value))!.then((_) {
             notifyListeners();
@@ -100,6 +108,7 @@ class ChatViewModel extends ChangeNotifier {
       }
     }
     // sort date..
+    LOG('--> showList : ${showList.length}');
     return sortDataCreateTimeDesc(showList);
   }
 
@@ -120,7 +129,7 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   onSnapshotAction(snapshot) async {
-    LOG('--> showItemList : ${snapshot.hasError} / ${snapshot.connectionState}');
+    LOG('--> onSnapshotAction : ${snapshot.hasError} / ${snapshot.connectionState}');
     if (snapshot.hasError) {
       return Center(
         child: Text('Unable to get data'.tr));
@@ -156,56 +165,16 @@ class ChatViewModel extends ChangeNotifier {
 
   showMainList(layout, snapshot) {
     onSnapshotAction(snapshot);
-    if (currentTab == 0) {
-      return FutureBuilder(
-        future: refreshShowList(),
-        builder: (context, snapshot) {
-          LOG('--> snapshot.hasData : ${snapshot.hasData}');
-          if (snapshot.hasData) {
-            mainShowList = snapshot.data!;
-            return Container(
-                padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                child: ListView(
-                    shrinkWrap: true,
-                    children: [
-                      SizedBox(height: 10),
-                      ...mainShowList,
-                      SizedBox(height: UI_BOTTOM_HEIGHT + 20),
-                    ]
-                )
-            );
-          } else {
-            return Center(
-              child: Text('No message'.tr),
-            );
-          }
-        }
-      );
-    } else {
-      return FutureBuilder(
-        future: refreshShowList(),
-        builder: (context, snapshot) {
-          LOG('--> snapshot.hasData : ${snapshot.hasData}');
-          if (snapshot.hasData) {
-            mainShowList = snapshot.data!;
-            return Container(
-                padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                child: ListView(
-                    shrinkWrap: true,
-                    children: [
-                      SizedBox(height: 10),
-                      ...mainShowList,
-                      SizedBox(height: UI_BOTTOM_HEIGHT + 20),
-                    ]
-                )
-            );
-          } else {
-            return Center(
-              child: Text('No message'.tr),
-            );
-          }
-        }
-      );
-    }
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          SizedBox(height: 10),
+          ...refreshShowList(),
+          SizedBox(height: UI_BOTTOM_HEIGHT + 20),
+        ]
+      )
+    );
   }
 }

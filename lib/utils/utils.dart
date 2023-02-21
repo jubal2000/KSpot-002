@@ -288,6 +288,11 @@ CURRENT_SERVER_TIME() {
 }
 
 // ignore: non_constant_identifier_names
+CURRENT_TEXT_TIME() {
+  return DateTime.now().toString();
+}
+
+// ignore: non_constant_identifier_names
 OFFSET_CURRENT_SERVER_TIME(Duration duration) {
   var now = DateTime.now();
   Timestamp currentTime = Timestamp.fromDate(DateTime(now.year, now.month, now.day).add(duration));
@@ -385,7 +390,7 @@ CURRENCY_SELECT_LIST() {
 
 // ignore: non_constant_identifier_names
 JSON_START_DAY_SORT_DESC(JSON data) {
-  LOG("--> JSON_START_DAY_SORT_DESC : ${data.length}");
+  // LOG("--> JSON_START_DAY_SORT_DESC : ${data.length}");
   if (JSON_EMPTY(data)) return {};
   if (data.length < 2) return data;
   return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
@@ -396,12 +401,12 @@ JSON_START_DAY_SORT_DESC(JSON data) {
 
 // ignore: non_constant_identifier_names
 JSON_CREATE_TIME_SORT_DESC(JSON data) {
-  LOG("--> JSON_CREATE_TIME_SORT_DESC : ${data.length}");
+  // LOG("--> JSON_CREATE_TIME_SORT_DESC : ${data.length}");
   try {
   if (JSON_EMPTY(data)) return JSON.from({});
   if (data.length < 2) return data;
   return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
-    LOG("--> check : ${data[a]['createTime']}");
+    // LOG("--> check : ${data[a]['createTime']}");
     return data[a]['createTime'] != null && data[b]['createTime'] != null ?
     DateTime.parse(data[a]['createTime']).isBefore(DateTime.parse(data[b]['createTime'])) ? -1 : 1 : 1;
   }));
@@ -412,7 +417,7 @@ JSON_CREATE_TIME_SORT_DESC(JSON data) {
 
 // ignore: non_constant_identifier_names
 JSON_UPDATE_TIME_SORT_DESC(JSON data) {
-  LOG("--> JSON_UPDATE_TIME_SORT_DESC : ${data.length}");
+  // LOG("--> JSON_UPDATE_TIME_SORT_DESC : ${data.length}");
   if (JSON_EMPTY(data)) return JSON.from({});
   if (data.length < 2) return data;
   return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
@@ -428,7 +433,7 @@ JSON_CREATE_TIME_SORT_ASCE(JSON data) {
   if (JSON_EMPTY(data)) return JSON.from({});
   if (data.length < 2) return data;
   return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
-    // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
+    // LOG("--> check : ${data[a]['createTime']} > ${data[b]['createTime']}");
     return data[a]['createTime'] != null && data[b]['createTime'] != null ?
     DateTime.parse(data[a]['createTime']).isBefore(DateTime.parse(data[b]['createTime'])) ? -1 : 1 : 1;
     // data[a]['createTime']['_seconds'] > data[b]['createTime']['_seconds'] ? 1 : -1 : 1;
@@ -436,8 +441,21 @@ JSON_CREATE_TIME_SORT_ASCE(JSON data) {
 }
 
 // ignore: non_constant_identifier_names
+JSON_TIME_STR_SORT_ASCE(JSON data) {
+  // LOG("--> JSON_CREATE_TIME_SORT_DESC : $data");
+  if (JSON_EMPTY(data)) return JSON.from({});
+  if (data.length < 2) return data;
+  return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
+    // LOG("--> check : ${data[a]['createTime']['_seconds']} > ${data[b]['createTime']['_seconds']}");
+    return data[a]['createTime'] != null && data[b]['createTime'] != null ?
+    data[a]['createTime'] < data[b]['createTime'] ? -1 : 1 : 1;
+    // data[a]['createTime']['_seconds'] > data[b]['createTime']['_seconds'] ? 1 : -1 : 1;
+  }));
+}
+
+// ignore: non_constant_identifier_names
 JSON_TARGET_DATE_SORT_ASCE(JSON data) {
-  LOG("--> JSON_TARGET_DATE_SORT_ASCE : $data");
+  // LOG("--> JSON_TARGET_DATE_SORT_ASCE : $data");
   try {
     if (JSON_EMPTY(data)) return JSON.from({});
     if (data.length < 2) return data;

@@ -70,7 +70,9 @@ SET_SERVER_TIME_ALL_ITEM(data) {
 // ignore: non_constant_identifier_names
 SET_SERVER_TIME(timestamp) {
   if (timestamp is Timestamp) {
-    return DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000).toString(); // fix for jsonSerialize
+    // return DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000).toString(); // fix for jsonSerialize
+    // LOG('--> timestamp : ${timestamp.toString()} => ${timestamp.toDate().toString()}');
+    return timestamp.toDate().toString();
     // return {
     //   '_seconds': timestamp.seconds,
     //   '_nanoseconds': timestamp.nanoseconds,
@@ -1893,7 +1895,7 @@ class ApiService extends GetxService {
     var ref = firestore!.collection(ChatCollection)
         .where('status'  , isEqualTo: 1)
         .where('roomId', isEqualTo: roomId)
-        .orderBy('updateTime', descending: true);
+        .orderBy('createTime', descending: false);
 
     return ref.snapshots().listen((QuerySnapshot querySnapshot) {
       for (var doc in querySnapshot.docs) {

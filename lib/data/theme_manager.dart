@@ -453,6 +453,18 @@ ItemDescAlertStyle(BuildContext context) {
   return TextStyle(fontSize: 14, color: Theme.of(context).errorColor);
 }
 
+ItemChatNameStyle(BuildContext context, [bool isOwner = false]) {
+  return TextStyle(fontSize: 14, color: isOwner ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.tertiary, fontWeight: FontWeight.w600);
+}
+
+ItemChatTimeStyle(BuildContext context) {
+  return TextStyle(fontSize: 10, color: Theme.of(context).hintColor, fontWeight: FontWeight.w600);
+}
+
+ItemChatReadStyle(BuildContext context) {
+  return TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.secondary, fontWeight: FontWeight.w400);
+}
+
 ItemDescAlertSmallStyle(BuildContext context) {
   return TextStyle(fontSize: 12, color: Theme.of(context).errorColor);
 }

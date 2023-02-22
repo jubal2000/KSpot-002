@@ -16,6 +16,7 @@ import '../../services/cache_service.dart';
 import '../../utils/local_utils.dart';
 import '../../utils/utils.dart';
 import '../../widget/card_scroll_viewer.dart';
+import '../../widget/chat_item.dart';
 
 class MessageTalkScreen extends StatefulWidget {
   MessageTalkScreen(this.targetId, this.targetName, this.targetPic, {Key? key}) : super(key: key);
@@ -26,6 +27,8 @@ class MessageTalkScreen extends StatefulWidget {
 
   final textController   = TextEditingController();
   final scrollController = ScrollController();
+
+  JSON chatItemData = {};
 
   @override
   MessageTalkScreenState createState() => MessageTalkScreenState();
@@ -42,95 +45,44 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
   final _iconSize         = 24.0;
   final _imageMax         = 3;
 
-  String _sendText = '';
-  JSON _addItem = {};
+  var  sendText = '';
   JSON _targetUser = {};
-  JSON _showList = {};
+  JSON showList = {};
   JSON _imageData = {};
 
   initData() {
-    _showList = {};
+    showList = {};
     if (JSON_NOT_EMPTY(cache.messageData)) {
       for (var item in cache.messageData!.entries) {
-        _showList[item.key] = item.value.toJson();
+        showList[item.key] = item.value.toJson();
       }
     }
-    LOG('--> initData :${_showList.length}');
+    LOG('--> initData :${showList.length}');
     msgRepo.startMessageStreamData(widget.targetId, (result) {
       if (mounted) {
-        _showList.addAll(result);
-        if (_showList.isNotEmpty) {
+        showList.addAll(result);
+        if (showList.isNotEmpty) {
           setState(() {
-            _showList = JSON_CREATE_TIME_SORT_ASCE(_showList);
+            showList = JSON_CREATE_TIME_SORT_ASCE(showList);
             AppData.isMainActive = true;
-            var lastItem = _showList.entries.last.value as JSON;
+            var lastItem = showList.entries.last.value as JSON;
             var lastKey = widget.targetId;
             AppData.messageReadLog[lastKey] = {'id': lastKey, 'lastId': lastItem['id'], 'createTime': SERVER_TIME_STR(lastItem['createTime'])};
             AppData.localInfo['messageReadLog'] = {};
             AppData.localInfo['messageReadLog'].addAll(AppData.messageReadLog);
-            LOG('--> startMessageStream result : ${_showList.length}');
+            LOG('--> startMessageStream result : ${showList.length}');
             writeLocalInfo();
-            _showList.forEach((key, value) async {
-              LOG('--> _showList item : ${CheckOwner(value['senderId'])} / ${value['senderId']} / ${STR(value['openTime'])}');
-              if (!CheckOwner(value['senderId']) && STR(value['openTime']).isEmpty) {
-                await api.setMessageInfo(key, {
-                  'openTime': CURRENT_SERVER_TIME(),
-                });
-              }
-            });
+            // _showList.forEach((key, value) async {
+            //   if (!CheckOwner(value['senderId']) && STR(value['openTime']).isEmpty) {
+            //     await api.setMessageInfo(key, {
+            //       'openTime': CURRENT_SERVER_TIME(),
+            //     });
+            //   }
+            // });
           });
         }
       }
     });
-  }
-
-  createAddItem() {
-    _addItem = {
-      "status":     1,
-      "senderId":   STR(AppData.USER_ID),
-      "senderName": STR(AppData.USER_NICKNAME),
-      "senderPic":  STR(AppData.USER_PIC),
-      "targetId":   widget.targetId,
-      "targetName": widget.targetName,
-      "targetPic":  widget.targetPic,
-      "imageData":  [],
-      "desc": "",
-    };
-    // switch (widget.tabIndex) {
-    //   case 0:
-    //     _addItem = {
-    //       "status":     1,
-    //       "senderId":   STR(AppData.USER_ID),
-    //       "senderName": STR(AppData.USER_NICKNAME),
-    //       "senderPic":  STR(AppData.USER_PIC),
-    //       "targetId":   widget.targetId,
-    //       "targetName": widget.targetName,
-    //       "targetPic":  widget.targetPic,
-    //       "imageData":  [],
-    //       "desc": "",
-    //     };
-    //     break;
-    //   default:
-    //     _addItem = {
-    //       "status":       1,
-    //       "userId":       STR(AppData.USER_ID),
-    //       "userName":     STR(AppData.USER_NICKNAME),
-    //       "userPic":      STR(AppData.USER_PIC),
-    //       "parentId":     widget.messageList.first['id'],
-    //       "targetId":     widget.messageList.first['targetId'],
-    //       "targetTitle":  widget.messageList.first['targetTitle'],
-    //       "targetType":   widget.messageList.first['targetType'],
-    //       "imageData":    [],
-    //       "desc": "",
-    //     };
-    // }
-  }
-
-  refresh(JSON pushData) {
-    // LOG('--> MessageItemListState refresh : $pushData / $mounted');
-    // setState(() {
-    //   refreshList();
-    // });
   }
 
   refreshList() {
@@ -139,6 +91,33 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
         widget.scrollController.jumpTo(0);
       });
     });
+  }
+
+  showMessageList() {
+    List<Widget> result = [];
+    var parentId = '';
+    // showList = JSON_CREATE_TIME_SORT_ASCE(showList);
+    for (var i=0; i<showList.length; i++) {
+      var isShowDate = true;
+      var item = showList.entries.elementAt(i);
+      if (i+1 < showList.length) {
+        var nextItem = showList.entries.elementAt(i+1);
+        isShowDate = item.value['senderId'] != nextItem.value['senderId'];
+      }
+      var addItem = widget.chatItemData[item.key];
+      addItem ??= ChatItem(item.value, isShowFace: parentId != item.value['senderId'], isShowDate: isShowDate,
+        onSelected: (key, status) {
+
+        }, onSetOpened: (message) {
+          api.setMessageInfo(message['id'], {
+            'openList': message['openList'],
+          });
+        });
+      result.add(addItem);
+      widget.chatItemData[item.key] = addItem;
+      parentId = item.value['senderId'];
+    }
+    return result;
   }
 
   getUserInfo() async {
@@ -200,8 +179,8 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                       controller: widget.scrollController,
                                       child: Column(
                                         children: [
-                                          for (var item in _showList.entries)
-                                            MessageItem(item.value),
+                                          SizedBox(height: 10),
+                                          ...showMessageList(),
                                           SizedBox(height: 10),
                                         ],
                                       )
@@ -260,7 +239,7 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                                       maxLength: 500,
                                                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Theme.of(context).primaryColor),
                                                       onChanged: (value) {
-                                                        _sendText = value;
+                                                        sendText = value;
                                                         widget.scrollController.jumpTo(0);
                                                       },
                                                     )
@@ -271,84 +250,55 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                                     padding: EdgeInsets.only(left: 10),
                                                     child: ElevatedButton(
                                                         onPressed: () async {
-                                                          if (!AppData.isMainActive || (_sendText.isEmpty && _imageData.isEmpty)) return;
+                                                          if (!AppData.isMainActive || (sendText.isEmpty && _imageData.isEmpty)) return;
                                                           if (_imageData.length >= _imageMax) {
                                                             showAlertDialog(context, 'Image'.tr,
                                                                 'You can\'t add any more'.tr, '${'Max'.tr}: $_imageMax', 'OK'.tr);
                                                             return;
                                                           }
                                                           AppData.isMainActive = false;
-                                                          createAddItem();
-                                                          _addItem['desc'] = _sendText;
-                                                          _addItem['picData'] = [];
-                                                          _addItem['thumbData'] = [];
-                                                          _addItem['createTime'] = CURRENT_SERVER_TIME();
+                                                          var addItem = {
+                                                            'id':         '',
+                                                            'status':     1,
+                                                            'senderId':   AppData.USER_ID,
+                                                            'senderName': AppData.USER_NICKNAME,
+                                                            'senderPic':  AppData.USER_PIC,
+                                                            'desc':       sendText,
+                                                            'memberList': [AppData.USER_ID, widget.targetId],
+                                                            'picData':    [],
+                                                            'thumbData':  [],
+                                                            'createTime': CURRENT_SERVER_TIME(),
+                                                          };
+                                                          addItem['desc'] = sendText;
+                                                          addItem['picData'] = [];
+                                                          addItem['thumbData'] = [];
+                                                          addItem['createTime'] = CURRENT_SERVER_TIME();
                                                           var upCount = 0;
                                                           for (var item in _imageData.entries) {
                                                             var result = await api.uploadImageData(item.value as JSON, 'message_img');
                                                             if (result != null) {
-                                                              _addItem['picData'].add(result);
+                                                              addItem['picData'] ??= [];
+                                                              addItem['picData'].add(result);
                                                               upCount++;
                                                             }
                                                           }
-                                                          LOG('----> upload image result : $upCount / ${_addItem['imageData']}');
+                                                          LOG('----> upload image result : $upCount / ${addItem['imageData']}');
                                                           upCount = 0;
                                                           for (var item in _imageData.entries) {
                                                             var result = await api.uploadImageData(
                                                                 {'id': item.key, 'data': item.value['thumb']}, 'message_img_p');
                                                             if (result != null) {
-                                                              _addItem['thumbData'].add(result);
+                                                              addItem['thumbData'] ??= '';
+                                                              addItem['thumbData'].add(result);
                                                               upCount++;
                                                             }
                                                           }
-                                                          LOG('----> upload thumb result : $upCount / ${_addItem['thumbData']}');
-                                                          api.addMessageItem(_addItem, _targetUser).then((result) {
-                                                            setState(() {
-                                                              _showList[result['id']] = result;
-                                                              _showList = JSON_CREATE_TIME_SORT_ASCE(_showList);
-                                                              cache.setMessageItem(MessageModel.fromJson(result));
-                                                              AppData.isMainActive = true;
-                                                              LOG('--------> add message result [${result['id']}]');
-                                                            });
+                                                          LOG('----> upload thumb result : $upCount / ${addItem['thumbData']}');
+                                                          api.addMessageItem(addItem, _targetUser).then((result) {
+                                                            AppData.isMainActive = true;
                                                           });
-
-                                                          // switch(widget.tabIndex) {
-                                                          //   case 0:
-                                                          //     api.addMessageItem(_addItem, _targetUser).then((result) {
-                                                          //       setState(() {
-                                                          //         _showList[result['id']] = result;
-                                                          //         _showList = JSON_CREATE_TIME_SORT_ASCE(_showList);
-                                                          //         AppData.messageData[result['id']] = result;
-                                                          //         AppData.isMainActive = true;
-                                                          //         LOG('--------> add message result [${result['id']}]');
-                                                          //       });
-                                                          //     });
-                                                          //     break;
-                                                          //   case 1:
-                                                          //     api.addCommentItem(_addItem, _targetUser).then((result) {
-                                                          //       setState(() {
-                                                          //         _showList[result['id']] = result;
-                                                          //         _showList = JSON_CREATE_TIME_SORT_ASCE(_showList);
-                                                          //         AppData.commentData[result['id']] = result;
-                                                          //         AppData.isMainActive = true;
-                                                          //         LOG('--------> add comment result [${result['id']}]');
-                                                          //       });
-                                                          //     });
-                                                          //     break;
-                                                          //   case 2:
-                                                          //     api.addQnAItem(_addItem, _targetUser).then((result) {
-                                                          //       setState(() {
-                                                          //         _showList[result['id']] = result;
-                                                          //         _showList = JSON_CREATE_TIME_SORT_ASCE(_showList);
-                                                          //         AppData.qnaData[result['id']] = result;
-                                                          //         AppData.isMainActive = true;
-                                                          //         LOG('--------> add qna result [${result['id']}]');
-                                                          //       });
-                                                          //     });
-                                                          //     break;
-                                                          // }
                                                           widget.textController.text = '';
-                                                          _sendText = '';
+                                                          sendText = '';
                                                           _imageData.clear();
                                                         },
                                                         style: ButtonStyle(
@@ -396,8 +346,8 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                           // paste..
                                           ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
                                           if (cdata != null) {
-                                            _sendText = cdata.text.toString();
-                                            widget.textController.text = _sendText;
+                                            sendText = cdata.text.toString();
+                                            widget.textController.text = sendText;
                                           }
                                         },
                                         child: Icon(Icons.paste, size: _iconSize, color: Theme.of(context).primaryColor.withOpacity(0.5)),
@@ -441,121 +391,5 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
   @override
   void dispose() {
     super.dispose();
-  }
-}
-
-class MessageItem extends StatefulWidget {
-  MessageItem(this.messageItem, {Key? key}) : super(key: key);
-  JSON messageItem;
-
-  @override
-  MessageItemState createState() => MessageItemState();
-}
-
-class MessageItemState extends State<MessageItem> {
-  // final _descStyle = TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w400);
-  // final _timeStyle = TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.5), fontWeight: FontWeight.w400);
-  final _radiusSize = 18.0;
-  final _imageSize = 80.0;
-  final JSON _imageData = {};
-  var _isOwner = true;
-
-  @override
-  void initState() {
-    _isOwner = widget.messageItem['senderId'] != null ?
-    CheckOwner(widget.messageItem['senderId']) : CheckOwner(widget.messageItem['userId']);
-    if (LIST_NOT_EMPTY(widget.messageItem['thumbData'])) {
-      widget.messageItem['thumbData'].forEach((item) {
-        var index = widget.messageItem['thumbData'].indexOf(item);
-        var key = Uuid().v1();
-        _imageData[key] = {'id': key, 'url': item};
-        if (widget.messageItem['picData'][index] != null) {
-          _imageData[key]['linkPic'] = widget.messageItem['data'][index];
-        }
-      });
-    }
-    LOG("--> _imageData : $_imageData / ${widget.messageItem}");
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-        onTap: () {
-          // TODO: 메시지 터치했을경우 처리 필요.. (삭제/수정등)
-        },
-        child: Row(
-            children: [
-              if (_isOwner)
-                Expanded(child: SizedBox(height: 1)),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal:20, vertical:10),
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: Container(
-                      padding: EdgeInsets.fromLTRB(15, 10, 15, 5),
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _isOwner ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.inversePrimary,
-                        borderRadius:  BorderRadius.only(
-                          topLeft:     Radius.circular(_radiusSize),
-                          topRight:    Radius.circular(_radiusSize),
-                          bottomLeft:  Radius.circular(_isOwner ? _radiusSize : 0),
-                          bottomRight: Radius.circular(_isOwner ? 0 : _radiusSize),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.35),
-                            spreadRadius: 0,
-                            blurRadius: 3,
-                            offset: Offset(0, 2), // changes position of shadow
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                          crossAxisAlignment: _isOwner ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                          children: [
-                            if (_imageData.isNotEmpty)...[
-                              Container(
-                                width: _imageData.length * _imageSize,
-                                child: CardScrollViewer(
-                                  _imageData,
-                                  itemWidth: _imageSize,
-                                  itemHeight: _imageSize,
-                                  itemRound: 3,
-                                  sidePadding: 0,
-                                  backgroundPadding: EdgeInsets.zero,
-                                  onActionCallback: (key, status) {
-                                    LOG('--> onActionCallback : $key / $status');
-                                  },
-                                ),
-                              ),
-                              SizedBox(height: 5),
-                            ],
-                            Text(DESC(widget.messageItem['desc']), maxLines: null, style: Theme.of(context).textTheme.bodyText2),
-                            SizedBox(height: 5),
-                            FittedBox(
-                                child: Row(
-                                  children: [
-                                    Text(SERVER_TIME_STR(widget.messageItem['createTime']), style: Theme.of(context).textTheme.bodySmall),
-                                    if (!_isOwner && STR(widget.messageItem['openTime']).isNotEmpty)...[
-                                      SizedBox(width: 5),
-                                      Text('READ'.tr, style: ItemDescEx2Style(context))
-                                    ]
-                                  ],
-                                )
-                            )
-                          ]
-                      )
-                  ),
-                ),
-              ),
-              if (!_isOwner)
-                Expanded(child: SizedBox(height: 1)),
-            ]
-        )
-    );
   }
 }

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:kspot_002/models/chat_model.dart';
 import 'package:kspot_002/models/message_model.dart';
 
 import '../data/app_data.dart';
@@ -40,11 +39,7 @@ class MessageRepository {
     stream = null;
   }
 
-  addRoomItem(ChatRoomModel room) async {
-    return await api.addRoomItem(room.toJson());
-  }
-
-  Future<String?> uploadImageInfo(JSON imageInfo, [String path = 'chat_room_img']) async {
+  Future<String?> uploadImageInfo(JSON imageInfo, [String path = 'message_img']) async {
     return await api.uploadImageData(imageInfo, path);
   }
 }

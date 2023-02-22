@@ -16,7 +16,9 @@ ChatModel _$ChatModelFromJson(Map<String, dynamic> json) => ChatModel(
       senderPic: json['senderPic'] as String,
       updateTime: json['updateTime'] as String,
       createTime: json['createTime'] as String,
-      openTime: json['openTime'] as String? ?? '',
+      openList: (json['openList'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       picData:
           (json['picData'] as List<dynamic>?)?.map((e) => e as String).toList(),
       thumbData: (json['thumbData'] as List<dynamic>?)
@@ -37,7 +39,7 @@ Map<String, dynamic> _$ChatModelToJson(ChatModel instance) => <String, dynamic>{
       'senderPic': instance.senderPic,
       'updateTime': instance.updateTime,
       'createTime': instance.createTime,
-      'openTime': instance.openTime,
+      'openList': instance.openList,
       'picData': instance.picData,
       'thumbData': instance.thumbData,
       'fileData': instance.fileData,

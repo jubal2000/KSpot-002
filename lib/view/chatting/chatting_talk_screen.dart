@@ -15,7 +15,6 @@ import '../../data/app_data.dart';
 import '../../data/dialogs.dart';
 import '../../data/theme_manager.dart';
 import '../../models/chat_model.dart';
-import '../../models/message_model.dart';
 import '../../repository/chat_repository.dart';
 import '../../repository/message_repository.dart';
 import '../../services/api_service.dart';
@@ -23,6 +22,7 @@ import '../../services/cache_service.dart';
 import '../../utils/local_utils.dart';
 import '../../utils/utils.dart';
 import '../../widget/card_scroll_viewer.dart';
+import '../../widget/chat_item.dart';
 
 class ChattingTalkScreen extends StatefulWidget {
   ChattingTalkScreen(this.roomInfo, {Key? key, this.roomTitle = ''}) : super(key: key);
@@ -64,29 +64,10 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
             var lastKey = widget.roomInfo.id;
             AppData.isMainActive = true;
             AppData.chatReadLog[lastKey] = {'id': lastKey, 'lastId': lastItem['id'], 'createTime': SERVER_TIME_STR(lastItem['createTime'])};
-            // AppData.localInfo['chatReadLog'] ??= {};
-            // AppData.localInfo['chatReadLog'].addAll(AppData.messageReadLog);
-            // LOG('--> startChatStreamData result : ${_showList.length}');
-            // writeLocalInfo();
-            // _showList.forEach((key, value) async {
-            //   LOG('--> _showList item : ${CheckOwner(value['id'])} / ${value['memberData']}');
-            //   if (STR(value['openTime']).isEmpty) {
-            //     await api.setChatInfo(key, {
-            //       'openTime': CURRENT_SERVER_TIME(),
-            //     });
-            //   }
-            // });
           });
         }
       }
     });
-  }
-
-  refresh(JSON pushData) {
-    // LOG('--> MessageItemListState refresh : $pushData / $mounted');
-    // setState(() {
-    //   refreshList();
-    // });
   }
 
   refreshList() {
@@ -123,9 +104,22 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
     List<Widget> result = [];
     var parentId = '';
     // showList = JSON_CREATE_TIME_SORT_ASCE(showList);
-    for (var item in showList.entries) {
+    for (var i=0; i<showList.length; i++) {
+      var isShowDate = true;
+      var item = showList.entries.elementAt(i);
+      if (i+1 < showList.length) {
+        var nextItem = showList.entries.elementAt(i+1);
+        isShowDate = item.value['senderId'] != nextItem.value['senderId'];
+      }
       var addItem = chatItemData[item.key];
-      addItem ??= ChatItem(item.value, isShowInfo: parentId != item.value['senderId']);
+      addItem ??= ChatItem(item.value, isShowFace: parentId != item.value['senderId'], isShowDate: isShowDate,
+        onSelected: (key, status) {
+
+        }, onSetOpened: (message) {
+          api.setChatInfo(message['id'], {
+            'openList': message['openList'],
+          });
+        });
       result.add(addItem);
       chatItemData[item.key] = addItem;
       parentId = item.value['senderId'];
@@ -285,6 +279,7 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                                                           }
                                                           AppData.isMainActive = false;
                                                           var addItem = {
+                                                            'id':         '',
                                                             'status':     1,
                                                             'roomId':     widget.roomInfo.id,
                                                             'senderId':   STR(AppData.USER_ID),
@@ -324,13 +319,6 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                                                           }
                                                           chatRepo.addChatItem(addItem, targetUser).then((result) {
                                                             AppData.isMainActive = true;
-                                                            // setState(() {
-                                                            //   showList[result['id']] = result;
-                                                            //   showList = JSON_CREATE_TIME_SORT_ASCE(showList);
-                                                            //   cache.setChatItem(ChatModel.fromJson(result));
-                                                            //   AppData.isMainActive = true;
-                                                            //   LOG('--------> add chat result [${result['id']}]');
-                                                            // });
                                                           });
                                                           widget.textController.text = '';
                                                           sendText = '';
@@ -432,195 +420,3 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
   }
 }
 
-class ChatItem extends StatefulWidget {
-  ChatItem(this.messageItem, {Key? key, this.isShowInfo = true}) : super(key: key);
-  JSON messageItem;
-  bool isShowInfo;
-
-  @override
-  ChatItemState createState() => ChatItemState();
-}
-
-class ChatItemState extends State<ChatItem> {
-  // final _descStyle = TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w400);
-  // final _timeStyle = TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.5), fontWeight: FontWeight.w400);
-  final api = Get.find<ApiService>();
-  final _radiusSize = 12.0;
-  final _imageSize = 80.0;
-  final _faceSize = 40.0;
-  final JSON _imageData = {};
-  var _isOwner = true;
-
-  init() {
-    _isOwner = CheckOwner(widget.messageItem['senderId']);
-    if (LIST_NOT_EMPTY(widget.messageItem['thumbData'])) {
-      LOG("--> thumbData : ${widget.messageItem['thumbData']}");
-      widget.messageItem['thumbData'].forEach((item) {
-        LOG("--> thumbData item : $item");
-        var index = widget.messageItem['thumbData'].indexOf(item);
-        var key = Uuid().v1();
-        _imageData[key] = {'id': key, 'url': item};
-        if (widget.messageItem['picData'][index] != null) {
-          _imageData[key]['linkPic'] = widget.messageItem['picData'][index];
-        }
-      });
-    }
-    LOG("--> initState : $_isOwner / ${widget.messageItem}");
-  }
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    init();
-    return GestureDetector(
-        onTap: () {
-          // TODO: 메시지 터치했을경우 처리 필요.. (삭제/수정등)
-        },
-        child: Container(
-            padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE_ES, 0, UI_HORIZONTAL_SPACE_ES, 5),
-            child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (_isOwner)
-                    Expanded(child: SizedBox(height: 1)),
-                  if (!_isOwner)...[
-                    if (widget.isShowInfo)
-                      showUserPic(context),
-                    SizedBox(width: widget.isShowInfo ? 5 : _faceSize + 5),
-                  ],
-                  FittedBox(
-                    fit: BoxFit.cover,
-                    child: Column(
-                        crossAxisAlignment: _isOwner ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                        children: [
-                          if (widget.isShowInfo)...[
-                            Text(STR(widget.messageItem['senderName']), style: ItemChatNameStyle(context, _isOwner)),
-                            SizedBox(height: 5),
-                          ],
-                          Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                if (_isOwner)...[
-                                  Row(
-                                    children: [
-                                      if (STR(widget.messageItem['openTime']).isNotEmpty)...[
-                                        Text('READ'.tr, style: ItemChatReadStyle(context)),
-                                        SizedBox(width: 5),
-                                      ],
-                                      Text(SERVER_TIME_STR(widget.messageItem['createTime'], true), style: ItemChatTimeStyle(context)),
-                                      SizedBox(width: 10),
-                                    ],
-                                  )
-                                ],
-                                Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                    constraints: BoxConstraints(
-                                      maxWidth: MediaQuery.of(context).size.width * 0.65,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: _isOwner ? Theme.of(context).colorScheme.inversePrimary : Theme.of(context).colorScheme.secondaryContainer,
-                                      borderRadius:  BorderRadius.only(
-                                        topLeft:     Radius.circular(_isOwner ? _radiusSize : 0),
-                                        topRight:    Radius.circular(_isOwner ? 0 : _radiusSize),
-                                        bottomLeft:  Radius.circular(_radiusSize),
-                                        bottomRight: Radius.circular(_radiusSize),
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.35),
-                                          spreadRadius: 0,
-                                          blurRadius: 3,
-                                          offset: Offset(0, 2), // changes position of shadow
-                                        ),
-                                      ],
-                                    ),
-                                    child: Column(
-                                        crossAxisAlignment: _isOwner ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                                        children: [
-                                          if (_imageData.isNotEmpty)...[
-                                            SizedBox(
-                                              width: _imageData.length * _imageSize,
-                                              child: CardScrollViewer(
-                                                _imageData,
-                                                itemWidth: _imageSize,
-                                                itemHeight: _imageSize,
-                                                itemRound: _radiusSize,
-                                                sidePadding: 0,
-                                                isImageExView: true,
-                                                backgroundPadding: EdgeInsets.zero,
-                                                onActionCallback: (key, status) {
-                                                  LOG('--> onActionCallback : $key / $status');
-                                                  showImageSlideDialog(context,
-                                                      List<String>.from(widget.messageItem['picData'].map((item) {
-                                                        LOG('--> imageData item : ${item.runtimeType} / $item');
-                                                        return item.runtimeType == String ? STR(item) : item['url'] ?? item['image'];
-                                                      }).toList()), 0, true);
-                                                },
-                                              ),
-                                            ),
-                                            SizedBox(height: 5),
-                                          ],
-                                          VisibilityDetector(
-                                            onVisibilityChanged: (value) {
-                                              if (!_isOwner && STR(widget.messageItem['openTime']).isEmpty) {
-                                                widget.messageItem['openTime'] = CURRENT_SERVER_TIME();
-                                                api.setChatInfo(widget.messageItem['id'], {
-                                                  'openTime': widget.messageItem['openTime'],
-                                                });
-                                              }
-                                            },
-                                            key: GlobalKey(),
-                                            child: Text(DESC(widget.messageItem['desc']), maxLines: null, style: Theme.of(context).textTheme.bodyText2),
-                                          ),
-                                        ]
-                                    )
-                                ),
-                                if (!_isOwner)...[
-                                  Row(
-                                    children: [
-                                      SizedBox(width: 10),
-                                      Text(SERVER_TIME_STR(widget.messageItem['createTime'], true), style: ItemChatTimeStyle(context)),
-                                      if (STR(widget.messageItem['openTime']).isNotEmpty)...[
-                                        SizedBox(width: 5),
-                                        Text('READ'.tr, style: ItemChatReadStyle(context))
-                                      ]
-                                    ],
-                                  )
-                                ],
-                              ]
-                          )
-                        ]
-                    ),
-                  ),
-                  if (_isOwner)...[
-                    SizedBox(width: widget.isShowInfo ? 5 : _faceSize + 5),
-                    if (widget.isShowInfo)
-                      showUserPic(context),
-                  ],
-                ]
-            )
-        )
-    );
-  }
-
-  showUserPic(context) {
-    return Container(
-      width:  _faceSize,
-      height: _faceSize,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(100)),
-        border: Border.all(
-          color: Theme.of(context).primaryColor.withOpacity(0.8),
-          width: 2,
-        ),
-      ),
-      child: ClipOval(
-        child: showImageFit(widget.messageItem['senderPic']),
-      ),
-    );
-  }
-}

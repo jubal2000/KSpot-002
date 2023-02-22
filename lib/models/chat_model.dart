@@ -16,9 +16,8 @@ class ChatModel {
   String  senderPic;
   String  updateTime;     // 수정 시간
   String  createTime;     // 생성 시간
-  @JsonKey(defaultValue: '')
-  String  openTime;       // 읽은 시간
 
+  List<String>? openList;
   List<String>? picData;
   List<String>? thumbData;
   List<String>? fileData;
@@ -33,8 +32,8 @@ class ChatModel {
     required this.senderPic,
     required this.updateTime,
     required this.createTime,
-    required this.openTime,
 
+    this.openList,
     this.picData,
     this.thumbData,
     this.fileData,

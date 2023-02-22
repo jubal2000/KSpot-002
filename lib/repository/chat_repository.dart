@@ -44,11 +44,18 @@ class ChatRepository {
     return await api.addChatItem(addItem, targetList);
   }
 
+  addRoomItem(ChatRoomModel room) async {
+    return await api.addRoomItem(room.toJson());
+  }
+
+  Future<String?> uploadImageInfo(JSON imageInfo, [String path = 'chat_room_img']) async {
+    return await api.uploadImageData(imageInfo, path);
+  }
+
   stopChatStreamData() {
     if (stream != null) {
       stream!.cancel();
     }
     stream = null;
   }
-
 }

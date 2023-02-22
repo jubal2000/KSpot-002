@@ -49,7 +49,7 @@ class MessageViewModel extends ChangeNotifier {
       if (CheckOwner(item.value.senderId)) {
         targetId = item.value.targetId;
       } else {
-        if (item.value.openTime.isEmpty) {
+        if (LIST_EMPTY(item.value.openTime) || item.value.openTime!.contains(AppData.USER_ID)) {
           unOpenCount[targetId]++;
         }
       }

@@ -13,6 +13,7 @@ import '../data/dialogs.dart';
 import '../data/theme_manager.dart';
 import '../models/etc_model.dart';
 import '../models/user_model.dart';
+import '../repository/chat_repository.dart';
 import '../repository/message_repository.dart';
 import '../repository/user_repository.dart';
 import '../services/cache_service.dart';
@@ -24,7 +25,7 @@ import '../widget/edit/edit_component_widget.dart';
 import '../widget/edit/edit_list_widget.dart';
 
 class ChatEditViewModel extends ChangeNotifier {
-  final repo      = MessageRepository();
+  final repo      = ChatRepository();
   final userRepo  = UserRepository();
   final imageGalleryKey = GlobalKey();
 

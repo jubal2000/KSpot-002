@@ -7,7 +7,6 @@ import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/widgets.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/models/etc_model.dart';
-import 'package:kspot_002/models/message_model.dart';
 import 'package:kspot_002/services/cache_service.dart';
 
 import '../../data/app_data.dart';

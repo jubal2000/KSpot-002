@@ -611,6 +611,11 @@ LIST_NOT_EMPTY(dynamic data) {
 }
 
 // ignore: non_constant_identifier_names
+LIST_IN_ITEM(dynamic data, dynamic item) {
+  return LIST_NOT_EMPTY(data) && data.contains(item);
+}
+
+// ignore: non_constant_identifier_names
 LIST_EMPTY(dynamic data) {
   if (data == null) return false;
   return !LIST_NOT_EMPTY(data);

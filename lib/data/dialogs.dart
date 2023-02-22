@@ -20,6 +20,7 @@ import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:uuid/uuid.dart';
 
+import '../models/chat_model.dart';
 import '../models/message_model.dart';
 import '../services/local_service.dart';
 import '../utils/address_utils.dart';

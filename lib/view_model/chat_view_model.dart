@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
-import 'package:kspot_002/models/message_model.dart';
 import 'package:kspot_002/view/chatting/chatting_edit_screen.dart';
 import 'package:kspot_002/view/message/message_group_item.dart';
 
@@ -80,9 +79,9 @@ class ChatViewModel extends ChangeNotifier {
           descList[targetId] = item.value;
           // LOG('--> descList item add [$targetId] : ${item.value}');
         }
-        if (STR(item.value.openTime).isEmpty) {
+        if (STR(item.value.openList).isEmpty) {
           var open = unOpenCount[targetId];
-          LOG('--> unOpenCount add [$targetId] : ${item.value.openTime} => ${open == null}');
+          LOG('--> unOpenCount add [$targetId] : ${item.value.openList} => ${open == null}');
           if (open == null) {
             unOpenCount[targetId] = 0;
           }

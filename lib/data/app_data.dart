@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import '../models/chat_model.dart';
 import '../models/etc_model.dart';
 import '../models/event_group_model.dart';
 import '../models/event_model.dart';

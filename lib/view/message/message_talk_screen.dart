@@ -17,6 +17,7 @@ import '../../utils/local_utils.dart';
 import '../../utils/utils.dart';
 import '../../widget/card_scroll_viewer.dart';
 import '../../widget/chat_item.dart';
+import '../../widget/message_item.dart';
 
 class MessageTalkScreen extends StatefulWidget {
   MessageTalkScreen(this.targetId, this.targetName, this.targetPic, {Key? key}) : super(key: key);
@@ -39,16 +40,13 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
   final msgRepo  = MessageRepository();
   final api      = Get.find<ApiService>();
   final cache    = Get.find<CacheService>();
-
-  final _formKey          = GlobalKey<FormState>();
-  final _minText          = 1;
-  final _iconSize         = 24.0;
-  final _imageMax         = 3;
+  final iconSize = 24.0;
+  final imageMax = 4;
 
   var  sendText = '';
-  JSON _targetUser = {};
+  JSON targetUser = {};
   JSON showList = {};
-  JSON _imageData = {};
+  JSON imageData = {};
 
   initData() {
     showList = {};
@@ -105,12 +103,12 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
         isShowDate = item.value['senderId'] != nextItem.value['senderId'];
       }
       var addItem = widget.chatItemData[item.key];
-      addItem ??= ChatItem(item.value, isShowFace: parentId != item.value['senderId'], isShowDate: isShowDate,
+      addItem ??= MessageItem(item.value, isShowFace: parentId != item.value['senderId'], isShowDate: isShowDate,
         onSelected: (key, status) {
 
         }, onSetOpened: (message) {
           api.setMessageInfo(message['id'], {
-            'openList': message['openList'],
+            'openTime': message['openTime'],
           });
         });
       result.add(addItem);
@@ -123,10 +121,10 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
   getUserInfo() async {
     var result = await userRepo.getUserInfo(widget.targetId);
     if (result != null) {
-      _targetUser = result.toJson();
+      targetUser = result.toJson();
     }
-    if (widget.targetName.isEmpty) widget.targetName = _targetUser['nickName'];
-    if (widget.targetPic.isEmpty ) widget.targetPic  = _targetUser['pic'];
+    if (widget.targetName.isEmpty) widget.targetName = targetUser['nickName'];
+    if (widget.targetPic.isEmpty ) widget.targetPic  = targetUser['pic'];
   }
 
   @override
@@ -189,17 +187,17 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                 Container(
                                     width: Get.width,
                                     constraints: BoxConstraints(
-                                      minHeight: _imageData.isEmpty ? 90 : 140,
+                                      minHeight: imageData.isEmpty ? 90 : 140,
                                     ),
                                     padding: EdgeInsets.all(10),
                                     color: Theme.of(context).canvasColor,
                                     child: Column(
                                         children: [
-                                          if (_imageData.isNotEmpty)...[
+                                          if (imageData.isNotEmpty)...[
                                             Row(
                                               children: [
                                                 ImageEditScrollViewer(
-                                                  _imageData,
+                                                  imageData,
                                                   itemWidth: 40.0,
                                                   itemHeight: 40.0,
                                                   isEditable: true,
@@ -207,7 +205,7 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                                   onActionCallback: (key, status) {
                                                     LOG('--> onActionCallback : $key / $status');
                                                     if (status == 2) {
-                                                      _imageData.remove(key);
+                                                      imageData.remove(key);
                                                       refreshImageData();
                                                     }
                                                   },
@@ -216,7 +214,7 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                                   onPressed: () {
                                                     showAlertDialog(context, 'Remove'.tr, 'Remove all images?'.tr, '', 'OK'.tr).then((result) {
                                                       if (result == 1) {
-                                                        _imageData.clear();
+                                                        imageData.clear();
                                                         refreshImageData();
                                                       }
                                                     });
@@ -250,10 +248,10 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                                     padding: EdgeInsets.only(left: 10),
                                                     child: ElevatedButton(
                                                         onPressed: () async {
-                                                          if (!AppData.isMainActive || (sendText.isEmpty && _imageData.isEmpty)) return;
-                                                          if (_imageData.length >= _imageMax) {
+                                                          if (!AppData.isMainActive || (sendText.isEmpty && imageData.isEmpty)) return;
+                                                          if (imageData.length >= imageMax) {
                                                             showAlertDialog(context, 'Image'.tr,
-                                                                'You can\'t add any more'.tr, '${'Max'.tr}: $_imageMax', 'OK'.tr);
+                                                                'You can\'t add any more'.tr, '${'Max'.tr}: $imageMax', 'OK'.tr);
                                                             return;
                                                           }
                                                           AppData.isMainActive = false;
@@ -274,7 +272,7 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                                           addItem['thumbData'] = [];
                                                           addItem['createTime'] = CURRENT_SERVER_TIME();
                                                           var upCount = 0;
-                                                          for (var item in _imageData.entries) {
+                                                          for (var item in imageData.entries) {
                                                             var result = await api.uploadImageData(item.value as JSON, 'message_img');
                                                             if (result != null) {
                                                               addItem['picData'] ??= [];
@@ -284,7 +282,7 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                                           }
                                                           LOG('----> upload image result : $upCount / ${addItem['imageData']}');
                                                           upCount = 0;
-                                                          for (var item in _imageData.entries) {
+                                                          for (var item in imageData.entries) {
                                                             var result = await api.uploadImageData(
                                                                 {'id': item.key, 'data': item.value['thumb']}, 'message_img_p');
                                                             if (result != null) {
@@ -294,12 +292,12 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                                             }
                                                           }
                                                           LOG('----> upload thumb result : $upCount / ${addItem['thumbData']}');
-                                                          api.addMessageItem(addItem, _targetUser).then((result) {
+                                                          api.addMessageItem(addItem, targetUser).then((result) {
                                                             AppData.isMainActive = true;
                                                           });
                                                           widget.textController.text = '';
                                                           sendText = '';
-                                                          _imageData.clear();
+                                                          imageData.clear();
                                                         },
                                                         style: ButtonStyle(
                                                           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -332,7 +330,7 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                         onTap: () {
                                           addSendImages(context);
                                         },
-                                        child: Icon(Icons.photo_library_outlined, size: _iconSize, color: Theme.of(context).primaryColor.withOpacity(0.5)),
+                                        child: Icon(Icons.photo_library_outlined, size: iconSize, color: Theme.of(context).primaryColor.withOpacity(0.5)),
                                       ),
                                       SizedBox(width: 15),
                                       // GestureDetector(
@@ -350,7 +348,7 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                             widget.textController.text = sendText;
                                           }
                                         },
-                                        child: Icon(Icons.paste, size: _iconSize, color: Theme.of(context).primaryColor.withOpacity(0.5)),
+                                        child: Icon(Icons.paste, size: iconSize, color: Theme.of(context).primaryColor.withOpacity(0.5)),
                                       ),
                                     ],
                                   )
@@ -366,16 +364,16 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
 
   addSendImages(BuildContext context) async {
     AppData.isMainActive = false;
-    _imageData.clear();
+    imageData.clear();
     List<XFile>? imageList = await ImagePicker().pickMultiImage();
     if (LIST_NOT_EMPTY(imageList)) {
       showLoadingDialog(context, 'Processing now...'.tr);
       for (var i = 0; i < imageList.length; i++) {
         var image = imageList[i];
-        var imageData = await ReadFileByte(image.path);
-        var thumbData = await resizeImage(imageData!.buffer.asUint8List(), 256) as Uint8List;
+        var data = await ReadFileByte(image.path);
+        var thumbData = await resizeImage(data!.buffer.asUint8List(), 256) as Uint8List;
         var key = Uuid().v1();
-        _imageData[key] = {'id': key, 'image': imageData, 'thumb': thumbData};
+        imageData[key] = {'id': key, 'data': data, 'thumb': thumbData};
       }
       Navigator.of(dialogContext!).pop();
       refreshImageData();

@@ -12,8 +12,8 @@ import '../services/api_service.dart';
 import '../utils/utils.dart';
 import 'card_scroll_viewer.dart';
 
-class ChatItem extends StatefulWidget {
-  ChatItem(this.messageItem,
+class MessageItem extends StatefulWidget {
+  MessageItem(this.messageItem,
       { Key? key, this.isShowFace = true, this.isShowDate = true, this.isChatMode = true,
         this.onSelected, this.onSetOpened }) : super(key: key);
   JSON messageItem;
@@ -24,10 +24,10 @@ class ChatItem extends StatefulWidget {
   Function(JSON)? onSetOpened;
 
   @override
-  ChatItemState createState() => ChatItemState();
+  MessageItemState createState() => MessageItemState();
 }
 
-class ChatItemState extends State<ChatItem> {
+class MessageItemState extends State<MessageItem> {
   final api = Get.find<ApiService>();
   final radiusSize = 12.0;
   final imageSize = 80.0;
@@ -50,10 +50,7 @@ class ChatItemState extends State<ChatItem> {
         }
       });
     }
-    if (isOwner && LIST_IN_ITEM(widget.messageItem['openList'], AppData.USER_ID)) {
-      isOpened = true;
-    }
-    if (!isOwner && LIST_IN_ITEM(widget.messageItem['openList'], STR(widget.messageItem['senderId']))) {
+    if (!isOwner && STR(widget.messageItem['openTime']).isNotEmpty) {
       isOpened = true;
     }
     LOG('--> initState : $isOwner / ${widget.messageItem} => $isOpened');
@@ -158,8 +155,7 @@ class ChatItemState extends State<ChatItem> {
                                           VisibilityDetector(
                                             onVisibilityChanged: (value) {
                                               if (value.visibleFraction > 0 && !isOwner && !isOpened) {
-                                                widget.messageItem['openList'] ??= [];
-                                                widget.messageItem['openList'].add(AppData.USER_ID);
+                                                widget.messageItem['openTime'] = CURRENT_SERVER_TIME();
                                                 if (widget.onSetOpened != null) widget.onSetOpened!(widget.messageItem);
                                               }
                                             },

@@ -1900,7 +1900,7 @@ class ApiService extends GetxService {
     return ref.snapshots().listen((QuerySnapshot querySnapshot) {
       for (var doc in querySnapshot.docs) {
         var item = FROM_SERVER_DATA(doc.data() as JSON);
-        LOG('--> listen item : $item');
+        LOG('--> startChatStreamData item : $item');
         result[item['id']] = item;
       }
       onChanged(result);

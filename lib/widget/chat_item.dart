@@ -14,9 +14,14 @@ import 'card_scroll_viewer.dart';
 
 class ChatItem extends StatefulWidget {
   ChatItem(this.messageItem,
-      { Key? key, this.isShowFace = true, this.isShowDate = true, this.isChatMode = true,
+      { Key? key,
+        this.openCount = 0, this.isOwner = false, this.isOpened = false,
+        this.isShowFace = true, this.isShowDate = true, this.isChatMode = true,
         this.onSelected, this.onSetOpened }) : super(key: key);
   JSON messageItem;
+  int  openCount;
+  bool isOwner;
+  bool isOpened;
   bool isShowFace;
   bool isShowDate;
   bool isChatMode;
@@ -33,11 +38,8 @@ class ChatItemState extends State<ChatItem> {
   final imageSize = 80.0;
   final faceSize = 40.0;
   final JSON imageData = {};
-  var isOwner  = true;
-  var isOpened = false;
 
   init() {
-    isOwner = CheckOwner(widget.messageItem['senderId']);
     if (LIST_NOT_EMPTY(widget.messageItem['thumbData'])) {
       LOG("--> thumbData : ${widget.messageItem['thumbData']}");
       widget.messageItem['thumbData'].forEach((item) {
@@ -50,13 +52,7 @@ class ChatItemState extends State<ChatItem> {
         }
       });
     }
-    if (isOwner && LIST_IN_ITEM(widget.messageItem['openList'], AppData.USER_ID)) {
-      isOpened = true;
-    }
-    if (!isOwner && LIST_IN_ITEM(widget.messageItem['openList'], STR(widget.messageItem['senderId']))) {
-      isOpened = true;
-    }
-    LOG('--> initState : $isOwner / ${widget.messageItem} => $isOpened');
+    LOG('--> ChatItemState init [${widget.messageItem['desc']}]: ${widget.isOwner} / ${widget.isOpened} / ${widget.openCount} => ${widget.messageItem['openList']}');
   }
 
   @override
@@ -76,9 +72,9 @@ class ChatItemState extends State<ChatItem> {
             child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (isOwner)
+                  if (widget.isOwner)
                     Expanded(child: SizedBox(height: 1)),
-                  if (!isOwner)...[
+                  if (!widget.isOwner)...[
                     if (widget.isShowFace)
                       showUserPic(context),
                     SizedBox(width: widget.isShowFace ? 5 : faceSize + 5),
@@ -86,26 +82,26 @@ class ChatItemState extends State<ChatItem> {
                   FittedBox(
                     fit: BoxFit.cover,
                     child: Column(
-                        crossAxisAlignment: isOwner ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        crossAxisAlignment: widget.isOwner ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                         children: [
                           if (widget.isShowFace)...[
-                            Text(STR(widget.messageItem['senderName']), style: ItemChatNameStyle(context, isOwner)),
+                            Text(STR(widget.messageItem['senderName']), style: ItemChatNameStyle(context, widget.isOwner)),
                             SizedBox(height: 5),
                           ],
                           Row(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                if (isOwner && widget.isShowDate)...[
-                                  Row(
-                                    children: [
-                                      if (isOpened)...[
-                                        Text('READ'.tr, style: ItemChatReadStyle(context)),
-                                        SizedBox(width: 5),
+                                if (widget.isOwner)...[
+                                  Text(widget.isOpened ? 'READ'.tr : '${widget.openCount} ${'READ'.tr}', style: ItemChatReadStyle(context, widget.isOpened)),
+                                  SizedBox(width: 5),
+                                  if (widget.isShowDate)...[
+                                    Row(
+                                      children: [
+                                        Text(SERVER_TIME_STR(widget.messageItem['createTime'], true), style: ItemChatTimeStyle(context)),
+                                        SizedBox(width: 10),
                                       ],
-                                      Text(SERVER_TIME_STR(widget.messageItem['createTime'], true), style: ItemChatTimeStyle(context)),
-                                      SizedBox(width: 10),
-                                    ],
-                                  )
+                                    )
+                                  ],
                                 ],
                                 Container(
                                     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -113,10 +109,10 @@ class ChatItemState extends State<ChatItem> {
                                       maxWidth: MediaQuery.of(context).size.width * 0.65,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: isOwner ? Theme.of(context).colorScheme.inversePrimary : Theme.of(context).colorScheme.secondaryContainer,
+                                      color: widget.isOwner ? Theme.of(context).colorScheme.inversePrimary : Theme.of(context).colorScheme.secondaryContainer,
                                       borderRadius:  BorderRadius.only(
-                                        topLeft:     Radius.circular(isOwner ? radiusSize : 0),
-                                        topRight:    Radius.circular(isOwner ? 0 : radiusSize),
+                                        topLeft:     Radius.circular(widget.isOwner ? radiusSize : 0),
+                                        topRight:    Radius.circular(widget.isOwner ? 0 : radiusSize),
                                         bottomLeft:  Radius.circular(radiusSize),
                                         bottomRight: Radius.circular(radiusSize),
                                       ),
@@ -130,7 +126,7 @@ class ChatItemState extends State<ChatItem> {
                                       ],
                                     ),
                                     child: Column(
-                                        crossAxisAlignment: isOwner ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                                        crossAxisAlignment: widget.isOwner ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                                         children: [
                                           if (imageData.isNotEmpty)...[
                                             SizedBox(
@@ -157,9 +153,12 @@ class ChatItemState extends State<ChatItem> {
                                           ],
                                           VisibilityDetector(
                                             onVisibilityChanged: (value) {
-                                              if (value.visibleFraction > 0 && !isOwner && !isOpened) {
+                                              if (value.visibleFraction > 0 && !widget.isOwner && !widget.isOpened) {
+                                                LOG('--> check opened : ${widget.messageItem['desc']} / ${widget.messageItem['openList']}');
                                                 widget.messageItem['openList'] ??= [];
-                                                widget.messageItem['openList'].add(AppData.USER_ID);
+                                                if (!widget.messageItem['openList'].contains(AppData.USER_ID)) {
+                                                  widget.messageItem['openList'].add(AppData.USER_ID);
+                                                }
                                                 if (widget.onSetOpened != null) widget.onSetOpened!(widget.messageItem);
                                               }
                                             },
@@ -169,15 +168,16 @@ class ChatItemState extends State<ChatItem> {
                                         ]
                                     )
                                 ),
-                                if (!isOwner && widget.isShowDate)...[
+                                if (!widget.isOwner)...[
                                   Row(
                                     children: [
-                                      SizedBox(width: 10),
-                                      Text(SERVER_TIME_STR(widget.messageItem['createTime'], true), style: ItemChatTimeStyle(context)),
-                                      if (isOpened)...[
+                                      SizedBox(width: 5),
+                                      if (widget.isShowDate)...[
                                         SizedBox(width: 5),
-                                        Text('READ'.tr, style: ItemChatReadStyle(context))
-                                      ]
+                                        Text(SERVER_TIME_STR(widget.messageItem['createTime'], true), style: ItemChatTimeStyle(context)),
+                                      ],
+                                      SizedBox(width: 5),
+                                      Text(widget.isOpened ? 'READ'.tr : '${'READ'.tr} ${widget.openCount}', style: ItemChatReadStyle(context, widget.isOpened)),
                                     ],
                                   )
                                 ],
@@ -186,7 +186,7 @@ class ChatItemState extends State<ChatItem> {
                         ]
                     ),
                   ),
-                  if (isOwner)...[
+                  if (widget.isOwner)...[
                     SizedBox(width: widget.isShowFace ? 5 : faceSize + 5),
                     if (widget.isShowFace)
                       showUserPic(context),

@@ -111,8 +111,27 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
         var nextItem = showList.entries.elementAt(i+1);
         isShowDate = item.value['senderId'] != nextItem.value['senderId'];
       }
-      var addItem = chatItemData[item.key];
-      addItem ??= ChatItem(item.value, isShowFace: parentId != item.value['senderId'], isShowDate: isShowDate,
+      var isOwner = CheckOwner(item.value['senderId']);
+      var isOpened = false;
+      var openCount = 0;
+      if (LIST_NOT_EMPTY(item.value['openList'])) {
+        for (var mItem in widget.roomInfo.memberList) {
+          if (item.value['openList'].contains(mItem)) {
+            openCount++;
+          }
+        }
+        isOpened = widget.roomInfo.memberList.length - 1 == openCount;
+      }
+      ChatItem? addItem = chatItemData[item.key];
+      LOG('-----> showList check [${STR(item.value['desc'])}] : $isOwner / $isOpened / [$openCount / ${addItem != null} ? ${addItem != null ? addItem.openCount : 0}]');
+      if (addItem == null || addItem.openCount != openCount) {
+      addItem = ChatItem(
+          item.value,
+          openCount: openCount,
+          isOwner: isOwner,
+          isOpened: isOpened,
+          isShowFace: parentId != item.value['senderId'],
+          isShowDate: isShowDate,
         onSelected: (key, status) {
 
         }, onSetOpened: (message) {
@@ -120,6 +139,7 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
             'openList': message['openList'],
           });
         });
+      }
       result.add(addItem);
       chatItemData[item.key] = addItem;
       parentId = item.value['senderId'];

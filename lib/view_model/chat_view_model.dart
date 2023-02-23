@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/view/chatting/chatting_edit_screen.dart';
 import 'package:kspot_002/view/message/message_group_item.dart';
@@ -79,7 +80,8 @@ class ChatViewModel extends ChangeNotifier {
           descList[targetId] = item.value;
           // LOG('--> descList item add [$targetId] : ${item.value}');
         }
-        if (STR(item.value.openList).isEmpty) {
+        final isMyMsg = item.value.senderId == AppData.USER_ID;
+        if (!isMyMsg && LIST_NOT_EMPTY(item.value.openList) && !item.value.openList!.contains(AppData.USER_ID)) {
           var open = unOpenCount[targetId];
           LOG('--> unOpenCount add [$targetId] : ${item.value.openList} => ${open == null}');
           if (open == null) {

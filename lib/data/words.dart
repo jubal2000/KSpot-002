@@ -367,6 +367,7 @@ class Words extends Translations {
       'SEND': '전송',
       'RESEND': '재전송',
       'READ': '읽음',
+      'UNREAD': '안읽음',
       'Chatting type': '대화방 선택',
       'Private chat room': '비공개 대화방',
       'Public chat room': '공개 대화방',

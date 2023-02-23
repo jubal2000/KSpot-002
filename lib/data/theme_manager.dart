@@ -461,8 +461,9 @@ ItemChatTimeStyle(BuildContext context) {
   return TextStyle(fontSize: 10, color: Theme.of(context).hintColor, fontWeight: FontWeight.w600);
 }
 
-ItemChatReadStyle(BuildContext context) {
-  return TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.secondary, fontWeight: FontWeight.w400);
+ItemChatReadStyle(BuildContext context, [bool isOpened = true]) {
+  return TextStyle(fontSize: 10,
+      color: isOpened ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.error, fontWeight: FontWeight.w400);
 }
 
 ItemDescAlertSmallStyle(BuildContext context) {

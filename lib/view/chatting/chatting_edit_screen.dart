@@ -62,6 +62,8 @@ class ChattingEditScreen extends StatelessWidget {
                                 viewModel.showPassword(),
                                 SizedBox(height: UI_LIST_TEXT_SPACE_S),
                               ],
+                              viewModel.showInviteMessage(),
+                              SizedBox(height: UI_LIST_TEXT_SPACE_S),
                               viewModel.showMembers(),
                               SizedBox(height: UI_LIST_TEXT_SPACE_L),
                             ],

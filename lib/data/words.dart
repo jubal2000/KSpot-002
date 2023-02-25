@@ -385,6 +385,8 @@ class Words extends Translations {
       'INVITE START MEMBERS': '시작 맴버 초대',
       'MEMBER': '맴버',
       'ROOM IMAGE': '대화방 이미지',
+      'INVITE MESSAGE': '초대 메시지',
+      'Enter message *': '메시지 입력 *',
 
       // promotion_list_screen
       'PROMOTION RECORD': '홍보 기록',

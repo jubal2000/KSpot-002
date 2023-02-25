@@ -21,8 +21,8 @@ class ChatRepository {
     return result;
   }
 
-  getChatRoomInfo() async {
-    return await api.getChatRoomFromId(AppData.USER_ID);
+  getChatRoomInfo(roomId) async {
+    return await api.getChatRoomFromId(roomId);
   }
 
   getChatRoomStreamData() {
@@ -40,8 +40,53 @@ class ChatRepository {
     stream = api.startChatStreamData(roomId, onChanged);
   }
 
-  addChatItem(JSON addItem, List<JSON> targetList) async {
-    return await api.addChatItem(addItem, targetList);
+  createChatItem(ChatRoomModel roomInfo, String sendText, [JSON? imageData]) async {
+    var addItem = {
+      'id':         '',
+      'status':     1,
+      'roomId':     roomInfo.id,
+      'senderId':   STR(AppData.USER_ID),
+      'senderName': STR(AppData.USER_NICKNAME),
+      'senderPic':  STR(AppData.USER_PIC),
+      'desc':       sendText,
+      'memberList': roomInfo.memberList,
+      'createTime': CURRENT_SERVER_TIME(),
+    };
+    if (imageData != null) {
+      var upCount = 0;
+      for (var item in imageData.entries) {
+        var result = await api.uploadImageData(item.value as JSON, 'chat_img');
+        if (result != null) {
+          addItem['picData'] ??= [];
+          addItem['picData'].add(result);
+          upCount++;
+        }
+      }
+      LOG('--> upload image result : $upCount / ${addItem['picData']}');
+      upCount = 0;
+      for (var item in imageData.entries) {
+        var result = await api.uploadImageData(
+            {'id': item.key, 'data': item.value['thumb']}, 'chat_img_p');
+        if (result != null) {
+          addItem['thumbData'] ??= [];
+          addItem['thumbData'].add(result);
+          upCount++;
+        }
+      }
+      LOG('--> upload thumb result : $upCount / ${addItem['thumbData']}');
+    }
+    List<JSON> targetUser = [];
+    for (var item in roomInfo.memberData) {
+      if (item.id != AppData.USER_ID) {
+        targetUser.add(item.toJson());
+      }
+    }
+    LOG('--> createChatItem : ${targetUser.length} / ${addItem.toString()}');
+    return await addChatItem(addItem, targetUser);
+  }
+
+  addChatItem(JSON addItem, List<JSON> targetUser) async {
+    return await api.addChatItem(addItem, targetUser);
   }
 
   addRoomItem(ChatRoomModel room) async {

@@ -135,9 +135,7 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
         onSelected: (key, status) {
 
         }, onSetOpened: (message) {
-          api.setChatInfo(message['id'], {
-            'openList': message['openList'],
-          });
+          api.addChatOpenItem(message['id'], AppData.USER_ID);
         });
       }
       result.add(addItem);
@@ -298,46 +296,39 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                                                             return;
                                                           }
                                                           AppData.isMainActive = false;
-                                                          var addItem = {
-                                                            'id':         '',
-                                                            'status':     1,
-                                                            'roomId':     widget.roomInfo.id,
-                                                            'senderId':   STR(AppData.USER_ID),
-                                                            'senderName': STR(AppData.USER_NICKNAME),
-                                                            'senderPic':  STR(AppData.USER_PIC),
-                                                            'desc':       sendText,
-                                                            'memberList': widget.roomInfo.memberList,
-                                                            'createTime': CURRENT_SERVER_TIME(),
-                                                          };
-                                                          var upCount = 0;
-                                                          for (var item in imageData.entries) {
-                                                            var result = await api.uploadImageData(item.value as JSON, 'chat_img');
-                                                            if (result != null) {
-                                                              addItem['picData'] ??= [];
-                                                              addItem['picData'].add(result);
-                                                              upCount++;
-                                                            }
-                                                          }
-                                                          LOG('--> upload image result : $upCount / ${addItem['picData']}');
-                                                          upCount = 0;
-                                                          for (var item in imageData.entries) {
-                                                            var result = await api.uploadImageData(
-                                                                {'id': item.key, 'data': item.value['thumb']}, 'chat_img_p');
-                                                            if (result != null) {
-                                                              addItem['thumbData'] ??= [];
-                                                              addItem['thumbData'].add(result);
-                                                              upCount++;
-                                                            }
-                                                          }
-                                                          LOG('--> upload thumb result : $upCount / ${addItem['thumbData']}');
-                                                          List<JSON> targetUser = [];
-                                                          for (var item in widget.roomInfo.memberData) {
-                                                            if (item.id != AppData.USER_ID) {
-                                                              targetUser.add(item.toJson());
-                                                            }
-                                                            LOG('--> targetUser : ${targetUser.length} / ${targetUser.toString()}');
-                                                          }
-                                                          chatRepo.addChatItem(addItem, targetUser).then((result) {
+                                                          // var addItem = {
+                                                          //   'id':         '',
+                                                          //   'status':     1,
+                                                          //   'roomId':     widget.roomInfo.id,
+                                                          //   'senderId':   STR(AppData.USER_ID),
+                                                          //   'senderName': STR(AppData.USER_NICKNAME),
+                                                          //   'senderPic':  STR(AppData.USER_PIC),
+                                                          //   'desc':       sendText,
+                                                          //   'memberList': widget.roomInfo.memberList,
+                                                          //   'createTime': CURRENT_SERVER_TIME(),
+                                                          // };
+                                                          // var upCount = 0;
+                                                          // for (var item in imageData.entries) {
+                                                          //   var result = await api.uploadImageData(item.value as JSON, 'chat_img');
+                                                          //   if (result != null) {
+                                                          //     addItem['picData'] ??= [];
+                                                          //     addItem['picData'].add(result);
+                                                          //     upCount++;
+                                                          //   }
+                                                          // }
+                                                          // LOG('--> upload image result : $upCount / ${addItem['picData']}');
+                                                          // upCount = 0;
+                                                          // for (var item in imageData.entries) {
+                                                          //   var result = await api.uploadImageData(
+                                                          //       {'id': item.key, 'data': item.value['thumb']}, 'chat_img_p');
+                                                          //   if (result != null) {
+                                                          //     addItem['thumbData'] ??= [];
+                                                          //     addItem['thumbData'].add(result);
+                                                          //     upCount++;
+                                                          //   }
+                                                          // }
+                                                          // LOG('--> upload thumb result : $upCount / ${addItem['thumbData']}');
+                                                          chatRepo.createChatItem(widget.roomInfo, sendText, imageData).then((result) {
                                                             AppData.isMainActive = true;
                                                           });
                                                           widget.textController.text = '';

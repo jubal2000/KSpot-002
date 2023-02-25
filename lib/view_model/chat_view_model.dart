@@ -66,6 +66,14 @@ class ChatViewModel extends ChangeNotifier {
     stream ??= chatRepo.getChatStreamData();
   }
 
+  createNewRoom(roomId) async {
+    final result = await chatRepo.getChatRoomInfo(roomId);
+    if (result != null) {
+      LOG('-----> new Room !! [$roomId] : ${result.toString()}');
+      cache.setChatRoomItem(ChatRoomModel.fromJson(result));
+    }
+  }
+
   refreshShowList() {
     LOG('--> refreshShowList');
     List<ChatGroupItem> showList = [];
@@ -75,13 +83,14 @@ class ChatViewModel extends ChangeNotifier {
       // get last message...
       for (var item in cache.chatData!.entries) {
         final targetId = item.value.roomId;
+        // get last message..
         var desc = descList[targetId];
         if (desc == null || DateTime.parse(desc.updateTime).isBefore(DateTime.parse(item.value.updateTime))) {
           descList[targetId] = item.value;
           // LOG('--> descList item add [$targetId] : ${item.value}');
         }
         final isMyMsg = item.value.senderId == AppData.USER_ID;
-        if (!isMyMsg && LIST_NOT_EMPTY(item.value.openList) && !item.value.openList!.contains(AppData.USER_ID)) {
+        if (!isMyMsg && (item.value.openList == null || !item.value.openList!.contains(AppData.USER_ID))) {
           var open = unOpenCount[targetId];
           LOG('--> unOpenCount add [$targetId] : ${item.value.openList} => ${open == null}');
           if (open == null) {
@@ -110,14 +119,10 @@ class ChatViewModel extends ChangeNotifier {
     }
     // sort date..
     LOG('--> showList : ${showList.length}');
-    return sortDataCreateTimeDesc(showList);
-  }
-
-  sortDataCreateTimeDesc(showList) {
     for (var a=0; a<showList.length-1; a++) {
       for (var b=a+1; b<showList.length; b++) {
-        final aDate = DateTime.parse(showList[a].groupItem.updateTime);
-        final bDate = DateTime.parse(showList[b].groupItem.updateTime);
+        final aDate = DateTime.parse(showList[a].groupItem!.updateTime);
+        final bDate = DateTime.parse(showList[b].groupItem!.updateTime);
         // LOG("----> check : ${aDate.toString()} > ${bDate.toString()}");
         if (aDate != bDate && aDate.isBefore(bDate)) {
           final tmp = showList[a];
@@ -130,7 +135,6 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   onSnapshotAction(snapshot) async {
-    LOG('--> onSnapshotAction : ${snapshot.hasError} / ${snapshot.connectionState}');
     if (snapshot.hasError) {
       return Center(
         child: Text('Unable to get data'.tr));
@@ -144,12 +148,9 @@ class ChatViewModel extends ChangeNotifier {
           var data = FROM_SERVER_DATA(item.data() as JSON);
           final chatItem = ChatModel.fromJson(data);
           cache.setChatItem(chatItem);
-          if (!cache.chatRoomData.containsKey(chatItem.roomId)) {
-            final roomItem = await chatRepo.getChatRoomInfo();
-            if (roomItem != null) {
-              cache.setChatRoomItem(ChatRoomModel.fromJson(roomItem));
-              LOG('--> cache.setChatRoomItem add : ${roomItem.id} / ${cache.chatRoomData.length}');
-            }
+          LOG('--> chatItem [${chatItem.id}] : ${chatItem.roomId} / ${chatItem.toJson()}');
+          if (chatItem.roomId.isNotEmpty && !cache.chatRoomData.containsKey(chatItem.roomId)) {
+            await createNewRoom(chatItem.roomId);
           }
         }
         return true;
@@ -165,17 +166,27 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   showMainList(layout, snapshot) {
-    onSnapshotAction(snapshot);
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-      child: ListView(
-        shrinkWrap: true,
-        children: [
-          SizedBox(height: 10),
-          ...refreshShowList(),
-          SizedBox(height: UI_BOTTOM_HEIGHT + 20),
-        ]
-      )
+    return FutureBuilder(
+      future: onSnapshotAction(snapshot),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                SizedBox(height: 10),
+                ...refreshShowList(),
+                SizedBox(height: UI_BOTTOM_HEIGHT + 20),
+              ]
+            )
+          );
+        } else {
+          return Center(
+            child: showLoadingFullPage(context),
+          );
+        }
+      }
     );
   }
 }

@@ -52,7 +52,7 @@ class PlaceViewModel extends ChangeNotifier {
         var key = Uuid().v1();
         imageData[key] = {'id': key, 'type': 0, 'url': '', 'data': resizeData};
         // imageList[key] = PicData(id: key, type: 0, url: '', data: String.fromCharCodes(resizeData)).toJson();
-        LOG('----> picLocalImage: ${imageData[key]}');
+        // LOG('----> picLocalImage: ${imageData[key]}');
         if (placeInfo!.pic.isEmpty) placeInfo!.pic = key;
       }
       notifyListeners();

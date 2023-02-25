@@ -1879,12 +1879,12 @@ class ApiService extends GetxService {
 
   getChatRoomFromId(String roomId) async {
     LOG('------> getChatRoomFromId : $roomId');
-    var snapshot = await firestore!.collection(ChatCollection)
+    var snapshot = await firestore!.collection(ChatRoomCollection)
         .doc(roomId)
         .get();
 
     if (snapshot.data() != null) {
-      return snapshot.data() as JSON;
+      return FROM_SERVER_DATA(snapshot.data() as JSON);
     }
     return null;
   }
@@ -1905,6 +1905,25 @@ class ApiService extends GetxService {
       }
       onChanged(result);
     });
+  }
+
+  Future<bool> addChatOpenItem(String targetId, String userId) async {
+    LOG('------> addChatOpenItem : $targetId - $userId');
+    try {
+      var ref = firestore!.collection(ChatCollection);
+      var snapshot = await ref.doc(targetId).get();
+      if (snapshot.data() != null) {
+        var item = snapshot.data() as JSON;
+        item['openList'] ??= [];
+        item['openList'].add(userId);
+        LOG('--> addChatOpenItem openList : ${item['openList']}');
+        await setChatInfo(targetId, item);
+        return true;
+      }
+    } catch (e) {
+      LOG('--> addChatOpenItem error : $e');
+    }
+    return false;
   }
 
   Future<bool> setChatInfo(String targetId, JSON updateInfo) async {

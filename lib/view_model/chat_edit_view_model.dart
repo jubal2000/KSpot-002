@@ -31,6 +31,7 @@ class ChatEditViewModel extends ChangeNotifier {
 
   BuildContext? buildContext;
   ChatRoomModel? editItem;
+  String? inviteMessage;
   final tabText = ['PUBLIC CHAT'.tr, 'PRIVATE CHAT'.tr];
   JSON memberData = {};
   JSON picInfo = {};
@@ -50,7 +51,7 @@ class ChatEditViewModel extends ChangeNotifier {
       case 0:
         return editItem!.title.isNotEmpty;
       default:
-        return memberData.isNotEmpty && editItem!.password.isNotEmpty;
+        return memberData.isNotEmpty && editItem!.password.isNotEmpty && STR(inviteMessage).isNotEmpty;
     }
   }
 
@@ -171,7 +172,7 @@ class ChatEditViewModel extends ChangeNotifier {
       var resizeData = await resizeImage(data!, IMAGE_SIZE_MAX) as Uint8List;
       var key = Uuid().v1();
       picInfo = {'id': key, 'type': 0, 'url': '', 'data': resizeData};
-      LOG('----> picLocalImage: ${picInfo.toString()} / $key');
+      // LOG('----> picLocalImage: ${picInfo.toString()} / $key');
     }
     setImageData();
     notifyListeners();
@@ -215,6 +216,13 @@ class ChatEditViewModel extends ChangeNotifier {
       });
   }
 
+  showInviteMessage() {
+    return EditTextField(buildContext!, 'INVITE MESSAGE'.tr, inviteMessage ?? '', hint: 'Enter message *'.tr, maxLength: TITLE_LENGTH,
+      maxLines: 1, keyboardType: TextInputType.text, onChanged: (value) {
+        inviteMessage = value;
+      });
+  }
+
   showMembers() {
     return EditListWidget(memberData, title:'INVITE START MEMBERS', EditListType.member, onItemAdd,
         onItemSelected);
@@ -249,6 +257,8 @@ class ChatEditViewModel extends ChangeNotifier {
 
     repo.addRoomItem(editItem!).then((result) {
       LOG('---> addRoomItem result: ${result.toString()}');
+      editItem!.id = result['id'];
+      repo.createChatItem(editItem!, inviteMessage!);
       hideLoadingDialog();
       showAlertDialog(buildContext!, 'Chat room create'.tr, 'Chat room create complete'.tr, '', 'OK'.tr).then((_) {
         Get.back(result: editItem);

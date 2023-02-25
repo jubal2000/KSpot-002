@@ -124,7 +124,7 @@ class StoryEditViewModel extends ChangeNotifier {
         var resizeData = await resizeImage(data!, IMAGE_SIZE_MAX) as Uint8List;
         var key = Uuid().v1();
         imageData[key] = {'id': key, 'type': 0, 'url': '', 'data': resizeData};
-        LOG('----> picLocalImage: ${imageData[key]} / $key');
+        // LOG('----> picLocalImage: ${imageData[key]} / $key');
       }
       isEdited = true;
       setImageData();

@@ -433,6 +433,10 @@ ItemDescStyle(BuildContext context) {
   return TextStyle(fontSize: 12, color: Theme.of(context).hintColor.withOpacity(0.8), height: 1.1);
 }
 
+ItemDescColorStyle(BuildContext context, [var color = Colors.yellowAccent]) {
+  return TextStyle(fontSize: 12, color: color, height: 1.1);
+}
+
 ItemDescBoldStyle(BuildContext context) {
   return TextStyle(fontSize: 12, color: Theme.of(context).hintColor.withOpacity(0.8), height: 1.1, fontWeight: FontWeight.w800);
 }

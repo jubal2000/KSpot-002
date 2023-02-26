@@ -77,7 +77,7 @@ class ChattingScreen extends StatelessWidget {
                 showChattingMenu(context).then((result) {
                   if (result == 'message') {
 
-                  } else {
+                  } else if (result != null) {
                     final chatType = result == 'public' ? ChatType.public : ChatType.private;
                     AppData.chatViewModel.onChattingNew(chatType);
                   }

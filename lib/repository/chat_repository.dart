@@ -6,11 +6,14 @@ import 'package:get/get.dart';
 import '../data/app_data.dart';
 import '../models/chat_model.dart';
 import '../services/api_service.dart';
+import '../services/cache_service.dart';
 import '../utils/utils.dart';
 
 class ChatRepository {
-  final api = Get.find<ApiService>();
+  final api   = Get.find<ApiService>();
+  final cache = Get.find<CacheService>();
   StreamSubscription<QuerySnapshot>? stream;
+  List<String> chatRoomIndexList = [];
 
   getChatRoomData() async {
     Map<String, ChatRoomModel> result = {};
@@ -44,12 +47,12 @@ class ChatRepository {
     var addItem = {
       'id':         '',
       'status':     1,
+      'action':     0,
       'roomId':     roomInfo.id,
       'senderId':   STR(AppData.USER_ID),
       'senderName': STR(AppData.USER_NICKNAME),
       'senderPic':  STR(AppData.USER_PIC),
       'desc':       sendText,
-      'memberList': roomInfo.memberList,
       'createTime': CURRENT_SERVER_TIME(),
     };
     if (imageData != null) {
@@ -75,18 +78,12 @@ class ChatRepository {
       }
       LOG('--> upload thumb result : $upCount / ${addItem['thumbData']}');
     }
-    List<JSON> targetUser = [];
-    for (var item in roomInfo.memberData) {
-      if (item.id != AppData.USER_ID) {
-        targetUser.add(item.toJson());
-      }
-    }
-    LOG('--> createChatItem : ${targetUser.length} / ${addItem.toString()}');
-    return await addChatItem(addItem, targetUser);
+    LOG('--> createChatItem : ${addItem.toString()}');
+    return await addChatItem(addItem);
   }
 
-  addChatItem(JSON addItem, List<JSON> targetUser) async {
-    return await api.addChatItem(addItem, targetUser);
+  addChatItem(JSON addItem) async {
+    return await api.addChatItem(addItem);
   }
 
   addRoomItem(ChatRoomModel room) async {
@@ -102,5 +99,28 @@ class ChatRepository {
       stream!.cancel();
     }
     stream = null;
+  }
+
+  exitChatRoom(String roomId, bool isExitShow) async {
+    final result = await api.exitChatRoom(roomId, AppData.USER_ID, isExitShow);
+    if (result != null) {
+      if (isExitShow) {
+        JSON addItem = {
+          'id': '',
+          'status': 1,
+          'action': isExitShow ? 2 : 3,
+          'desc': 'exit',
+          'roomId': roomId,
+          'senderId': AppData.USER_ID,
+          'senderName': AppData.USER_NICKNAME,
+          'senderPic': AppData.USER_PIC,
+        };
+        api.addChatItem(addItem);
+      }
+      cache.setChatRoomItem(ChatRoomModel.fromJson(result));
+      LOG('--> remove room data : $roomId => ${cache.chatRoomData.length}');
+      return true;
+    }
+    return false;
   }
 }

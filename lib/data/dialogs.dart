@@ -3166,7 +3166,7 @@ Future<String> showJsonButtonSelectExDialog(BuildContext context, String title, 
                       TextButton(
                         child: Text('닫기'),
                         onPressed: () {
-                          Navigator.pop(_context, '');
+                          Navigator.pop(_context);
                         },
                       ),
                     ]

@@ -103,7 +103,7 @@ class ChatViewModel extends ChangeNotifier {
     }
     // create group..
     for (var item in cache.chatRoomData.entries) {
-      if (item.value.type == currentTab) {
+      if (item.value.type == currentTab && item.value.memberList.contains(AppData.USER_ID)) {
         if (descList[item.value.id] != null) {
           item.value.lastMessage = descList[item.value.id].desc ?? '';
         }
@@ -113,6 +113,18 @@ class ChatViewModel extends ChangeNotifier {
           Get.to(() => ChattingTalkScreen(item.value))!.then((_) {
             notifyListeners();
           });
+        }, onMenuSelected: (menu, key) {
+          LOG('--> onMenuSelected [$key] : $menu');
+          switch(menu) {
+            case DropdownItemType.exit:
+            case DropdownItemType.sExit:
+              chatRepo.exitChatRoom(key, menu == DropdownItemType.exit).then((result) {
+                if (result) {
+                  notifyListeners();
+                }
+              });
+              break;
+          }
         });
         showList.add(addGroup);
       }

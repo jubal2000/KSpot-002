@@ -27,6 +27,9 @@ class CacheService extends GetxService {
   JSON reportData = {};
   JSON blockData = {};
 
+  List<String> roomAlarmData = [];
+  List<String> roomIndexData = [];
+
   Future<CacheService> init() async {
     eventListItemData = {};
     eventMapItemData  = {};
@@ -81,7 +84,7 @@ class CacheService extends GetxService {
 
   setChatRoomItem(ChatRoomModel addItem) {
     chatRoomData[addItem.id] = addItem;
-    LOG('--> setChatRoomItem [${addItem.id}] : ${chatRoomData[addItem.id]!.title} / ${chatRoomData.length}');
+    LOG('--> setChatRoomItem [${addItem.id}] : ${chatRoomData[addItem.id]!.title} / ${chatRoomData[addItem.id]!.status} / ${chatRoomData.length}');
   }
 
   Future sortStoryDataCreateTimeDesc() async {

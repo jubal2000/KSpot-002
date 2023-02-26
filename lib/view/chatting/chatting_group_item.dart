@@ -30,6 +30,7 @@ class ChatGroupItem extends StatelessWidget {
   Function(DropdownItemType, String)? onMenuSelected;
   Function(String)? onSelected;
 
+  final cache = Get.find<CacheService>();
   final showMemberMax = 4;
   final itemHeight = 65.0.w;
   List<MemberData> showList = [];
@@ -211,17 +212,19 @@ class ChatGroupItem extends StatelessWidget {
               ),
               // customItemsIndexes: const [1],
               // customItemsHeight: 6,
-              itemHeight: 45,
+              itemHeight: kMinInteractiveDimension,
               dropdownWidth: 160,
               buttonHeight: 30,
               buttonWidth: 30,
               itemPadding: const EdgeInsets.only(left: 12, right: 12),
               offset: const Offset(0, 8),
               items: [
-                ...UserMenuItems.chatRoomMenu0.map((item) => DropdownMenuItem<DropdownItem>(
+                ...UserMenuItems.chatRoomMenu.map((item) => DropdownMenuItem<DropdownItem>(
                   value: item,
                   child: UserMenuItems.buildItem(item),
                 )),
+                ...alarmMenu(),
+                ...indexMenu(),
               ],
               onChanged: (value) {
                 var selected = value as DropdownItem;
@@ -232,5 +235,34 @@ class ChatGroupItem extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  DropdownMenuItem showLine() {
+    return DropdownMenuItem<DropdownItem>(value: dropMenuLine, child: UserMenuItems.buildItem(dropMenuLine));
+  }
+
+  List<DropdownMenuItem> alarmMenu() {
+    var item = cache.roomAlarmData.contains(groupItem!.id) ? dropMenuAlarmOff : dropMenuAlarmOn;
+    return [
+      DropdownMenuItem<DropdownItem>(value: item, child: UserMenuItems.buildItem(item)),
+    ];
+  }
+
+  List<DropdownMenuItem> indexMenu() {
+    var index = cache.roomIndexData.indexOf(groupItem!.id);
+    return [
+      if (index < 0)...[
+        DropdownMenuItem<DropdownItem>(value: dropMenuIndexTop, child: UserMenuItems.buildItem(dropMenuIndexTop)),
+        DropdownMenuItem<DropdownItem>(value: dropMenuIndexUp, child: UserMenuItems.buildItem(dropMenuIndexUp)),
+      ],
+      if (index == 0)...[
+        DropdownMenuItem<DropdownItem>(value: dropMenuIndexUnTop, child: UserMenuItems.buildItem(dropMenuIndexUnTop)),
+      ],
+      if (index > 0)...[
+        if (index != 1)
+          DropdownMenuItem<DropdownItem>(value: dropMenuIndexUp, child: UserMenuItems.buildItem(dropMenuIndexUp)),
+        DropdownMenuItem<DropdownItem>(value: dropMenuIndexDown, child: UserMenuItems.buildItem(dropMenuIndexDown)),
+      ],
+    ];
   }
 }

@@ -46,11 +46,13 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
   final _minText          = 1;
   final _iconSize         = 24.0;
   final _imageMax         = 3;
+  final showMemberMax     = 4;
 
   var  sendText = '';
   JSON showList = {};
   JSON imageData = {};
   JSON chatItemData = {};
+  var  memberList = [].obs;
 
   initData() {
     LOG('--> initData :${showList.length}');
@@ -90,20 +92,34 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
   }
 
   showMemberList() {
-    return Row(
+    return Obx(() => Row(
       children: [
-        for (var item in widget.roomInfo.memberData)
-          Text(widget.roomInfo.memberData.indexOf(item) > 0 ? ', ${item.nickName}' : item.nickName, style: ItemDescStyle(context)),
+        for (var i=0; i<memberList.length; i++)
+          Text(i > 0 ? ', ${memberList[i]}' : memberList[i], style: ItemDescStyle(context)),
         SizedBox(width: 10),
-        Text('${widget.roomInfo.memberData.length}', style: ItemTitleBoldStyle(context)),
+        Text('${memberList.length}', style: ItemTitleBoldStyle(context)),
       ],
-    );
+    ));
+  }
+
+  refreshMemberList() {
+    memberList.value = widget.roomInfo.memberData.map((item) => item.nickName).toList();
+    for (var item in showList.entries) {
+      LOG('--> refreshMemberList : ${item.value} / ${memberList.toString()}');
+      if (INT(item.value['action']) == 2) {
+        memberList.remove(item.value['senderName']);
+        break;
+      }
+    }
+    memberList.refresh();
   }
 
   showChatList() {
     List<Widget> result = [];
     var parentId = '';
     // showList = JSON_CREATE_TIME_SORT_ASCE(showList);
+    refreshMemberList();
+    LOG('--> showChatList memberList : ${memberList.length} / ${memberList.toString()}');
     for (var i=0; i<showList.length; i++) {
       var isShowDate = true;
       var item = showList.entries.elementAt(i);
@@ -123,20 +139,21 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
         isOpened = widget.roomInfo.memberList.length - 1 == openCount;
       }
       ChatItem? addItem = chatItemData[item.key];
-      LOG('-----> showList check [${STR(item.value['desc'])}] : $isOwner / $isOpened / [$openCount / ${addItem != null} ? ${addItem != null ? addItem.openCount : 0}]');
+      // LOG('-----> showList check [${STR(item.value['desc'])}] : $isOwner / $isOpened / [$openCount / ${addItem != null} ? ${addItem != null ? addItem.openCount : 0}]');
       if (addItem == null || addItem.openCount != openCount) {
-      addItem = ChatItem(
+        addItem = ChatItem(
           item.value,
           openCount: openCount,
           isOwner: isOwner,
           isOpened: isOpened,
           isShowFace: parentId != item.value['senderId'],
           isShowDate: isShowDate,
-        onSelected: (key, status) {
+          onSelected: (key, status) {
 
-        }, onSetOpened: (message) {
-          api.addChatOpenItem(message['id'], AppData.USER_ID);
-        });
+          }, onSetOpened: (message) {
+            api.addChatOpenItem(message['id'], AppData.USER_ID);
+          }
+        );
       }
       result.add(addItem);
       chatItemData[item.key] = addItem;

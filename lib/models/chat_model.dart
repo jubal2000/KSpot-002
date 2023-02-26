@@ -8,7 +8,8 @@ part 'chat_model.g.dart';
 @JsonSerializable()
 class ChatModel {
   String  id;
-  int     status;         // 상태 (0:removed, 1:active, 2:disable, 3:ready)
+  int     status;   // 상태 (0:removed, 1:active, 2:disable, 3:ready)
+  int     action;   // 액션 (0:normal, 1:room in, 2:room exit 3:room s exit)
   String  desc;
   String  roomId;
   String  senderId;
@@ -25,6 +26,7 @@ class ChatModel {
   ChatModel({
     required this.id,
     required this.status,
+    required this.action,
     required this.desc,
     required this.roomId,
     required this.senderId,

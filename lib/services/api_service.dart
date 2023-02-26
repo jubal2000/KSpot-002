@@ -1889,11 +1889,49 @@ class ApiService extends GetxService {
     return null;
   }
 
+  exitChatRoom(String roomId, String userId, [bool isShowExit = true]) async {
+    try {
+      var ref = firestore!.collection(ChatRoomCollection);
+      var snapshot = await ref.doc(roomId).get();
+      if (snapshot.data() != null) {
+        var roomInfo = snapshot.data() as JSON;
+        var isOk = false;
+        for (var item in roomInfo['memberData']) {
+          if (STR(item['id']) == userId) {
+            item['status'] = isShowExit ? 0 : 2; // 0:exit 1:sExit
+            item['outTime'] = CURRENT_SERVER_TIME();
+            isOk = true;
+            break;
+          }
+        }
+        if (isOk) {
+          roomInfo['memberList'] = [];
+          if (LIST_NOT_EMPTY(roomInfo['memberData'])) {
+            for (var item in roomInfo['memberData']) {
+              if (INT(item['status']) == 1) {
+                roomInfo['memberList'].add(STR(item['id']));
+              }
+            }
+            await ref.doc(roomId).update(Map<String, dynamic>.from({
+              'memberData': roomInfo['memberData'],
+              'memberList': roomInfo['memberList'],
+            }));
+          }
+        }
+        LOG('--> exitChatRoom result : $isOk => ${roomInfo.toString()}');
+        return FROM_SERVER_DATA(roomInfo);
+      }
+    } catch (e) {
+      LOG('--> exitChatRoom error : $e');
+    }
+    return null;
+  }
+
   startChatStreamData(String roomId, Function(JSON) onChanged) {
     LOG('------> startChatStreamData : $roomId');
     JSON result = {};
     var ref = firestore!.collection(ChatCollection)
-        .where('status'  , isEqualTo: 1)
+        .where('status', isEqualTo: 1)
         .where('roomId', isEqualTo: roomId)
         .orderBy('createTime', descending: false);
 
@@ -1938,19 +1976,25 @@ class ApiService extends GetxService {
     return false;
   }
 
-  Future<JSON> addChatItem(JSON addItem, List<JSON> targetUserInfo) async {
-    LOG('------> addChatItem : $addItem / ${targetUserInfo.toString()}');
-    var dataRef = firestore!.collection(ChatCollection);
-    var key = STR(addItem['id']).toString();
-    if (key.isEmpty) {
-      key = dataRef.doc().id;
-      addItem['id'] = key;
-      addItem['createTime'] = CURRENT_SERVER_TIME();
+  Future<JSON?> addChatItem(JSON addItem) async {
+    LOG('------> addChatItem : $addItem');
+    var roomInfo = await getChatRoomFromId(STR(addItem['roomId']));
+    if (roomInfo != null) {
+      var dataRef = firestore!.collection(ChatCollection);
+      var key = STR(addItem['id']).toString();
+      if (key.isEmpty) {
+        key = dataRef
+            .doc()
+            .id;
+        addItem['id'] = key;
+        addItem['createTime'] = CURRENT_SERVER_TIME();
+      }
+      addItem['memberList'] = roomInfo['memberList'];
+      addItem['updateTime'] = CURRENT_SERVER_TIME();
+      await dataRef.doc(key).set(Map<String, dynamic>.from(addItem));
+      return FROM_SERVER_DATA(addItem);
     }
-    addItem['updateTime'] = CURRENT_SERVER_TIME();
-    await dataRef.doc(key).set(Map<String, dynamic>.from(addItem));
-    var result = FROM_SERVER_DATA(addItem);
-    return result;
+    return null;
   }
 
   //----------------------------------------------------------------------------------------

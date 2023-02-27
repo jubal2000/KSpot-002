@@ -9,6 +9,7 @@ import '../models/message_model.dart';
 import '../models/story_model.dart';
 import '../utils/utils.dart';
 import '../view/message/message_group_item.dart';
+import 'local_service.dart';
 
 class CacheService extends GetxService {
   Map<String, EventModel>? eventData;
@@ -28,7 +29,9 @@ class CacheService extends GetxService {
   JSON blockData = {};
 
   List<String> roomAlarmData = [];
-  List<String> roomIndexData = [];
+  var publicMyRoomIndexData = [].obs;
+  var publicIndexData = [].obs;
+  var privateIndexData = [].obs;
 
   Future<CacheService> init() async {
     eventListItemData = {};
@@ -85,6 +88,59 @@ class CacheService extends GetxService {
   setChatRoomItem(ChatRoomModel addItem) {
     chatRoomData[addItem.id] = addItem;
     LOG('--> setChatRoomItem [${addItem.id}] : ${chatRoomData[addItem.id]!.title} / ${chatRoomData[addItem.id]!.status} / ${chatRoomData.length}');
+  }
+
+  readRoomIndexData() async {
+    publicMyRoomIndexData.value = await StorageManager.readData('publicMyRoomIndexData') ?? [];
+    publicIndexData.value       = await StorageManager.readData('publicIndexData') ?? [];
+    privateIndexData.value      = await StorageManager.readData('privateIndexData') ?? [];
+    LOG('--> publicMyRoomIndexData: ${publicMyRoomIndexData.toString()}');
+    LOG('--> publicIndexData: ${publicIndexData.toString()}');
+    LOG('--> privateIndexData: ${privateIndexData.toString()}');
+  }
+
+  setRoomIndexTop(int type, String roomId) {
+    switch (type) {
+      case 0:
+        if (publicMyRoomIndexData.contains(roomId)) {
+          publicMyRoomIndexData.remove(roomId);
+        }
+        publicMyRoomIndexData.insert(0, roomId);
+        publicMyRoomIndexData.refresh();
+        StorageManager.saveData('publicMyRoomIndexData', List<String>.from(publicMyRoomIndexData.toList()));
+        break;
+      case 1:
+        if (publicIndexData.contains(roomId)) {
+          publicIndexData.remove(roomId);
+        }
+        publicIndexData.insert(0, roomId);
+        publicIndexData.refresh();
+        StorageManager.saveData('publicIndexData', List<String>.from(publicIndexData.toList()));
+        break;
+      case 2:
+        if (privateIndexData.contains(roomId)) {
+          privateIndexData.remove(roomId);
+        }
+        privateIndexData.insert(0, roomId);
+        privateIndexData.refresh();
+        StorageManager.saveData('privateIndexData', List<String>.from(privateIndexData.toList()));
+        break;
+    }
+  }
+
+  getRoomIndexTop(int type, String roomId) {
+    return getRoomIndexData(type).indexOf(roomId);
+  }
+
+  getRoomIndexData(int type) {
+    switch (type) {
+      case 0:
+        return publicMyRoomIndexData;
+      case 1:
+        return publicIndexData;
+      default:
+        return privateIndexData;
+    }
   }
 
   Future sortStoryDataCreateTimeDesc() async {

@@ -11,6 +11,7 @@ import 'package:kspot_002/view/message/message_group_item.dart';
 
 import '../data/app_data.dart';
 import '../data/common_sizes.dart';
+import '../data/dialogs.dart';
 import '../data/theme_manager.dart';
 import '../models/chat_model.dart';
 import '../models/event_model.dart';
@@ -27,6 +28,13 @@ import '../widget/user_item_widget.dart';
 import 'app_view_model.dart';
 
 enum ChatType {
+  public,
+  private,
+  one,
+}
+
+enum ChatRoomType {
+  publicMy,
   public,
   private,
   one,
@@ -82,11 +90,21 @@ class ChatViewModel extends ChangeNotifier {
     }
   }
 
+  showTalkScreen(item) {
+    Get.to(() => ChattingTalkScreen(item))!.then((_) {
+      notifyListeners();
+    });
+  }
+
   refreshShowList(bool isMy) {
     LOG('--> refreshShowList : $isMy');
     List<ChatGroupItem> showList = [];
+    List<String> showListKey = [];
+    List<ChatGroupItem> showResultList = [];
     JSON descList = {};
     JSON unOpenCount = {};
+    var roomType = currentTab == 1 ? ChatRoomType.private : (currentTab == 0 && isMy) ? ChatRoomType.publicMy : ChatRoomType.public;
+
     if (cache.chatData != null) {
       // get last message...
       for (var item in cache.chatData!.entries) {
@@ -129,25 +147,53 @@ class ChatViewModel extends ChangeNotifier {
           item.value.updateTime = unOpenCount[item.key]['updateTime'];
           unOpen = INT(unOpenCount[item.key]['count']);
         }
-        var addGroup = ChatGroupItem(item.value, isPublicRoom: currentTab == 0 && !isMy,
+        var addGroup = ChatGroupItem(item.value, roomType: roomType,
           unOpenCount: unOpen, onSelected: (key) {
-          Get.to(() => ChattingTalkScreen(item.value))!.then((_) {
-            notifyListeners();
-          });
+          if (!item.value.memberList.contains(AppData.USER_ID)) {
+            showAlertYesNoCheckDialog(buildContext!, item.value.title, 'Would you like to enter the chat room?'.tr,
+              'Enter quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
+              if (result > 0) {
+                showTalkScreen(item.value);
+              }
+            });
+          } else {
+            showTalkScreen(item.value);
+          }
         }, onMenuSelected: (menu, key) {
           LOG('--> onMenuSelected [$key] : $menu');
           switch(menu) {
-            case DropdownItemType.exit:
-            case DropdownItemType.sExit:
-              chatRepo.exitChatRoom(key, menu == DropdownItemType.exit).then((result) {
-                if (result) {
-                  notifyListeners();
+            case DropdownItemType.enter:
+              showAlertYesNoCheckDialog(buildContext!, item.value.title, 'Would you like to enter the chat room?'.tr,
+                'Enter quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
+                if (result > 0) {
+                  showTalkScreen(item.value);
                 }
               });
+              break;
+            case DropdownItemType.exit:
+              showAlertYesNoCheckDialog(buildContext!, item.value.title, 'Would you like to leave the chat room?'.tr,
+                'Leave quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
+                if (result > 0) {
+                  chatRepo.exitChatRoom(key, result == 1).then((result) {
+                    if (result) {
+                      notifyListeners();
+                    }
+                  });
+               }
+              });
+              break;
+            case DropdownItemType.alarmOn:
+              break;
+            case DropdownItemType.alarmOff:
+              break;
+            case DropdownItemType.indexTop:
+              cache.setRoomIndexTop(roomType.index, item.value.id);
+              notifyListeners();
               break;
           }
         });
         showList.add(addGroup);
+        showListKey.add(item.key);
       }
     }
     // sort date..
@@ -156,7 +202,6 @@ class ChatViewModel extends ChangeNotifier {
         if (isMy) {
           final aDate = DateTime.parse(showList[a].groupItem!.updateTime);
           final bDate = DateTime.parse(showList[b].groupItem!.updateTime);
-          // LOG("----> check : ${aDate.toString()} > ${bDate.toString()}");
           if (aDate != bDate && aDate.isBefore(bDate)) {
             final tmp = showList[a];
             showList[a] = showList[b];
@@ -173,7 +218,29 @@ class ChatViewModel extends ChangeNotifier {
         }
       }
     }
-    LOG('--> showList : ${showList.length}');
+    // final roomIndexData = cache.getRoomIndexData(roomType.index);
+    // LOG('--> roomIndexData : ${roomIndexData.toString()}');
+    // for (var item in roomIndexData) {
+    //   if (showListKey.contains(item)) {
+    //     showResultList.add(item);
+    //   }
+    // }
+    // for (var item in showList) {
+    //   if (!showResultList.contains(item)) {
+    //     showResultList.add(item);
+    //   }
+    // }
+    // sort index..
+    for (ChatGroupItem item in showList) {
+      var index = cache.getRoomIndexTop(item.roomType.index, item.groupItem!.id);
+      if (index >= 0 && index < showResultList.length) {
+        // LOG('--> showResultList : ${showResultList.toString()} / $index');
+        showResultList.insert(index, item);
+      } else {
+        showResultList.add(item);
+      }
+    }
+    LOG('--> showList : ${showList.length} / ${showResultList.length}');
     return Column(
       children: [
         SubTitleBar(buildContext!, isMy ? 'MY CHAT'.tr : 'OTHER CHAT'.tr,
@@ -184,7 +251,7 @@ class ChatViewModel extends ChangeNotifier {
         }),
         if (isTabOpen[isMy ? 0 : 1])...[
           SizedBox(height: 5),
-          ...showList,
+          ...showResultList,
         ],
       ],
     );

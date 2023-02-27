@@ -146,6 +146,74 @@ Future showAlertYesNoDialog(BuildContext context,
   );
 }
 
+Future showAlertYesNoCheckDialog(BuildContext context,
+    String title,
+    String message,
+    String checkMessage,
+    String btnNoStr,
+    String btnYesStr, {bool checkValue = false})
+{
+  var check = checkValue.obs;
+  return showDialog(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return PointerInterceptor(
+          child: AlertDialog(
+            title: Text(title, style: dialogTitleTextStyle(context)),
+            titlePadding: EdgeInsets.all(20),
+            insetPadding: EdgeInsets.all(40),
+            actionsPadding: EdgeInsets.fromLTRB(10, 0, 10, 10),
+            contentPadding: EdgeInsets.symmetric(horizontal: 20),
+            backgroundColor: DialogBackColor(context),
+            content: SingleChildScrollView(
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.9,
+                constraints: BoxConstraints(
+                    minHeight: 100
+                ),
+                child: Obx(() => Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 25),
+                      Text(message, style: dialogDescTextStyle(context)),
+                      SizedBox(height: 30),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Checkbox(value: check.value, onChanged: (value) {
+                            check.value = value ?? false;
+                          }),
+                          Text(checkMessage, style: dialogDescTextExStyle(context)),
+                          SizedBox(width: 10),
+                        ]
+                      )
+                    ]
+                  )
+                )),
+              ),
+            ),
+            actions: [
+              TextButton(
+                child: Text(btnNoStr),
+                onPressed: () {
+                  Navigator.of(context).pop(0);
+                },
+              ),
+              TextButton(
+                child: Text(btnYesStr),
+                onPressed: () {
+                  Navigator.of(context).pop(check.value ? 2 : 1);
+                },
+              ),
+            ],
+          )
+      );
+    },
+  );
+}
+
 Future showAlertYesNoExDialog(BuildContext context,
     String title,
     String message1,
@@ -3057,8 +3125,8 @@ showReportMenu(BuildContext context, JSON targetInfo, String type, {List<JSON> m
 }
 
 showChattingMenu(BuildContext context, {List<JSON> menuList = const [
-  {'id':'public'  , 'title':'Public chat room', 'desc': '',},
-  {'id':'private' , 'title':'Private chat room'},
+  {'id':'public'  , 'title':'Public chat', 'desc': '',},
+  {'id':'private' , 'title':'Private chat'},
   {'id':'message' , 'title':'1:1 Message send'},
 ]}) async {
   return await showJsonButtonSelectExDialog(context, 'Chatting type'.tr, menuList, null, itemHeight: 60.0);
@@ -3183,3 +3251,4 @@ hideLoadingDialog() {
   Navigator.of(dialogContext!).pop();
   dialogContext = null;
 }
+

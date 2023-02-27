@@ -1043,8 +1043,8 @@ enum DropdownItemType {
   reject,
   confirm,
 
+  enter,
   exit,
-  sExit,
   alarmOn,
   alarmOff,
   indexTop,
@@ -1077,6 +1077,64 @@ class DropdownItem {
       this.alert = false,
     }
   );
+}
+
+
+const dropMenuMessage     = DropdownItem(DropdownItemType.message, text: 'SEND MESSAGE', icon: Icons.mail_outline);
+const dropMenuDelete      = DropdownItem(DropdownItemType.unfollow, text: 'FOLLOW CANCEL', icon: Icons.clear);
+const dropMenuMsgBlock    = DropdownItem(DropdownItemType.block, text: 'BLOCK', icon: Icons.mic_off);
+const dropMenuMsgReport   = DropdownItem(DropdownItemType.report, text: 'REPORT', icon: Icons.report_gmailerrorred);
+const dropMenuUnblock     = DropdownItem(DropdownItemType.unblock, text: 'UNBLOCK', icon: Icons.mic);
+const dropMenuDeclare     = DropdownItem(DropdownItemType.showDeclar, text: 'VIEW REPORT', icon: Icons.announcement_outlined);
+const dropMenuReDeclare   = DropdownItem(DropdownItemType.reDeclar, text: 'REPORT RESULT', icon: Icons.announcement);
+const dropMenuUnDeclare   = DropdownItem(DropdownItemType.unDeclar, text: 'REPORT CANCEL', icon: Icons.clear);
+const dropMenuEnter       = DropdownItem(DropdownItemType.enter, text: 'ENTER', icon: Icons.login);
+const dropMenuExit        = DropdownItem(DropdownItemType.exit, text: 'LEAVE', icon: Icons.logout);
+const dropMenuAlarmOn     = DropdownItem(DropdownItemType.alarmOn, text: 'ALARM ON', icon: Icons.notifications_active);
+const dropMenuAlarmOff    = DropdownItem(DropdownItemType.alarmOff, text: 'ALARM OFF', icon: Icons.notifications_off_outlined);
+const dropMenuIndexFix    = DropdownItem(DropdownItemType.indexTop, text: 'TOP FIX', icon: Icons.lock_outline);
+const dropMenuIndexRel    = DropdownItem(DropdownItemType.indexUnTop, text: 'FIX RELEASE', icon: Icons.lock_open);
+const dropMenuIndexTop    = DropdownItem(DropdownItemType.indexTop, text: 'MOVE TOP', icon: Icons.vertical_align_top);
+const dropMenuIndexUp     = DropdownItem(DropdownItemType.indexUp, text: 'MOVE UP', icon: Icons.arrow_upward);
+const dropMenuIndexDown   = DropdownItem(DropdownItemType.indexDown, text: 'MOVE DOWN', icon: Icons.arrow_downward);
+const dropMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
+
+class UserMenuItems {
+  static const List<DropdownItem> followingMenu   = [dropMenuMessage, dropMenuDelete];
+  static const List<DropdownItem> followerMenu    = [dropMenuMessage];
+  static const List<DropdownItem> messageMenu     = [dropMenuMsgBlock, dropMenuMsgReport];
+  static const List<DropdownItem> chatRoomMenu0   = [dropMenuEnter];
+  static const List<DropdownItem> chatRoomMenu1   = [dropMenuExit];
+  static const List<DropdownItem> chatRoomMenu2   = [dropMenuExit];
+  static const List<DropdownItem> blockMenu       = [dropMenuUnblock];
+  static const List<DropdownItem> declarMenu      = [dropMenuDeclare, dropMenuReDeclare, dropMenuUnDeclare];
+
+  static Widget buildItem(DropdownItem item) {
+    return Column(
+        children: [
+          if (item.text != null)...[
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 5),
+                child: Row(
+                    children: [
+                      Icon(
+                          item.icon,
+                          color: Colors.grey,
+                          size: 20
+                      ),
+                      SizedBox(width: 5),
+                      Text(item.text!.tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    ]
+                ),
+              ),
+            ),
+          ],
+          if (item.isLine)
+            showHorizontalDivider(Size(double.infinity, 2), color: Colors.grey),
+        ]
+    );
+  }
 }
 
 class DropdownItems {
@@ -1983,60 +2041,6 @@ showGroupTabWidget(context, onUpdate, Widget? child) {
         ],
       )
   );
-}
-
-const dropMenuMessage     = DropdownItem(DropdownItemType.message, text: '메시지보내기', icon: Icons.mail_outline);
-const dropMenuDelete      = DropdownItem(DropdownItemType.unfollow, text: '팔로우 취소', icon: Icons.clear);
-const dropMenuMsgBlock    = DropdownItem(DropdownItemType.block, text: '차단하기', icon: Icons.mic_off);
-const dropMenuMsgAlarm    = DropdownItem(DropdownItemType.report, text: '신고하기', icon: Icons.notifications);
-const dropMenuUnblock     = DropdownItem(DropdownItemType.unblock, text: '차단해제', icon: Icons.mic);
-const dropMenuDeclare     = DropdownItem(DropdownItemType.showDeclar, text: '신고내용보기', icon: Icons.announcement_outlined);
-const dropMenuReDeclare   = DropdownItem(DropdownItemType.reDeclar, text: '신고결과보기', icon: Icons.announcement);
-const dropMenuUnDeclare   = DropdownItem(DropdownItemType.unDeclar, text: '신고취소', icon: Icons.clear);
-const dropMenuExit        = DropdownItem(DropdownItemType.exit, text: '나가기', icon: Icons.exit_to_app);
-const dropMenuSExit       = DropdownItem(DropdownItemType.sExit, text: '조용히 나가기', icon: Icons.exit_to_app);
-const dropMenuAlarmOn     = DropdownItem(DropdownItemType.alarmOn, text: '알림 켜기', icon: Icons.notifications_active);
-const dropMenuAlarmOff    = DropdownItem(DropdownItemType.alarmOff, text: '알림 끄기', icon: Icons.notifications_off_outlined);
-const dropMenuIndexTop    = DropdownItem(DropdownItemType.indexTop, text: '최상위 고정', icon: Icons.lock);
-const dropMenuIndexUnTop  = DropdownItem(DropdownItemType.indexUnTop, text: '최상위 고정해제', icon: Icons.lock_open);
-const dropMenuIndexUp     = DropdownItem(DropdownItemType.indexUp, text: '위로', icon: Icons.arrow_upward);
-const dropMenuIndexDown   = DropdownItem(DropdownItemType.indexDown, text: '아래로', icon: Icons.arrow_downward);
-const dropMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
-
-class UserMenuItems {
-  static const List<DropdownItem> followingMenu   = [dropMenuMessage, dropMenuDelete];
-  static const List<DropdownItem> followerMenu    = [dropMenuMessage];
-  static const List<DropdownItem> messageMenu     = [dropMenuMsgBlock, dropMenuMsgAlarm];
-  static const List<DropdownItem> chatRoomMenu    = [dropMenuExit, dropMenuSExit];
-  static const List<DropdownItem> blockMenu       = [dropMenuUnblock];
-  static const List<DropdownItem> declarMenu      = [dropMenuDeclare, dropMenuReDeclare, dropMenuUnDeclare];
-
-  static Widget buildItem(DropdownItem item) {
-    return Column(
-        children: [
-          if (item.text != null)...[
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5),
-                child: Row(
-                    children: [
-                      Icon(
-                          item.icon,
-                          color: Colors.grey,
-                          size: 20
-                      ),
-                      SizedBox(width: 3),
-                      Text(item.text!.tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                    ]
-                ),
-              ),
-            ),
-          ],
-          if (item.isLine)
-            showHorizontalDivider(Size(double.infinity, 2), color: Colors.grey),
-        ]
-    );
-  }
 }
 
 // ignore: must_be_immutable

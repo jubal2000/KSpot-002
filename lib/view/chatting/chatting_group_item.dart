@@ -22,11 +22,11 @@ import '../profile/target_profile.dart';
 
 class ChatGroupItem extends StatelessWidget {
   ChatGroupItem(this.groupItem,
-      {Key? key, this.unOpenCount = 0, this.isPublicRoom = false, this.onMenuSelected, this.onSelected}) : super(key: key);
+      {Key? key, this.unOpenCount = 0, this.roomType = ChatRoomType.public, this.onMenuSelected, this.onSelected}) : super(key: key);
 
   ChatRoomModel? groupItem;
   int unOpenCount;
-  bool isPublicRoom;
+  ChatRoomType roomType;
 
   Function(DropdownItemType, String)? onMenuSelected;
   Function(String)? onSelected;
@@ -34,11 +34,13 @@ class ChatGroupItem extends StatelessWidget {
   final cache = Get.find<CacheService>();
   final showMemberMax = 4;
   var itemHeight = 0.0;
+  var isEnter = false;
   List<MemberData> showList = [];
 
   showUserList() {
     LOG('--> showUserList [${groupItem!.id}] : ${groupItem!.memberData.length}');
-    itemHeight = isPublicRoom ? 50 : 65;
+    isEnter = groupItem!.memberList.contains(AppData.USER_ID);
+    itemHeight = roomType == ChatRoomType.public ? 50 : 65;
     showList.clear();
     for (var i=0; i<groupItem!.memberData.length; i++) {
       if (i > showMemberMax) return;
@@ -171,7 +173,7 @@ class ChatGroupItem extends StatelessWidget {
                               ],
                             ),
                           ),
-                        if (!isPublicRoom && unOpenCount > 0)...[
+                        if (roomType != ChatRoomType.public && unOpenCount > 0)...[
                           SizedBox(width: 10),
                           Container(
                             alignment: Alignment.center,
@@ -190,7 +192,7 @@ class ChatGroupItem extends StatelessWidget {
                         ],
                       ],
                     ),
-                    if (!isPublicRoom)
+                    if (roomType != ChatRoomType.public)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -205,7 +207,7 @@ class ChatGroupItem extends StatelessWidget {
               ),
             ),
           ),
-          DropdownButtonHideUnderline(
+          Obx (() => DropdownButtonHideUnderline(
             child: DropdownButton2(
               customButton: Container(
                 width: 24,
@@ -216,17 +218,30 @@ class ChatGroupItem extends StatelessWidget {
               // customItemsIndexes: const [1],
               // customItemsHeight: 6,
               itemHeight: kMinInteractiveDimension,
-              dropdownWidth: 160,
+              dropdownWidth: 140,
               buttonHeight: 30,
               buttonWidth: 30,
               itemPadding: const EdgeInsets.only(left: 12, right: 12),
               offset: const Offset(0, 8),
               items: [
-                ...UserMenuItems.chatRoomMenu.map((item) => DropdownMenuItem<DropdownItem>(
-                  value: item,
-                  child: UserMenuItems.buildItem(item),
-                )),
-                ...alarmMenu(),
+                if (!isEnter)...[
+                  ...UserMenuItems.chatRoomMenu0.map((item) => DropdownMenuItem<DropdownItem>(
+                    value: item,
+                    child: UserMenuItems.buildItem(item),
+                  )),
+                ],
+                if (isEnter)...[
+                  ...UserMenuItems.chatRoomMenu1.map((item) => DropdownMenuItem<DropdownItem>(
+                    value: item,
+                    child: UserMenuItems.buildItem(item),
+                  )),
+                ],
+                if (roomType != ChatRoomType.publicMy)...[
+                  DropdownMenuItem<DropdownItem>(value: dropMenuMsgReport, child: UserMenuItems.buildItem(dropMenuMsgReport)),
+                ],
+                if (roomType != ChatRoomType.public)...[
+                  ...alarmMenu(),
+                ],
                 ...indexMenu(),
               ],
               onChanged: (value) {
@@ -234,7 +249,7 @@ class ChatGroupItem extends StatelessWidget {
                 if (onMenuSelected != null) onMenuSelected!(selected.type, groupItem!.id);
               },
             ),
-          )
+          ))
         ],
       ),
     );
@@ -247,25 +262,19 @@ class ChatGroupItem extends StatelessWidget {
   List<DropdownMenuItem> alarmMenu() {
     var item = cache.roomAlarmData.contains(groupItem!.id) ? dropMenuAlarmOff : dropMenuAlarmOn;
     return [
-      DropdownMenuItem<DropdownItem>(value: item, child: UserMenuItems.buildItem(item)),
+        DropdownMenuItem<DropdownItem>(value: item, child: UserMenuItems.buildItem(item)),
     ];
   }
 
   List<DropdownMenuItem> indexMenu() {
-    var index = cache.roomIndexData.indexOf(groupItem!.id);
+    var index = cache.getRoomIndexTop(roomType.index, groupItem!.id);
+    LOG('--> indexMenu index [${groupItem!.id}] => $index');
     return [
-      if (index < 0)...[
+      if (index != 0)
         DropdownMenuItem<DropdownItem>(value: dropMenuIndexTop, child: UserMenuItems.buildItem(dropMenuIndexTop)),
-        DropdownMenuItem<DropdownItem>(value: dropMenuIndexUp, child: UserMenuItems.buildItem(dropMenuIndexUp)),
-      ],
-      if (index == 0)...[
-        DropdownMenuItem<DropdownItem>(value: dropMenuIndexUnTop, child: UserMenuItems.buildItem(dropMenuIndexUnTop)),
-      ],
-      if (index > 0)...[
-        if (index != 1)
-          DropdownMenuItem<DropdownItem>(value: dropMenuIndexUp, child: UserMenuItems.buildItem(dropMenuIndexUp)),
-        DropdownMenuItem<DropdownItem>(value: dropMenuIndexDown, child: UserMenuItems.buildItem(dropMenuIndexDown)),
-      ],
+      // if (index > 0)
+      //   DropdownMenuItem<DropdownItem>(value: dropMenuIndexUp, child: UserMenuItems.buildItem(dropMenuIndexUp)),
+      // DropdownMenuItem<DropdownItem>(value: dropMenuIndexDown, child: UserMenuItems.buildItem(dropMenuIndexDown)),
     ];
   }
 }

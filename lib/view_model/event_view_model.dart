@@ -362,7 +362,7 @@ class EventViewModel extends ChangeNotifier {
           ],
           TopCenterAlign(
             child: SizedBox(
-              height: UI_TOP_MENU_HEIGHT * 1.7,
+              height: UI_APPBAR_HEIGHT,
               child: HomeTopMenuBar(
                 MainMenuID.event,
                 isShowDatePick: eventListType == EventListType.map,

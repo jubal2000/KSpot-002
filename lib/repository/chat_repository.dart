@@ -17,8 +17,13 @@ class ChatRepository {
 
   getChatRoomData() async {
     Map<String, ChatRoomModel> result = {};
-    final data = await api.getChatRoomData(AppData.USER_ID);
-    for (var item in data.entries) {
+    final openData = await api.getChatOpenRoomData(AppData.USER_ID,
+        AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
+    for (var item in openData.entries) {
+      result[item.key] = ChatRoomModel.fromJson(item.value);
+    }
+    final closeData = await api.getChatCloseRoomData(AppData.USER_ID);
+    for (var item in closeData.entries) {
       result[item.key] = ChatRoomModel.fromJson(item.value);
     }
     return result;

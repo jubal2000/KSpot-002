@@ -11,6 +11,7 @@ import 'package:kspot_002/view/message/message_group_item.dart';
 
 import '../data/app_data.dart';
 import '../data/common_sizes.dart';
+import '../data/theme_manager.dart';
 import '../models/chat_model.dart';
 import '../models/event_model.dart';
 import '../repository/chat_repository.dart';
@@ -42,6 +43,7 @@ class ChatViewModel extends ChangeNotifier {
   List<ChatGroupItem> mainShowList = [];
   List<ChatTabScreen> tabList = [];
   List<GlobalKey> tabKeyList = [];
+  var isTabOpen = [true, false];
 
   init(context) {
     buildContext = context;
@@ -62,6 +64,12 @@ class ChatViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  getChatRoomData() async {
+    final roomData = await chatRepo.getChatRoomData();
+    cache.chatRoomData.addAll(roomData);
+    return roomData;
+  }
+
   getChatStreamData() {
     stream ??= chatRepo.getChatStreamData();
   }
@@ -74,8 +82,8 @@ class ChatViewModel extends ChangeNotifier {
     }
   }
 
-  refreshShowList() {
-    LOG('--> refreshShowList');
+  refreshShowList(bool isMy) {
+    LOG('--> refreshShowList : $isMy');
     List<ChatGroupItem> showList = [];
     JSON descList = {};
     JSON unOpenCount = {};
@@ -84,32 +92,45 @@ class ChatViewModel extends ChangeNotifier {
       for (var item in cache.chatData!.entries) {
         final targetId = item.value.roomId;
         // get last message..
-        var desc = descList[targetId];
-        if (desc == null || DateTime.parse(desc.updateTime).isBefore(DateTime.parse(item.value.updateTime))) {
-          descList[targetId] = item.value;
-          // LOG('--> descList item add [$targetId] : ${item.value}');
+        if (item.value.action < 1) {
+          var desc = descList[targetId];
+          if (desc == null || DateTime.parse(desc.updateTime).isBefore(DateTime.parse(item.value.updateTime))) {
+            descList[targetId] = item.value;
+            // LOG('--> descList item add [$targetId] : ${item.value}');
+          }
         }
         final isMyMsg = item.value.senderId == AppData.USER_ID;
-        if (!isMyMsg && (item.value.openList == null || !item.value.openList!.contains(AppData.USER_ID))) {
+        if (!isMyMsg && item.value.action < 1 && (item.value.openList == null || !item.value.openList!.contains(AppData.USER_ID))) {
           var open = unOpenCount[targetId];
           LOG('--> unOpenCount add [$targetId] : ${item.value.openList} => ${open == null}');
           if (open == null) {
-            unOpenCount[targetId] = 0;
+            unOpenCount[targetId] = {'id': targetId, 'count': 0};
           }
-          unOpenCount[targetId]++;
+          unOpenCount[targetId]['count']++;
+          unOpenCount[targetId]['updateTime'] = item.value.updateTime;
           LOG('--> unOpenCount [$targetId] : ${unOpenCount[targetId]}');
         }
       }
     }
     // create group..
     for (var item in cache.chatRoomData.entries) {
-      if (item.value.type == currentTab && item.value.memberList.contains(AppData.USER_ID)) {
+      if (item.value.type == currentTab && !cache.blockData.containsKey(item.value.userId) &&
+         ((item.value.type == 0 && COMPARE_GROUP_COUNTRY(item.value.toJson()) && (
+         ((isMy && item.value.memberList.contains(AppData.USER_ID)) ||
+          (!isMy && !item.value.memberList.contains(AppData.USER_ID))))) ||
+          (item.value.type == 1 && item.value.memberList.contains(AppData.USER_ID)))) {
         if (descList[item.value.id] != null) {
           item.value.lastMessage = descList[item.value.id].desc ?? '';
         }
         // LOG('--> cache.chatRoomData item : ${descList.length} / ${item.value.lastMessage}');
         LOG('--> ChatGroupItem [${item.key}] : ${unOpenCount[item.key]}');
-        var addGroup = ChatGroupItem(item.value, unOpenCount: unOpenCount[item.key] ?? 0, onSelected: (key) {
+        var unOpen = 0;
+        if (unOpenCount[item.key] != null) {
+          item.value.updateTime = unOpenCount[item.key]['updateTime'];
+          unOpen = INT(unOpenCount[item.key]['count']);
+        }
+        var addGroup = ChatGroupItem(item.value, isPublicRoom: currentTab == 0 && !isMy,
+          unOpenCount: unOpen, onSelected: (key) {
           Get.to(() => ChattingTalkScreen(item.value))!.then((_) {
             notifyListeners();
           });
@@ -130,20 +151,43 @@ class ChatViewModel extends ChangeNotifier {
       }
     }
     // sort date..
-    LOG('--> showList : ${showList.length}');
     for (var a=0; a<showList.length-1; a++) {
       for (var b=a+1; b<showList.length; b++) {
-        final aDate = DateTime.parse(showList[a].groupItem!.updateTime);
-        final bDate = DateTime.parse(showList[b].groupItem!.updateTime);
-        // LOG("----> check : ${aDate.toString()} > ${bDate.toString()}");
-        if (aDate != bDate && aDate.isBefore(bDate)) {
-          final tmp = showList[a];
-          showList[a] = showList[b];
-          showList[b] = tmp;
+        if (isMy) {
+          final aDate = DateTime.parse(showList[a].groupItem!.updateTime);
+          final bDate = DateTime.parse(showList[b].groupItem!.updateTime);
+          // LOG("----> check : ${aDate.toString()} > ${bDate.toString()}");
+          if (aDate != bDate && aDate.isBefore(bDate)) {
+            final tmp = showList[a];
+            showList[a] = showList[b];
+            showList[b] = tmp;
+          }
+        } else {
+          final aCount = showList[a].groupItem!.memberList.length;
+          final bCount = showList[b].groupItem!.memberList.length;
+          if (aCount < bCount) {
+            final tmp = showList[a];
+            showList[a] = showList[b];
+            showList[b] = tmp;
+          }
         }
       }
     }
-    return showList;
+    LOG('--> showList : ${showList.length}');
+    return Column(
+      children: [
+        SubTitleBar(buildContext!, isMy ? 'MY CHAT'.tr : 'OTHER CHAT'.tr,
+          height: 35,
+          icon: isTabOpen[isMy ? 0 : 1] ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
+          isTabOpen[isMy ? 0 : 1] = !isTabOpen[isMy ? 0 : 1];
+          notifyListeners();
+        }),
+        if (isTabOpen[isMy ? 0 : 1])...[
+          SizedBox(height: 5),
+          ...showList,
+        ],
+      ],
+    );
   }
 
   onSnapshotAction(snapshot) async {
@@ -188,7 +232,11 @@ class ChatViewModel extends ChangeNotifier {
               shrinkWrap: true,
               children: [
                 SizedBox(height: 10),
-                ...refreshShowList(),
+                refreshShowList(true),
+                if (currentTab == 0)...[
+                  SizedBox(height: 5),
+                  refreshShowList(false),
+                ],
                 SizedBox(height: UI_BOTTOM_HEIGHT + 20),
               ]
             )

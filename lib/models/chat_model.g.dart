@@ -65,6 +65,9 @@ ChatRoomModel _$ChatRoomModelFromJson(Map<String, dynamic> json) =>
       memberData: (json['memberData'] as List<dynamic>)
           .map((e) => MemberData.fromJson(e as Map<String, dynamic>))
           .toList(),
+      groupId: json['groupId'] as String?,
+      country: json['country'] as String?,
+      countryState: json['countryState'] as String?,
       fileData: (json['fileData'] as List<dynamic>?)
           ?.map((e) => RoomFileData.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -84,5 +87,8 @@ Map<String, dynamic> _$ChatRoomModelToJson(ChatRoomModel instance) =>
       'createTime': instance.createTime,
       'memberList': instance.memberList,
       'memberData': instance.memberData.map((e) => e.toJson()).toList(),
+      'groupId': instance.groupId,
+      'country': instance.country,
+      'countryState': instance.countryState,
       'fileData': instance.fileData?.map((e) => e.toJson()).toList(),
     };

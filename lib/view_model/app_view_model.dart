@@ -25,13 +25,14 @@ import '../services/local_service.dart';
 import '../view/event/event_edit_screen.dart';
 import '../view/message/message_talk_screen.dart';
 import '../widget/event_group_dialog.dart';
+import 'chat_view_model.dart';
 
 class MainMenuID {
   static int get hide     => 0;
   static int get back     => 1;
   static int get event    => 2;
   static int get story    => 3;
-  static int get message  => 4;
+  static int get chat     => 4;
   static int get my       => 5;
   static int get max      => 6;
 }
@@ -67,7 +68,7 @@ class AppViewModel extends ChangeNotifier {
         appbarMenuMode = MainMenuID.story;
         break;
       case 2:
-        appbarMenuMode = MainMenuID.message;
+        appbarMenuMode = MainMenuID.chat;
         break;
       default:
         appbarMenuMode = MainMenuID.my;
@@ -194,8 +195,8 @@ class AppViewModel extends ChangeNotifier {
                     child: DropdownItems.buildItem(buildContext!, item),
                   ),
             ),
-          if (appbarMenuMode == MainMenuID.message)
-            ...DropdownItems.messageAddItem.map(
+          if (appbarMenuMode == MainMenuID.chat)
+            ...DropdownItems.chatAddItem.map(
                   (item) =>
                   DropdownMenuItem<DropdownItem>(
                     value: item,
@@ -236,6 +237,20 @@ class AppViewModel extends ChangeNotifier {
               Get.to(() => StoryEditScreen())!.then((result) {
                 notifyListeners();
               });
+              break;
+            case DropdownItemType.chatOpen:
+              AppData.chatViewModel.onChattingNew(ChatType.public);
+              // showChattingMenu(buildContext!).then((result) {
+              //   if (result == 'message') {
+              //
+              //   } else if (result != null) {
+              //     final chatType = result == 'public' ? ChatType.public : ChatType.private;
+              //     AppData.chatViewModel.onChattingNew(chatType);
+              //   }
+              // });
+              break;
+            case DropdownItemType.chatClose:
+              AppData.chatViewModel.onChattingNew(ChatType.private);
               break;
             case DropdownItemType.message:
               Get.to(() => FollowScreen(AppData.userInfo, isSelectable: true))!.then((result) {

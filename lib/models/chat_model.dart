@@ -79,6 +79,9 @@ class ChatRoomModel {
   List<String> memberList;      // 채팅 맴버 ID 목록 (for Search)
   List<MemberData> memberData;  // 채팅 맴버 목록
 
+  String? groupId;        // 이벤트 그룹 Id
+  String? country;
+  String? countryState;
   List<RoomFileData>? fileData;
 
   ChatRoomModel({
@@ -95,6 +98,9 @@ class ChatRoomModel {
     required this.memberList,
     required this.memberData,
 
+    this.groupId,
+    this.country,
+    this.countryState,
     this.fileData,
   });
   factory ChatRoomModel.fromJson(JSON json) => _$ChatRoomModelFromJson(json);

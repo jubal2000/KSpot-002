@@ -11,6 +11,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -72,6 +73,10 @@ SET_SERVER_TIME(timestamp) {
   if (timestamp is Timestamp) {
     // return DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000).toString(); // fix for jsonSerialize
     // LOG('--> timestamp : ${timestamp.toString()} => ${timestamp.toDate().toString()}');
+    // final date = timestamp.toDate();
+    // final result = DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(date).toString();
+    // LOG('--> SET_SERVER_TIME : ${timestamp.toString()} => $result');
+    // return result;
     return timestamp.toDate().toString();
     // return {
     //   '_seconds': timestamp.seconds,
@@ -1826,11 +1831,41 @@ class ApiService extends GetxService {
   final ChatRoomCollection = 'data_chatRoom';
   final ChatCollection = 'data_chat';
 
-  Future<JSON> getChatRoomData(String userId) async {
+  Future<JSON> getChatOpenRoomData(String userId, String groupId, String country, [String countryState = '']) async {
+    LOG('------> getChatOpenRoomData : $userId / $groupId [ $country / $countryState ]');
+    JSON result = {};
+    try {
+      var ref = firestore!.collection(ChatRoomCollection);
+      var query = ref.where('status', isEqualTo: 1)
+                     .where('type', isEqualTo: 0);
+      if (groupId.isNotEmpty) {
+        query = query.where('groupId', isEqualTo: groupId);
+      }
+      if (country.isNotEmpty) {
+        query = query.where('country', isEqualTo: country);
+        if (countryState.isNotEmpty) {
+          query = query.where('countryState', isEqualTo: countryState);
+        }
+      }
+      var snapshot = await query.get();
+      for (var doc in snapshot.docs) {
+        var item = FROM_SERVER_DATA(doc.data());
+        result[item['id']] = item;
+      }
+    } catch (e) {
+      LOG('--> getChatOpenRoomData error : $e');
+    }
+    return result;
+  }
+
+
+  Future<JSON> getChatCloseRoomData(String userId) async {
+    LOG('------> getChatCloseRoomData : $userId');
     JSON result = {};
     try {
       var snapshot = await firestore!.collection(ChatRoomCollection)
           .where('status', isEqualTo: 1)
+          .where('type', isEqualTo: 1)
           .where('memberList', arrayContainsAny: [userId])
           .get();
 
@@ -1839,7 +1874,7 @@ class ApiService extends GetxService {
         result[item['id']] = item;
       }
     } catch (e) {
-      LOG('--> getCommentFromUserId error : $e');
+      LOG('--> getChatCloseRoomData error : $e');
     }
     return result;
   }
@@ -1898,7 +1933,7 @@ class ApiService extends GetxService {
         var isOk = false;
         for (var item in roomInfo['memberData']) {
           if (STR(item['id']) == userId) {
-            item['status'] = isShowExit ? 0 : 2; // 0:exit 1:sExit
+            item['status' ] = 0; // 0:exit
             item['outTime'] = CURRENT_SERVER_TIME();
             isOk = true;
             break;
@@ -1908,7 +1943,7 @@ class ApiService extends GetxService {
           roomInfo['memberList'] = [];
           if (LIST_NOT_EMPTY(roomInfo['memberData'])) {
             for (var item in roomInfo['memberData']) {
-              if (INT(item['status']) == 1) {
+              if (INT(item['status']) > 0) {
                 roomInfo['memberList'].add(STR(item['id']));
               }
             }

@@ -186,8 +186,8 @@ TIME_DATA_DESC(dynamic data, [String defaultValue = '']) {
 // ignore: non_constant_identifier_names
 String SERVER_TIME_STR(value, [bool isTodayCut = false]) {
   if (value == null) return '';
-  var format1 = DateFormat('yyyy-MM-dd hh:mm:ss');
-  var format2 = DateFormat('hh:mm:ss');
+  var format1 = DateFormat('yyyy-MM-dd HH:mm:ss');
+  var format2 = DateFormat('HH:mm:ss');
   DateTime? date = TME(value);
   if (date != null) {
     if (isTodayCut && date.isToday()) {
@@ -1021,6 +1021,8 @@ enum DropdownItemType {
   goodsLink,
   urlLink,
 
+  chatOpen,
+  chatClose,
   message,
   unfollow,
   block,
@@ -1079,6 +1081,7 @@ class DropdownItem {
 
 class DropdownItems {
   static const List<DropdownItem> eventAddItem    = [placeGroup, place, event];
+  static const List<DropdownItem> chatAddItem     = [chatOpen, chatClose, message];
   static const List<DropdownItem> messageAddItem  = [message];
   static const List<DropdownItem> storyAddItem    = [story];
   static const List<DropdownItem> homeAddItems    = [placeGroup, place, event];
@@ -1110,11 +1113,13 @@ class DropdownItems {
   static const goods        = DropdownItem(DropdownItemType.goods, text: 'GOODS +', icon: Icons.card_giftcard);
   static const live         = DropdownItem(DropdownItemType.live, text: 'LIVE +', icon: Icons.live_tv);
 
-  static const placeGroup   = DropdownItem(DropdownItemType.placeGroup, text: 'SPOT GROUP +', icon: Icons.map_outlined);
-  static const place        = DropdownItem(DropdownItemType.place, text: 'SPOT +', icon: Icons.place_outlined);
-  static const event        = DropdownItem(DropdownItemType.event, text: 'EVENT +', icon: Icons.event_available);
-  static const story        = DropdownItem(DropdownItemType.story, text: 'STORY +', icon: Icons.school_outlined);
-  static const message      = DropdownItem(DropdownItemType.message, text: 'MESSAGE +', icon: Icons.mail_outlined);
+  static const placeGroup   = DropdownItem(DropdownItemType.placeGroup, text: 'SPOT GROUP', icon: Icons.map_outlined);
+  static const place        = DropdownItem(DropdownItemType.place, text: 'SPOT', icon: Icons.place_outlined);
+  static const event        = DropdownItem(DropdownItemType.event, text: 'EVENT', icon: Icons.event_available);
+  static const story        = DropdownItem(DropdownItemType.story, text: 'STORY', icon: Icons.school_outlined);
+  static const chatOpen     = DropdownItem(DropdownItemType.chatOpen, text: 'PUBLIC CHAT', icon: Icons.lock_open_outlined);
+  static const chatClose    = DropdownItem(DropdownItemType.chatClose, text: 'PRIVATE CHAT', icon: Icons.lock_outline);
+  static const message      = DropdownItem(DropdownItemType.message, text: '1:1 MESSAGE', icon: Icons.mail_outlined);
 
   static const historyLink  = DropdownItem(DropdownItemType.historyLink, text: 'HISTORY LINK', icon: Icons.link);
   static const goodsLink    = DropdownItem(DropdownItemType.goodsLink, text: 'GOODS LINK', icon: Icons.link);
@@ -2501,4 +2506,10 @@ inputChatSuffix(BuildContext context) {
       borderSide: BorderSide(color: Theme.of(context).errorColor),
     ),
   );
+}
+
+COMPARE_GROUP_COUNTRY(JSON s) {
+  return s['groupId'] == AppData.currentEventGroup!.id &&
+         s['country'] == AppData.currentCountry &&
+         (AppData.currentState.isEmpty || s['countryState'] == AppData.currentState);
 }

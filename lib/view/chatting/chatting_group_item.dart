@@ -22,21 +22,23 @@ import '../profile/target_profile.dart';
 
 class ChatGroupItem extends StatelessWidget {
   ChatGroupItem(this.groupItem,
-      {Key? key, this.unOpenCount = 0, this.onMenuSelected, this.onSelected}) : super(key: key);
+      {Key? key, this.unOpenCount = 0, this.isPublicRoom = false, this.onMenuSelected, this.onSelected}) : super(key: key);
 
   ChatRoomModel? groupItem;
   int unOpenCount;
+  bool isPublicRoom;
 
   Function(DropdownItemType, String)? onMenuSelected;
   Function(String)? onSelected;
 
   final cache = Get.find<CacheService>();
   final showMemberMax = 4;
-  final itemHeight = 65.0.w;
+  var itemHeight = 0.0;
   List<MemberData> showList = [];
 
   showUserList() {
     LOG('--> showUserList [${groupItem!.id}] : ${groupItem!.memberData.length}');
+    itemHeight = isPublicRoom ? 50 : 65;
     showList.clear();
     for (var i=0; i<groupItem!.memberData.length; i++) {
       if (i > showMemberMax) return;
@@ -169,7 +171,7 @@ class ChatGroupItem extends StatelessWidget {
                               ],
                             ),
                           ),
-                        if (unOpenCount > 0)...[
+                        if (!isPublicRoom && unOpenCount > 0)...[
                           SizedBox(width: 10),
                           Container(
                             alignment: Alignment.center,
@@ -188,6 +190,7 @@ class ChatGroupItem extends StatelessWidget {
                         ],
                       ],
                     ),
+                    if (!isPublicRoom)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [

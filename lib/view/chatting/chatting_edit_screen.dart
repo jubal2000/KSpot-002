@@ -46,9 +46,9 @@ class ChattingEditScreen extends StatelessWidget {
                           padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
                           child: ListView(
                             children: [
-                              SizedBox(height: UI_ITEM_SPACE),
-                              viewModel.showTypeSelect(),
-                              SizedBox(height: UI_LIST_TEXT_SPACE_S),
+                              SizedBox(height: UI_ITEM_SPACE_M),
+                              // viewModel.showTypeSelect(),
+                              // SizedBox(height: UI_LIST_TEXT_SPACE_S),
                               if (viewModel.type == 0)...[
                                 viewModel.showImageSelector(),
                                 SizedBox(height: UI_LIST_TEXT_SPACE_S),

@@ -229,7 +229,9 @@ class ChatEditViewModel extends ChangeNotifier {
   }
 
   uploadStart() async {
-    LOG('---> uploadStart: ${picInfo.toString()}');
+    LOG('---> uploadStart: ${picInfo.toString()} / $createButtonEnable');
+    if (!createButtonEnable || !AppData.isMainActive) return;
+    AppData.isMainActive = false;
     showLoadingDialog(buildContext!, 'Uploading now...'.tr);
     // upload new images..
     if (picInfo.isNotEmpty && picInfo['data'] != null) {
@@ -240,6 +242,7 @@ class ChatEditViewModel extends ChangeNotifier {
       } else {
         hideLoadingDialog();
         showAlertDialog(buildContext!, 'Chat room create'.tr, 'Chat room create failed'.tr, '', 'OK'.tr);
+        AppData.isMainActive = true;
         return;
       }
     }
@@ -253,6 +256,11 @@ class ChatEditViewModel extends ChangeNotifier {
     }
     editItem!.userId = AppData.USER_ID;
     editItem!.status = 1;
+
+    editItem!.groupId = AppData.currentEventGroup!.id;
+    editItem!.country = AppData.currentCountry;
+    editItem!.countryState = AppData.currentState;
+
     LOG('---> upload editItem: ${editItem!.toJson()}');
 
     repo.addRoomItem(editItem!).then((result) {
@@ -260,6 +268,7 @@ class ChatEditViewModel extends ChangeNotifier {
       editItem!.id = result['id'];
       repo.createChatItem(editItem!, inviteMessage!);
       hideLoadingDialog();
+      AppData.isMainActive = true;
       showAlertDialog(buildContext!, 'Chat room create'.tr, 'Chat room create complete'.tr, '', 'OK'.tr).then((_) {
         Get.back(result: editItem);
       });

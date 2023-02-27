@@ -103,15 +103,24 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
   }
 
   refreshMemberList() {
-    memberList.value = widget.roomInfo.memberData.map((item) => item.nickName).toList();
+    var isUpdated = false;
+    // memberList.value = widget.roomInfo.memberData.map((item) => item.nickName).toList();
     for (var item in showList.entries) {
-      LOG('--> refreshMemberList : ${item.value} / ${memberList.toString()}');
+      // exit member..
       if (INT(item.value['action']) == 2) {
-        memberList.remove(item.value['senderName']);
+        // memberList.remove(item.value['senderName']);
+        widget.roomInfo.removeMemberData(item.value['senderId']);
+        widget.roomInfo.memberList.remove(item.value['senderId']);
+        isUpdated = true;
         break;
       }
     }
-    memberList.refresh();
+    if (isUpdated) {
+      memberList.refresh();
+      cache.chatRoomData[widget.roomInfo.id] = widget.roomInfo;
+    }
+    memberList.value = widget.roomInfo.memberData.map((item) => item.nickName).toList();
+    LOG('--> refreshMemberList : ${widget.roomInfo.memberData.toString()} / ${widget.roomInfo.memberList.toString()} => ${memberList.toString()}');
   }
 
   showChatList() {
@@ -131,12 +140,14 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
       var isOpened = false;
       var openCount = 0;
       if (LIST_NOT_EMPTY(item.value['openList'])) {
-        for (var mItem in widget.roomInfo.memberList) {
-          if (item.value['openList'].contains(mItem)) {
+        for (var member in widget.roomInfo.memberList) {
+          LOG('--> member item : $member / ${item.value['openList'].toString()}');
+          if (item.value['openList'].contains(member)) {
             openCount++;
           }
         }
-        isOpened = widget.roomInfo.memberList.length - 1 == openCount;
+        LOG('--> isOpened : $isOpened / ${widget.roomInfo.memberList.length - 1} / $openCount');
+        isOpened = widget.roomInfo.memberList.length - 1 <= openCount;
       }
       ChatItem? addItem = chatItemData[item.key];
       // LOG('-----> showList check [${STR(item.value['desc'])}] : $isOwner / $isOpened / [$openCount / ${addItem != null} ? ${addItem != null ? addItem.openCount : 0}]');

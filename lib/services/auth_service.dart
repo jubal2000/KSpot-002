@@ -51,8 +51,8 @@ class AuthService extends GetxService {
             LOG('--> getStartUserInfo done! : ${AppData.userInfo.id}');
             cache.reportData    = await userRepo.getReportData();
             cache.blockData     = await userRepo.getBlockData();
-            cache.messageData   = await msgRepo.getMessageData();
-            cache.chatRoomData  = await chatRepo.getChatRoomData();
+            // cache.messageData   = await msgRepo.getMessageData();
+            // cache.chatRoomData  = await chatRepo.getChatRoomData();
             LOG('--> cache.chatRoomData : ${cache.chatRoomData.toString()}');
             Get.offAllNamed(Routes.HOME);
           } else {

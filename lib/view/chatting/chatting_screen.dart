@@ -23,69 +23,102 @@ class ChattingScreen extends StatelessWidget {
       top: false,
       child: Container(
         padding: EdgeInsets.only(bottom: UI_BOTTOM_HEIGHT),
-        child: DefaultTabController(
-          length: AppData.chatViewModel.tabList.length,
-          child: Scaffold(
-            appBar: AppBar(
-              toolbarHeight: 0,
-              bottom: TabBar(
-                onTap: (index) {
-                  AppData.chatViewModel.setMessageTab(index);
-                },
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                labelColor: Theme
-                    .of(context)
-                    .primaryColor,
-                labelStyle: ItemTitleStyle(context),
-                unselectedLabelColor: Theme
-                    .of(context)
-                    .hintColor,
-                unselectedLabelStyle: ItemTitleStyle(context),
-                indicatorColor: Theme
-                    .of(context)
-                    .primaryColor,
-                tabs: List<Widget>.from(AppData.chatViewModel.tabList.map((item) => item.getTab()).toList()),
-              ),
-            ),
-            body: ChangeNotifierProvider<AppViewModel>.value(
-              value: AppData.appViewModel,
-              child: Consumer<AppViewModel>(
-                builder: (context, appViewModel, _) {
-                  LOG('--> AppViewModel');
-                  return LayoutBuilder(
-                    builder: (context, layout) {
-                      return ChangeNotifierProvider<ChatViewModel>.value(
-                          value: AppData.chatViewModel,
-                          child: Consumer<ChatViewModel>(builder: (context, viewModel, _) {
-                            LOG('--> ChatViewModel refresh');
-                            return StreamBuilder(
-                              stream: viewModel.stream!,
-                              builder: (BuildContext context, AsyncSnapshot snapshot) {
-                                return viewModel.showMainList(layout, snapshot);
+        // color: Theme.of(context).dialogBackgroundColor,
+        child: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(top: UI_APPBAR_TOOL_HEIGHT - 5),
+            child: DefaultTabController(
+              length: AppData.chatViewModel.tabList.length,
+              child: Scaffold(
+                appBar: AppBar(
+                  toolbarHeight: 0,
+                  backgroundColor: Colors.transparent,
+                  bottom: TabBar(
+                    onTap: (index) {
+                      AppData.chatViewModel.setMessageTab(index);
+                    },
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    labelColor: Theme
+                        .of(context)
+                        .primaryColor,
+                    labelStyle: ItemTitleStyle(context),
+                    unselectedLabelColor: Theme
+                        .of(context)
+                        .hintColor,
+                    unselectedLabelStyle: ItemTitleStyle(context),
+                    indicatorColor: Theme
+                        .of(context)
+                        .primaryColor,
+                    tabs: List<Widget>.from(AppData.chatViewModel.tabList.map((item) => item.getTab()).toList()),
+                  ),
+                ),
+                body: ChangeNotifierProvider<AppViewModel>.value(
+                  value: AppData.appViewModel,
+                  child: Consumer<AppViewModel>(
+                    builder: (context, appViewModel, _) {
+                      LOG('--> AppViewModel');
+                      return FutureBuilder(
+                        future: AppData.chatViewModel.getChatRoomData(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return LayoutBuilder(
+                              builder: (context, layout) {
+                                return ChangeNotifierProvider<ChatViewModel>.value(
+                                    value: AppData.chatViewModel,
+                                    child: Consumer<ChatViewModel>(builder: (context, viewModel, _) {
+                                      LOG('--> ChatViewModel refresh');
+                                      return StreamBuilder(
+                                        stream: viewModel.stream!,
+                                        builder: (BuildContext context, AsyncSnapshot snapshot) {
+                                          return viewModel.showMainList(layout, snapshot);
+                                        }
+                                      );
+                                    }
+                                  )
+                                );
                               }
                             );
+                          } else {
+                            return Center(
+                              child: showLoadingFullPage(context),
+                            );
                           }
-                        )
+                        }
                       );
                     }
-                  );
-                }
+                  )
+                ),
+                // floatingActionButton: FloatingActionButton.small(
+                //   onPressed: () {
+                //     showChattingMenu(context).then((result) {
+                //       if (result == 'message') {
+                //
+                //       } else if (result != null) {
+                //         final chatType = result == 'public' ? ChatType.public : ChatType.private;
+                //         AppData.chatViewModel.onChattingNew(chatType);
+                //       }
+                //     });
+                //   },
+                //   child: Icon(Icons.add, size: 24),
+                // ),
               )
             ),
-            floatingActionButton: FloatingActionButton.small(
-              onPressed: () {
-                showChattingMenu(context).then((result) {
-                  if (result == 'message') {
-
-                  } else if (result != null) {
-                    final chatType = result == 'public' ? ChatType.public : ChatType.private;
-                    AppData.chatViewModel.onChattingNew(chatType);
+          ),
+          TopCenterAlign(
+            child: SizedBox(
+              height: UI_APPBAR_HEIGHT,
+                child: HomeTopMenuBar(
+                  MainMenuID.event,
+                  isShowDatePick: false,
+                  onCountryChanged: () {
+                  },
+                  onDateChange: (state) {
                   }
-                });
-              },
-              child: Icon(Icons.add, size: 24),
+                )
+              )
             ),
-          )
+          ]
         )
       )
     );

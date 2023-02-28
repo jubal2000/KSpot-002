@@ -401,9 +401,11 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
                   // }
                   // markerSize = MediaQuery.of(context).size.width * 0.4;
                   LOG('--> show marker window ready : ${markers.length}');
-                  rootBundle.load('assets/ui/map_marker_00.png').then((value) {
-                    widget.markerBgImage = value;
-                    refreshMap();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    rootBundle.load('assets/ui/map_marker_00.png').then((value) {
+                      widget.markerBgImage = value;
+                      refreshMap();
+                    });
                   });
                 },
                 onCameraMove: (pos) {

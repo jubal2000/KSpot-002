@@ -289,7 +289,8 @@ CURRENT_SERVER_TIME() {
 
 // ignore: non_constant_identifier_names
 CURRENT_TEXT_TIME() {
-  return DateTime.now().toString();
+  var format = DateFormat('yyyy-MM-dd HH:mm:ss');
+  return format.format(DateTime.now()).toString();
 }
 
 // ignore: non_constant_identifier_names
@@ -1047,8 +1048,8 @@ enum DropdownItemType {
   exit,
   alarmOn,
   alarmOff,
-  indexTop,
-  indexUnTop,
+  bookmarkOn,
+  bookmarkOff,
   indexUp,
   indexDown,
 
@@ -1092,9 +1093,8 @@ const dropMenuEnter       = DropdownItem(DropdownItemType.enter, text: 'ENTER', 
 const dropMenuExit        = DropdownItem(DropdownItemType.exit, text: 'LEAVE', icon: Icons.logout);
 const dropMenuAlarmOn     = DropdownItem(DropdownItemType.alarmOn, text: 'ALARM ON', icon: Icons.notifications_active);
 const dropMenuAlarmOff    = DropdownItem(DropdownItemType.alarmOff, text: 'ALARM OFF', icon: Icons.notifications_off_outlined);
-const dropMenuIndexFix    = DropdownItem(DropdownItemType.indexTop, text: 'TOP FIX', icon: Icons.lock_outline);
-const dropMenuIndexRel    = DropdownItem(DropdownItemType.indexUnTop, text: 'FIX RELEASE', icon: Icons.lock_open);
-const dropMenuIndexTop    = DropdownItem(DropdownItemType.indexTop, text: 'MOVE TOP', icon: Icons.vertical_align_top);
+const dropMenuIndexBkOn   = DropdownItem(DropdownItemType.bookmarkOn, text: 'FIX TOP', icon: Icons.bookmark_add_outlined);
+const dropMenuIndexBkOff  = DropdownItem(DropdownItemType.bookmarkOff, text: 'FIX RELEASE', icon: Icons.bookmark_remove_outlined);
 const dropMenuIndexUp     = DropdownItem(DropdownItemType.indexUp, text: 'MOVE UP', icon: Icons.arrow_upward);
 const dropMenuIndexDown   = DropdownItem(DropdownItemType.indexDown, text: 'MOVE DOWN', icon: Icons.arrow_downward);
 const dropMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
@@ -1105,7 +1105,6 @@ class UserMenuItems {
   static const List<DropdownItem> messageMenu     = [dropMenuMsgBlock, dropMenuMsgReport];
   static const List<DropdownItem> chatRoomMenu0   = [dropMenuEnter];
   static const List<DropdownItem> chatRoomMenu1   = [dropMenuExit];
-  static const List<DropdownItem> chatRoomMenu2   = [dropMenuExit];
   static const List<DropdownItem> blockMenu       = [dropMenuUnblock];
   static const List<DropdownItem> declarMenu      = [dropMenuDeclare, dropMenuReDeclare, dropMenuUnDeclare];
 

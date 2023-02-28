@@ -188,18 +188,14 @@ class MemberData {
   int     status;
   String  nickName;
   String  pic;
-  String? updateTime;
-  String? inTime;
-  String? outTime;
+  String? createTime;
 
   MemberData({
     required this.id,
     required this.status,
     required this.nickName,
     required this.pic,
-    this.updateTime,
-    this.inTime,
-    this.outTime,
+    this.createTime,
   });
 
   factory MemberData.fromJson(JSON json) => _$MemberDataFromJson(json);
@@ -210,7 +206,7 @@ class MemberData {
     status      = 1;
     nickName    = user.nickName;
     pic         = user.pic;
-    updateTime  = DateTime.now().toString();
+    createTime  = DateTime.now().toString();
   }
 }
 

@@ -1,4 +1,7 @@
 
+import 'dart:collection';
+
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -55,8 +58,14 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
   var  memberList = [].obs;
 
   initData() {
-    LOG('--> initData :${showList.length}');
-    chatRepo.startChatStreamData(widget.roomInfo.id, (result) {
+    DateTime? startTime;
+    for (var item in widget.roomInfo.memberData) {
+      LOG('--> widget.roomInfo.memberData :${item.toJson()}');
+      if (item.id == AppData.USER_ID && item.createTime != null) {
+        startTime = DateTime.parse(item.createTime!);
+      }
+    }
+    chatRepo.startChatStreamData(widget.roomInfo.id, startTime ?? DateTime.now(), (result) {
       if (mounted) {
         showList = result;
         if (showList.isNotEmpty) {
@@ -102,25 +111,55 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
     ));
   }
 
+  // refreshMemberList() {
+  //   var isUpdated = false;
+  //   // memberList.value = widget.roomInfo.memberData.map((item) => item.nickName).toList();
+  //   final reverseM = JSON.from(LinkedHashMap.fromEntries(showList.entries.toList().reversed));
+  //   for (var item in reverseM.entries) {
+  //     LOG('--> refreshMemberList item [${item.value['desc']} / ${reverseM.entries.length}] : ${item.value.toString()}');
+  //     // exit member..
+  //     if (INT(item.value['action']) == 2) {
+  //       // memberList.remove(item.value['senderName']);
+  //       if (widget.roomInfo.memberList.contains(item.value['senderId'])) {
+  //         widget.roomInfo.removeMemberData(item.value['senderId']);
+  //       }
+  //       isUpdated = true;
+  //       break;
+  //     }
+  //   }
+  //   if (isUpdated) {
+  //     memberList.value = [];
+  //     for (var item in widget.roomInfo.memberData) {
+  //       memberList.add(item.nickName);
+  //     }
+  //     memberList.refresh();
+  //     cache.chatRoomData[widget.roomInfo.id] = widget.roomInfo;
+  //   }
+  //   LOG('--> refreshMemberList : ${widget.roomInfo.memberData.toString()} / ${widget.roomInfo.memberList.toString()} => ${memberList.toString()}');
+  // }
+
   refreshMemberList() {
-    var isUpdated = false;
-    // memberList.value = widget.roomInfo.memberData.map((item) => item.nickName).toList();
-    for (var item in showList.entries) {
-      // exit member..
-      if (INT(item.value['action']) == 2) {
-        // memberList.remove(item.value['senderName']);
-        widget.roomInfo.removeMemberData(item.value['senderId']);
-        widget.roomInfo.memberList.remove(item.value['senderId']);
-        isUpdated = true;
-        break;
+    memberList.value = [];
+    final reverseM = JSON.from(LinkedHashMap.fromEntries(showList.entries.toList().reversed));
+    for (var item in reverseM.entries) {
+      LOG('--> reverseM item : ${item.value.toString()}');
+      if (INT(item.value['action']) != 0 && LIST_NOT_EMPTY(item.value['memberData'])) {
+        for (var member in item.value['memberData']) {
+          memberList.add(member['nickName']);
+          widget.roomInfo.addMemberData(member);
+        }
+        cache.chatRoomData[widget.roomInfo.id] = widget.roomInfo;
+        memberList.refresh();
+        LOG('--> refreshMemberList : ${memberList.toString()} / ${item.value['memberList'].toString()}');
+        return;
       }
     }
-    if (isUpdated) {
+    if (memberList.isEmpty && LIST_NOT_EMPTY(reverseM.entries)) {
+      for (var member in widget.roomInfo.memberData) {
+        memberList.add(member.nickName);
+      }
       memberList.refresh();
-      cache.chatRoomData[widget.roomInfo.id] = widget.roomInfo;
     }
-    memberList.value = widget.roomInfo.memberData.map((item) => item.nickName).toList();
-    LOG('--> refreshMemberList : ${widget.roomInfo.memberData.toString()} / ${widget.roomInfo.memberList.toString()} => ${memberList.toString()}');
   }
 
   showChatList() {
@@ -128,47 +167,55 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
     var parentId = '';
     // showList = JSON_CREATE_TIME_SORT_ASCE(showList);
     refreshMemberList();
-    LOG('--> showChatList memberList : ${memberList.length} / ${memberList.toString()}');
+    // LOG('--> showChatList memberList : ${memberList.length} / ${memberList.toString()}');
     for (var i=0; i<showList.length; i++) {
       var isShowDate = true;
       var item = showList.entries.elementAt(i);
-      if (i+1 < showList.length) {
-        var nextItem = showList.entries.elementAt(i+1);
-        isShowDate = item.value['senderId'] != nextItem.value['senderId'];
-      }
-      var isOwner = CheckOwner(item.value['senderId']);
-      var isOpened = false;
-      var openCount = 0;
-      if (LIST_NOT_EMPTY(item.value['openList'])) {
-        for (var member in widget.roomInfo.memberList) {
-          LOG('--> member item : $member / ${item.value['openList'].toString()}');
-          if (item.value['openList'].contains(member)) {
-            openCount++;
+      var action = INT(item.value['action']);
+      if (action >= 0) {
+        if (i+1 < showList.length) {
+          var nextItem = showList.entries.elementAt(i+1);
+          isShowDate = item.value['senderId'] != nextItem.value['senderId'];
+        }
+        var isOwner = CheckOwner(item.value['senderId']);
+        var isOpened = false;
+        var openCount = 0;
+        if (item.value['memberList'] != null && item.value['memberList'].length > 1) {
+          if (LIST_NOT_EMPTY(item.value['openList'])) {
+            for (var member in item.value['memberList']) {
+              LOG('--> member item : $member / ${item.value['memberList'].toString()} / ${item.value['openList'].toString()}');
+              if (item.value['openList'].contains(member)) {
+                openCount++;
+              }
+            }
+            // LOG('--> isOpened : $isOpened / ${widget.roomInfo.memberList.length - 1} / $openCount');
+            isOpened = item.value['memberList'].length - 1 <= openCount;
           }
         }
-        LOG('--> isOpened : $isOpened / ${widget.roomInfo.memberList.length - 1} / $openCount');
-        isOpened = widget.roomInfo.memberList.length - 1 <= openCount;
-      }
-      ChatItem? addItem = chatItemData[item.key];
-      // LOG('-----> showList check [${STR(item.value['desc'])}] : $isOwner / $isOpened / [$openCount / ${addItem != null} ? ${addItem != null ? addItem.openCount : 0}]');
-      if (addItem == null || addItem.openCount != openCount) {
-        addItem = ChatItem(
-          item.value,
-          openCount: openCount,
-          isOwner: isOwner,
-          isOpened: isOpened,
-          isShowFace: parentId != item.value['senderId'],
-          isShowDate: isShowDate,
-          onSelected: (key, status) {
+        var isShowFace = parentId != item.value['senderId'];
+        ChatItem? addItem = chatItemData[item.key];
+        // LOG('-----> showList check [${STR(item.value['desc'])}] : $isOwner / $isOpened / [$openCount / ${addItem != null} ? ${addItem != null ? addItem.openCount : 0}]');
+        if (addItem == null || addItem.openCount != openCount) {
+          addItem = ChatItem(
+            item.value,
+            openCount: openCount,
+            isOwner: isOwner,
+            isOpened: isOpened,
+            isShowFace: isShowFace,
+            isShowDate: isShowDate,
+            onSelected: (key, status) {
 
-          }, onSetOpened: (message) {
-            api.addChatOpenItem(message['id'], AppData.USER_ID);
-          }
-        );
+            }, onSetOpened: (message) {
+              api.addChatOpenItem(message['id'], AppData.USER_ID);
+            }
+          );
+        }
+        result.add(addItem);
+        chatItemData[item.key] = addItem;
+        if (INT(item.value['action']) == 0) {
+          parentId = item.value['senderId'];
+        }
       }
-      result.add(addItem);
-      chatItemData[item.key] = addItem;
-      parentId = item.value['senderId'];
     }
     return result;
   }
@@ -231,6 +278,50 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                       ],
                     ],
                   ),
+                  actions: [
+                    DropdownButtonHideUnderline(
+                      child: DropdownButton2(
+                        customButton: Container(
+                          width: 30,
+                          height: double.infinity,
+                          alignment: Alignment.centerRight,
+                          child: Icon(Icons.more_vert_outlined, size: 22, color: Theme.of(context).indicatorColor),
+                        ),
+                        // customItemsIndexes: const [1],
+                        // customItemsHeight: 6,
+                        itemHeight: kMinInteractiveDimension,
+                        dropdownWidth: 140,
+                        buttonHeight: 30,
+                        buttonWidth: 30,
+                        itemPadding: const EdgeInsets.only(left: 12, right: 12),
+                        offset: const Offset(0, 8),
+                        items: [
+                          ...UserMenuItems.chatRoomMenu1.map((item) => DropdownMenuItem<DropdownItem>(
+                            value: item,
+                            child: UserMenuItems.buildItem(item),
+                          )),
+                        ],
+                        onChanged: (value) {
+                          var selected = value as DropdownItem;
+                          switch(selected.type) {
+                            case DropdownItemType.exit:
+                              showAlertYesNoCheckDialog(context, widget.roomTitle, 'Would you like to leave the chat room?'.tr,
+                                  'Leave quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
+                                if (result > 0) {
+                                  chatRepo.exitChatRoom(widget.roomInfo.id, result == 1).then((result2) {
+                                    if (result2 != null && JSON_EMPTY(result2['error'])) {
+                                      Get.back();
+                                    }
+                                  });
+                                }
+                              });
+                              break;
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                  ],
                   titleSpacing: 0,
                   toolbarHeight: 55,
                 ),

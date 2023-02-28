@@ -388,12 +388,15 @@ class Words extends Translations {
       'INVITE MESSAGE': '초대 메시지',
       'Enter message *': '메시지 입력 *',
       'has left the room': '님이 방을 나갔습니다',
+      'has enter the room': '님이 방에 입장했습니다',
       'MY CHAT': '참여중인 대화',
       'OTHER CHAT': '모든 대화',
       'Would you like to enter the chat room?': '대화방에 입장하시겠습니까?',
       'Would you like to leave the chat room?': '대화방에서 나오시겠습니까?',
       'Enter quietly': '조용히 입장하기',
       'Leave quietly': '조용히 나가기',
+      'FIX TOP': '맨위에 고정',
+      'FIX RELEASE': '고정 해제',
 
       // promotion_list_screen
       'PROMOTION RECORD': '홍보 기록',

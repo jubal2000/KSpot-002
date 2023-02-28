@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/data/dialogs.dart';
 
 import '../data/app_data.dart';
 import '../models/chat_model.dart';
@@ -41,11 +42,11 @@ class ChatRepository {
     return api.getChatStreamData(AppData.USER_ID);
   }
 
-  startChatStreamData(String roomId, Function(JSON) onChanged) {
+  startChatStreamData(String roomId, DateTime? startTime, Function(JSON) onChanged) {
     if (stream != null) {
       stopChatStreamData();
     }
-    stream = api.startChatStreamData(roomId, onChanged);
+    stream = api.startChatStreamData(roomId, startTime, onChanged);
   }
 
   createChatItem(ChatRoomModel roomInfo, String sendText, [JSON? imageData]) async {
@@ -106,26 +107,41 @@ class ChatRepository {
     stream = null;
   }
 
-  exitChatRoom(String roomId, bool isExitShow) async {
-    final result = await api.exitChatRoom(roomId, AppData.USER_ID, isExitShow);
-    if (result != null) {
-      if (isExitShow) {
-        JSON addItem = {
-          'id': '',
-          'status': 1,
-          'action': isExitShow ? 2 : 3,
-          'desc': 'exit',
-          'roomId': roomId,
-          'senderId': AppData.USER_ID,
-          'senderName': AppData.USER_NICKNAME,
-          'senderPic': AppData.USER_PIC,
-        };
-        api.addChatItem(addItem);
-      }
+  enterChatRoom(String roomId, bool isEnterShow) async {
+    final result = await api.enterChatRoom(roomId, AppData.userInfo.toJson());
+    if (result != null && JSON_EMPTY(result['error'])) {
+      JSON addItem = {
+        'id': '',
+        'status': 1,
+        'action': isEnterShow ? 1 : -1,
+        'desc': '${AppData.USER_NICKNAME} enter',
+        'roomId': roomId,
+        'senderId': AppData.USER_ID,
+        'senderName': AppData.USER_NICKNAME,
+        'senderPic': AppData.USER_PIC,
+      };
+      api.addChatItem(addItem);
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
-      LOG('--> remove room data : $roomId => ${cache.chatRoomData.length}');
-      return true;
     }
-    return false;
+    return result;
+  }
+
+  exitChatRoom(String roomId, bool isExitShow) async {
+    final result = await api.exitChatRoom(roomId, AppData.USER_ID);
+    if (result != null && JSON_EMPTY(result['error'])) {
+      JSON addItem = {
+        'id': '',
+        'status': 1,
+        'action': isExitShow ? 2 : -2,
+        'desc': '${AppData.USER_NICKNAME} leave',
+        'roomId': roomId,
+        'senderId': AppData.USER_ID,
+        'senderName': AppData.USER_NICKNAME,
+        'senderPic': AppData.USER_PIC,
+      };
+      api.addChatItem(addItem);
+      cache.setChatRoomItem(ChatRoomModel.fromJson(result));
+    }
+    return result;
   }
 }

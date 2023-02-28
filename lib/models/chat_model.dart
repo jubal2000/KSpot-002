@@ -129,13 +129,28 @@ class ChatRoomModel {
   }
 
   setMemberDataMap(JSON map) {
-    memberData ??= [];
     memberData.clear();
+    memberList.clear();
     if (map.isNotEmpty) {
       for (var item in map.entries) {
         memberData.add(MemberData.fromJson(item.value));
+        memberList.add(item.value['id']);
       }
     }
+    return memberData;
+  }
+
+  addMemberData(JSON member) {
+    final addItem = MemberData.fromJson(member);
+    for (var item in memberData) {
+      if (item.id == addItem.id) {
+        memberData.remove(item);
+        memberList.remove(item.id);
+        break;
+      }
+    }
+    memberData.add(addItem);
+    memberList.add(addItem.id);
     return memberData;
   }
 }

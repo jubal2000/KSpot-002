@@ -25,8 +25,8 @@ class ChatGroupItem extends StatelessWidget {
       {Key? key, this.unOpenCount = 0, this.roomType = ChatRoomType.public, this.onMenuSelected, this.onSelected}) : super(key: key);
 
   ChatRoomModel? groupItem;
-  int unOpenCount;
   ChatRoomType roomType;
+  int unOpenCount;    // no read message count..
 
   Function(DropdownItemType, String)? onMenuSelected;
   Function(String)? onSelected;
@@ -35,22 +35,24 @@ class ChatGroupItem extends StatelessWidget {
   final showMemberMax = 4;
   var itemHeight = 0.0;
   var isEnter = false;
+  var fixIndex = -1;
   List<MemberData> showList = [];
 
-  showUserList() {
-    LOG('--> showUserList [${groupItem!.id}] : ${groupItem!.memberData.length}');
+  initData() {
     isEnter = groupItem!.memberList.contains(AppData.USER_ID);
     itemHeight = roomType == ChatRoomType.public ? 50 : 65;
+    fixIndex = cache.getRoomIndexTop(roomType.index, groupItem!.id);
     showList.clear();
     for (var i=0; i<groupItem!.memberData.length; i++) {
       if (i > showMemberMax) return;
       showList.add(groupItem!.memberData[i]);
     }
+    LOG('--> ChatGroupItem initData [${groupItem!.id}] : ${groupItem!.memberData.length} / $fixIndex');
   }
 
   @override
   Widget build(BuildContext context) {
-    showUserList();
+    initData();
     return Container(
       width: double.infinity,
       height: itemHeight,
@@ -147,18 +149,15 @@ class ChatGroupItem extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         if (groupItem!.type == 0)
-                          Expanded(
-                            child: Row(
+                          Row(
                               children: [
                                 Text(STR(groupItem!.title), style: ItemTitleStyle(context), maxLines: 1),
                                 SizedBox(width: 10),
                                 Text('${groupItem!.memberData.length}', style: ItemTitleBoldStyle(context)),
                               ]
-                            )
                           ),
                         if (groupItem!.type == 1)
-                          Expanded(
-                            child: Row(
+                          Row(
                               children: [
                                 for (var item in showList)
                                   // Row(
@@ -171,10 +170,13 @@ class ChatGroupItem extends StatelessWidget {
                                 SizedBox(width: 10),
                                 Text('${groupItem!.memberData.length}', style: ItemTitleBoldStyle(context)),
                               ],
-                            ),
                           ),
+                        Expanded(child: SizedBox(height: 1)),
+                        if (fixIndex >= 0)...[
+                          Icon(Icons.bookmark_border, color: Theme.of(context).colorScheme.tertiary, size: 18),
+                        ],
                         if (roomType != ChatRoomType.public && unOpenCount > 0)...[
-                          SizedBox(width: 10),
+                          SizedBox(width: 5),
                           Container(
                             alignment: Alignment.center,
                             constraints: BoxConstraints(
@@ -207,7 +209,7 @@ class ChatGroupItem extends StatelessWidget {
               ),
             ),
           ),
-          Obx (() => DropdownButtonHideUnderline(
+          DropdownButtonHideUnderline(
             child: DropdownButton2(
               customButton: Container(
                 width: 24,
@@ -249,14 +251,10 @@ class ChatGroupItem extends StatelessWidget {
                 if (onMenuSelected != null) onMenuSelected!(selected.type, groupItem!.id);
               },
             ),
-          ))
+          )
         ],
       ),
     );
-  }
-
-  DropdownMenuItem showLine() {
-    return DropdownMenuItem<DropdownItem>(value: dropMenuLine, child: UserMenuItems.buildItem(dropMenuLine));
   }
 
   List<DropdownMenuItem> alarmMenu() {
@@ -267,14 +265,12 @@ class ChatGroupItem extends StatelessWidget {
   }
 
   List<DropdownMenuItem> indexMenu() {
-    var index = cache.getRoomIndexTop(roomType.index, groupItem!.id);
-    LOG('--> indexMenu index [${groupItem!.id}] => $index');
+    LOG('--> indexMenu index [${groupItem!.id}] => $fixIndex');
     return [
-      if (index != 0)
-        DropdownMenuItem<DropdownItem>(value: dropMenuIndexTop, child: UserMenuItems.buildItem(dropMenuIndexTop)),
-      // if (index > 0)
-      //   DropdownMenuItem<DropdownItem>(value: dropMenuIndexUp, child: UserMenuItems.buildItem(dropMenuIndexUp)),
-      // DropdownMenuItem<DropdownItem>(value: dropMenuIndexDown, child: UserMenuItems.buildItem(dropMenuIndexDown)),
+      if (fixIndex != 0)
+        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOn, child: UserMenuItems.buildItem(dropMenuIndexBkOn)),
+      if (fixIndex >= 0)
+        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOff, child: UserMenuItems.buildItem(dropMenuIndexBkOff)),
     ];
   }
 }

@@ -249,7 +249,13 @@ class ChatEditViewModel extends ChangeNotifier {
     editItem!.memberList = [];
     editItem!.memberData = [];
     editItem!.memberList.add(AppData.USER_ID);
-    editItem!.memberData.add(MemberData(id: AppData.USER_ID, status: AppData.USER_STATUS, nickName: AppData.USER_NICKNAME, pic: AppData.USER_PIC));
+    editItem!.memberData.add(MemberData(
+        id: AppData.USER_ID,
+        status: 2, // 1: normal 2: room manager..
+        nickName: AppData.USER_NICKNAME,
+        pic: AppData.USER_PIC,
+      )
+    );
     for (var item in memberData.entries) {
       editItem!.memberList.add(item.key);
       editItem!.memberData.add(MemberData.fromJson(item.value));

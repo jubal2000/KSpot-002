@@ -29,9 +29,9 @@ class CacheService extends GetxService {
   JSON blockData = {};
 
   List<String> roomAlarmData = [];
-  var publicMyRoomIndexData = [].obs;
-  var publicIndexData = [].obs;
-  var privateIndexData = [].obs;
+  List<String> publicMyRoomIndexData = [];
+  List<String> publicIndexData = [];
+  List<String> privateIndexData = [];
 
   Future<CacheService> init() async {
     eventListItemData = {};
@@ -91,12 +91,13 @@ class CacheService extends GetxService {
   }
 
   readRoomIndexData() async {
-    publicMyRoomIndexData.value = await StorageManager.readData('publicMyRoomIndexData') ?? [];
-    publicIndexData.value       = await StorageManager.readData('publicIndexData') ?? [];
-    privateIndexData.value      = await StorageManager.readData('privateIndexData') ?? [];
+    publicMyRoomIndexData = List<String>.from(await StorageManager.readData('publicMyRoomIndexData') ?? []);
+    publicIndexData       = List<String>.from(await StorageManager.readData('publicIndexData') ?? []);
+    privateIndexData      = List<String>.from(await StorageManager.readData('privateIndexData') ?? []);
     LOG('--> publicMyRoomIndexData: ${publicMyRoomIndexData.toString()}');
     LOG('--> publicIndexData: ${publicIndexData.toString()}');
     LOG('--> privateIndexData: ${privateIndexData.toString()}');
+    return true;
   }
 
   setRoomIndexTop(int type, String roomId) {
@@ -106,24 +107,47 @@ class CacheService extends GetxService {
           publicMyRoomIndexData.remove(roomId);
         }
         publicMyRoomIndexData.insert(0, roomId);
-        publicMyRoomIndexData.refresh();
-        StorageManager.saveData('publicMyRoomIndexData', List<String>.from(publicMyRoomIndexData.toList()));
+        // publicMyRoomIndexData.refresh();
+        StorageManager.saveData('publicMyRoomIndexData', publicMyRoomIndexData);
         break;
       case 1:
         if (publicIndexData.contains(roomId)) {
           publicIndexData.remove(roomId);
         }
         publicIndexData.insert(0, roomId);
-        publicIndexData.refresh();
-        StorageManager.saveData('publicIndexData', List<String>.from(publicIndexData.toList()));
+        // publicIndexData.refresh();
+        StorageManager.saveData('publicIndexData', publicIndexData);
         break;
       case 2:
         if (privateIndexData.contains(roomId)) {
           privateIndexData.remove(roomId);
         }
         privateIndexData.insert(0, roomId);
-        privateIndexData.refresh();
-        StorageManager.saveData('privateIndexData', List<String>.from(privateIndexData.toList()));
+        // privateIndexData.refresh();
+        StorageManager.saveData('privateIndexData', privateIndexData);
+        break;
+    }
+  }
+
+  removeRoomIndexTop(int type, String roomId) {
+    switch (type) {
+      case 0:
+        if (publicMyRoomIndexData.contains(roomId)) {
+          publicMyRoomIndexData.remove(roomId);
+        }
+        StorageManager.saveData('publicMyRoomIndexData', publicMyRoomIndexData);
+        break;
+      case 1:
+        if (publicIndexData.contains(roomId)) {
+          publicIndexData.remove(roomId);
+        }
+        StorageManager.saveData('publicIndexData', publicIndexData);
+        break;
+      case 2:
+        if (privateIndexData.contains(roomId)) {
+          privateIndexData.remove(roomId);
+        }
+        StorageManager.saveData('privateIndexData', privateIndexData);
         break;
     }
   }

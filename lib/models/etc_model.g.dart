@@ -167,9 +167,7 @@ MemberData _$MemberDataFromJson(Map<String, dynamic> json) => MemberData(
       status: json['status'] as int,
       nickName: json['nickName'] as String,
       pic: json['pic'] as String,
-      updateTime: json['updateTime'] as String?,
-      inTime: json['inTime'] as String?,
-      outTime: json['outTime'] as String?,
+      createTime: json['createTime'] as String?,
     );
 
 Map<String, dynamic> _$MemberDataToJson(MemberData instance) =>
@@ -178,9 +176,7 @@ Map<String, dynamic> _$MemberDataToJson(MemberData instance) =>
       'status': instance.status,
       'nickName': instance.nickName,
       'pic': instance.pic,
-      'updateTime': instance.updateTime,
-      'inTime': instance.inTime,
-      'outTime': instance.outTime,
+      'createTime': instance.createTime,
     };
 
 DescData _$DescDataFromJson(Map<String, dynamic> json) => DescData(

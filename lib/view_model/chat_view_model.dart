@@ -51,7 +51,7 @@ class ChatViewModel extends ChangeNotifier {
   List<ChatGroupItem> mainShowList = [];
   List<ChatTabScreen> tabList = [];
   List<GlobalKey> tabKeyList = [];
-  var isTabOpen = [true, false];
+  var isTabOpen = [true, true];
 
   init(context) {
     buildContext = context;
@@ -90,6 +90,14 @@ class ChatViewModel extends ChangeNotifier {
     }
   }
 
+  enterRoom(roomId, roomInfo, isShow) {
+    chatRepo.enterChatRoom(roomId, isShow).then((result2) {
+      if (result2 != null && JSON_EMPTY(result2['error'])) {
+        showTalkScreen(roomInfo);
+      }
+    });
+  }
+
   showTalkScreen(item) {
     Get.to(() => ChattingTalkScreen(item))!.then((_) {
       notifyListeners();
@@ -103,10 +111,11 @@ class ChatViewModel extends ChangeNotifier {
     List<ChatGroupItem> showResultList = [];
     JSON descList = {};
     JSON unOpenCount = {};
+
+    // current show room type
     var roomType = currentTab == 1 ? ChatRoomType.private : (currentTab == 0 && isMy) ? ChatRoomType.publicMy : ChatRoomType.public;
 
     if (cache.chatData != null) {
-      // get last message...
       for (var item in cache.chatData!.entries) {
         final targetId = item.value.roomId;
         // get last message..
@@ -114,46 +123,45 @@ class ChatViewModel extends ChangeNotifier {
           var desc = descList[targetId];
           if (desc == null || DateTime.parse(desc.updateTime).isBefore(DateTime.parse(item.value.updateTime))) {
             descList[targetId] = item.value;
-            // LOG('--> descList item add [$targetId] : ${item.value}');
           }
         }
+        // get unread count..
         final isMyMsg = item.value.senderId == AppData.USER_ID;
-        if (!isMyMsg && item.value.action < 1 && (item.value.openList == null || !item.value.openList!.contains(AppData.USER_ID))) {
+        if (!isMyMsg && item.value.action == 0 && (item.value.openList == null || !item.value.openList!.contains(AppData.USER_ID))) {
           var open = unOpenCount[targetId];
-          LOG('--> unOpenCount add [$targetId] : ${item.value.openList} => ${open == null}');
           if (open == null) {
             unOpenCount[targetId] = {'id': targetId, 'count': 0};
           }
           unOpenCount[targetId]['count']++;
           unOpenCount[targetId]['updateTime'] = item.value.updateTime;
-          LOG('--> unOpenCount [$targetId] : ${unOpenCount[targetId]}');
         }
       }
     }
-    // create group..
+    // create show group..
     for (var item in cache.chatRoomData.entries) {
       if (item.value.type == currentTab && !cache.blockData.containsKey(item.value.userId) &&
          ((item.value.type == 0 && COMPARE_GROUP_COUNTRY(item.value.toJson()) && (
          ((isMy && item.value.memberList.contains(AppData.USER_ID)) ||
           (!isMy && !item.value.memberList.contains(AppData.USER_ID))))) ||
           (item.value.type == 1 && item.value.memberList.contains(AppData.USER_ID)))) {
+        // set last message..
         if (descList[item.value.id] != null) {
           item.value.lastMessage = descList[item.value.id].desc ?? '';
         }
-        // LOG('--> cache.chatRoomData item : ${descList.length} / ${item.value.lastMessage}');
-        LOG('--> ChatGroupItem [${item.key}] : ${unOpenCount[item.key]}');
+        // set unread count..
         var unOpen = 0;
         if (unOpenCount[item.key] != null) {
           item.value.updateTime = unOpenCount[item.key]['updateTime'];
           unOpen = INT(unOpenCount[item.key]['count']);
         }
+        // add group item..
         var addGroup = ChatGroupItem(item.value, roomType: roomType,
           unOpenCount: unOpen, onSelected: (key) {
           if (!item.value.memberList.contains(AppData.USER_ID)) {
             showAlertYesNoCheckDialog(buildContext!, item.value.title, 'Would you like to enter the chat room?'.tr,
               'Enter quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
               if (result > 0) {
-                showTalkScreen(item.value);
+                enterRoom(key, item.value, result == 1);
               }
             });
           } else {
@@ -166,7 +174,7 @@ class ChatViewModel extends ChangeNotifier {
               showAlertYesNoCheckDialog(buildContext!, item.value.title, 'Would you like to enter the chat room?'.tr,
                 'Enter quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
                 if (result > 0) {
-                  showTalkScreen(item.value);
+                  enterRoom(key, item.value, result == 1);
                 }
               });
               break;
@@ -174,8 +182,9 @@ class ChatViewModel extends ChangeNotifier {
               showAlertYesNoCheckDialog(buildContext!, item.value.title, 'Would you like to leave the chat room?'.tr,
                 'Leave quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
                 if (result > 0) {
-                  chatRepo.exitChatRoom(key, result == 1).then((result) {
-                    if (result) {
+                  chatRepo.exitChatRoom(key, result == 1).then((result2) {
+                    LOG('--> result2 $result2');
+                    if (result2 != null && JSON_EMPTY(result2['error'])) {
                       notifyListeners();
                     }
                   });
@@ -186,8 +195,12 @@ class ChatViewModel extends ChangeNotifier {
               break;
             case DropdownItemType.alarmOff:
               break;
-            case DropdownItemType.indexTop:
+            case DropdownItemType.bookmarkOn:
               cache.setRoomIndexTop(roomType.index, item.value.id);
+              notifyListeners();
+              break;
+            case DropdownItemType.bookmarkOff:
+              cache.removeRoomIndexTop(roomType.index, item.value.id);
               notifyListeners();
               break;
           }
@@ -271,7 +284,7 @@ class ChatViewModel extends ChangeNotifier {
           var data = FROM_SERVER_DATA(item.data() as JSON);
           final chatItem = ChatModel.fromJson(data);
           cache.setChatItem(chatItem);
-          LOG('--> chatItem [${chatItem.id}] : ${chatItem.roomId} / ${chatItem.toJson()}');
+          // LOG('--> chatItem [${chatItem.id}] : ${chatItem.roomId} / ${chatItem.toJson()}');
           if (chatItem.roomId.isNotEmpty && !cache.chatRoomData.containsKey(chatItem.roomId)) {
             await createNewRoom(chatItem.roomId);
           }

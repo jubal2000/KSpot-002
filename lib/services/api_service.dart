@@ -1897,7 +1897,12 @@ class ApiService extends GetxService {
       addItem['createTime'] = CURRENT_SERVER_TIME();
     }
     addItem['updateTime'] = CURRENT_SERVER_TIME();
-    LOG('--> addRoomItem key : ${addItem['id']}');
+    if (LIST_NOT_EMPTY(addItem['memberData'])) {
+      for (var item in addItem['memberData']) {
+        item['createTime'] = CURRENT_SERVER_TIME();
+      }
+    }
+
     await dataRef.doc(key).set(Map<String, dynamic>.from(addItem));
     var result = FROM_SERVER_DATA(addItem);
     return result;
@@ -1924,37 +1929,74 @@ class ApiService extends GetxService {
     return null;
   }
 
-  exitChatRoom(String roomId, String userId, [bool isShowExit = true]) async {
+  enterChatRoom(String roomId, JSON user) async {
     try {
       var ref = firestore!.collection(ChatRoomCollection);
       var snapshot = await ref.doc(roomId).get();
       if (snapshot.data() != null) {
         var roomInfo = snapshot.data() as JSON;
-        var isOk = false;
+        JSON? enterUser;
         for (var item in roomInfo['memberData']) {
-          if (STR(item['id']) == userId) {
-            item['status' ] = 0; // 0:exit
-            item['outTime'] = CURRENT_SERVER_TIME();
-            isOk = true;
+          if (STR(item['id']) == user['id']) {
+            enterUser = item;
             break;
           }
         }
-        if (isOk) {
+        if (enterUser == null) {
+          enterUser = {};
+          enterUser['status']     = 1; // 0:exit 1:enter
+          enterUser['id']         = user['id'];
+          enterUser['nickName']   = user['nickName'];
+          enterUser['pic']        = user['pic'];
+          enterUser['createTime'] = CURRENT_SERVER_TIME();
+          roomInfo['memberData'].add(enterUser);
+          roomInfo['memberList'].add(user['id']);
+          await ref.doc(roomId).update(Map<String, dynamic>.from({
+            'memberData': roomInfo['memberData'],
+            'memberList': roomInfo['memberList'],
+          }));
+          LOG('--> enterChatRoom result : ${roomInfo.toString()}');
+          return FROM_SERVER_DATA(roomInfo);
+        } else {
+          return {'error': 'User has already entered'};
+        }
+      }
+    } catch (e) {
+      LOG('--> enterChatRoom error : $e');
+    }
+    return null;
+  }
+
+  exitChatRoom(String roomId, String userId) async {
+    try {
+      var ref = firestore!.collection(ChatRoomCollection);
+      var snapshot = await ref.doc(roomId).get();
+      if (snapshot.data() != null) {
+        var roomInfo = snapshot.data() as JSON;
+        JSON? exitUser;
+        for (var item in roomInfo['memberData']) {
+          if (STR(item['id']) == userId) {
+            exitUser = item;
+            break;
+          }
+        }
+        if (exitUser != null) {
+          roomInfo['memberData'].remove(exitUser);
           roomInfo['memberList'] = [];
           if (LIST_NOT_EMPTY(roomInfo['memberData'])) {
             for (var item in roomInfo['memberData']) {
-              if (INT(item['status']) > 0) {
-                roomInfo['memberList'].add(STR(item['id']));
-              }
+              roomInfo['memberList'].add(STR(item['id']));
             }
             await ref.doc(roomId).update(Map<String, dynamic>.from({
               'memberData': roomInfo['memberData'],
               'memberList': roomInfo['memberList'],
             }));
           }
+          LOG('--> exitChatRoom result : ${roomInfo.toString()}');
+          return FROM_SERVER_DATA(roomInfo);
+        } else {
+          return {'error': 'User not found'};
         }
-        LOG('--> exitChatRoom result : $isOk => ${roomInfo.toString()}');
-        return FROM_SERVER_DATA(roomInfo);
       }
     } catch (e) {
       LOG('--> exitChatRoom error : $e');
@@ -1962,14 +2004,17 @@ class ApiService extends GetxService {
     return null;
   }
 
-  startChatStreamData(String roomId, Function(JSON) onChanged) {
-    LOG('------> startChatStreamData : $roomId');
+  startChatStreamData(String roomId, DateTime? startTime, Function(JSON) onChanged) {
+    LOG('------> startChatStreamData : $roomId / $startTime');
     JSON result = {};
     var ref = firestore!.collection(ChatCollection)
         .where('status', isEqualTo: 1)
-        .where('roomId', isEqualTo: roomId)
-        .orderBy('createTime', descending: false);
+        .where('roomId', isEqualTo: roomId);
 
+    if (startTime != null) {
+      ref = ref.where('createTime', isGreaterThan: Timestamp.fromDate(startTime));
+    }
+    ref = ref.orderBy('createTime', descending: false);
     return ref.snapshots().listen((QuerySnapshot querySnapshot) {
       for (var doc in querySnapshot.docs) {
         var item = FROM_SERVER_DATA(doc.data() as JSON);
@@ -2023,6 +2068,9 @@ class ApiService extends GetxService {
             .id;
         addItem['id'] = key;
         addItem['createTime'] = CURRENT_SERVER_TIME();
+      }
+      if (INT(addItem['action']) != 0) {
+        addItem['memberData'] = roomInfo['memberData'];
       }
       addItem['memberList'] = roomInfo['memberList'];
       addItem['updateTime'] = CURRENT_SERVER_TIME();

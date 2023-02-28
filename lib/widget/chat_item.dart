@@ -38,6 +38,7 @@ class ChatItemState extends State<ChatItem> {
   final imageSize = 80.0;
   final faceSize = 40.0;
   final JSON imageData = {};
+  var action = 0;
 
   init() {
     if (LIST_NOT_EMPTY(widget.messageItem['thumbData'])) {
@@ -52,27 +53,28 @@ class ChatItemState extends State<ChatItem> {
         }
       });
     }
-    LOG('--> ChatItemState init [${widget.messageItem['desc']}]: ${widget.isOwner} / ${widget.isOpened} / ${widget.openCount} => ${widget.messageItem['openList']}');
+    // LOG('--> ChatItemState init [${widget.messageItem['desc']}]: ${widget.isOwner} / ${widget.isOpened} / ${widget.openCount} => ${widget.messageItem['openList']}');
   }
 
   @override
   void initState() {
+    action = INT(widget.messageItem['action']);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     init();
-    if (INT(widget.messageItem['action']) > 0) {
+    if (action > 0) {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: faceSize + 10, vertical: 20),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(STR(widget.messageItem['senderName']), style: ItemDescColorStyle(context, Colors.yellowAccent)),
-            Text(' ${'has left the room'.tr}', style: ItemDescStyle(context)),
+            Text(' ${action == 1 ? 'has enter the room'.tr : 'has left the room'.tr}', style: ItemDescStyle(context)),
             SizedBox(width: 10),
-            Text(SERVER_TIME_STR(widget.messageItem['createTime']), style: ItemChatTimeStyle(context)),
+            Text(SERVER_TIME_STR(widget.messageItem['createTime'], true), style: ItemChatTimeStyle(context)),
           ],
         ),
       );

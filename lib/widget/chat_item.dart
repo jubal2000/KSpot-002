@@ -1,6 +1,9 @@
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/repository/user_repository.dart';
+import 'package:kspot_002/view/profile/target_profile.dart';
 import 'package:uuid/uuid.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -8,6 +11,7 @@ import '../data/app_data.dart';
 import '../data/common_sizes.dart';
 import '../data/dialogs.dart';
 import '../data/theme_manager.dart';
+import '../models/user_model.dart';
 import '../services/api_service.dart';
 import '../utils/utils.dart';
 import 'card_scroll_viewer.dart';
@@ -15,12 +19,13 @@ import 'card_scroll_viewer.dart';
 class ChatItem extends StatefulWidget {
   ChatItem(this.messageItem,
       { Key? key,
-        this.openCount = 0, this.isOwner = false, this.isOpened = false,
+        this.openCount = 0, this.isOwner = false, this.isManager = false, this.isOpened = false,
         this.isShowFace = true, this.isShowDate = true, this.isChatMode = true,
         this.onSelected, this.onSetOpened }) : super(key: key);
   JSON messageItem;
   int  openCount;
   bool isOwner;
+  bool isManager;
   bool isOpened;
   bool isShowFace;
   bool isShowDate;
@@ -34,6 +39,7 @@ class ChatItem extends StatefulWidget {
 
 class ChatItemState extends State<ChatItem> {
   final api = Get.find<ApiService>();
+  final userRepo = UserRepository();
   final radiusSize = 12.0;
   final imageSize = 80.0;
   final faceSize = 40.0;
@@ -128,7 +134,7 @@ class ChatItemState extends State<ChatItem> {
                             maxWidth: MediaQuery
                                 .of(context)
                                 .size
-                                .width * 0.65,
+                                .width * 0.6,
                           ),
                           decoration: BoxDecoration(
                             color: widget.isOwner ? Theme
@@ -236,18 +242,87 @@ class ChatItemState extends State<ChatItem> {
   }
 
   showUserPic(context) {
-    return Container(
-      width:  faceSize,
-      height: faceSize,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(100)),
-        border: Border.all(
-          color: Theme.of(context).primaryColor.withOpacity(0.8),
-          width: 2,
+    if (widget.isOwner) {
+      return Container(
+        width:  faceSize,
+        height: faceSize,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(100)),
+          border: Border.all(
+            color: Theme.of(context).primaryColor.withOpacity(0.8),
+            width: 2,
+          ),
         ),
-      ),
-      child: ClipOval(
-        child: showImageFit(widget.messageItem['senderPic']),
+        child: ClipOval(
+          child: showImageFit(widget.messageItem['senderPic']),
+        ),
+      );
+    }
+    return DropdownButtonHideUnderline(
+      child: DropdownButton2(
+        customButton: Container(
+          width:  faceSize,
+          height: faceSize,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(100)),
+            border: Border.all(
+              color: Theme.of(context).primaryColor.withOpacity(0.8),
+              width: 2,
+            ),
+          ),
+          child: ClipOval(
+            child: showImageFit(widget.messageItem['senderPic']),
+          ),
+        ),
+        // customItemsIndexes: const [1],
+        // customItemsHeight: 6,
+        itemHeight: kMinInteractiveDimension,
+        dropdownWidth: 150,
+        buttonHeight: 30,
+        buttonWidth: 30,
+        itemPadding: const EdgeInsets.only(left: 12, right: 12),
+        offset: const Offset(0, 120),
+        items: [
+          ...UserMenuItems.chatUserMenu.map((item) => DropdownMenuItem<DropdownItem>(
+            value: item,
+            child: UserMenuItems.buildItem(context, item),
+          )),
+          if (widget.isManager)
+            ...UserMenuItems.chatManagerMenu.map((item) => DropdownMenuItem<DropdownItem>(
+              value: item,
+              child: UserMenuItems.buildItem(context, item),
+            )),
+        ],
+        onChanged: (value) async {
+          unFocusAll(context);
+          var selected = value as DropdownItem;
+          switch(selected.type) {
+            case DropdownItemType.profile:
+              var userInfo = await userRepo.getUserInfo(widget.messageItem['senderId']);
+              if (userInfo != null) {
+                Get.to(() => TargetProfileScreen(userInfo))!.then((value) {
+                });
+              } else {
+                showUserAlertDialog(context, '${'Target user'.tr} : ${widget.messageItem['senderName']}');
+              }
+              break;
+            case DropdownItemType.block:
+              JSON user = {
+                'id': STR(widget.messageItem['senderId']),
+                'nickName': STR(widget.messageItem['senderName']),
+                'pic': STR(widget.messageItem['senderPic']),
+              };
+              userRepo.addBlockUser(context, UserModel.fromJson(user));
+              break;
+            case DropdownItemType.report:
+              break;
+            case DropdownItemType.manager:
+              break;
+            case DropdownItemType.kick:
+              break;
+
+          }
+        },
       ),
     );
   }

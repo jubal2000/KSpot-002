@@ -44,17 +44,19 @@ class AuthService extends GetxService {
       } else {
         LOG('------> User is signed in! : ${AppData.isSignUpMode}');
         setLoginUserInfo(user);
+
         if (!AppData.isSignUpMode) {
           final result = await userRepo.getStartUserInfo(AppData.loginInfo.loginId);
           if (result != null) {
             AppData.userInfo = result;
             LOG('--> getStartUserInfo done! : ${AppData.userInfo.id}');
+            // get user ex data..
             cache.reportData    = await userRepo.getReportData();
             cache.blockData     = await userRepo.getBlockData();
             cache.readRoomIndexData();
             // cache.messageData   = await msgRepo.getMessageData();
             // cache.chatRoomData  = await chatRepo.getChatRoomData();
-            LOG('--> cache.chatRoomData : ${cache.chatRoomData.toString()}');
+            LOG('--> cache.chatRoomData : ${cache.reportData.toString()}');
             Get.offAllNamed(Routes.HOME);
           } else {
             LOG('--> getStartUserInfo failed! : ${AppData.loginInfo.loginId} / ${AppData.loginInfo.loginType}');

@@ -174,7 +174,7 @@ class MessageGroupItemState extends State<MessageGroupItem> {
               items: [
                 ...UserMenuItems.messageMenu.map((item) => DropdownMenuItem<DropdownItem>(
                   value: item,
-                  child: UserMenuItems.buildItem(item),
+                  child: UserMenuItems.buildItem(context, item),
                 )),
               ],
               onChanged: (value) {

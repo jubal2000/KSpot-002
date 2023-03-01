@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:helpers/helpers/widgets/align.dart';
+import 'package:kspot_002/models/etc_model.dart';
 import 'package:kspot_002/view/chatting/chatting_edit_screen.dart';
 import 'package:kspot_002/view/message/message_group_item.dart';
 
@@ -17,6 +18,7 @@ import '../models/chat_model.dart';
 import '../models/event_model.dart';
 import '../repository/chat_repository.dart';
 import '../repository/message_repository.dart';
+import '../repository/user_repository.dart';
 import '../services/api_service.dart';
 import '../services/cache_service.dart';
 import '../utils/utils.dart';
@@ -42,6 +44,7 @@ enum ChatRoomType {
 
 class ChatViewModel extends ChangeNotifier {
   final chatRepo = ChatRepository();
+  final userRepo = UserRepository();
   final cache = Get.find<CacheService>();
   final api   = Get.find<ApiService>();
   BuildContext? buildContext;
@@ -117,33 +120,44 @@ class ChatViewModel extends ChangeNotifier {
 
     if (cache.chatData != null) {
       for (var item in cache.chatData!.entries) {
-        final targetId = item.value.roomId;
+        final roomId = item.value.roomId;
         // get last message..
-        if (item.value.action < 1) {
-          var desc = descList[targetId];
+        if (item.value.action == 0) {
+          var desc = descList[roomId];
           if (desc == null || DateTime.parse(desc.updateTime).isBefore(DateTime.parse(item.value.updateTime))) {
-            descList[targetId] = item.value;
+            descList[roomId] = item.value;
           }
-        }
-        // get unread count..
-        final isMyMsg = item.value.senderId == AppData.USER_ID;
-        if (!isMyMsg && item.value.action == 0 && (item.value.openList == null || !item.value.openList!.contains(AppData.USER_ID))) {
-          var open = unOpenCount[targetId];
-          if (open == null) {
-            unOpenCount[targetId] = {'id': targetId, 'count': 0};
+          // get unread count..
+          final isMyMsg = item.value.senderId == AppData.USER_ID;
+          var isTimeCheck = false;
+          MemberData? memberInfo = cache.getMemberFromRoom(roomId, AppData.USER_ID);
+          if (memberInfo != null && memberInfo.createTime != null) {
+            isTimeCheck = DateTime.parse(item.value.createTime).isAfter(DateTime.parse(memberInfo.createTime!));
           }
-          unOpenCount[targetId]['count']++;
-          unOpenCount[targetId]['updateTime'] = item.value.updateTime;
+          if (!isMyMsg && isTimeCheck && (item.value.openList == null || !item.value.openList!.contains(AppData.USER_ID))) {
+            var open = unOpenCount[roomId];
+            if (open == null) {
+              unOpenCount[roomId] = {'id': roomId, 'count': 0};
+            }
+            unOpenCount[roomId]['count']++;
+            unOpenCount[roomId]['updateTime'] = item.value.updateTime;
+          }
+          LOG('--> unOpenCount [$roomId] : ${unOpenCount[roomId].toString()} / $isMyMsg, $isTimeCheck, ${item.value.openList}, ${AppData.USER_ID}');
         }
       }
     }
     // create show group..
     for (var item in cache.chatRoomData.entries) {
-      if (item.value.type == currentTab && !cache.blockData.containsKey(item.value.userId) &&
+      // set reported room..
+      cache.reportData['report'] ??= {};
+      var reportData = cache.reportData['report'][item.key];
+
+      if (item.value.type == currentTab &&
+          !cache.blockData.containsKey(item.value.userId) &&
          ((item.value.type == 0 && COMPARE_GROUP_COUNTRY(item.value.toJson()) && (
          ((isMy && item.value.memberList.contains(AppData.USER_ID)) ||
           (!isMy && !item.value.memberList.contains(AppData.USER_ID))))) ||
-          (item.value.type == 1 && item.value.memberList.contains(AppData.USER_ID)))) {
+          ((item.value.type == 1 && item.value.memberList.contains(AppData.USER_ID))))) {
         // set last message..
         if (descList[item.value.id] != null) {
           item.value.lastMessage = descList[item.value.id].desc ?? '';
@@ -155,7 +169,7 @@ class ChatViewModel extends ChangeNotifier {
           unOpen = INT(unOpenCount[item.key]['count']);
         }
         // add group item..
-        var addGroup = ChatGroupItem(item.value, roomType: roomType,
+        var addGroup = ChatGroupItem(item.value, isBlocked: reportData != null, roomType: roomType,
           unOpenCount: unOpen, onSelected: (key) {
           if (!item.value.memberList.contains(AppData.USER_ID)) {
             showAlertYesNoCheckDialog(buildContext!, item.value.title, 'Would you like to enter the chat room?'.tr,
@@ -191,16 +205,29 @@ class ChatViewModel extends ChangeNotifier {
                }
               });
               break;
+            case DropdownItemType.report:
+              userRepo.addReportItem(buildContext!, 'chatRoom', item.value, (_) {
+                  notifyListeners();
+              });
+              break;
+            case DropdownItemType.unReport:
+              if (reportData != null) {
+                userRepo.removeReportItem(buildContext!, reportData['id'], item.key, () {
+                  LOG('--> unReport done : ${reportData.toString()}');
+                  notifyListeners();
+                });
+              }
+              break;
             case DropdownItemType.alarmOn:
               break;
             case DropdownItemType.alarmOff:
               break;
             case DropdownItemType.bookmarkOn:
-              cache.setRoomIndexTop(roomType.index, item.value.id);
+              cache.setRoomIndexTop(roomType.index, item.key);
               notifyListeners();
               break;
             case DropdownItemType.bookmarkOff:
-              cache.removeRoomIndexTop(roomType.index, item.value.id);
+              cache.removeRoomIndexTop(roomType.index, item.key);
               notifyListeners();
               break;
           }

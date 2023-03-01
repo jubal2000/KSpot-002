@@ -128,13 +128,13 @@ Future showAlertYesNoDialog(BuildContext context,
             ),
             actions: [
               TextButton(
-                child: Text(btnNoStr),
+                child: Text(btnNoStr, style: ItemTitleExStyle(context)),
                 onPressed: () {
                   Navigator.of(context).pop(0);
                 },
               ),
               TextButton(
-                child: Text(btnYesStr),
+                child: Text(btnYesStr, style: ItemTitleStyle(context)),
                 onPressed: () {
                   Navigator.of(context).pop(1);
                 },
@@ -2897,7 +2897,7 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
   var _isChanged = false;
 
   refreshImage() {
-    _jsonData['picData'] = _imageData.entries.map((e) => e.value['url']).toList();
+    _jsonData['imageData'] = _imageData.entries.map((e) => e.value['url']).toList();
   }
 
   refreshGallery() {
@@ -2914,16 +2914,16 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
         var imageUrl = await ShowImageCroper(image.path);
         var imageData = await ReadFileByte(imageUrl);
         var key = Uuid().v1();
-        _imageData[key] = {'id': key, 'image': imageData};
+        _imageData[key] = {'id': key, 'data': imageData};
       }
       refreshGallery();
     }
   }
 
   initData() {
-    if (_jsonData['picData'] != null) {
+    if (_jsonData['imageData'] != null) {
       _imageData = {};
-      for (var item in _jsonData['picData']) {
+      for (var item in _jsonData['imageData']) {
         var key = Uuid().v1();
         _imageData[key] = JSON.from(jsonDecode('{"id": "$key", "url": "$item"}'));
       }
@@ -3021,13 +3021,13 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
                   ),
                   actions: [
                     TextButton(
-                      child: Text('Cancel'.tr),
+                      child: Text('Cancel'.tr, style: ItemTitleExStyle(context)),
                       onPressed: () {
                         Navigator.pop(_context, {});
                       },
                     ),
                     TextButton(
-                        child: Text('OK'.tr),
+                        child: Text('OK'.tr, style: ItemTitleStyle(context)),
                         onPressed: () {
                           if (type == ReportType.ownership && _imageData.isEmpty) {
                             showAlertDialog(context, 'Error'.tr, 'Please select one or more images'.tr, '', 'OK'.tr);
@@ -3042,7 +3042,7 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
                               for (var item in _imageData.entries) {
                                 var result = await api.uploadImageData(item.value as JSON, 'report_img');
                                 if (result != null) {
-                                  _imageData[item.key]['backPic'] = result;
+                                  _imageData[item.key]['url'] = result;
                                   upCount++;
                                 }
                               }
@@ -3060,19 +3060,15 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
                               _jsonData['imageData'   ] = [];
                               _jsonData['pic'         ] = '';
                               for (var item in _imageData.entries) {
-                                if (item.value['backPic'] != null) {
-                                  _jsonData['imageData'].add(item.value['backPic']);
-                                  if (STR(_jsonData['pic']).isEmpty) _jsonData['pic'] = item.value['backPic'];
+                                if (item.value['url'] != null) {
+                                  _jsonData['imageData'].add(item.value['url']);
+                                  if (STR(_jsonData['pic']).isEmpty) _jsonData['pic'] = item.value['url'];
                                 }
                               }
-                              JSON upResult = {};
-                              final result = await api.addReportItemEx(_jsonData, cache.reportData);
-                              if (result.isNotEmpty) {
-                                upResult = FROM_SERVER_DATA(_jsonData);
-                              }
+                              final result = await api.addReportItemEx(_jsonData);
                               Navigator.of(dialogContext!).pop();
                               Future.delayed(Duration(milliseconds: 200), () async {
-                                Navigator.pop(_context, upResult);
+                                Navigator.pop(_context, result);
                               });
                             });
                           });

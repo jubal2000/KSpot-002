@@ -1646,8 +1646,8 @@ class ApiService extends GetxService {
     return result;
   }
   
-  Future<bool> addBlockItem(JSON user, String type, String targetId) async {
-    LOG('--> addBlockItem : $targetId');
+  Future<JSON?> addBlockItem(String type, JSON targetUser, String userId) async {
+    LOG('--> addBlockItem : ${targetUser.toString()}');
     try {
       var dataRef = firestore!.collection(BlockCollection);
       var key = dataRef.doc().id;
@@ -1655,28 +1655,30 @@ class ApiService extends GetxService {
         'id': key,
         'status': 1,
         'type': type,
-        'userId': STR(user['id']),
-        'targetId': targetId,
+        'userId': userId,
+        'targetId': STR(targetUser['id']),
+        'targetName': STR(targetUser['nickName']),
+        'targetPic': STR(targetUser['pic']),
         'createTime': CURRENT_SERVER_TIME()
       };
       await dataRef.doc(key).set(addItem);
       // AppData.blockList[targetId] = FROM_SERVER_DATA(addItem);
-      return true;
+      return FROM_SERVER_DATA(addItem);
     } catch (e) {
       LOG('--> addBlockItem error : $e');
     }
-    return false;
+    return null;
   }
   
-  Future<bool> setBlockItemStatus(JSON user, String targetId, int status) async {
-    LOG('------> setBlockItemStatus : $targetId / $status');
+  Future<bool> setBlockItemStatusFromUserId(String targetId, String userId, int status) async {
+    LOG('------> setBlockItemStatusFromUserId : $targetId / $status');
     var ref = firestore!.collection(BlockCollection)
         .where('targetId', isEqualTo: targetId)
-        .where('userId' , isEqualTo: STR(user['id']));
+        .where('userId' , isEqualTo: userId);
     var snapshot = await ref.limit(1).get();
   
     if (snapshot.docs.isEmpty) {
-      LOG('--> setBlockItemStatus : No matching documents.');
+      LOG('--> setBlockItemStatusFromUserId : No matching documents.');
     } else {
       try {
         var item = snapshot.docs.first;
@@ -1688,13 +1690,28 @@ class ApiService extends GetxService {
         // AppData.blockList.remove(targetId);
         return true;
       } catch (e) {
-        LOG('--> setBlockItemStatus error : $e');
+        LOG('--> setBlockItemStatusFromUserId error : $e');
       }
     }
     return false;
   }
-  
-  
+
+  Future<bool> setBlockItemStatus(String blockId, int status) async {
+    LOG('------> setBlockItemStatus : $blockId / $status');
+    try {
+      var dataRef = firestore!.collection(ReportCollection);
+      await dataRef.doc(blockId).update({
+        'status': status,
+        'updateTime': CURRENT_SERVER_TIME()
+      });
+    } catch (e) {
+      LOG('--> setBlockItemStatus error : $e');
+      return false;
+    }
+    return true;
+  }
+
+
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
   //    REPORT Functions
@@ -1708,13 +1725,14 @@ class ApiService extends GetxService {
       var snapshot = await firestore!.collection(ReportCollection)
           .where('status', isEqualTo: 1)
           .where('userId', isEqualTo: userId)
+          .orderBy('createTime', descending: true)
           .get();
 
       for (var item in snapshot.docs) {
-        var addItem = FROM_SERVER_DATA(item.data());
+        JSON addItem = FROM_SERVER_DATA(item.data());
         var type = STR(addItem['type']);
         if (!result.containsKey(type)) {
-          result[type] = {};
+          result[type] = JSON.from({});
         }
         var targetID = STR(addItem['targetId']);
         if (targetID.isNotEmpty) {
@@ -1724,16 +1742,15 @@ class ApiService extends GetxService {
       for (var type in result.keys) {
         result[type] = JSON_CREATE_TIME_SORT_DESC(result[type]);
       }
-      LOG('------> getReportList result : ${result.length}');
+      LOG('--> getReportData result : ${result.toString()}');
     } catch (e) {
-      LOG('--> getReportList error : $e');
+      LOG('--> getReportData error : $e');
     }
     return result;
   }
   
-  Future<JSON> addReportItem(JSON user, JSON reportData, String type, String targetId, String desc) async {
+  Future<JSON?> addReportItem(JSON user, String type, String targetId, String desc) async {
     LOG('--> addReportItem : $type / $targetId / $desc');
-    if (type.isEmpty || desc.isEmpty || targetId.isEmpty) return reportData;
     try {
       JSON addItem = {
         'userId'    : STR(user['id']),
@@ -1745,15 +1762,14 @@ class ApiService extends GetxService {
         'replayDesc': '', // 처리내역..
         'replayTime': '', // 처리시간..
       };
-      return await addReportItemEx(addItem, reportData);
+      return await addReportItemEx(addItem);
     } catch (e) {
       LOG('--> addDeclarationItem error : $e');
     }
-    return reportData;
+    return null;
   }
   
-  Future<JSON> addReportItemEx(JSON itemInfo, JSON reportData) async {
-    if (itemInfo.isEmpty) return reportData;
+  Future<JSON?> addReportItemEx(JSON itemInfo) async {
     try {
       var dataRef = firestore!.collection(ReportCollection);
       var key = dataRef.doc().id;
@@ -1764,18 +1780,11 @@ class ApiService extends GetxService {
       addItem['createTime' ] = CURRENT_SERVER_TIME();
       LOG('--> addReportItem : $addItem');
       await dataRef.doc(key).set(addItem);
-      var type = STR(itemInfo['type']);
-      if (!reportData.containsKey(type)) {
-        reportData[type] = {};
-      }
-      var targetId = STR(itemInfo['targetId']);
-      if (targetId.isNotEmpty) {
-        reportData[type][targetId] = FROM_SERVER_DATA(addItem);
-      }
+      return FROM_SERVER_DATA(addItem);
     } catch (e) {
       LOG('--> addReportItemEx error : $e');
     }
-    return reportData;
+    return null;
   }
   
   Future<JSON> setReportDesc(JSON reportData, String targetId, String desc) async {
@@ -1800,27 +1809,19 @@ class ApiService extends GetxService {
     return reportData;
   }
   
-  Future<JSON> setReportItemStatus(JSON reportData, String targetId, int status) async {
-    LOG('------> setReportItemStatus : $targetId / $status');
+  Future<bool> setReportItemStatus(String reportId, int status) async {
+    LOG('------> setReportItemStatus : $reportId / $status');
     try {
       var dataRef = firestore!.collection(ReportCollection);
-      await dataRef.doc(targetId).update({
+      await dataRef.doc(reportId).update({
         'status': status,
         'updateTime': CURRENT_SERVER_TIME()
       });
-      if (status == 0) {
-        for (var type in reportData.keys) {
-          for (var item in reportData[type].entries) {
-            if (item.value['id'] == targetId) {
-              reportData[type].remove(item.key);
-            }
-          }
-        }
-      }
     } catch (e) {
-      LOG('--> setDeclarationItemStatus error : $e');
+      LOG('--> setReportItemStatus error : $e');
+      return false;
     }
-    return reportData;
+    return true;
   }
 
   //----------------------------------------------------------------------------------------

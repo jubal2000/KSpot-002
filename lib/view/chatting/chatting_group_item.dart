@@ -22,11 +22,17 @@ import '../profile/target_profile.dart';
 
 class ChatGroupItem extends StatelessWidget {
   ChatGroupItem(this.groupItem,
-      {Key? key, this.unOpenCount = 0, this.roomType = ChatRoomType.public, this.onMenuSelected, this.onSelected}) : super(key: key);
+      {Key? key,
+        this.unOpenCount = 0,
+        this.isBlocked = false,
+        this.roomType = ChatRoomType.public,
+        this.onMenuSelected,
+        this.onSelected}) : super(key: key);
 
   ChatRoomModel? groupItem;
   ChatRoomType roomType;
   int unOpenCount;    // no read message count..
+  bool isBlocked;
 
   Function(DropdownItemType, String)? onMenuSelected;
   Function(String)? onSelected;
@@ -137,7 +143,7 @@ class ChatGroupItem extends StatelessWidget {
           Expanded(
             child: GestureDetector(
               onTap: () {
-                if (onSelected != null) onSelected!(groupItem!.id);
+                if (!isBlocked && onSelected != null) onSelected!(groupItem!.id);
               },
               child: Container(
                 color: Colors.transparent,
@@ -151,9 +157,11 @@ class ChatGroupItem extends StatelessWidget {
                         if (groupItem!.type == 0)
                           Row(
                               children: [
-                                Text(STR(groupItem!.title), style: ItemTitleStyle(context), maxLines: 1),
-                                SizedBox(width: 10),
-                                Text('${groupItem!.memberData.length}', style: ItemTitleBoldStyle(context)),
+                                Text(STR(groupItem!.title), style: isBlocked ? ItemTitleDisableStyle(context) : ItemTitleStyle(context), maxLines: 1),
+                                if (!isBlocked)...[
+                                  SizedBox(width: 10),
+                                  Text('${groupItem!.memberData.length}', style: ItemTitleBoldStyle(context)),
+                                ],
                               ]
                           ),
                         if (groupItem!.type == 1)
@@ -194,16 +202,16 @@ class ChatGroupItem extends StatelessWidget {
                         ],
                       ],
                     ),
-                    if (roomType != ChatRoomType.public)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Text(STR(groupItem!.lastMessage), maxLines: 1, style: ItemDescStyle(context), overflow: TextOverflow.ellipsis),
-                        ),
-                        Text(SERVER_TIME_STR(groupItem!.updateTime, true), style: ItemDescExStyle(context)),
-                      ],
-                    ),
+                    if (roomType != ChatRoomType.public && !isBlocked)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Text(STR(groupItem!.lastMessage), maxLines: 1, style: ItemDescStyle(context), overflow: TextOverflow.ellipsis),
+                          ),
+                          Text(SERVER_TIME_STR(groupItem!.updateTime, true), style: ItemDescExStyle(context)),
+                        ],
+                      ),
                   ],
                 ),
               ),
@@ -226,25 +234,30 @@ class ChatGroupItem extends StatelessWidget {
               itemPadding: const EdgeInsets.only(left: 12, right: 12),
               offset: const Offset(0, 8),
               items: [
-                if (!isEnter)...[
-                  ...UserMenuItems.chatRoomMenu0.map((item) => DropdownMenuItem<DropdownItem>(
-                    value: item,
-                    child: UserMenuItems.buildItem(item),
-                  )),
+                if (isBlocked)...[
+                  DropdownMenuItem<DropdownItem>(value: userMenuMsgUnReport, child: UserMenuItems.buildItem(context, userMenuMsgUnReport)),
                 ],
-                if (isEnter)...[
-                  ...UserMenuItems.chatRoomMenu1.map((item) => DropdownMenuItem<DropdownItem>(
-                    value: item,
-                    child: UserMenuItems.buildItem(item),
-                  )),
+                if (!isBlocked)...[
+                  if (!isEnter)...[
+                    ...DropdownItems.chatRoomMenu0.map((item) => DropdownMenuItem<DropdownItem>(
+                      value: item,
+                      child: DropdownItems.buildItem(context,item),
+                    )),
+                    if (roomType != ChatRoomType.publicMy)...[
+                      DropdownMenuItem<DropdownItem>(value: userMenuMsgReport, child: UserMenuItems.buildItem(context, userMenuMsgReport)),
+                    ],
+                  ],
+                  if (isEnter)...[
+                    ...DropdownItems.chatRoomMenu1.map((item) => DropdownMenuItem<DropdownItem>(
+                      value: item,
+                      child: DropdownItems.buildItem(context, item),
+                    )),
+                    if (roomType != ChatRoomType.public)...[
+                      ...alarmMenu(context),
+                    ],
+                  ],
+                  ...indexMenu(context),
                 ],
-                if (roomType != ChatRoomType.publicMy)...[
-                  DropdownMenuItem<DropdownItem>(value: dropMenuMsgReport, child: UserMenuItems.buildItem(dropMenuMsgReport)),
-                ],
-                if (roomType != ChatRoomType.public)...[
-                  ...alarmMenu(),
-                ],
-                ...indexMenu(),
               ],
               onChanged: (value) {
                 var selected = value as DropdownItem;
@@ -257,20 +270,20 @@ class ChatGroupItem extends StatelessWidget {
     );
   }
 
-  List<DropdownMenuItem> alarmMenu() {
+  List<DropdownMenuItem> alarmMenu(context) {
     var item = cache.roomAlarmData.contains(groupItem!.id) ? dropMenuAlarmOff : dropMenuAlarmOn;
     return [
-        DropdownMenuItem<DropdownItem>(value: item, child: UserMenuItems.buildItem(item)),
+        DropdownMenuItem<DropdownItem>(value: item, child: UserMenuItems.buildItem(context, item)),
     ];
   }
 
-  List<DropdownMenuItem> indexMenu() {
+  List<DropdownMenuItem> indexMenu(context) {
     LOG('--> indexMenu index [${groupItem!.id}] => $fixIndex');
     return [
       if (fixIndex != 0)
-        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOn, child: UserMenuItems.buildItem(dropMenuIndexBkOn)),
+        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOn, child: UserMenuItems.buildItem(context, dropMenuIndexBkOn)),
       if (fixIndex >= 0)
-        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOff, child: UserMenuItems.buildItem(dropMenuIndexBkOff)),
+        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOff, child: UserMenuItems.buildItem(context, dropMenuIndexBkOff)),
     ];
   }
 }

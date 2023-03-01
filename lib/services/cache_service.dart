@@ -152,6 +152,15 @@ class CacheService extends GetxService {
     }
   }
 
+  getMemberFromRoom(String roomId, String userId) {
+    for (var item in chatRoomData[roomId]!.memberData) {
+      if (item.id == userId) {
+        return item;
+      }
+    }
+    return null;
+  }
+
   getRoomIndexTop(int type, String roomId) {
     return getRoomIndexData(type).indexOf(roomId);
   }
@@ -165,6 +174,11 @@ class CacheService extends GetxService {
       default:
         return privateIndexData;
     }
+  }
+
+  List<String> getBlockDataList() {
+    if (blockData.entries.isEmpty) return [];
+    return List<String>.from(blockData.entries.map((item) => item.value).toList());
   }
 
   Future sortStoryDataCreateTimeDesc() async {

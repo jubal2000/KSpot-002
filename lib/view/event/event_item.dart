@@ -124,7 +124,7 @@ class _EventCardItemState extends State<EventCardItem> {
                     SizedBox(width: 10),
                     Expanded(
                         child: Container(
-                            padding: EdgeInsets.only(top: 10),
+                            padding: EdgeInsets.only(top: 5),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.end,
                               crossAxisAlignment: CrossAxisAlignment.start,

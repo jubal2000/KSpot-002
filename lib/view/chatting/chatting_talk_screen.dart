@@ -56,6 +56,7 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
   JSON imageData = {};
   JSON chatItemData = {};
   var  memberList = [].obs;
+  var  isManager = false;
 
   initData() {
     DateTime? startTime;
@@ -63,6 +64,7 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
       LOG('--> widget.roomInfo.memberData :${item.toJson()}');
       if (item.id == AppData.USER_ID && item.createTime != null) {
         startTime = DateTime.parse(item.createTime!);
+        isManager = item.status == 2;
       }
     }
     chatRepo.startChatStreamData(widget.roomInfo.id, startTime ?? DateTime.now(), (result) {
@@ -200,6 +202,7 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
             item.value,
             openCount: openCount,
             isOwner: isOwner,
+            isManager: isManager,
             isOpened: isOpened,
             isShowFace: isShowFace,
             isShowDate: isShowDate,
@@ -296,9 +299,9 @@ class ChattingTalkScreenState extends State<ChattingTalkScreen> {
                         itemPadding: const EdgeInsets.only(left: 12, right: 12),
                         offset: const Offset(0, 8),
                         items: [
-                          ...UserMenuItems.chatRoomMenu1.map((item) => DropdownMenuItem<DropdownItem>(
+                          ...DropdownItems.chatRoomMenu1.map((item) => DropdownMenuItem<DropdownItem>(
                             value: item,
-                            child: UserMenuItems.buildItem(item),
+                            child: DropdownItems.buildItem(context, item),
                           )),
                         ],
                         onChanged: (value) {

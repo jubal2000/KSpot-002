@@ -591,7 +591,7 @@ class MyProfileTab extends StatelessWidget {
                                   isShowUser: false,
                                   isShowHomeButton: false,
                                   isShowLike: false,
-                                  itemHeight: 80,
+                                  itemHeight: 90,
                                   onRefresh: (updateData) {
                                     setState(() {
                                       // _itemList![key] = updateData;

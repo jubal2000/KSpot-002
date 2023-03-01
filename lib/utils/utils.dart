@@ -63,7 +63,16 @@ DBL(dynamic value, {double defaultValue = 0.0}) {
 // ignore: non_constant_identifier_names
 STR(dynamic value, {String defaultValue = ''}) {
   var result = value.runtimeType != Null && value != 'null' && value!.toString().isNotEmpty ? value!.toString() : defaultValue;
-  return result.replaceAll('\\n', ' ');
+  result = result.replaceAll('\\n', ' ');
+  result = result.replaceAll('\n', ' ');
+  return result;
+}
+
+// ignore: non_constant_identifier_names
+DESC(dynamic value, {String defaultValue = ''}) {
+  var result = value.runtimeType != Null && value != 'null' && value!.toString().isNotEmpty ? value!.toString() : defaultValue;
+  result = result.replaceAll('\\n', '\n');
+  return result;
 }
 
 // ignore: non_constant_identifier_names
@@ -270,12 +279,6 @@ String EVENT_TIMEDATA_TITLE_TIME_STR(value) {
 }
 
 // ignore: non_constant_identifier_names
-DESC(dynamic desc) {
-  var tmp = desc != null ? desc.replaceAll('\\n', '\n') : '';
-  return STR(tmp);
-}
-
-// ignore: non_constant_identifier_names
 SERVER_DATE(DateTime date) {
   Timestamp currentTime = Timestamp.fromDate(DateTime(date.year, date.month, date.day));
   return currentTime;
@@ -404,13 +407,13 @@ JSON_START_DAY_SORT_DESC(JSON data) {
 JSON_CREATE_TIME_SORT_DESC(JSON data) {
   // LOG("--> JSON_CREATE_TIME_SORT_DESC : ${data.length}");
   try {
-  if (JSON_EMPTY(data)) return JSON.from({});
-  if (data.length < 2) return data;
-  return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
-    // LOG("--> check : ${data[a]['createTime']}");
-    return data[a]['createTime'] != null && data[b]['createTime'] != null ?
-    DateTime.parse(data[a]['createTime']).isBefore(DateTime.parse(data[b]['createTime'])) ? -1 : 1 : 1;
-  }));
+    if (JSON_EMPTY(data)) return JSON.from({});
+    if (data.length < 2) return data;
+    return JSON.from(SplayTreeMap<String,dynamic>.from(data, (a, b) {
+      // LOG("--> check : ${data[a]['createTime']}");
+      return data[a]['createTime'] != null && data[b]['createTime'] != null ?
+      DateTime.parse(data[a]['createTime']).isBefore(DateTime.parse(data[b]['createTime'])) ? -1 : 1 : 1;
+    }));
   } catch (e) {
     LOG("--> JSON_CREATE_TIME_SORT_DESC error : $e");
   }
@@ -1028,6 +1031,7 @@ enum DropdownItemType {
   unfollow,
   block,
   report,
+  unReport,
   unblock,
   showDeclar,
   reDeclar,
@@ -1056,6 +1060,10 @@ enum DropdownItemType {
   promotion,
   stop,
   pay,
+
+  profile,
+  kick,
+  manager,
 }
 
 class DropdownItem {
@@ -1081,14 +1089,56 @@ class DropdownItem {
 }
 
 
-const dropMenuMessage     = DropdownItem(DropdownItemType.message, text: 'SEND MESSAGE', icon: Icons.mail_outline);
-const dropMenuDelete      = DropdownItem(DropdownItemType.unfollow, text: 'FOLLOW CANCEL', icon: Icons.clear);
-const dropMenuMsgBlock    = DropdownItem(DropdownItemType.block, text: 'BLOCK', icon: Icons.mic_off);
-const dropMenuMsgReport   = DropdownItem(DropdownItemType.report, text: 'REPORT', icon: Icons.report_gmailerrorred);
-const dropMenuUnblock     = DropdownItem(DropdownItemType.unblock, text: 'UNBLOCK', icon: Icons.mic);
-const dropMenuDeclare     = DropdownItem(DropdownItemType.showDeclar, text: 'VIEW REPORT', icon: Icons.announcement_outlined);
-const dropMenuReDeclare   = DropdownItem(DropdownItemType.reDeclar, text: 'REPORT RESULT', icon: Icons.announcement);
-const dropMenuUnDeclare   = DropdownItem(DropdownItemType.unDeclar, text: 'REPORT CANCEL', icon: Icons.clear);
+const userMenuProfile     = DropdownItem(DropdownItemType.profile, text: 'PROFILE', icon: Icons.person_pin_outlined);
+const userMenuMessage     = DropdownItem(DropdownItemType.message, text: 'SEND MESSAGE', icon: Icons.mail_outline);
+const userMenuDelete      = DropdownItem(DropdownItemType.unfollow, text: 'FOLLOW CANCEL', icon: Icons.clear);
+const userMenuMsgBlock    = DropdownItem(DropdownItemType.block, text: 'BLOCK', icon: Icons.mic_off);
+const userMenuMsgReport   = DropdownItem(DropdownItemType.report, text: 'REPORT', icon: Icons.report_gmailerrorred);
+const userMenuMsgUnReport = DropdownItem(DropdownItemType.unReport, text: 'REPORT CANCEL', icon: Icons.cancel_outlined);
+const userMenuUnblock     = DropdownItem(DropdownItemType.unblock, text: 'UNBLOCK', icon: Icons.mic);
+const userMenuDeclare     = DropdownItem(DropdownItemType.showDeclar, text: 'VIEW REPORT', icon: Icons.announcement_outlined);
+const userMenuReDeclare   = DropdownItem(DropdownItemType.reDeclar, text: 'REPORT RESULT', icon: Icons.announcement);
+const userMenuUnDeclare   = DropdownItem(DropdownItemType.unDeclar, text: 'REPORT CANCEL', icon: Icons.clear);
+const userMenuKick        = DropdownItem(DropdownItemType.kick, text: 'DROP OUT', icon: Icons.clear);
+const userMenuManager     = DropdownItem(DropdownItemType.manager, text: 'MANAGER CHANGE', icon: Icons.perm_identity);
+const userMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
+
+class UserMenuItems {
+  static const List<DropdownItem> followingMenu   = [userMenuMessage, userMenuDelete];
+  static const List<DropdownItem> followerMenu    = [userMenuMessage];
+  static const List<DropdownItem> messageMenu     = [userMenuMsgBlock, userMenuMsgReport];
+  static const List<DropdownItem> chatUserMenu    = [userMenuProfile, userMenuMsgBlock, userMenuMsgReport];
+  static const List<DropdownItem> chatManagerMenu = [userMenuManager, userMenuKick];
+  static const List<DropdownItem> blockMenu       = [userMenuUnblock];
+  static const List<DropdownItem> declarMenu      = [userMenuDeclare, userMenuReDeclare, userMenuUnDeclare];
+
+  static Widget buildItem(BuildContext context, DropdownItem item) {
+    final color = item.alert ? Theme.of(context).colorScheme.error : item.color ? Theme.of(context).primaryColor : Theme.of(context).hintColor;
+    final style = item.alert ? itemTitleAlertStyle : item.color ? itemTitleColorStyle : itemTitleStyle;
+    return Row(
+        children: [
+          if (!item.isLine)...[
+            Icon(
+                item.icon,
+                color: color,
+                size: 20
+            ),
+            SizedBox(width: 5),
+            if (item.text != null)...[
+              SizedBox(width: 3),
+              Text(item.text!.tr, style: style, maxLines: 1),
+            ]
+          ],
+          if (item.isLine)...[
+            Expanded(
+              child: showHorizontalDivider(Size(double.infinity, 2), color: Colors.grey),
+            )
+          ]
+        ]
+    );
+  }
+}
+
 const dropMenuEnter       = DropdownItem(DropdownItemType.enter, text: 'ENTER', icon: Icons.login);
 const dropMenuExit        = DropdownItem(DropdownItemType.exit, text: 'LEAVE', icon: Icons.logout);
 const dropMenuAlarmOn     = DropdownItem(DropdownItemType.alarmOn, text: 'ALARM ON', icon: Icons.notifications_active);
@@ -1099,42 +1149,6 @@ const dropMenuIndexUp     = DropdownItem(DropdownItemType.indexUp, text: 'MOVE U
 const dropMenuIndexDown   = DropdownItem(DropdownItemType.indexDown, text: 'MOVE DOWN', icon: Icons.arrow_downward);
 const dropMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
 
-class UserMenuItems {
-  static const List<DropdownItem> followingMenu   = [dropMenuMessage, dropMenuDelete];
-  static const List<DropdownItem> followerMenu    = [dropMenuMessage];
-  static const List<DropdownItem> messageMenu     = [dropMenuMsgBlock, dropMenuMsgReport];
-  static const List<DropdownItem> chatRoomMenu0   = [dropMenuEnter];
-  static const List<DropdownItem> chatRoomMenu1   = [dropMenuExit];
-  static const List<DropdownItem> blockMenu       = [dropMenuUnblock];
-  static const List<DropdownItem> declarMenu      = [dropMenuDeclare, dropMenuReDeclare, dropMenuUnDeclare];
-
-  static Widget buildItem(DropdownItem item) {
-    return Column(
-        children: [
-          if (item.text != null)...[
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5),
-                child: Row(
-                    children: [
-                      Icon(
-                          item.icon,
-                          color: Colors.grey,
-                          size: 20
-                      ),
-                      SizedBox(width: 5),
-                      Text(item.text!.tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                    ]
-                ),
-              ),
-            ),
-          ],
-          if (item.isLine)
-            showHorizontalDivider(Size(double.infinity, 2), color: Colors.grey),
-        ]
-    );
-  }
-}
 
 class DropdownItems {
   static const List<DropdownItem> eventAddItem    = [placeGroup, place, event];
@@ -1164,6 +1178,8 @@ class DropdownItems {
   static const List<DropdownItem> reserve1          = [delete];
   static const List<DropdownItem> reserve2          = [confirm, reject];
   static const List<DropdownItem> secondItems = [];
+  static const List<DropdownItem> chatRoomMenu0     = [dropMenuEnter];
+  static const List<DropdownItem> chatRoomMenu1     = [dropMenuExit];
 
   static const content      = DropdownItem(DropdownItemType.content, text: 'HISTORY +', icon: Icons.movie_creation);
   static const talent       = DropdownItem(DropdownItemType.talent, text: 'TALENT +', icon: Icons.star);

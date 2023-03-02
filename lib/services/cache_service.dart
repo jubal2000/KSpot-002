@@ -27,6 +27,7 @@ class CacheService extends GetxService {
 
   JSON reportData = {};
   JSON blockData = {};
+  JSON chatItemData = {};
 
   List<String> roomAlarmData = [];
   List<String> publicMyRoomIndexData = [];
@@ -70,11 +71,18 @@ class CacheService extends GetxService {
   }
 
   setChatItemData(JSON addData) {
+    var count = 0;
     chatData ??= {};
     for (var item in addData.entries) {
-      setChatItem(ChatModel.fromJson(item.value));
+      var chatItem = ChatModel.fromJson(item.value);
+      var chatItemOrg = chatData![item.key];
+      var openCount = chatItem.openList != null ? chatItem.openList!.length : 0;
+      var openOrgCount = chatItemOrg != null && chatItemOrg.openList != null ? chatItemOrg.openList!.length : 0;
+      if (openCount != openOrgCount || chatItem.action == 9) count++; // is chat item edited..
+      setChatItem(chatItem);
     }
     // LOG('--> setChatItem : ${addData.length} / ${chatData!.length}');
+    return count;
   }
 
   setChatItemList(List<JSON> addData) {

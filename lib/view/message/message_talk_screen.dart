@@ -365,7 +365,7 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
   addSendImages(BuildContext context) async {
     AppData.isMainActive = false;
     imageData.clear();
-    List<XFile>? imageList = await ImagePicker().pickMultiImage();
+    List<XFile>? imageList = await ImagePicker().pickMultiImage(maxWidth: PIC_IMAGE_SIZE_MAX, maxHeight: PIC_IMAGE_SIZE_MAX);
     if (LIST_NOT_EMPTY(imageList)) {
       showLoadingDialog(context, 'Processing now...'.tr);
       for (var i = 0; i < imageList.length; i++) {

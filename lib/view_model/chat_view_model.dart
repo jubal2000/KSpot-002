@@ -102,13 +102,13 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   showTalkScreen(item) {
-    Get.to(() => ChattingTalkScreen(item))!.then((_) {
+    Get.to(() => ChatTalkScreen(item))!.then((_) {
       notifyListeners();
     });
   }
 
   refreshShowList(bool isMy) {
-    LOG('--> refreshShowList : $isMy');
+    // LOG('--> refreshShowList : $isMy');
     List<ChatGroupItem> showList = [];
     List<String> showListKey = [];
     List<ChatGroupItem> showResultList = [];
@@ -142,7 +142,7 @@ class ChatViewModel extends ChangeNotifier {
             unOpenCount[roomId]['count']++;
             unOpenCount[roomId]['updateTime'] = item.value.updateTime;
           }
-          LOG('--> unOpenCount [$roomId] : ${unOpenCount[roomId].toString()} / $isMyMsg, $isTimeCheck, ${item.value.openList}, ${AppData.USER_ID}');
+          // LOG('--> unOpenCount [$roomId] : ${unOpenCount[roomId].toString()} / $isMyMsg, $isTimeCheck, ${item.value.openList}, ${AppData.USER_ID}');
         }
       }
     }
@@ -250,7 +250,7 @@ class ChatViewModel extends ChangeNotifier {
         } else {
           final aCount = showList[a].groupItem!.memberList.length;
           final bCount = showList[b].groupItem!.memberList.length;
-          if (aCount < bCount) {
+          if ((showList[a].isBlocked && !showList[b].isBlocked) || (!showList[b].isBlocked && aCount < bCount)) {
             final tmp = showList[a];
             showList[a] = showList[b];
             showList[b] = tmp;
@@ -258,18 +258,6 @@ class ChatViewModel extends ChangeNotifier {
         }
       }
     }
-    // final roomIndexData = cache.getRoomIndexData(roomType.index);
-    // LOG('--> roomIndexData : ${roomIndexData.toString()}');
-    // for (var item in roomIndexData) {
-    //   if (showListKey.contains(item)) {
-    //     showResultList.add(item);
-    //   }
-    // }
-    // for (var item in showList) {
-    //   if (!showResultList.contains(item)) {
-    //     showResultList.add(item);
-    //   }
-    // }
     // sort index..
     for (ChatGroupItem item in showList) {
       var index = cache.getRoomIndexTop(item.roomType.index, item.groupItem!.id);
@@ -280,15 +268,17 @@ class ChatViewModel extends ChangeNotifier {
         showResultList.add(item);
       }
     }
-    LOG('--> showList : ${showList.length} / ${showResultList.length}');
+    // LOG('--> showList : ${showList.length} / ${showResultList.length}');
     return Column(
       children: [
-        SubTitleBar(buildContext!, isMy ? 'MY CHAT'.tr : 'OTHER CHAT'.tr,
+        SubTitleBar(buildContext!, '${isMy ? 'MY CHAT'.tr : 'OTHER CHAT'.tr} ${showResultList.length}',
           height: 35,
-          icon: isTabOpen[isMy ? 0 : 1] ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
-          isTabOpen[isMy ? 0 : 1] = !isTabOpen[isMy ? 0 : 1];
-          notifyListeners();
-        }),
+          icon: isTabOpen[isMy ? 0 : 1] ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+          onActionSelect: (select) {
+            isTabOpen[isMy ? 0 : 1] = !isTabOpen[isMy ? 0 : 1];
+            notifyListeners();
+          }
+        ),
         if (isTabOpen[isMy ? 0 : 1])...[
           SizedBox(height: 5),
           ...showResultList,
@@ -338,7 +328,6 @@ class ChatViewModel extends ChangeNotifier {
             child: ListView(
               shrinkWrap: true,
               children: [
-                SizedBox(height: 10),
                 refreshShowList(true),
                 if (currentTab == 0)...[
                   SizedBox(height: 5),

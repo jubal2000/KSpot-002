@@ -53,7 +53,7 @@ class ChatGroupItem extends StatelessWidget {
       if (i > showMemberMax) return;
       showList.add(groupItem!.memberData[i]);
     }
-    LOG('--> ChatGroupItem initData [${groupItem!.id}] : ${groupItem!.memberData.length} / $fixIndex');
+    // LOG('--> ChatGroupItem initData [${groupItem!.id}] : ${groupItem!.memberData.length} / $fixIndex');
   }
 
   @override
@@ -278,7 +278,6 @@ class ChatGroupItem extends StatelessWidget {
   }
 
   List<DropdownMenuItem> indexMenu(context) {
-    LOG('--> indexMenu index [${groupItem!.id}] => $fixIndex');
     return [
       if (fixIndex != 0)
         DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOn, child: UserMenuItems.buildItem(context, dropMenuIndexBkOn)),

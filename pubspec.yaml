@@ -74,7 +74,6 @@ dependencies:
 #  csc_picker: ^0.2.6
   pointer_interceptor: ^0.9.3
   image_cropper: ^2.0.3
-  file_picker: ^4.6.1
   shared_preferences: ^2.0.15
   pin_code_fields: ^7.4.0
   location: ^4.4.0
@@ -88,6 +87,7 @@ dependencies:
   image_editor: ^1.0.2
   image_gallery_saver: ^1.7.1
   date_picker_timeline: ^1.2.3
+  file_picker: ^5.2.5
 
   # ui..
   cupertino_icons: any
@@ -165,6 +165,8 @@ flutter:
     - assets/html/
     - assets/data/
     - assets/map_style/
+    - assets/file_icons/
+
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a

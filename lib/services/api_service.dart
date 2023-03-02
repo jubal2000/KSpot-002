@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:kspot_002/models/upload_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -2019,7 +2020,7 @@ class ApiService extends GetxService {
     return ref.snapshots().listen((QuerySnapshot querySnapshot) {
       for (var doc in querySnapshot.docs) {
         var item = FROM_SERVER_DATA(doc.data() as JSON);
-        LOG('--> startChatStreamData item : $item');
+        // LOG('--> startChatStreamData item : $item');
         result[item['id']] = item;
       }
       onChanged(result);
@@ -2657,9 +2658,8 @@ class ApiService extends GetxService {
   Future? uploadImageData(JSON imageInfo, String path) async {
     if (imageInfo['data'] != null) {
       try {
-        final ref = FirebaseStorage.instance.ref().child('$path/${imageInfo['id']}');
-        // List<int> list = utf8.encode(STR(imageInfo['data']));
-        // Uint8List bytes = Uint8List.fromList(list);
+        final ref = FirebaseStorage.instance.ref()
+            .child('$path/${imageInfo['id']}');
         var uploadTask = ref.putData(imageInfo['data']);
         var snapshot = await uploadTask;
         if (snapshot.state == TaskState.success) {
@@ -2724,11 +2724,33 @@ class ApiService extends GetxService {
     }
     return true;
   }
-  
-  Future uploadDocFile(File? file, String path, String key) async {
+
+  Future? uploadData(Uint8List? data, String key, String path) async {
+    if (data != null) {
+      try {
+        final ref = FirebaseStorage.instance.ref()
+            .child('$path/$key');
+        var uploadTask = ref.putData(data!);
+        var snapshot = await uploadTask;
+        if (snapshot.state == TaskState.success) {
+          var url = await snapshot.ref.getDownloadURL();
+          LOG('--> uploadData done : $url');
+          return url;
+        } else {
+          return null;
+        }
+      } catch (e) {
+        LOG('--> uploadData error : $e');
+      }
+    }
+    return null;
+  }
+
+  Future uploadFile(File? file, String path, String fileName) async {
+    LOG('--> uploadFile : $path/$fileName');
     if (file == null) return;
     try {
-      final ref = FirebaseStorage.instance.ref().child('$path/$key');
+      final ref = FirebaseStorage.instance.ref().child('$path/$fileName');
       var snapshot = await ref.putFile(file);
       if (snapshot.state == TaskState.success) {
         var imageUrl = await snapshot.ref.getDownloadURL();

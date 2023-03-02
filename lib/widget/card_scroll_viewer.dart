@@ -32,6 +32,7 @@ class ImageEditScrollViewer extends CardScrollViewer {
         selectedId = '',
         selectText = '',
         selectTextStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white),
+        backgroundPadding = EdgeInsets.zero,
         onActionCallback,
       })
       : super(itemList,
@@ -52,6 +53,7 @@ class ImageEditScrollViewer extends CardScrollViewer {
     selectedId: selectedId,
     selectText: selectText,
     selectTextStyle: selectTextStyle,
+    backgroundPadding: backgroundPadding,
     onActionCallback: onActionCallback,
   );
 }
@@ -391,8 +393,10 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.add_outlined, color: Theme.of(context).primaryColor.withOpacity(0.5)),
-                  SizedBox(height: 5),
-                  Text(widget.addText.isNotEmpty ? widget.addText : 'Add'.tr, style: itemSubTitleStyle)
+                  if (widget.addText.isNotEmpty)...[
+                    SizedBox(height: 5),
+                    Text(widget.addText, style: itemSubTitleStyle)
+                  ]
                 ],
               ),
             )

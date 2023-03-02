@@ -1109,7 +1109,7 @@ SPEC CHECKSUMS:
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
   ffmpeg-kit-ios-min-gpl: 074814f41eeb3d4980a3051c46f05b18b1d5b2e3
   ffmpeg_kit_flutter_min_gpl: 1507ed8e57a2a9f09a8c96834a115c8301f0d468
-  file_picker: 817ab1d8cd2da9d2da412a417162deee3500fc95
+  file_picker: ce3938a0df3cc1ef404671531facef740d03f920
   Firebase: 5ae8b7cf8efce559a653aef0ad95bab3f427c351
   firebase_analytics: 9937a91df25cce5b0ee19eaf65277ff8bf0f88e5
   firebase_auth: 07a4db69cfa447ac42cb7faa560fc100708b707c
@@ -1174,4 +1174,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.11.3

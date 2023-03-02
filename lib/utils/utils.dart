@@ -1074,6 +1074,7 @@ class DropdownItem {
   final double height;
   final bool color;
   final bool alert;
+  final bool manager;
 
   const DropdownItem(
     this.type,
@@ -1084,12 +1085,13 @@ class DropdownItem {
       this.height = 40,
       this.color = false,
       this.alert = false,
+      this.manager = false,
     }
   );
 }
 
 
-const userMenuProfile     = DropdownItem(DropdownItemType.profile, text: 'PROFILE', icon: Icons.person_pin_outlined);
+const userMenuProfile     = DropdownItem(DropdownItemType.profile, text: 'PROFILE', icon: Icons.person);
 const userMenuMessage     = DropdownItem(DropdownItemType.message, text: 'SEND MESSAGE', icon: Icons.mail_outline);
 const userMenuDelete      = DropdownItem(DropdownItemType.unfollow, text: 'FOLLOW CANCEL', icon: Icons.clear);
 const userMenuMsgBlock    = DropdownItem(DropdownItemType.block, text: 'BLOCK', icon: Icons.mic_off);
@@ -1099,8 +1101,8 @@ const userMenuUnblock     = DropdownItem(DropdownItemType.unblock, text: 'UNBLOC
 const userMenuDeclare     = DropdownItem(DropdownItemType.showDeclar, text: 'VIEW REPORT', icon: Icons.announcement_outlined);
 const userMenuReDeclare   = DropdownItem(DropdownItemType.reDeclar, text: 'REPORT RESULT', icon: Icons.announcement);
 const userMenuUnDeclare   = DropdownItem(DropdownItemType.unDeclar, text: 'REPORT CANCEL', icon: Icons.clear);
-const userMenuKick        = DropdownItem(DropdownItemType.kick, text: 'DROP OUT', icon: Icons.clear);
-const userMenuManager     = DropdownItem(DropdownItemType.manager, text: 'MANAGER CHANGE', icon: Icons.perm_identity);
+const userMenuKick        = DropdownItem(DropdownItemType.kick, text: 'DROP OUT', icon: Icons.clear, manager: true);
+const userMenuManager     = DropdownItem(DropdownItemType.manager, text: 'TRANSFER MANAGER', icon: Icons.perm_identity, manager: true);
 const userMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
 
 class UserMenuItems {
@@ -1112,29 +1114,44 @@ class UserMenuItems {
   static const List<DropdownItem> blockMenu       = [userMenuUnblock];
   static const List<DropdownItem> declarMenu      = [userMenuDeclare, userMenuReDeclare, userMenuUnDeclare];
 
-  static Widget buildItem(BuildContext context, DropdownItem item) {
-    final color = item.alert ? Theme.of(context).colorScheme.error : item.color ? Theme.of(context).primaryColor : Theme.of(context).hintColor;
-    final style = item.alert ? itemTitleAlertStyle : item.color ? itemTitleColorStyle : itemTitleStyle;
-    return Row(
-        children: [
-          if (!item.isLine)...[
-            Icon(
-                item.icon,
-                color: color,
-                size: 20
-            ),
-            SizedBox(width: 5),
-            if (item.text != null)...[
-              SizedBox(width: 3),
-              Text(item.text!.tr, style: style, maxLines: 1),
+  static Widget buildItem(BuildContext context, DropdownItem item, {Function(DropdownItemType)? onSelected}) {
+    var color = item.alert ? Theme.of(context).colorScheme.error : item.color ? Theme.of(context).primaryColor : Theme.of(context).hintColor;
+    var style = item.alert ? itemTitleAlertStyle : item.color ? itemTitleColorStyle : itemTitleStyle;
+
+    if (item.manager) {
+      color = Theme.of(context).colorScheme.tertiary;
+    }
+
+    return GestureDetector(
+      onTap: () {
+        if (onSelected != null) onSelected(item.type);
+      },
+      child: Container(
+        constraints: BoxConstraints(
+          minHeight: item.isLine ? 3 : 45,
+        ),
+        child: Row(
+          children: [
+            if (!item.isLine)...[
+              Icon(
+                  item.icon,
+                  color: color,
+                  size: 20
+              ),
+              SizedBox(width: 5),
+              if (item.text != null)...[
+                SizedBox(width: 3),
+                Text(item.text!.tr, style: style, maxLines: 1),
+              ]
+            ],
+            if (item.isLine)...[
+              Expanded(
+                child: showHorizontalDivider(Size(double.infinity, 3), color: Theme.of(context).dividerColor),
+              )
             ]
-          ],
-          if (item.isLine)...[
-            Expanded(
-              child: showHorizontalDivider(Size(double.infinity, 2), color: Colors.grey),
-            )
           ]
-        ]
+        )
+      )
     );
   }
 }
@@ -2531,4 +2548,18 @@ COMPARE_GROUP_COUNTRY(JSON s) {
   return s['groupId'] == AppData.currentEventGroup!.id &&
          s['country'] == AppData.currentCountry &&
          (AppData.currentState.isEmpty || s['countryState'] == AppData.currentState);
+}
+
+final extImageList = [
+  'gif',
+  'jpg',
+  'jpeg',
+  'png',
+  'bmp',
+  'tif',
+  'tiff',
+];
+
+IS_IMAGE_FILE(String ext) {
+  return extImageList.contains(ext.toLowerCase());
 }

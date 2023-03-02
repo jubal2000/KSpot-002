@@ -549,7 +549,7 @@ class MyProfileTab extends StatelessWidget {
       _showList.add(_itemList![key].toJson());
     }
     _pageMax = (_itemList!.length / _pageShowMax).floor() + (_itemList!.length % _pageShowMax > 0 ? 1 : 0);
-    LOG('--> refreshShowList : ${_itemList!.length} - $_pageNow / $_pageMax - ${userViewModel.isMyProfile}');
+    // LOG('--> refreshShowList : ${_itemList!.length} - $_pageNow / $_pageMax - ${userViewModel.isMyProfile}');
     userViewModel.tabListHeight = (itemHeight * _showList.length + (userViewModel.isMyProfile ? 155.0 : 80.0) + 120.0);
     refreshTabHeight();
   }

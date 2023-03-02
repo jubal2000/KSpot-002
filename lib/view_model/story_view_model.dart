@@ -114,7 +114,7 @@ class StoryViewModel extends ChangeNotifier {
         showList.add(addItem);
       }
     }
-    LOG('------> refreshShowList : ${showList.length} ${cache.storyData!.entries.length}');
+    // LOG('------> refreshShowList : ${showList.length} ${cache.storyData!.entries.length}');
     return sortDataCreateTimeDesc(showList);
   }
 

@@ -110,27 +110,6 @@ class PicData {
 }
 
 @JsonSerializable()
-class RoomFileData {
-  String  id;
-  int     type; // 파일 종류
-  String  url;
-  String  pic;
-  String  userId;
-  String  createTime;
-
-  RoomFileData({
-    required this.id,
-    required this.type,
-    required this.url,
-    required this.pic,
-    required this.userId,
-    required this.createTime,
-  });
-  factory RoomFileData.fromJson(JSON json) => _$RoomFileDataFromJson(json);
-  JSON toJson() => _$RoomFileDataToJson(this);
-}
-
-@JsonSerializable()
 class CountryData {
   String    country;
   String    countryState;

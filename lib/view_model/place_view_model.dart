@@ -42,7 +42,7 @@ class PlaceViewModel extends ChangeNotifier {
   }
 
   picLocalImage() async {
-    List<XFile> pickList = await ImagePicker().pickMultiImage();
+    List<XFile> pickList = await ImagePicker().pickMultiImage(maxWidth: PIC_IMAGE_SIZE_MAX, maxHeight: PIC_IMAGE_SIZE_MAX);
     if (pickList.isNotEmpty) {
       for (var i=0; i<pickList.length; i++) {
         var image = pickList[i];

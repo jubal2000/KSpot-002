@@ -1,11 +1,14 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:kspot_002/models/upload_model.dart';
 import 'package:kspot_002/models/user_model.dart';
 import 'etc_model.dart';
 import '../utils/utils.dart';
 
 part 'chat_model.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(
+  explicitToJson: true,
+)
 class ChatModel {
   String  id;
   int     status;   // 상태 (0:removed, 1:active, 2:disable, 3:ready)
@@ -19,9 +22,8 @@ class ChatModel {
   String  createTime;     // 생성 시간
 
   List<String>? openList;
-  List<String>? picData;
-  List<String>? thumbData;
-  List<String>? fileData;
+  List<String>? thumbList;
+  List<UploadFileModel>? fileData;
 
   ChatModel({
     required this.id,
@@ -36,8 +38,7 @@ class ChatModel {
     required this.createTime,
 
     this.openList,
-    this.picData,
-    this.thumbData,
+    this.thumbList,
     this.fileData,
   });
   factory ChatModel.fromJson(JSON json) => _$ChatModelFromJson(json);
@@ -82,7 +83,6 @@ class ChatRoomModel {
   String? groupId;        // 이벤트 그룹 Id
   String? country;
   String? countryState;
-  List<RoomFileData>? fileData;
 
   ChatRoomModel({
     required this.id,
@@ -101,7 +101,6 @@ class ChatRoomModel {
     this.groupId,
     this.country,
     this.countryState,
-    this.fileData,
   });
   factory ChatRoomModel.fromJson(JSON json) => _$ChatRoomModelFromJson(json);
   JSON toJson() => _$ChatRoomModelToJson(this);

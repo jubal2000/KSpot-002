@@ -2,6 +2,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/models/upload_model.dart';
 import 'package:kspot_002/repository/user_repository.dart';
 import 'package:kspot_002/view/profile/target_profile.dart';
 import 'package:uuid/uuid.dart';
@@ -43,20 +44,24 @@ class ChatItemState extends State<ChatItem> {
   final radiusSize = 12.0;
   final imageSize = 80.0;
   final faceSize = 40.0;
-  final JSON imageData = {};
+  final JSON fileData = {};
   var action = 0;
 
   init() {
-    if (LIST_NOT_EMPTY(widget.messageItem['thumbData'])) {
-      LOG("--> thumbData : ${widget.messageItem['thumbData']}");
-      widget.messageItem['thumbData'].forEach((item) {
-        LOG("--> thumbData item : $item");
-        var index = widget.messageItem['thumbData'].indexOf(item);
-        var key = Uuid().v1();
-        imageData[key] = {'id': key, 'url': item};
-        if (widget.messageItem['picData'][index] != null) {
-          imageData[key]['linkPic'] = widget.messageItem['picData'][index];
+    if (LIST_NOT_EMPTY(widget.messageItem['fileData'])) {
+      LOG("--> thumbList : ${widget.messageItem['fileData']}");
+      widget.messageItem['fileData'].forEach((item) {
+        final fileItem = UploadFileModel.fromJson(item);
+        LOG("--> fileData item : ${fileItem.toJson()}");
+        JSON addItem = {'id': fileItem.id};
+        if (IS_IMAGE_FILE(fileItem.extension)) {
+          addItem['url'] = fileItem.thumb;
+          addItem['linkPic'] = fileItem.url;
+        } else {
+          addItem['url'] = 'assets/file_icons/icon_${fileItem.extension}.png';
+          addItem['linkPic'] = addItem['url'];
         }
+        fileData[fileItem.id] = addItem;
       });
     }
     // LOG('--> ChatItemState init [${widget.messageItem['desc']}]: ${widget.isOwner} / ${widget.isOpened} / ${widget.openCount} => ${widget.messageItem['openList']}');
@@ -115,7 +120,7 @@ class ChatItemState extends State<ChatItem> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         if (widget.isOwner)...[
-                          Text(widget.isOpened ? 'READ'.tr : '${widget.openCount} ${'READ'.tr}',
+                          Text(widget.isOpened ? 'READ'.tr : '${widget.openCount}',
                               style: ItemChatReadStyle(context, widget.isOpened)),
                           SizedBox(width: 5),
                           if (widget.isShowDate)...[
@@ -164,11 +169,11 @@ class ChatItemState extends State<ChatItem> {
                                 ? CrossAxisAlignment.end
                                 : CrossAxisAlignment.start,
                             children: [
-                              if (imageData.isNotEmpty)...[
+                              if (fileData.isNotEmpty)...[
                                 SizedBox(
-                                  width: imageData.length * imageSize,
+                                  width: fileData.length * imageSize,
                                   child: CardScrollViewer(
-                                    imageData,
+                                    fileData,
                                     itemWidth: imageSize,
                                     itemHeight: imageSize,
                                     itemRound: radiusSize,
@@ -177,12 +182,7 @@ class ChatItemState extends State<ChatItem> {
                                     backgroundPadding: EdgeInsets.zero,
                                     onActionCallback: (key, status) {
                                       LOG('--> onActionCallback : $key / $status');
-                                      showImageSlideDialog(context,
-                                          List<String>.from(widget.messageItem['picData'].map((item) {
-                                            LOG('--> imageData item : ${item.runtimeType} / $item');
-                                            return item.runtimeType == String ? STR(item) : item['url'] ??
-                                                item['image'];
-                                          }).toList()), 0, true);
+                                      showImageSlideDialog(context, fileData.entries.map((e) => STR(e.value['linkPic']).toString()).toList(), 0, true);
                                     },
                                   ),
                                 ),
@@ -191,13 +191,12 @@ class ChatItemState extends State<ChatItem> {
                               VisibilityDetector(
                                 onVisibilityChanged: (value) {
                                   if (value.visibleFraction > 0 && !widget.isOwner && !widget.isOpened) {
-                                    LOG('--> check opened : ${widget.messageItem['desc']} / ${widget
-                                        .messageItem['openList']}');
+                                    // LOG('--> check opened : ${widget.messageItem['desc']} / ${widget.messageItem['openList']}');
                                     widget.messageItem['openList'] ??= [];
                                     if (!widget.messageItem['openList'].contains(AppData.USER_ID)) {
                                       widget.messageItem['openList'].add(AppData.USER_ID);
+                                      if (widget.onSetOpened != null) widget.onSetOpened!(widget.messageItem);
                                     }
-                                    if (widget.onSetOpened != null) widget.onSetOpened!(widget.messageItem);
                                   }
                                 },
                                 key: GlobalKey(),
@@ -219,7 +218,7 @@ class ChatItemState extends State<ChatItem> {
                                     style: ItemChatTimeStyle(context)),
                               ],
                               SizedBox(width: 5),
-                              Text(widget.isOpened ? 'READ'.tr : '${'READ'.tr} ${widget.openCount}',
+                              Text(widget.isOpened ? 'READ'.tr : '${widget.openCount}',
                                   style: ItemChatReadStyle(context, widget.isOpened)),
                             ],
                           )
@@ -241,6 +240,35 @@ class ChatItemState extends State<ChatItem> {
     }
   }
 
+  onSelected(type) async {
+    unFocusAll(context);
+    switch(type) {
+      case DropdownItemType.profile:
+        var userInfo = await userRepo.getUserInfo(widget.messageItem['senderId']);
+        if (userInfo != null) {
+          Get.to(() => TargetProfileScreen(userInfo))!.then((value) {
+          });
+        } else {
+          showUserAlertDialog(context, '${'Target user'.tr} : ${widget.messageItem['senderName']}');
+        }
+        break;
+      case DropdownItemType.block:
+        JSON user = {
+          'id': STR(widget.messageItem['senderId']),
+          'nickName': STR(widget.messageItem['senderName']),
+          'pic': STR(widget.messageItem['senderPic']),
+        };
+        userRepo.addBlockUser(context, UserModel.fromJson(user));
+        break;
+      case DropdownItemType.report:
+        break;
+      case DropdownItemType.manager:
+        break;
+      case DropdownItemType.kick:
+        break;
+    }
+  }
+
   showUserPic(context) {
     if (widget.isOwner) {
       return Container(
@@ -258,72 +286,98 @@ class ChatItemState extends State<ChatItem> {
         ),
       );
     }
-    return DropdownButtonHideUnderline(
-      child: DropdownButton2(
-        customButton: Container(
-          width:  faceSize,
-          height: faceSize,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(100)),
-            border: Border.all(
-              color: Theme.of(context).primaryColor.withOpacity(0.8),
-              width: 2,
-            ),
-          ),
-          child: ClipOval(
-            child: showImageFit(widget.messageItem['senderPic']),
+    return GestureDetector(
+      onTap: () {
+        if (widget.isOwner) return;
+        List<Widget> btnList = [
+          ...UserMenuItems.chatUserMenu.map((item) => UserMenuItems.buildItem(context, item, onSelected: onSelected)),
+          if (widget.isManager)
+            ...UserMenuItems.chatManagerMenu.map((item) => UserMenuItems.buildItem(context, item, onSelected: onSelected)),
+        ];
+        showButtonListDialog(context, btnList);
+      },
+      child: Container(
+        width:  faceSize,
+        height: faceSize,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(100)),
+          border: Border.all(
+            color: Theme.of(context).primaryColor.withOpacity(0.8),
+            width: 2,
           ),
         ),
-        // customItemsIndexes: const [1],
-        // customItemsHeight: 6,
-        itemHeight: kMinInteractiveDimension,
-        dropdownWidth: 150,
-        buttonHeight: 30,
-        buttonWidth: 30,
-        itemPadding: const EdgeInsets.only(left: 12, right: 12),
-        offset: const Offset(0, 120),
-        items: [
-          ...UserMenuItems.chatUserMenu.map((item) => DropdownMenuItem<DropdownItem>(
-            value: item,
-            child: UserMenuItems.buildItem(context, item),
-          )),
-          if (widget.isManager)
-            ...UserMenuItems.chatManagerMenu.map((item) => DropdownMenuItem<DropdownItem>(
-              value: item,
-              child: UserMenuItems.buildItem(context, item),
-            )),
-        ],
-        onChanged: (value) async {
-          unFocusAll(context);
-          var selected = value as DropdownItem;
-          switch(selected.type) {
-            case DropdownItemType.profile:
-              var userInfo = await userRepo.getUserInfo(widget.messageItem['senderId']);
-              if (userInfo != null) {
-                Get.to(() => TargetProfileScreen(userInfo))!.then((value) {
-                });
-              } else {
-                showUserAlertDialog(context, '${'Target user'.tr} : ${widget.messageItem['senderName']}');
-              }
-              break;
-            case DropdownItemType.block:
-              JSON user = {
-                'id': STR(widget.messageItem['senderId']),
-                'nickName': STR(widget.messageItem['senderName']),
-                'pic': STR(widget.messageItem['senderPic']),
-              };
-              userRepo.addBlockUser(context, UserModel.fromJson(user));
-              break;
-            case DropdownItemType.report:
-              break;
-            case DropdownItemType.manager:
-              break;
-            case DropdownItemType.kick:
-              break;
-
-          }
-        },
+        child: ClipOval(
+          child: showImageFit(widget.messageItem['senderPic']),
+        ),
       ),
     );
+
+    // return DropdownButtonHideUnderline(
+    //   child: DropdownButton2(
+    //     customButton: Container(
+    //       width:  faceSize,
+    //       height: faceSize,
+    //       decoration: BoxDecoration(
+    //         borderRadius: BorderRadius.all(Radius.circular(100)),
+    //         border: Border.all(
+    //           color: Theme.of(context).primaryColor.withOpacity(0.8),
+    //           width: 2,
+    //         ),
+    //       ),
+    //       child: ClipOval(
+    //         child: showImageFit(widget.messageItem['senderPic']),
+    //       ),
+    //     ),
+    //     // customItemsIndexes: const [1],
+    //     // customItemsHeight: 6,
+    //     itemHeight: kMinInteractiveDimension,
+    //     dropdownWidth: 150,
+    //     buttonHeight: 30,
+    //     buttonWidth: 30,
+    //     itemPadding: const EdgeInsets.only(left: 12, right: 12),
+    //     offset: const Offset(0, 120),
+    //     items: [
+    //       ...UserMenuItems.chatUserMenu.map((item) => DropdownMenuItem<DropdownItem>(
+    //         value: item,
+    //         child: UserMenuItems.buildItem(context, item),
+    //       )),
+    //       if (widget.isManager)
+    //         ...UserMenuItems.chatManagerMenu.map((item) => DropdownMenuItem<DropdownItem>(
+    //           value: item,
+    //           child: UserMenuItems.buildItem(context, item),
+    //         )),
+    //     ],
+    //     onChanged: (value) async {
+    //       unFocusAll(context);
+    //       var selected = value as DropdownItem;
+    //       switch(selected.type) {
+    //         case DropdownItemType.profile:
+    //           var userInfo = await userRepo.getUserInfo(widget.messageItem['senderId']);
+    //           if (userInfo != null) {
+    //             Get.to(() => TargetProfileScreen(userInfo))!.then((value) {
+    //             });
+    //           } else {
+    //             showUserAlertDialog(context, '${'Target user'.tr} : ${widget.messageItem['senderName']}');
+    //           }
+    //           break;
+    //         case DropdownItemType.block:
+    //           JSON user = {
+    //             'id': STR(widget.messageItem['senderId']),
+    //             'nickName': STR(widget.messageItem['senderName']),
+    //             'pic': STR(widget.messageItem['senderPic']),
+    //           };
+    //           userRepo.addBlockUser(context, UserModel.fromJson(user));
+    //           break;
+    //         case DropdownItemType.report:
+    //           break;
+    //         case DropdownItemType.manager:
+    //           break;
+    //         case DropdownItemType.kick:
+    //           break;
+    //
+    //       }
+    //     },
+    //   ),
+    // );
   }
 }

@@ -319,61 +319,87 @@ startImageCroper(String imageFilePath, CropStyle cropStyle, List<CropAspectRatio
 Future showImageSlideDialog(BuildContext context, List<String> imageData, int startIndex, [bool isCanDownload = false]) async {
   // TextStyle _menuText   = TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.blueAccent);
   LOG('--> showImageSlideDialog : $imageData / $startIndex');
+  var currentPage = 0;
 
-  _saveImage(String fileUrl) async {
+  saveImage(String fileUrl) async {
     var response = await Dio().get(fileUrl, options: Options(responseType: ResponseType.bytes));
     final result = await ImageGallerySaver.saveImage(
         Uint8List.fromList(response.data),
         quality: 100,
         name: "KSpot-download-${Uuid().v1()}-${DATETIME_FULL_STR(DateTime.now())}");
-    LOG('--> _saveImage result : $result');
+    LOG('--> saveImage result : $result');
   }
 
   return await showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return PointerInterceptor(
-          child: AlertDialog(
-              title: SizedBox(height: 10),
-              scrollable: true,
-              insetPadding: EdgeInsets.all(15),
-              contentPadding: EdgeInsets.zero,
-              backgroundColor: DialogBackColor(context),
-              content: Container(
-                width: MediaQuery.of(context).size.width,
-                child: ImageScrollViewer(
-                  imageData,
-                  startIndex: startIndex,
-                  rowHeight: MediaQuery.of(context).size.width - 30,
-                  backgroundColor: Colors.transparent,
-                  imageFit: BoxFit.contain,
-                  showArrow: true,
-                  showPage: false,
-                  autoScroll: false,
-                ),
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context) {
+      return PointerInterceptor(
+        child: AlertDialog(
+            scrollable: true,
+            insetPadding: EdgeInsets.zero,
+            contentPadding: EdgeInsets.fromLTRB(10, 20, 10, 10),
+            actionsPadding: EdgeInsets.fromLTRB(10, 0, 10, 10),
+            backgroundColor: DialogBackColor(context),
+            content: Container(
+              width: MediaQuery.of(context).size.width,
+              child: ImageScrollViewer(
+                imageData,
+                startIndex: startIndex,
+                rowHeight: MediaQuery.of(context).size.width - 30,
+                backgroundColor: Colors.transparent,
+                imageFit: BoxFit.contain,
+                showArrow: true,
+                showPage: false,
+                autoScroll: false,
+                onPageChanged: (index) {
+                  currentPage = index;
+                }
               ),
-              actions: [
-                if (isCanDownload)...[
-                  TextButton(
-                      onPressed: () async {
-                        showLoadingDialog(context, 'image downloading...'.tr);
-                        for (var item in imageData) {
-                          await _saveImage(item);
-                        }
-                        Navigator.of(dialogContext!).pop();
-                        ShowToast('Download complete'.tr);
-                      },
-                      child: Icon(Icons.download, size: 24)
+            ),
+            actions: [
+              if (isCanDownload)...[
+                IconButton(
+                  onPressed: () async {
+                    showLoadingDialog(context, 'Image downloading...'.tr);
+                    if (currentPage < imageData.length) {
+                      var item = imageData[currentPage];
+                      await saveImage(item);
+                    }
+                    Navigator.of(dialogContext!).pop();
+                    ShowToast('Download complete'.tr);
+                  },
+                  icon: Column(
+                    children: [
+                      Icon(Icons.download_outlined, size: 24),
+                      Text('Save'.tr, style: TextStyle(fontSize: 10)),
+                    ],
                   )
-                ],
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('Close'.tr)
+                ),
+                IconButton(
+                  onPressed: () async {
+                    showLoadingDialog(context, 'All image downloading...'.tr);
+                    for (var item in imageData) {
+                      await saveImage(item);
+                    }
+                    Navigator.of(dialogContext!).pop();
+                    ShowToast('Download complete'.tr);
+                  },
+                  icon: Column(
+                    children: [
+                      Icon(Icons.download_rounded, size: 24),
+                      Text('Save all'.tr, style: TextStyle(fontSize: 10)),
+                    ],
+                  )
                 )
-              ]
+              ],
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Close'.tr)
+              )
+            ]
           ),
         );
       }
@@ -803,7 +829,16 @@ Future<JSON>? showTitleOptionDialog(BuildContext context, JSON optionMain, JSON 
                                                   child: ElevatedButton(
                                                       onPressed: () {
                                                       },
-                                                      child: Container(
+                                                      style: ElevatedButton.styleFrom(
+                                                          elevation: 3,
+                                                          primary: Colors.white,
+                                                          shadowColor: Colors.grey,
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(8),
+                                                              side: BorderSide(color: Colors.grey)
+                                                          )
+                                                      ),
+                                                      child: SizedBox(
                                                         height: 40,
                                                         child: Row(
                                                           children: [
@@ -814,15 +849,6 @@ Future<JSON>? showTitleOptionDialog(BuildContext context, JSON optionMain, JSON 
                                                             ),
                                                           ],
                                                         ),
-                                                      ),
-                                                      style: ElevatedButton.styleFrom(
-                                                          elevation: 3,
-                                                          primary: Colors.white,
-                                                          shadowColor: Colors.grey,
-                                                          shape: RoundedRectangleBorder(
-                                                              borderRadius: BorderRadius.circular(8),
-                                                              side: BorderSide(color: Colors.grey)
-                                                          )
                                                       )
                                                   )
                                               ),
@@ -1915,7 +1941,7 @@ Future<JSON> showEditCommentDialog(BuildContext context, CommentType type, Strin
   }
 
   picLocalImage() async {
-    List<XFile>? pickList = await ImagePicker().pickMultiImage();
+    List<XFile>? pickList = await ImagePicker().pickMultiImage(maxWidth: PIC_IMAGE_SIZE_MAX, maxHeight: PIC_IMAGE_SIZE_MAX);
     if (pickList != null) {
       for (var i=0; i<pickList.length; i++) {
         var image = pickList[i];
@@ -2206,7 +2232,7 @@ Future<JSON> showEditCommentMultiSendDialog(BuildContext context, CommentType ty
   }
 
   picLocalImage() async {
-    List<XFile>? pickList = await ImagePicker().pickMultiImage();
+    List<XFile>? pickList = await ImagePicker().pickMultiImage(maxWidth: PIC_IMAGE_SIZE_MAX, maxHeight: PIC_IMAGE_SIZE_MAX);
     if (pickList != null) {
       for (var i=0; i<pickList.length; i++) {
         var image = pickList[i];
@@ -2719,6 +2745,45 @@ showThemeSelectorDialog(BuildContext context, String title, bool themeMode, int 
   );
 }
 
+Future showButtonListDialog(BuildContext context, List<Widget> buttonList)
+{
+  return showDialog(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return PointerInterceptor(
+        child: AlertDialog(
+          contentPadding: EdgeInsets.fromLTRB(30, 30, 30, 0),
+          actionsPadding: EdgeInsets.fromLTRB(30, 0, 30, 10),
+          backgroundColor: DialogBackColor(context),
+          content: SingleChildScrollView(
+            child: Container(
+              color: Colors.transparent,
+              constraints: BoxConstraints (
+                maxWidth: 200,
+              ),
+              width: MediaQuery.of(context).size.width * 0.9,
+              child: ListBody(
+                children: [
+                  ...buttonList
+                ]
+              )
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel'.tr),
+              onPressed: () {
+                Navigator.pop(context, {});
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 Future showButtonDialog(BuildContext context,
     String title,
     String message1,
@@ -2733,7 +2798,7 @@ Future showButtonDialog(BuildContext context,
         child: AlertDialog(
           title: Text(title, style: dialogTitleTextStyle(context)),
           titlePadding: EdgeInsets.all(20),
-          insetPadding: EdgeInsets.all(20),
+          insetPadding: EdgeInsets.all(10),
           backgroundColor: DialogBackColor(context),
           content: SingleChildScrollView(
             child: Container(
@@ -2907,7 +2972,7 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
   }
 
   picLocalImage() async {
-    List<XFile>? pickList = await ImagePicker().pickMultiImage();
+    List<XFile>? pickList = await ImagePicker().pickMultiImage(maxWidth: PIC_IMAGE_SIZE_MAX, maxHeight: PIC_IMAGE_SIZE_MAX);
     if (pickList != null) {
       for (var i=0; i<pickList.length; i++) {
         var image = pickList[i];

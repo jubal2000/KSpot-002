@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/data/dialogs.dart';
+import 'package:kspot_002/models/upload_model.dart';
 
 import '../data/app_data.dart';
 import '../models/chat_model.dart';
@@ -49,7 +51,7 @@ class ChatRepository {
     stream = api.startChatStreamData(roomId, startTime, onChanged);
   }
 
-  createChatItem(ChatRoomModel roomInfo, String sendText, [JSON? imageData]) async {
+  createChatItem(ChatRoomModel roomInfo, String sendText, [Map<String, UploadFileModel>? fileData]) async {
     var addItem = {
       'id':         '',
       'status':     1,
@@ -61,28 +63,34 @@ class ChatRepository {
       'desc':       sendText,
       'createTime': CURRENT_SERVER_TIME(),
     };
-    if (imageData != null) {
+    if (fileData != null && fileData.isNotEmpty) {
       var upCount = 0;
-      for (var item in imageData.entries) {
-        var result = await api.uploadImageData(item.value as JSON, 'chat_img');
-        if (result != null) {
-          addItem['picData'] ??= [];
-          addItem['picData'].add(result);
-          upCount++;
+      for (var item in fileData.entries) {
+        LOG('--> fileData item : ${item.value.toJson()}');
+        if (item.value.data != null) {
+          var result = await api.uploadData(item.value.data, item.key, 'chat_img');
+          if (result != null && item.value.thumbData != null) {
+            var thumbResult = await api.uploadData(item.value.thumbData, item.key, 'chat_img_thumb');
+            if (thumbResult != null) {
+              addItem['thumbList'] ??= [];
+              addItem['thumbList'].add(thumbResult);
+            }
+            item.value.url = result;
+            item.value.thumb = thumbResult;
+            upCount++;
+          }
+        } else {
+          var result = await api.uploadFile(File.fromUri(Uri.parse(item.value.path!)), 'chat_file', item.key);
+          if (result != null) {
+            item.value.url = result;
+            upCount++;
+          }
         }
+        var upItem = item.value.toJson();
+        addItem['fileData'] ??= [];
+        addItem['fileData'].add(upItem);
       }
-      LOG('--> upload image result : $upCount / ${addItem['picData']}');
-      upCount = 0;
-      for (var item in imageData.entries) {
-        var result = await api.uploadImageData(
-            {'id': item.key, 'data': item.value['thumb']}, 'chat_img_p');
-        if (result != null) {
-          addItem['thumbData'] ??= [];
-          addItem['thumbData'].add(result);
-          upCount++;
-        }
-      }
-      LOG('--> upload thumb result : $upCount / ${addItem['thumbData']}');
+      LOG('--> upload image result : $upCount');
     }
     LOG('--> createChatItem : ${addItem.toString()}');
     return await addChatItem(addItem);

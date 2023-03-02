@@ -102,25 +102,6 @@ Map<String, dynamic> _$PicDataToJson(PicData instance) => <String, dynamic>{
       'url': instance.url,
     };
 
-RoomFileData _$RoomFileDataFromJson(Map<String, dynamic> json) => RoomFileData(
-      id: json['id'] as String,
-      type: json['type'] as int,
-      url: json['url'] as String,
-      pic: json['pic'] as String,
-      userId: json['userId'] as String,
-      createTime: json['createTime'] as String,
-    );
-
-Map<String, dynamic> _$RoomFileDataToJson(RoomFileData instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'type': instance.type,
-      'url': instance.url,
-      'pic': instance.pic,
-      'userId': instance.userId,
-      'createTime': instance.createTime,
-    };
-
 CountryData _$CountryDataFromJson(Map<String, dynamic> json) => CountryData(
       country: json['country'] as String,
       countryState: json['countryState'] as String,

@@ -577,11 +577,11 @@ GroupTitleOutlineStyle(BuildContext context, Color borderColor) {
 }
 
 SubTitleBar(BuildContext context, String title, {double horizontalPadding = 20, double height = 30, IconData? icon, Function(String)? onActionSelect}) {
-  Widget? childWidget;
+  Widget? child;
   if (icon != null) {
-    childWidget = Icon(icon, size: height * 0.8, color: Theme.of(context).primaryColor);
+    child = Icon(icon, size: height * 0.8, color: Theme.of(context).primaryColor);
   }
-  return SubTitleBarEx(context, title, horizontalPadding: horizontalPadding, height: height, child: childWidget, onActionSelect:onActionSelect);
+  return SubTitleBarEx(context, title, horizontalPadding: horizontalPadding, height: height, child: child, onActionSelect:onActionSelect);
 }
 
 SubTitleBarEx(BuildContext context, String title, {double horizontalPadding = 20, double height = 30, Widget? child, Function(String)? onActionSelect}) {

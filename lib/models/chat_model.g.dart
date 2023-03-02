@@ -20,13 +20,11 @@ ChatModel _$ChatModelFromJson(Map<String, dynamic> json) => ChatModel(
       openList: (json['openList'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
-      picData:
-          (json['picData'] as List<dynamic>?)?.map((e) => e as String).toList(),
-      thumbData: (json['thumbData'] as List<dynamic>?)
+      thumbList: (json['thumbList'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
       fileData: (json['fileData'] as List<dynamic>?)
-          ?.map((e) => e as String)
+          ?.map((e) => UploadFileModel.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -42,9 +40,8 @@ Map<String, dynamic> _$ChatModelToJson(ChatModel instance) => <String, dynamic>{
       'updateTime': instance.updateTime,
       'createTime': instance.createTime,
       'openList': instance.openList,
-      'picData': instance.picData,
-      'thumbData': instance.thumbData,
-      'fileData': instance.fileData,
+      'thumbList': instance.thumbList,
+      'fileData': instance.fileData?.map((e) => e.toJson()).toList(),
     };
 
 ChatRoomModel _$ChatRoomModelFromJson(Map<String, dynamic> json) =>
@@ -68,9 +65,6 @@ ChatRoomModel _$ChatRoomModelFromJson(Map<String, dynamic> json) =>
       groupId: json['groupId'] as String?,
       country: json['country'] as String?,
       countryState: json['countryState'] as String?,
-      fileData: (json['fileData'] as List<dynamic>?)
-          ?.map((e) => RoomFileData.fromJson(e as Map<String, dynamic>))
-          .toList(),
     );
 
 Map<String, dynamic> _$ChatRoomModelToJson(ChatRoomModel instance) =>
@@ -90,5 +84,4 @@ Map<String, dynamic> _$ChatRoomModelToJson(ChatRoomModel instance) =>
       'groupId': instance.groupId,
       'country': instance.country,
       'countryState': instance.countryState,
-      'fileData': instance.fileData?.map((e) => e.toJson()).toList(),
     };

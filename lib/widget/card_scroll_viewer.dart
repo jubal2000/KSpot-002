@@ -216,7 +216,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                                   if (item.value['data'] != null || item.value['url'] != null || (widget.isThumbShow && item.value['thumb'] != null) || item.value['icon'] != null)
                                     SizedBox(
                                       width: widget.itemWidth,
-                                      height: widget.itemHeight,
+                                      height: widget.itemHeight - (STR(item.value['title']).isNotEmpty ? 30 : 0),
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(widget.itemRound),
                                         child: widget.isThumbShow && item.value['thumb'] != null
@@ -226,11 +226,10 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                                         showImageWidget(item.value['url'], widget.backFit, color: widget.imageColor),
                                       ),
                                     ),
-                                  if (item.value['title'] != null)
+                                  if (STR(item.value['title']).isNotEmpty)
                                     Container(
-                                      height: widget.textHeight,
                                       padding: EdgeInsets.only(top: 5),
-                                      child: Text(STR(item.value['title']), style: Theme.of(context).textTheme.headline5!, maxLines: null),
+                                      child: Text(STR(item.value['title']), style: CardDescStyle(context), maxLines: 2),
                                     )
                                 ]
                             )

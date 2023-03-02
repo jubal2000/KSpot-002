@@ -516,7 +516,7 @@ CardTitleStyle(BuildContext context) {
 }
 
 CardDescStyle(BuildContext context) {
-  return TextStyle(fontSize: 11, color: Theme.of(context).hintColor.withOpacity(0.75), fontWeight: FontWeight.w400, height: 1.2);
+  return TextStyle(fontSize: 11, color: Theme.of(context).hintColor.withOpacity(0.75), fontWeight: FontWeight.w400, height: 1.1);
 }
 
 CardNameStyle(BuildContext context) {

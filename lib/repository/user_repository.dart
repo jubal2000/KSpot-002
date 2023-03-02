@@ -47,20 +47,18 @@ class UserRepository {
     AppData.loginInfo.loginType = type;
   }
 
-  addBlockUser(context, UserModel targetUser, [Function(JSON)? onResult]) {
+  addBlockUser(context, JSON targetItem, [Function(JSON)? onResult]) {
     final cache = Get.find<CacheService>();
-    final blockInfo = cache.blockData[targetUser.id];
+    final blockInfo = cache.blockData[targetItem['id']];
     if (blockInfo == null) {
       showAlertYesNoDialog(context, 'To black'.tr,
-          'Are you sure you want to block that user?'.tr, '${'Target'.tr} : ${targetUser.nickName}', 'Cancel'.tr, 'OK'.tr)
+          'Are you sure you want to block that user?'.tr, '${'Target'.tr} : ${targetItem['nickName']}', 'Cancel'.tr, 'OK'.tr)
           .then((value) {
         if (value == 1) {
-          showLoadingDialog(context, 'Processing now...'.tr);
-          api.addBlockItem('user', targetUser.toJson(), AppData.USER_ID).then((result) {
-            hideLoadingDialog();
+          api.addBlockItem('user', targetItem, AppData.USER_ID).then((result) {
             if (result != null) {
-              showAlertDialog(context, 'To black'.tr, 'The user has been blocked'.tr, '', 'OK'.tr);
-              cache.blockData[targetUser.id] = result;
+              ShowToast('The user has been blocked'.tr);
+              cache.blockData[targetItem['id']] = result;
               if (onResult != null) onResult(result);
             }
           });
@@ -70,8 +68,9 @@ class UserRepository {
       showAlertYesNoDialog(context, 'Block'.tr, 'Already blocked'.tr,
           'Are you sure you want to cancel the block?'.tr, 'NO'.tr, 'Yes, Cancel block'.tr).then((result) {
         if (result == 1) {
-          api.setBlockItemStatus(blockInfo.id, 0).then((_) {
-            cache.blockData.remove(blockInfo.id);
+          api.setBlockItemStatus(blockInfo['id'], 0).then((_) {
+            ShowToast('Unblocking is complete'.tr);
+            cache.blockData.remove(targetItem['id']);
             if (onResult != null) onResult(blockInfo);
           });
         }
@@ -79,16 +78,26 @@ class UserRepository {
     }
   }
 
-  addReportItem(context, String type, ChatRoomModel targetRoom, [Function(JSON)? onResult]) {
+
+  addReportItem(context, String type, JSON targetItem, [Function(JSON)? onResult]) {
     final cache = Get.find<CacheService>();
-    final reportInfo = cache.reportData['report'] != null ? cache.reportData['report'][targetRoom.id] : null;
+    final reportInfo = cache.reportData['report'] != null ? cache.reportData['report'][targetItem['id']] : null;
     if (reportInfo == null) {
       showReportDialog(context, ReportType.report,
-          'Report'.tr, type, targetRoom.toJson(), subTitle: 'Please write what you want to report'.tr).then((result) async {
+          'Report'.tr, type, targetItem, subTitle: 'Please write what you want to report'.tr).then((result) async {
         if (result.isNotEmpty) {
           cache.reportData['report'] ??= {};
-          cache.reportData['report'][targetRoom.id] = result;
+          cache.reportData['report'][targetItem['id']] = result;
           ShowToast('Report has been completed'.tr);
+          if (BOL(result['blockUser'])) {
+            // api.addBlockItem('user', targetItem, AppData.USER_ID).then((result) {
+            //   if (result != null) {
+            //     ShowToast('The user has been blocked'.tr);
+            //     cache.blockData[targetItem['id']] = result;
+            //     if (onResult != null) onResult(result);
+            //   }
+            // });
+          }
           if (onResult != null) onResult(result);
           // showAlertDialog(context, 'Report'.tr, 'Report has been completed'.tr, '', 'OK'.tr).then((_) {
           //   if (onResult != null) onResult(result);
@@ -100,7 +109,7 @@ class UserRepository {
           'Are you sure you want to cancel the report?'.tr, 'NO'.tr, 'Yes, Cancel report'.tr).then((result) {
         if (result == 1) {
           api.setReportItemStatus(reportInfo['id'], 0).then((_) {
-            cache.reportData['report'].remove(targetRoom.id);
+            cache.reportData['report'].remove(targetItem['id']);
             if (onResult != null) onResult(reportInfo);
           });
         }

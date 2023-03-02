@@ -66,7 +66,7 @@ class ChatRepository {
     if (fileData != null && fileData.isNotEmpty) {
       var upCount = 0;
       for (var item in fileData.entries) {
-        LOG('--> fileData item : ${item.value.toJson()}');
+        // LOG('--> fileData item : ${item.value.toJson()}');
         if (item.value.data != null) {
           var result = await api.uploadData(item.value.data, item.key, 'chat_img');
           if (result != null && item.value.thumbData != null) {

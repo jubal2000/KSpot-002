@@ -14,6 +14,7 @@ import '../data/dialogs.dart';
 import '../data/theme_manager.dart';
 import '../models/user_model.dart';
 import '../services/api_service.dart';
+import '../services/cache_service.dart';
 import '../utils/utils.dart';
 import 'card_scroll_viewer.dart';
 
@@ -40,6 +41,7 @@ class ChatItem extends StatefulWidget {
 
 class ChatItemState extends State<ChatItem> {
   final api = Get.find<ApiService>();
+  final cache = Get.find<CacheService>();
   final userRepo = UserRepository();
   final radiusSize = 12.0;
   final imageSize = 80.0;
@@ -52,7 +54,7 @@ class ChatItemState extends State<ChatItem> {
       LOG("--> thumbList : ${widget.messageItem['fileData']}");
       widget.messageItem['fileData'].forEach((item) {
         final fileItem = UploadFileModel.fromJson(item);
-        LOG("--> fileData item : ${fileItem.toJson()}");
+        // LOG("--> fileData item : ${fileItem.toJson()}");
         JSON addItem = {'id': fileItem.id};
         if (IS_IMAGE_FILE(fileItem.extension)) {
           addItem['url'] = fileItem.thumb;
@@ -60,6 +62,7 @@ class ChatItemState extends State<ChatItem> {
         } else {
           addItem['url'] = 'assets/file_icons/icon_${fileItem.extension}.png';
           addItem['linkPic'] = addItem['url'];
+          addItem['title'] = fileItem.name;
         }
         fileData[fileItem.id] = addItem;
       });
@@ -200,7 +203,8 @@ class ChatItemState extends State<ChatItem> {
                                   }
                                 },
                                 key: GlobalKey(),
-                                child: Text(DESC(widget.messageItem['desc']), maxLines: null, style: Theme
+                                child: Text(cache.blockData[widget.messageItem['senderId']] != null ? '....' :
+                                    DESC(widget.messageItem['desc']), maxLines: null, style: Theme
                                     .of(context)
                                     .textTheme
                                     .bodyText2),
@@ -241,7 +245,12 @@ class ChatItemState extends State<ChatItem> {
   }
 
   onSelected(type) async {
-    unFocusAll(context);
+    Navigator.pop(context, {});
+    JSON userInfo = {
+      'id': STR(widget.messageItem['senderId']),
+      'nickName': STR(widget.messageItem['senderName']),
+      'pic': STR(widget.messageItem['senderPic']),
+    };
     switch(type) {
       case DropdownItemType.profile:
         var userInfo = await userRepo.getUserInfo(widget.messageItem['senderId']);
@@ -258,9 +267,18 @@ class ChatItemState extends State<ChatItem> {
           'nickName': STR(widget.messageItem['senderName']),
           'pic': STR(widget.messageItem['senderPic']),
         };
-        userRepo.addBlockUser(context, UserModel.fromJson(user));
+        userRepo.addBlockUser(context, userInfo, (result) {
+          setState(() {
+            if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], 9);
+          });
+        });
         break;
       case DropdownItemType.report:
+        userRepo.addReportItem(context, 'user', userInfo, (result) {
+          setState(() {
+            if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], 9);
+          });
+        });
         break;
       case DropdownItemType.manager:
         break;
@@ -289,6 +307,7 @@ class ChatItemState extends State<ChatItem> {
     return GestureDetector(
       onTap: () {
         if (widget.isOwner) return;
+        unFocusAll(context);
         List<Widget> btnList = [
           ...UserMenuItems.chatUserMenu.map((item) => UserMenuItems.buildItem(context, item, onSelected: onSelected)),
           if (widget.isManager)

@@ -239,7 +239,11 @@ class ChatTalkViewModel extends ChangeNotifier {
               isShowFace: isShowFace,
               isShowDate: isShowDate,
               onSelected: (key, status) {
-
+                switch(status) {
+                  case 9:
+                    notifyListeners();
+                    break;
+                }
               }, onSetOpened: (message) {
             api.addChatOpenItem(message['id'], AppData.USER_ID);
           }

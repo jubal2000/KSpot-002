@@ -206,7 +206,7 @@ class ChatViewModel extends ChangeNotifier {
               });
               break;
             case DropdownItemType.report:
-              userRepo.addReportItem(buildContext!, 'chatRoom', item.value, (_) {
+              userRepo.addReportItem(buildContext!, 'chatRoom', item.value.toJson(), (_) {
                   notifyListeners();
               });
               break;

@@ -1700,7 +1700,7 @@ class ApiService extends GetxService {
   Future<bool> setBlockItemStatus(String blockId, int status) async {
     LOG('------> setBlockItemStatus : $blockId / $status');
     try {
-      var dataRef = firestore!.collection(ReportCollection);
+      var dataRef = firestore!.collection(BlockCollection);
       await dataRef.doc(blockId).update({
         'status': status,
         'updateTime': CURRENT_SERVER_TIME()
@@ -1750,11 +1750,11 @@ class ApiService extends GetxService {
     return result;
   }
   
-  Future<JSON?> addReportItem(JSON user, String type, String targetId, String desc) async {
+  Future<JSON?> addReportItem(String userId, String type, String targetId, String desc) async {
     LOG('--> addReportItem : $type / $targetId / $desc');
     try {
       JSON addItem = {
-        'userId'    : STR(user['id']),
+        'userId'    : userId,
         'targetId'  : targetId,
         'type'      : type, // user, history, goods, place, owner
         'desc'      : desc,

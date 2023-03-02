@@ -2960,6 +2960,7 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
   JSON _jsonData = {};
   var _descText = '';
   var _isChanged = false;
+  var isBlockUser = true;
 
   refreshImage() {
     _jsonData['imageData'] = _imageData.entries.map((e) => e.value['url']).toList();
@@ -3044,7 +3045,7 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
                                 });
                               }
                           ),
-                          SizedBox(height: 5),
+                          SizedBox(height: 10),
                           if (STR(_jsonData['descOrg']).isNotEmpty)...[
                             TextFormField(
                               controller: _editControllerEx,
@@ -3081,6 +3082,18 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
                               });
                             },
                           ),
+                          if (targetType == 'user')...[
+                            Row(
+                              children: [
+                                Checkbox(value: isBlockUser, onChanged: (value) {
+                                  setState(() {
+                                    isBlockUser = value ?? false;
+                                  });
+                                }),
+                                Text('To black'.tr, style: ItemTitleAlertStyle(context)),
+                              ],
+                            )
+                          ]
                         ],
                       )
                   ),
@@ -3130,7 +3143,10 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
                                   if (STR(_jsonData['pic']).isEmpty) _jsonData['pic'] = item.value['url'];
                                 }
                               }
-                              final result = await api.addReportItemEx(_jsonData);
+                              var result = await api.addReportItemEx(_jsonData);
+                              if (isBlockUser && result != null) {
+                                result['blockUser'] = true;
+                              }
                               Navigator.of(dialogContext!).pop();
                               Future.delayed(Duration(milliseconds: 200), () async {
                                 Navigator.pop(_context, result);

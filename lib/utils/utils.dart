@@ -1063,7 +1063,8 @@ enum DropdownItemType {
 
   profile,
   kick,
-  manager,
+  notice,
+  admin,
 }
 
 class DropdownItem {
@@ -1102,7 +1103,7 @@ const userMenuDeclare     = DropdownItem(DropdownItemType.showDeclar, text: 'VIE
 const userMenuReDeclare   = DropdownItem(DropdownItemType.reDeclar, text: 'REPORT RESULT', icon: Icons.announcement);
 const userMenuUnDeclare   = DropdownItem(DropdownItemType.unDeclar, text: 'REPORT CANCEL', icon: Icons.clear);
 const userMenuKick        = DropdownItem(DropdownItemType.kick, text: 'DROP OUT', icon: Icons.clear, manager: true);
-const userMenuManager     = DropdownItem(DropdownItemType.manager, text: 'TRANSFER MANAGER', icon: Icons.perm_identity, manager: true);
+const userMenuAdmin       = DropdownItem(DropdownItemType.admin, text: 'CHANGE ADMIN', icon: Icons.perm_identity, manager: true);
 const userMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
 
 class UserMenuItems {
@@ -1110,14 +1111,14 @@ class UserMenuItems {
   static const List<DropdownItem> followerMenu    = [userMenuMessage];
   static const List<DropdownItem> messageMenu     = [userMenuMsgBlock, userMenuMsgReport];
   static const List<DropdownItem> chatUserMenu    = [userMenuProfile, userMenuMsgBlock, userMenuMsgReport];
-  static const List<DropdownItem> chatManagerMenu = [userMenuManager, userMenuKick];
+  static const List<DropdownItem> chatAdminMenu0  = [userMenuKick];
+  static const List<DropdownItem> chatAdminMenu1  = [userMenuAdmin];
   static const List<DropdownItem> blockMenu       = [userMenuUnblock];
   static const List<DropdownItem> declarMenu      = [userMenuDeclare, userMenuReDeclare, userMenuUnDeclare];
 
   static Widget buildItem(BuildContext context, DropdownItem item, {Function(DropdownItemType)? onSelected}) {
     var color = item.alert ? Theme.of(context).colorScheme.error : item.color ? Theme.of(context).primaryColor : Theme.of(context).hintColor;
     var style = item.alert ? itemTitleAlertStyle : item.color ? itemTitleColorStyle : itemTitleStyle;
-
     if (item.manager) {
       color = Theme.of(context).colorScheme.tertiary;
     }
@@ -1164,6 +1165,7 @@ const dropMenuIndexBkOn   = DropdownItem(DropdownItemType.bookmarkOn, text: 'FIX
 const dropMenuIndexBkOff  = DropdownItem(DropdownItemType.bookmarkOff, text: 'FIX RELEASE', icon: Icons.bookmark_remove_outlined);
 const dropMenuIndexUp     = DropdownItem(DropdownItemType.indexUp, text: 'MOVE UP', icon: Icons.arrow_upward);
 const dropMenuIndexDown   = DropdownItem(DropdownItemType.indexDown, text: 'MOVE DOWN', icon: Icons.arrow_downward);
+const dropMenuNotice      = DropdownItem(DropdownItemType.notice, text: 'NOTICE', icon: Icons.campaign_outlined, manager: true);
 const dropMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
 
 
@@ -1197,6 +1199,7 @@ class DropdownItems {
   static const List<DropdownItem> secondItems = [];
   static const List<DropdownItem> chatRoomMenu0     = [dropMenuEnter];
   static const List<DropdownItem> chatRoomMenu1     = [dropMenuExit];
+  static const List<DropdownItem> chatRoomMenu2     = [dropMenuNotice];
 
   static const content      = DropdownItem(DropdownItemType.content, text: 'HISTORY +', icon: Icons.movie_creation);
   static const talent       = DropdownItem(DropdownItemType.talent, text: 'TALENT +', icon: Icons.star);
@@ -1235,8 +1238,11 @@ class DropdownItems {
   static const space        = DropdownItem(DropdownItemType.none, height: 5);
 
   static Widget buildItem(BuildContext context, DropdownItem item) {
-    final color = item.alert ? Theme.of(context).colorScheme.error : item.color ? Theme.of(context).primaryColor : Theme.of(context).hintColor;
-    final style = item.alert ? itemTitleAlertStyle : item.color ? itemTitleColorStyle : itemTitleStyle;
+    var color = item.alert ? Theme.of(context).colorScheme.error : item.color ? Theme.of(context).primaryColor : Theme.of(context).hintColor;
+    var style = item.alert ? itemTitleAlertStyle : item.color ? itemTitleColorStyle : itemTitleStyle;
+    if (item.manager) {
+      color = Theme.of(context).colorScheme.tertiary;
+    }
     return Row(
         children: [
           if (!item.isLine)...[

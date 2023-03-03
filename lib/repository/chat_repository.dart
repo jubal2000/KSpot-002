@@ -115,6 +115,44 @@ class ChatRepository {
     stream = null;
   }
 
+  setChatRoomAdmin(String roomId, String targetId, String targetName) async {
+    var result = await api.setChatRoomAdmin(roomId, targetId, AppData.USER_ID);
+    if (result != null) {
+      JSON addItem = {
+        'id': '',
+        'status': 1,
+        'action': 3,
+        'desc': '$targetName change admin',
+        'roomId': roomId,
+        'senderId': targetId,
+        'senderName': targetName,
+        'senderPic': '',
+      };
+      api.addChatItem(addItem);
+      cache.setChatRoomItem(ChatRoomModel.fromJson(result));
+    }
+    return result;
+  }
+
+  setChatRoomKickUser(String roomId, String targetId, String targetName) async {
+    var result = await api.setChatRoomKickUser(roomId, targetId, targetName, AppData.USER_ID);
+    if (result != null) {
+      JSON addItem = {
+        'id': '',
+        'status': 1,
+        'action': 4,
+        'desc': '$targetName has kicked',
+        'roomId': roomId,
+        'senderId': targetId,
+        'senderName': targetName,
+        'senderPic': '',
+      };
+      api.addChatItem(addItem);
+      cache.setChatRoomItem(ChatRoomModel.fromJson(result));
+    }
+    return result;
+  }
+
   enterChatRoom(String roomId, bool isEnterShow) async {
     final result = await api.enterChatRoom(roomId, AppData.userInfo.toJson());
     if (result != null && JSON_EMPTY(result['error'])) {

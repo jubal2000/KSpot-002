@@ -9,6 +9,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:helpers/helpers.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
@@ -151,7 +152,7 @@ Future showAlertYesNoCheckDialog(BuildContext context,
     String message,
     String checkMessage,
     String btnNoStr,
-    String btnYesStr, {bool checkValue = false})
+    String btnYesStr, {bool checkValue = false, bool needCheck = false})
 {
   var check = checkValue.obs;
   return showDialog(
@@ -159,7 +160,7 @@ Future showAlertYesNoCheckDialog(BuildContext context,
     barrierDismissible: false, // user must tap button!
     builder: (BuildContext context) {
       return PointerInterceptor(
-          child: AlertDialog(
+          child: Obx(() => AlertDialog(
             title: Text(title, style: dialogTitleTextStyle(context)),
             titlePadding: EdgeInsets.all(20),
             insetPadding: EdgeInsets.all(40),
@@ -172,7 +173,7 @@ Future showAlertYesNoCheckDialog(BuildContext context,
                 constraints: BoxConstraints(
                     minHeight: 100
                 ),
-                child: Obx(() => Center(
+                child: Center(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -193,22 +194,23 @@ Future showAlertYesNoCheckDialog(BuildContext context,
                   )
                 )),
               ),
-            ),
             actions: [
               TextButton(
-                child: Text(btnNoStr),
+                child: Text(btnNoStr, style: ItemTitleExStyle(context)),
                 onPressed: () {
                   Navigator.of(context).pop(0);
                 },
               ),
               TextButton(
-                child: Text(btnYesStr),
+                child: Text(btnYesStr, style: !needCheck || check.value ? ItemTitleStyle(context) : ItemTitleExStyle(context)),
                 onPressed: () {
+                  if (needCheck && !check.value) return;
                   Navigator.of(context).pop(check.value ? 2 : 1);
                 },
               ),
             ],
           )
+        )
       );
     },
   );
@@ -366,7 +368,7 @@ Future showImageSlideDialog(BuildContext context, List<String> imageData, int st
                       var item = imageData[currentPage];
                       await saveImage(item);
                     }
-                    Navigator.of(dialogContext!).pop();
+                    hideLoadingDialog();
                     ShowToast('Download complete'.tr);
                   },
                   icon: Column(
@@ -382,7 +384,7 @@ Future showImageSlideDialog(BuildContext context, List<String> imageData, int st
                     for (var item in imageData) {
                       await saveImage(item);
                     }
-                    Navigator.of(dialogContext!).pop();
+                    hideLoadingDialog();
                     ShowToast('Download complete'.tr);
                   },
                   icon: Column(
@@ -2188,7 +2190,7 @@ Future<JSON> showEditCommentDialog(BuildContext context, CommentType type, Strin
                                   break;
                                 default:
                               }
-                              Navigator.of(dialogContext!).pop();
+                              hideLoadingDialog();
                               Future.delayed(Duration(milliseconds: 200), () async {
                                 Navigator.pop(_context, upResult);
                               });
@@ -2463,7 +2465,7 @@ Future<JSON> showEditCommentMultiSendDialog(BuildContext context, CommentType ty
                                   default:
                                 }
                               }
-                              Navigator.of(dialogContext!).pop();
+                              hideLoadingDialog();
                               Future.delayed(Duration(milliseconds: 200), () async {
                                 Navigator.pop(_context, upResult);
                               });
@@ -3129,7 +3131,7 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
                               _jsonData['type'        ] = type == ReportType.report ? 'report' : 'owner';
                               _jsonData['targetType'  ] = targetType;
                               _jsonData['targetId'    ] = STR(targetData['id']);
-                              _jsonData['targetTitle' ] = STR(targetData['title'] ?? targetData['desc']);
+                              _jsonData['targetTitle' ] = STR(targetData['title'] ?? targetData['desc'] ?? targetData['nickName']);
                               _jsonData['desc'        ] = _descText;
                               _jsonData['replayType'  ] = 'ready';
                               _jsonData['replayName'  ] = '';
@@ -3147,7 +3149,7 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
                               if (isBlockUser && result != null) {
                                 result['blockUser'] = true;
                               }
-                              Navigator.of(dialogContext!).pop();
+                              hideLoadingDialog();
                               Future.delayed(Duration(milliseconds: 200), () async {
                                 Navigator.pop(_context, result);
                               });

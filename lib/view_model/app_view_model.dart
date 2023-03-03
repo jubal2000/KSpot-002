@@ -58,6 +58,10 @@ class AppViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  refresh() {
+    notifyListeners();
+  }
+
   setMainIndex(index) {
     menuIndex = index;
     switch(index) {

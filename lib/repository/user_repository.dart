@@ -57,7 +57,7 @@ class UserRepository {
         if (value == 1) {
           api.addBlockItem('user', targetItem, AppData.USER_ID).then((result) {
             if (result != null) {
-              ShowToast('The user has been blocked'.tr);
+              ShowToast('Target has been blocked'.tr);
               cache.blockData[targetItem['id']] = result;
               if (onResult != null) onResult(result);
             }
@@ -80,6 +80,8 @@ class UserRepository {
 
 
   addReportItem(context, String type, JSON targetItem, [Function(JSON)? onResult]) {
+    if (!AppData.isMainActive) return;
+    AppData.isMainActive = false;
     final cache = Get.find<CacheService>();
     final reportInfo = cache.reportData['report'] != null ? cache.reportData['report'][targetItem['id']] : null;
     if (reportInfo == null) {
@@ -90,18 +92,20 @@ class UserRepository {
           cache.reportData['report'][targetItem['id']] = result;
           ShowToast('Report has been completed'.tr);
           if (BOL(result['blockUser'])) {
-            // api.addBlockItem('user', targetItem, AppData.USER_ID).then((result) {
-            //   if (result != null) {
-            //     ShowToast('The user has been blocked'.tr);
-            //     cache.blockData[targetItem['id']] = result;
-            //     if (onResult != null) onResult(result);
-            //   }
-            // });
+            Future.delayed(Duration(seconds: 1)).then((_) {
+              api.addBlockItem('user', targetItem, AppData.USER_ID).then((result) {
+                if (result != null) {
+                  ShowToast('Target has been blocked'.tr);
+                  cache.blockData[targetItem['id']] = result;
+                  if (onResult != null) onResult(result);
+                }
+                AppData.isMainActive = true;
+              });
+            });
+          } else {
+            AppData.isMainActive = true;
+            if (onResult != null) onResult(result);
           }
-          if (onResult != null) onResult(result);
-          // showAlertDialog(context, 'Report'.tr, 'Report has been completed'.tr, '', 'OK'.tr).then((_) {
-          //   if (onResult != null) onResult(result);
-          // });
         }
       });
     } else {
@@ -110,8 +114,11 @@ class UserRepository {
         if (result == 1) {
           api.setReportItemStatus(reportInfo['id'], 0).then((_) {
             cache.reportData['report'].remove(targetItem['id']);
+            AppData.isMainActive = true;
             if (onResult != null) onResult(reportInfo);
           });
+        } else {
+          AppData.isMainActive = true;
         }
       });
     }

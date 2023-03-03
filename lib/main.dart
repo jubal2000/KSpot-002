@@ -46,6 +46,7 @@ Future<void> main() async {
     child: FutureBuilder(
       future: getInfoData(),
       builder: (context, snapshot) {
+        unFocusAll(context);
         if (snapshot.hasData) {
           AppData.initStartInfo(snapshot.data as JSON);
           LOG('--> MyApp Start : ${AppData.userInfo.id}');

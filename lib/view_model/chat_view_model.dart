@@ -118,8 +118,8 @@ class ChatViewModel extends ChangeNotifier {
     // current show room type
     var roomType = currentTab == 1 ? ChatRoomType.private : (currentTab == 0 && isMy) ? ChatRoomType.publicMy : ChatRoomType.public;
 
-    if (cache.chatData != null) {
-      for (var item in cache.chatData!.entries) {
+    if (cache.chatData.isNotEmpty) {
+      for (var item in cache.chatData.entries) {
         final roomId = item.value.roomId;
         // get last message..
         if (item.value.action == 0) {
@@ -193,6 +193,10 @@ class ChatViewModel extends ChangeNotifier {
               });
               break;
             case DropdownItemType.exit:
+              if (item.value.userId == AppData.USER_ID) {
+                ShowToast('You are currently an admin'.tr);
+                return;
+              }
               showAlertYesNoCheckDialog(buildContext!, item.value.title, 'Would you like to leave the chat room?'.tr,
                 'Leave quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
                 if (result > 0) {
@@ -314,7 +318,9 @@ class ChatViewModel extends ChangeNotifier {
 
   onChattingNew(type) {
     Get.to(() => ChattingEditScreen(type))!.then((result) {
-
+      if (result != null) {
+        Get.to(() => ChatTalkScreen(result));
+      }
     });
   }
 

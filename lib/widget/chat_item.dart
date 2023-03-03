@@ -12,7 +12,9 @@ import '../data/app_data.dart';
 import '../data/common_sizes.dart';
 import '../data/dialogs.dart';
 import '../data/theme_manager.dart';
+import '../models/chat_model.dart';
 import '../models/user_model.dart';
+import '../repository/chat_repository.dart';
 import '../services/api_service.dart';
 import '../services/cache_service.dart';
 import '../utils/utils.dart';
@@ -43,6 +45,7 @@ class ChatItemState extends State<ChatItem> {
   final api = Get.find<ApiService>();
   final cache = Get.find<CacheService>();
   final userRepo = UserRepository();
+  final chatRepo = ChatRepository();
   final radiusSize = 12.0;
   final imageSize = 80.0;
   final faceSize = 40.0;
@@ -51,7 +54,7 @@ class ChatItemState extends State<ChatItem> {
 
   init() {
     if (LIST_NOT_EMPTY(widget.messageItem['fileData'])) {
-      LOG("--> thumbList : ${widget.messageItem['fileData']}");
+      // LOG("--> thumbList : ${widget.messageItem['fileData']}");
       widget.messageItem['fileData'].forEach((item) {
         final fileItem = UploadFileModel.fromJson(item);
         // LOG("--> fileData item : ${fileItem.toJson()}");
@@ -80,13 +83,29 @@ class ChatItemState extends State<ChatItem> {
   Widget build(BuildContext context) {
     init();
     if (action > 0) {
+      var text = '';
+      var color = Colors.yellowAccent;
+      switch(action) {
+        case 1:
+          text = 'has enter the room';
+          break;
+        case 2:
+        case 4:
+          text = 'has left the room';
+          color = Colors.lightBlueAccent;
+          break;
+        case 3:
+          text = 'has [admin] the room';
+          color = Colors.purpleAccent;
+          break;
+      }
       return Container(
-        padding: EdgeInsets.symmetric(horizontal: faceSize + 10, vertical: 20),
+        padding: EdgeInsets.symmetric(vertical: 20),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(STR(widget.messageItem['senderName']), style: ItemDescColorStyle(context, Colors.yellowAccent)),
-            Text(' ${action == 1 ? 'has enter the room'.tr : 'has left the room'.tr}', style: ItemDescStyle(context)),
+            Text(STR(widget.messageItem['senderName']), style: ItemDescColorBoldStyle(context, color)),
+            Text(' ${text.tr}', style: ItemDescStyle(context)),
             SizedBox(width: 10),
             Text(SERVER_TIME_STR(widget.messageItem['createTime'], true), style: ItemChatTimeStyle(context)),
           ],
@@ -251,9 +270,12 @@ class ChatItemState extends State<ChatItem> {
       'nickName': STR(widget.messageItem['senderName']),
       'pic': STR(widget.messageItem['senderPic']),
     };
+    var roomId      = STR(widget.messageItem['roomId']);
+    var targetId    = STR(widget.messageItem['senderId']);
+    var targetName  = STR(widget.messageItem['senderName']);
     switch(type) {
       case DropdownItemType.profile:
-        var userInfo = await userRepo.getUserInfo(widget.messageItem['senderId']);
+        var userInfo = await userRepo.getUserInfo(targetId);
         if (userInfo != null) {
           Get.to(() => TargetProfileScreen(userInfo))!.then((value) {
           });
@@ -262,11 +284,6 @@ class ChatItemState extends State<ChatItem> {
         }
         break;
       case DropdownItemType.block:
-        JSON user = {
-          'id': STR(widget.messageItem['senderId']),
-          'nickName': STR(widget.messageItem['senderName']),
-          'pic': STR(widget.messageItem['senderPic']),
-        };
         userRepo.addBlockUser(context, userInfo, (result) {
           setState(() {
             if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], 9);
@@ -280,9 +297,34 @@ class ChatItemState extends State<ChatItem> {
           });
         });
         break;
-      case DropdownItemType.manager:
+      case DropdownItemType.admin:
+        showAlertYesNoCheckDialog(context, 'Change Admin'.tr,
+          'Do you want to change admin?'.tr,
+          'Admin change confirmation'.tr, 'Cancel'.tr, 'OK'.tr, needCheck: true).then((result) {
+          if (result > 1) {
+            chatRepo.setChatRoomAdmin(roomId, targetId, targetName).then((result2) {
+              if (result2 != null) {
+                LOG('--> admin changed : ${result2.toString()}');
+                cache.setChatRoomItem(ChatRoomModel.fromJson(result2), true);
+                if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], 8);
+              }
+            });
+          }
+        });
         break;
       case DropdownItemType.kick:
+        showAlertYesNoDialog(context, 'Drop Out'.tr, 'Are you sure you want to kick the target?'.tr,
+          '', 'Cancel'.tr, 'OK'.tr).then((result) {
+          if (result > 0) {
+            chatRepo.setChatRoomKickUser(roomId, targetId, targetName).then((result2) {
+              if (result2 != null) {
+                LOG('--> admin changed : ${result2.toString()}');
+                cache.setChatRoomItem(ChatRoomModel.fromJson(result2), true);
+                if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], 8);
+              }
+            });
+          }
+        });
         break;
     }
   }
@@ -310,8 +352,11 @@ class ChatItemState extends State<ChatItem> {
         unFocusAll(context);
         List<Widget> btnList = [
           ...UserMenuItems.chatUserMenu.map((item) => UserMenuItems.buildItem(context, item, onSelected: onSelected)),
-          if (widget.isManager)
-            ...UserMenuItems.chatManagerMenu.map((item) => UserMenuItems.buildItem(context, item, onSelected: onSelected)),
+          if (widget.isManager)...[
+            ...UserMenuItems.chatAdminMenu0.map((item) => UserMenuItems.buildItem(context, item, onSelected: onSelected)),
+            if (!cache.blockData.containsKey(STR(widget.messageItem['senderId'])))
+              ...UserMenuItems.chatAdminMenu1.map((item) => UserMenuItems.buildItem(context, item, onSelected: onSelected)),
+          ],
         ];
         showButtonListDialog(context, btnList);
       },

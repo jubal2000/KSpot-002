@@ -31,7 +31,7 @@ class ChatEditViewModel extends ChangeNotifier {
 
   BuildContext? buildContext;
   ChatRoomModel? editItem;
-  String? inviteMessage;
+  String inviteMessage = '';
   final tabText = ['PUBLIC CHAT'.tr, 'PRIVATE CHAT'.tr];
   JSON memberData = {};
   JSON picInfo = {};
@@ -49,9 +49,9 @@ class ChatEditViewModel extends ChangeNotifier {
   get createButtonEnable {
     switch(type) {
       case 0:
-        return editItem!.title.isNotEmpty;
+        return editItem!.title.isNotEmpty && inviteMessage.isNotEmpty;
       default:
-        return memberData.isNotEmpty && editItem!.password.isNotEmpty && STR(inviteMessage).isNotEmpty;
+        return memberData.isNotEmpty && editItem!.password.isNotEmpty && inviteMessage.isNotEmpty;
     }
   }
 
@@ -217,7 +217,7 @@ class ChatEditViewModel extends ChangeNotifier {
   }
 
   showInviteMessage() {
-    return EditTextField(buildContext!, 'INVITE MESSAGE'.tr, inviteMessage ?? '', hint: 'Enter message *'.tr, maxLength: TITLE_LENGTH,
+    return EditTextField(buildContext!, 'INVITE MESSAGE'.tr, inviteMessage, hint: 'Enter message *'.tr, maxLength: TITLE_LENGTH,
       maxLines: 1, keyboardType: TextInputType.text, onChanged: (value) {
         inviteMessage = value;
       });
@@ -229,7 +229,7 @@ class ChatEditViewModel extends ChangeNotifier {
   }
 
   uploadStart() async {
-    LOG('---> uploadStart: ${picInfo.toString()} / $createButtonEnable');
+    LOG('---> uploadStart: $inviteMessage / $createButtonEnable');
     if (!createButtonEnable || !AppData.isMainActive) return;
     AppData.isMainActive = false;
     showLoadingDialog(buildContext!, 'Uploading now...'.tr);
@@ -272,7 +272,7 @@ class ChatEditViewModel extends ChangeNotifier {
     repo.addRoomItem(editItem!).then((result) {
       LOG('---> addRoomItem result: ${result.toString()}');
       editItem!.id = result['id'];
-      repo.createChatItem(editItem!, inviteMessage!);
+      repo.createChatItem(editItem!, inviteMessage);
       hideLoadingDialog();
       AppData.isMainActive = true;
       showAlertDialog(buildContext!, 'Chat room create'.tr, 'Chat room create complete'.tr, '', 'OK'.tr).then((_) {

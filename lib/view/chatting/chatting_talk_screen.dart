@@ -42,11 +42,13 @@ class ChatTalkScreen extends StatefulWidget {
 class ChatTalkScreenState extends State<ChatTalkScreen> {
   final chatRepo    = ChatRepository();
   final _viewModel  = ChatTalkViewModel();
+  var isAdmin = false;
 
   @override
   void initState() {
     _viewModel.initData(widget.roomInfo);
     _viewModel.refreshListYPos();
+    isAdmin = widget.roomInfo.userId == AppData.USER_ID;
     super.initState();
   }
 
@@ -113,11 +115,20 @@ class ChatTalkScreenState extends State<ChatTalkScreen> {
                           value: item,
                           child: DropdownItems.buildItem(context, item),
                         )),
+                        if (isAdmin)
+                          ...DropdownItems.chatRoomMenu2.map((item) => DropdownMenuItem<DropdownItem>(
+                            value: item,
+                            child: DropdownItems.buildItem(context, item),
+                          )),
                       ],
                       onChanged: (value) {
                         var selected = value as DropdownItem;
                         switch(selected.type) {
                           case DropdownItemType.exit:
+                            if (widget.roomInfo.userId == AppData.USER_ID) {
+                              ShowToast('You are currently an admin'.tr);
+                              return;
+                            }
                             showAlertYesNoCheckDialog(context, widget.roomTitle, 'Would you like to leave the chat room?'.tr,
                                 'Leave quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
                               if (result > 0) {

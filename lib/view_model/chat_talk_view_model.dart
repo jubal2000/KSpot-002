@@ -42,6 +42,7 @@ class ChatTalkViewModel extends ChangeNotifier {
   JSON showList = {};
   JSON imageData = {};
   Map<String, UploadFileModel> uploadFileData = {};
+  DateTime? startTime;
 
   var  memberList = [].obs;
   var  isManager = false;
@@ -52,32 +53,45 @@ class ChatTalkViewModel extends ChangeNotifier {
 
   initData(ChatRoomModel room) {
     roomInfo = room;
-    DateTime? startTime;
-    for (var item in roomInfo!.memberData) {
-      // LOG('--> roomInfo!.memberData :${item.toJson()}');
-      if (item.id == AppData.USER_ID && item.createTime != null) {
-        startTime = DateTime.parse(item.createTime!);
-        isManager = item.status == 2;
-      }
-    }
+    LOG('--> initData room : $isManager / ${room.toJson()}');
+    refreshAdmin();
+    initMemberList();
     chatRepo.startChatStreamData(roomInfo!.id, startTime ?? DateTime.now(), (result) {
       if (result.isNotEmpty) {
-        var orgCount = showList.length;
-        LOG('--> orgCount : $orgCount / ${result.length}');
+        // var orgCount = showList.length;
+        // LOG('--> orgCount : $orgCount / ${result.length}');
         showList.clear();
         showList.addAll(result);
-        var updateCount = cache.setChatItemData(result);
-        LOG('--> startChatStreamData check : $orgCount / ${result.length} / $updateCount');
-        var lastItem = showList.entries.last.value as JSON;
-        var lastKey = roomInfo!.id;
-        AppData.isMainActive = true;
-        AppData.chatReadLog[lastKey] = {'id': lastKey, 'lastId': lastItem['id'], 'createTime': SERVER_TIME_STR(lastItem['createTime'])};
+        cache.setChatItemData(result);
+        // var updateCount = cache.setChatItemData(result);
+        // LOG('--> startChatStreamData check : $orgCount / ${result.length} / $updateCount');
+        // var lastItem = showList.entries.last.value as JSON;
+        // var lastKey = roomInfo!.id;
+        // AppData.isMainActive = true;
+        // AppData.chatReadLog[lastKey] = {'id': lastKey, 'lastId': lastItem['id'], 'createTime': SERVER_TIME_STR(lastItem['createTime'])};
         notifyListeners();
         // if (orgCount != result.length || updateCount > 0) {
         //   notifyListeners();
         // }
       }
     });
+  }
+
+  refreshAdmin() {
+    var memberCheck = false;
+    for (var item in roomInfo!.memberData) {
+      // LOG('--> roomInfo!.memberData :${item.toJson()}');
+      if (item.id == AppData.USER_ID) {
+        memberCheck = true;
+        if (item.createTime != null) {
+          startTime = DateTime.parse(item.createTime!);
+          isManager = item.status == 2;
+        }
+      }
+    }
+    if (!memberCheck) {
+      Get.back();
+    }
   }
 
   refreshListYPos() {
@@ -119,28 +133,41 @@ class ChatTalkViewModel extends ChangeNotifier {
     ));
   }
 
+  initMemberList() {
+    memberList.clear();
+    for (var item in roomInfo!.memberData) {
+      memberList.add(item.nickName);
+    }
+    LOG('--> initMemberList : ${memberList.length}');
+  }
+
   refreshMemberList() {
     memberList.value = [];
     final reverseM = JSON.from(LinkedHashMap.fromEntries(showList.entries.toList().reversed));
     for (var item in reverseM.entries) {
       // LOG('--> reverseM item : ${item.value.toString()}');
       if (INT(item.value['action']) != 0 && LIST_NOT_EMPTY(item.value['memberData'])) {
+        // force refresh room info..
+        if ((item.value['action'] == 3 || item.value['action'] == 4) &&
+          !AppData.refreshChatList.contains(item.key)) {
+            AppData.refreshChatList.add(item.key);
+            refreshRoomInfo(true);
+            return false;
+          }
+        // change member list..
         for (var member in item.value['memberData']) {
           memberList.add(member['nickName']);
           roomInfo!.addMemberData(member);
         }
         cache.chatRoomData[roomInfo!.id] = roomInfo!;
-        memberList.refresh();
         // LOG('--> refreshMemberList : ${memberList.toString()} / ${item.value['memberList'].toString()}');
-        return;
       }
     }
-    if (memberList.isEmpty && LIST_NOT_EMPTY(reverseM.entries)) {
-      for (var member in roomInfo!.memberData) {
-        memberList.add(member.nickName);
-      }
-      memberList.refresh();
+    if (memberList.isEmpty) {
+      initMemberList();
     }
+    memberList.refresh();
+    return true;
   }
 
   selectAttachFile() async {
@@ -195,11 +222,26 @@ class ChatTalkViewModel extends ChangeNotifier {
     AppData.isMainActive = true;
   }
 
+  refreshRoomInfo([bool isNew = false]) async {
+    LOG('--> refreshRoomInfo : $isNew');
+    if (isNew) {
+      var result = await chatRepo.getChatRoomInfo(roomInfo!.id);
+      if (result != null) {
+        roomInfo = ChatRoomModel.fromJson(result);
+        cache.setChatRoomItem(roomInfo!, true);
+      }
+    }
+    if (cache.chatRoomData.containsKey(roomInfo!.id)) {
+      initData(cache.chatRoomData[roomInfo!.id]!);
+      notifyListeners();
+    }
+  }
+
   showChatList() {
     List<Widget> result = [];
     var parentId = '';
     // showList = JSON_CREATE_TIME_SORT_ASCE(showList);
-    refreshMemberList();
+    if (!refreshMemberList()) return;
     // LOG('--> showChatList memberList : ${memberList.length} / ${memberList.toString()}');
     for (var i=0; i<showList.length; i++) {
       var isShowDate = true;
@@ -228,25 +270,28 @@ class ChatTalkViewModel extends ChangeNotifier {
         var isShowFace = parentId != item.value['senderId'];
         ChatItem? addItem = cache.chatItemData[item.key];
         // LOG('-----> showList check [${STR(item.value['desc'])}] : $isOwner / $isOpened / [$openCount / ${addItem != null} ? ${addItem != null ? addItem.openCount : 0}]');
-        // LOG('--> addItem : $isOpened => ${addItem != null} / ${addItem != null ? addItem.openCount : 0} / $openCount');
         if (addItem == null || addItem.openCount != openCount) {
+          LOG('--> addItem : $isOpened => ${addItem != null} / ${addItem != null ? addItem.openCount : 0} / $openCount');
           addItem = ChatItem(
-              item.value,
-              openCount: openCount,
-              isOwner: isOwner,
-              isManager: isManager,
-              isOpened: isOpened,
-              isShowFace: isShowFace,
-              isShowDate: isShowDate,
-              onSelected: (key, status) {
-                switch(status) {
-                  case 9:
-                    notifyListeners();
-                    break;
-                }
-              }, onSetOpened: (message) {
-            api.addChatOpenItem(message['id'], AppData.USER_ID);
-          }
+            item.value,
+            openCount: openCount,
+            isOwner: isOwner,
+            isManager: isManager,
+            isOpened: isOpened,
+            isShowFace: isShowFace,
+            isShowDate: isShowDate,
+            onSelected: (key, status) {
+              switch(status) {
+                case 8: // room update
+                  refreshRoomInfo();
+                  break;
+                case 9: // talk list update
+                  notifyListeners();
+                  break;
+              }
+            }, onSetOpened: (message) {
+              api.addChatOpenItem(message['id'], AppData.USER_ID);
+            }
           );
         }
         result.add(addItem);
@@ -355,14 +400,16 @@ class ChatTalkViewModel extends ChangeNotifier {
                         return;
                       }
                       AppData.isMainActive = false;
-                      // showLoadingDialog(buildContext!, 'Uploading now...'.tr);
+                      if (uploadFileData.isNotEmpty) {
+                        showLoadingDialog(buildContext!, 'Uploading now...'.tr);
+                      }
                       chatRepo.createChatItem(roomInfo!, sendText, uploadFileData).then((result) {
                         hideLoadingDialog();
-                        AppData.isMainActive = true;
                         textController.text = '';
                         sendText = '';
                         imageData.clear();
                         uploadFileData.clear();
+                        AppData.isMainActive = true;
                         notifyListeners();
                       });
                     },

@@ -2006,6 +2006,80 @@ class ApiService extends GetxService {
     return null;
   }
 
+  Future<JSON?> setChatRoomAdmin(String roomId, String targetId, String userId) async {
+    LOG('------> setChatRoomAdmin : $roomId / $targetId <- $userId');
+    try {
+      var ref = firestore!.collection(ChatRoomCollection);
+      var snapshot = await ref.doc(roomId).get();
+      if (snapshot.data() != null) {
+        var roomInfo = FROM_SERVER_DATA(snapshot.data() as JSON);
+        if (STR(roomInfo['userId']) == userId) {
+          var isOk = [false, false];
+          for (var item in roomInfo['memberData']) {
+            if (STR(item['id']) == userId) {
+              item['status'] = 1;
+              isOk[0] = true;
+            }
+            if (STR(item['id']) == targetId) {
+              item['status'] = 2;
+              isOk[1] = true;
+            }
+          }
+          if (isOk[0] && isOk[1]) {
+            await ref.doc(roomId).update(Map<String, dynamic>.from({
+              'userId': targetId,
+              'memberData': roomInfo['memberData'],
+            }));
+          }
+        }
+        return roomInfo;
+      }
+    } catch (e) {
+      LOG('--> setChatRoomAdmin error : $e');
+    }
+    return null;
+  }
+
+  setChatRoomKickUser(String roomId, String targetId, String targetName, String userId) async {
+    LOG('------> setChatRoomKickUser : $roomId / $targetId <- $userId');
+    try {
+      var ref = firestore!.collection(ChatRoomCollection);
+      var snapshot = await ref.doc(roomId).get();
+      if (snapshot.data() != null) {
+        var roomInfo = snapshot.data() as JSON;
+        if (STR(roomInfo['userId']) == userId) {
+          var isOk = false;
+          for (var item in roomInfo['memberData']) {
+            if (STR(item['id']) == targetId) {
+              roomInfo['memberData'].remove(item);
+              roomInfo['memberList'].remove(targetId);
+              isOk = true;
+              LOG('--> memberData removed : ${roomInfo['memberData']}');
+              break;
+            }
+          }
+          if (isOk) {
+            roomInfo['banData'] ??= {};
+            roomInfo['banData'][targetId] = {
+              'id': targetId,
+              'nickName': targetName,
+              'createTime': CURRENT_SERVER_TIME(),
+            };
+            await ref.doc(roomId).update(Map<String, dynamic>.from({
+              'memberData': roomInfo['memberData'],
+              'memberList': roomInfo['memberList'],
+              'kickData'  : roomInfo['kickData'],
+            }));
+          }
+        }
+        return FROM_SERVER_DATA(roomInfo);
+      }
+    } catch (e) {
+      LOG('--> setChatRoomKickUser error : $e');
+    }
+    return null;
+  }
+
   startChatStreamData(String roomId, DateTime? startTime, Function(JSON) onChanged) {
     LOG('------> startChatStreamData : $roomId / $startTime');
     JSON result = {};

@@ -22,7 +22,7 @@ class CacheService extends GetxService {
   Map<String, MessageModel>? messageData;
   Map<String, MessageGroupModel>? messageGroupData;
 
-  Map<String, ChatModel>? chatData;
+  Map<String, ChatModel> chatData = {};
   Map<String, ChatRoomModel> chatRoomData = {};
 
   JSON reportData = {};
@@ -65,17 +65,15 @@ class CacheService extends GetxService {
   }
 
   setChatItem(ChatModel addItem) {
-    chatData ??= {};
-    chatData![addItem.id] = addItem;
+    chatData[addItem.id] = addItem;
     // LOG('--> setChatItem [${addItem.id}] : ${chatData![addItem.id]!.desc} / ${chatData!.length}');
   }
 
   setChatItemData(JSON addData) {
     var count = 0;
-    chatData ??= {};
     for (var item in addData.entries) {
       var chatItem = ChatModel.fromJson(item.value);
-      var chatItemOrg = chatData![item.key];
+      var chatItemOrg = chatData[item.key];
       var openCount = chatItem.openList != null ? chatItem.openList!.length : 0;
       var openOrgCount = chatItemOrg != null && chatItemOrg.openList != null ? chatItemOrg.openList!.length : 0;
       if (openCount != openOrgCount || chatItem.action == 9) count++; // is chat item edited..
@@ -86,16 +84,18 @@ class CacheService extends GetxService {
   }
 
   setChatItemList(List<JSON> addData) {
-    chatData ??= {};
     for (var item in addData) {
       setChatItem(ChatModel.fromJson(item));
     }
     // LOG('--> setChatItem : ${addData.length} / ${chatData!.length}');
   }
 
-  setChatRoomItem(ChatRoomModel addItem) {
+  setChatRoomItem(ChatRoomModel addItem, [bool isClearItem = false]) {
     chatRoomData[addItem.id] = addItem;
-    LOG('--> setChatRoomItem [${addItem.id}] : ${chatRoomData[addItem.id]!.title} / ${chatRoomData[addItem.id]!.status} / ${chatRoomData.length}');
+    if (isClearItem) {
+      chatItemData.clear();
+    }
+    LOG('--> setChatRoomItem [${addItem.id}] :  ${chatRoomData.length}');
   }
 
   readRoomIndexData() async {
@@ -161,6 +161,7 @@ class CacheService extends GetxService {
   }
 
   getMemberFromRoom(String roomId, String userId) {
+    if (!chatRoomData.containsKey(roomId)) return null;
     for (var item in chatRoomData[roomId]!.memberData) {
       if (item.id == userId) {
         return item;

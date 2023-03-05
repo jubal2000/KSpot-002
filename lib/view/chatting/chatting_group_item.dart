@@ -25,12 +25,12 @@ class ChatGroupItem extends StatelessWidget {
       {Key? key,
         this.unOpenCount = 0,
         this.isBlocked = false,
-        this.roomType = ChatRoomType.public,
+        this.roomType = 0,
         this.onMenuSelected,
         this.onSelected}) : super(key: key);
 
   ChatRoomModel? groupItem;
-  ChatRoomType roomType;
+  int roomType;
   int unOpenCount;    // no read message count..
   bool isBlocked;
 
@@ -42,18 +42,20 @@ class ChatGroupItem extends StatelessWidget {
   var itemHeight = 0.0;
   var isEnter = false;
   var fixIndex = -1;
+  var isAdmin = false;
   List<MemberData> showList = [];
 
   initData() {
     isEnter = groupItem!.memberList.contains(AppData.USER_ID);
     itemHeight = roomType == ChatRoomType.public ? 50 : 65;
-    fixIndex = cache.getRoomIndexTop(roomType.index, groupItem!.id);
+    fixIndex = cache.getRoomIndexTop(roomType, groupItem!.id);
+    isAdmin = groupItem!.userId == AppData.USER_ID;
     showList.clear();
     for (var i=0; i<groupItem!.memberData.length; i++) {
       if (i > showMemberMax) return;
       showList.add(groupItem!.memberData[i]);
     }
-    // LOG('--> ChatGroupItem initData [${groupItem!.id}] : ${groupItem!.memberData.length} / $fixIndex');
+    LOG('--> ChatGroupItem initData [${groupItem!.id}] : $fixIndex / $isAdmin - ${groupItem!.toJson()}');
   }
 
   @override
@@ -154,7 +156,11 @@ class ChatGroupItem extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        if (groupItem!.type == 0)
+                        if (isAdmin)...[
+                          Icon(Icons.admin_panel_settings, color: Theme.of(context).colorScheme.primary, size: 18),
+                          SizedBox(width: 5),
+                        ],
+                        if (groupItem!.type == ChatType.public)
                           Row(
                               children: [
                                 Text(STR(groupItem!.title), style: isBlocked ? ItemTitleDisableStyle(context) : ItemTitleStyle(context), maxLines: 1),
@@ -164,7 +170,7 @@ class ChatGroupItem extends StatelessWidget {
                                 ],
                               ]
                           ),
-                        if (groupItem!.type == 1)
+                        if (groupItem!.type == ChatType.private)
                           Row(
                               children: [
                                 for (var item in showList)
@@ -180,16 +186,12 @@ class ChatGroupItem extends StatelessWidget {
                               ],
                           ),
                         Expanded(child: SizedBox(height: 1)),
-                        if (fixIndex >= 0)...[
-                          Icon(Icons.bookmark_border, color: Theme.of(context).colorScheme.tertiary, size: 18),
-                        ],
                         if (roomType != ChatRoomType.public && unOpenCount > 0)...[
-                          SizedBox(width: 5),
                           Container(
                             alignment: Alignment.center,
+                            padding: EdgeInsets.symmetric(horizontal: 3),
                             constraints: BoxConstraints(
-                              minWidth: 18,
-                              minHeight: 18,
+                              minWidth: 16,
                             ),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(15.0),
@@ -199,6 +201,10 @@ class ChatGroupItem extends StatelessWidget {
                                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800,
                                     color: Theme.of(context).cardColor)),
                           ),
+                        ],
+                        if (fixIndex >= 0)...[
+                          SizedBox(width: 5),
+                          Icon(Icons.bookmark_border, color: Theme.of(context).colorScheme.tertiary, size: 18),
                         ],
                       ],
                     ),
@@ -248,13 +254,13 @@ class ChatGroupItem extends StatelessWidget {
                     ],
                   ],
                   if (isEnter)...[
-                    ...DropdownItems.chatRoomMenu1.map((item) => DropdownMenuItem<DropdownItem>(
-                      value: item,
-                      child: DropdownItems.buildItem(context, item),
-                    )),
-                    if (roomType != ChatRoomType.public)...[
+                    if (!isAdmin)
+                      ...DropdownItems.chatRoomMenu1.map((item) => DropdownMenuItem<DropdownItem>(
+                        value: item,
+                        child: DropdownItems.buildItem(context, item),
+                      )),
+                    if (roomType != ChatRoomType.public)
                       ...alarmMenu(context),
-                    ],
                   ],
                   ...indexMenu(context),
                 ],

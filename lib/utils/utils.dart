@@ -621,7 +621,7 @@ LIST_IN_ITEM(dynamic data, dynamic item) {
 
 // ignore: non_constant_identifier_names
 LIST_EMPTY(dynamic data) {
-  if (data == null) return false;
+  if (data == null) return true;
   return !LIST_NOT_EMPTY(data);
 }
 
@@ -1063,7 +1063,10 @@ enum DropdownItemType {
 
   profile,
   kick,
-  notice,
+  title,
+  noticeAdd,
+  noticeShow,
+  noticeSet,
   admin,
 }
 
@@ -1165,7 +1168,10 @@ const dropMenuIndexBkOn   = DropdownItem(DropdownItemType.bookmarkOn, text: 'FIX
 const dropMenuIndexBkOff  = DropdownItem(DropdownItemType.bookmarkOff, text: 'FIX RELEASE', icon: Icons.bookmark_remove_outlined);
 const dropMenuIndexUp     = DropdownItem(DropdownItemType.indexUp, text: 'MOVE UP', icon: Icons.arrow_upward);
 const dropMenuIndexDown   = DropdownItem(DropdownItemType.indexDown, text: 'MOVE DOWN', icon: Icons.arrow_downward);
-const dropMenuNotice      = DropdownItem(DropdownItemType.notice, text: 'NOTICE', icon: Icons.campaign_outlined, manager: true);
+const dropMenuTitle       = DropdownItem(DropdownItemType.title, text: 'TITLE CHANGE', icon: Icons.title, manager: true);
+const dropMenuNoticeShow  = DropdownItem(DropdownItemType.noticeShow, text: 'NOTICE', icon: Icons.campaign_outlined);
+const dropMenuNoticeSet   = DropdownItem(DropdownItemType.noticeSet, text: 'NOTICE SET', icon: Icons.campaign_rounded, manager: true);
+const dropMenuNoticeAdd   = DropdownItem(DropdownItemType.noticeAdd, text: 'NOTICE ADD', icon: Icons.campaign_rounded, manager: true);
 const dropMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
 
 
@@ -1198,8 +1204,9 @@ class DropdownItems {
   static const List<DropdownItem> reserve2          = [confirm, reject];
   static const List<DropdownItem> secondItems = [];
   static const List<DropdownItem> chatRoomMenu0     = [dropMenuEnter];
-  static const List<DropdownItem> chatRoomMenu1     = [dropMenuExit];
-  static const List<DropdownItem> chatRoomMenu2     = [dropMenuNotice];
+  static const List<DropdownItem> chatRoomMenu1     = [dropMenuExit, dropMenuNoticeShow];
+  static const List<DropdownItem> chatRoomAdmin0    = [dropMenuTitle, dropMenuNoticeSet];
+  static const List<DropdownItem> chatRoomAdmin1    = [dropMenuTitle, dropMenuNoticeAdd];
 
   static const content      = DropdownItem(DropdownItemType.content, text: 'HISTORY +', icon: Icons.movie_creation);
   static const talent       = DropdownItem(DropdownItemType.talent, text: 'TALENT +', icon: Icons.star);

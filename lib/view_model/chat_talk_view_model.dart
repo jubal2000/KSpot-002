@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:helpers/helpers.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:uuid/uuid.dart';
@@ -45,7 +46,10 @@ class ChatTalkViewModel extends ChangeNotifier {
   DateTime? startTime;
 
   var  memberList = [].obs;
-  var  isManager = false;
+  var  isAdmin = false.obs;
+  var  roomTitle = ''.obs;
+  var  isNoticeShow = true.obs;
+  var  isNoticeAll  = true.obs;
 
   init(context) {
     buildContext = context;
@@ -53,9 +57,38 @@ class ChatTalkViewModel extends ChangeNotifier {
 
   initData(ChatRoomModel room) {
     roomInfo = room;
-    LOG('--> initData room : $isManager / ${room.toJson()}');
-    refreshAdmin();
+    LOG('--> initData room : $isAdmin / ${roomInfo!.noticeData}');
+    roomTitle.value = roomInfo!.title;
     initMemberList();
+  }
+
+  initMemberList() {
+    var adminCheck = false;
+    var memberCheck = false;
+    memberList.clear();
+    for (var item in roomInfo!.memberData) {
+      memberList.add(item.nickName);
+      if (item.id == AppData.USER_ID) {
+        memberCheck = true;
+        isAdmin.value = item.status == 2;
+        if (item.createTime != null) {
+          startTime = DateTime.parse(item.createTime!);
+        }
+      }
+      if (item.status == 2) {
+        adminCheck = true;
+      }
+    }
+    LOG('--> initMemberList : ${memberList.length} / $memberCheck');
+    if (!adminCheck && roomInfo!.userId == AppData.USER_ID) {
+      isAdmin.value = true;
+    }
+    if (!memberCheck) {
+      Get.back();
+    }
+  }
+
+  getChatData() {
     chatRepo.startChatStreamData(roomInfo!.id, startTime ?? DateTime.now(), (result) {
       if (result.isNotEmpty) {
         // var orgCount = showList.length;
@@ -77,27 +110,12 @@ class ChatTalkViewModel extends ChangeNotifier {
     });
   }
 
-  refreshAdmin() {
-    var memberCheck = false;
-    for (var item in roomInfo!.memberData) {
-      // LOG('--> roomInfo!.memberData :${item.toJson()}');
-      if (item.id == AppData.USER_ID) {
-        memberCheck = true;
-        if (item.createTime != null) {
-          startTime = DateTime.parse(item.createTime!);
-          isManager = item.status == 2;
-        }
-      }
-    }
-    if (!memberCheck) {
-      Get.back();
-    }
-  }
-
   refreshListYPos() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       Future.delayed(Duration(milliseconds: 200), () {
-        scrollController.jumpTo(0);
+        if (scrollController.hasClients) {
+          scrollController.jumpTo(0);
+        }
       });
     });
   }
@@ -133,41 +151,34 @@ class ChatTalkViewModel extends ChangeNotifier {
     ));
   }
 
-  initMemberList() {
-    memberList.clear();
-    for (var item in roomInfo!.memberData) {
-      memberList.add(item.nickName);
-    }
-    LOG('--> initMemberList : ${memberList.length}');
-  }
-
   refreshMemberList() {
-    memberList.value = [];
     final reverseM = JSON.from(LinkedHashMap.fromEntries(showList.entries.toList().reversed));
     for (var item in reverseM.entries) {
       // LOG('--> reverseM item : ${item.value.toString()}');
-      if (INT(item.value['action']) != 0 && LIST_NOT_EMPTY(item.value['memberData'])) {
-        // force refresh room info..
-        if ((item.value['action'] == 3 || item.value['action'] == 4) &&
-          !AppData.refreshChatList.contains(item.key)) {
-            AppData.refreshChatList.add(item.key);
-            refreshRoomInfo(true);
-            return false;
+      var action = INT(item.value['action']);
+      if (action != 0 && JSON_NOT_EMPTY(item.value['memberData'])) {
+        roomInfo!.memberData.clear();
+        for (var mItem in item.value['memberData']) {
+          roomInfo!.memberData.add(MemberData.fromJson(mItem));
+          // set admin id..
+          if (INT(mItem['status']) == 2) {
+            roomInfo!.userId = STR(mItem['id']);
           }
-        // change member list..
-        for (var member in item.value['memberData']) {
-          memberList.add(member['nickName']);
-          roomInfo!.addMemberData(member);
         }
-        cache.chatRoomData[roomInfo!.id] = roomInfo!;
-        // LOG('--> refreshMemberList : ${memberList.toString()} / ${item.value['memberList'].toString()}');
+        if (action == ChatActionType.title) {
+          roomInfo!.title = STR(item.value['desc']);
+          LOG('--> title changed ! : ${roomInfo!.title}');
+          roomTitle.value = roomInfo!.title;
+        } else {
+          initMemberList();
+          memberList.refresh();
+          cache.setChatRoomItem(roomInfo!);
+          cache.chatItemData.clear();
+        }
+        return true;
       }
     }
-    if (memberList.isEmpty) {
-      initMemberList();
-    }
-    memberList.refresh();
-    return true;
+    return false;
   }
 
   selectAttachFile() async {
@@ -202,23 +213,6 @@ class ChatTalkViewModel extends ChangeNotifier {
       }
       notifyListeners();
     }
-
-    // imageData.clear();
-    // List<XFile>? imageList = await ImagePicker().pickMultiImage(maxWidth: PIC_IMAGE_SIZE_MAX, maxHeight: PIC_IMAGE_SIZE_MAX);
-    // if (LIST_NOT_EMPTY(imageList)) {
-    //   showLoadingDialog(buildContext!, 'Processing now...'.tr);
-    //   for (var i = 0; i < imageList.length; i++) {
-    //     var image = imageList[i];
-    //     var data = await ReadFileByte(image.path);
-    //     if (data != null) {
-    //       var thumbData = await resizeImage(data.buffer.asUint8List(), 256) as Uint8List;
-    //       var key = Uuid().v1();
-    //       imageData[key] = {'id': key, 'data': data, 'thumb': thumbData};
-    //     }
-    //   }
-    //   hideLoadingDialog();
-    //   notifyListeners();
-    // }
     AppData.isMainActive = true;
   }
 
@@ -229,20 +223,19 @@ class ChatTalkViewModel extends ChangeNotifier {
       if (result != null) {
         roomInfo = ChatRoomModel.fromJson(result);
         cache.setChatRoomItem(roomInfo!, true);
+        cache.chatItemData.clear();
       }
     }
     if (cache.chatRoomData.containsKey(roomInfo!.id)) {
       initData(cache.chatRoomData[roomInfo!.id]!);
-      notifyListeners();
+      // notifyListeners();
     }
   }
 
   showChatList() {
     List<Widget> result = [];
     var parentId = '';
-    // showList = JSON_CREATE_TIME_SORT_ASCE(showList);
-    if (!refreshMemberList()) return;
-    // LOG('--> showChatList memberList : ${memberList.length} / ${memberList.toString()}');
+    refreshMemberList();
     for (var i=0; i<showList.length; i++) {
       var isShowDate = true;
       var item = showList.entries.elementAt(i);
@@ -271,12 +264,12 @@ class ChatTalkViewModel extends ChangeNotifier {
         ChatItem? addItem = cache.chatItemData[item.key];
         // LOG('-----> showList check [${STR(item.value['desc'])}] : $isOwner / $isOpened / [$openCount / ${addItem != null} ? ${addItem != null ? addItem.openCount : 0}]');
         if (addItem == null || addItem.openCount != openCount) {
-          LOG('--> addItem : $isOpened => ${addItem != null} / ${addItem != null ? addItem.openCount : 0} / $openCount');
+          LOG('--> addItem : ${isAdmin.value} / $isOpened => ${addItem != null} / ${addItem != null ? addItem.openCount : 0} / $openCount');
           addItem = ChatItem(
             item.value,
             openCount: openCount,
             isOwner: isOwner,
-            isManager: isManager,
+            isManager: isAdmin.value,
             isOpened: isOpened,
             isShowFace: isShowFace,
             isShowDate: isShowDate,
@@ -296,8 +289,10 @@ class ChatTalkViewModel extends ChangeNotifier {
         }
         result.add(addItem);
         cache.chatItemData[item.key] = addItem;
-        if (INT(item.value['action']) == 0) {
+        if (action == 0) {
           parentId = item.value['senderId'];
+        } else {
+          parentId = '';
         }
       }
     }
@@ -307,16 +302,16 @@ class ChatTalkViewModel extends ChangeNotifier {
   showChatMainList() {
     return Expanded(
       child: SingleChildScrollView(
-          reverse: true,
-          controller: scrollController,
-          child: Column(
-            children: [
-              SizedBox(height: 10),
-              ...showChatList(),
-              SizedBox(height: 10),
-            ],
-          )
-      ),
+        reverse: true,
+        controller: scrollController,
+        child: Column(
+          children: [
+            SizedBox(height: 10),
+            ...showChatList(),
+            SizedBox(height: 10),
+          ],
+        )
+      )
     );
   }
   
@@ -434,6 +429,102 @@ class ChatTalkViewModel extends ChangeNotifier {
     );
   }
 
+  noticeItem(NoticeModel notice, [bool isShowMenu = false]) {
+    return Container(
+      width: Get.width * 0.9,
+      padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE_M, UI_HORIZONTAL_SPACE_S, UI_HORIZONTAL_SPACE_S, UI_HORIZONTAL_SPACE_S),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(DESC(notice.desc), style: ItemTitleStyle(buildContext!)),
+                SizedBox(height: 5),
+                Text(SERVER_TIME_STR(notice.createTime), style: ItemDescExInfoStyle(buildContext!)),
+              ],
+            )
+          ),
+          SizedBox(
+            width: 40,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (isShowMenu)
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: GestureDetector(
+                      onTap: () {
+                        isNoticeShow.value = false;
+                      },
+                      child: Icon(Icons.highlight_remove, size: 24),
+                    ),
+                  ),
+                if (isAdmin.value)...[
+                  GestureDetector(
+                    onTap: () {
+                      showNoticeEditDialog(buildContext!, 'Notice Edit'.tr, notice.toJson()).then((result) {
+                        if (result != null) {
+                          result['id'         ] ??= '';
+                          result['status'     ] = 1;
+                          result['userId'     ] = AppData.USER_ID;
+                          result['userName'   ] = AppData.USER_NICKNAME;
+                          result['createTime' ] = DateTime.now().toString();
+                          chatRepo.setChatRoomNotice(roomInfo!.id, NoticeModel.fromJson(result), BOL(result['isFirst']));
+                        }
+                      });
+                    },
+                    child: Icon(Icons.edit_note, size: 24),
+                  ),
+                ]
+              ]
+            )
+          )
+        ]
+      )
+    );
+  }
+
+  showChatNotice() {
+    return Obx(() => TopCenterAlign(
+      child: AnimatedSize(
+      duration: Duration(milliseconds: 200),
+        child: Container(
+          margin: EdgeInsets.only(top: 10),
+          height: isNoticeShow.value ? null : 0,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+            color: Theme.of(buildContext!).canvasColor.withOpacity(0.8)
+          ),
+          child: FittedBox(
+            child: Column(
+              children: [
+                if (!isNoticeAll.value || roomInfo!.noticeData!.length <= 1)
+                  noticeItem(roomInfo!.noticeData!.first, true),
+                if (isNoticeAll.value && roomInfo!.noticeData!.length > 1)
+                  ...roomInfo!.noticeData!.map((e) => noticeItem(e, roomInfo!.noticeData!.indexOf(e) == 0)).toList(),
+                if ((LIST_NOT_EMPTY(roomInfo!.noticeData) && roomInfo!.noticeData!.length > 1))
+                  GestureDetector(
+                    onTap: () {
+                      isNoticeAll.value = !isNoticeAll.value;
+                    },
+                    child: Container(
+                      width: 100,
+                      height: 30,
+                      color: Colors.transparent,
+                      child: Icon(isNoticeAll.value ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, size: 24),
+                    )
+                  )
+              ],
+            )
+          )
+        )
+      )
+    ));
+  }
+
   showChatButtonBox() {
     return Positioned(
       left: 15,
@@ -467,5 +558,69 @@ class ChatTalkViewModel extends ChangeNotifier {
         )
       )
     );
+  }
+
+  roomMenuList() {
+    return [
+      ...DropdownItems.chatRoomMenu1.map((item) => DropdownMenuItem<DropdownItem>(
+        value: item,
+        child: DropdownItems.buildItem(buildContext!, item),
+      )),
+      if (isAdmin.value)...[
+        if (LIST_NOT_EMPTY(roomInfo!.noticeData))
+          ...DropdownItems.chatRoomAdmin0.map((item) => DropdownMenuItem<DropdownItem>(
+            value: item,
+            child: DropdownItems.buildItem(buildContext!, item),
+          )),
+        if (LIST_EMPTY(roomInfo!.noticeData))
+          ...DropdownItems.chatRoomAdmin1.map((item) => DropdownMenuItem<DropdownItem>(
+            value: item,
+            child: DropdownItems.buildItem(buildContext!, item),
+          )),
+      ]
+    ];
+  }
+
+  onRoomMenuAction(DropdownItemType type) {
+    switch(type) {
+      case DropdownItemType.exit:
+        if (isAdmin.value) {
+          ShowToast('You are currently an admin'.tr);
+          return;
+        }
+        showAlertYesNoCheckDialog(buildContext!, 'Room Exit'.tr, 'Would you like to leave the chat room?'.tr,
+            'Leave quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
+          if (result > 0) {
+            chatRepo.exitChatRoom(roomInfo!.id, result == 1).then((result2) {
+              if (result2 != null && JSON_EMPTY(result2['error'])) {
+                Get.back();
+              }
+            });
+          }
+        });
+        break;
+      case DropdownItemType.title:
+        showTextInputDialog(buildContext!, 'Room Title'.tr, '', roomInfo!.title, 1, null).then((result) {
+          if (result.isNotEmpty && roomInfo!.title != result) {
+            chatRepo.setChatRoomTitle(roomInfo!.id, result);
+          }
+        });
+        break;
+      case DropdownItemType.noticeShow:
+        isNoticeShow.value = true;
+        break;
+      case DropdownItemType.noticeAdd:
+        showNoticeEditDialog(buildContext!, 'Room Notice'.tr, {}).then((result) {
+          if (result != null) {
+            result['id'         ] ??= '';
+            result['status'     ] = 1;
+            result['userId'     ] = AppData.USER_ID;
+            result['userName'   ] = AppData.USER_NICKNAME;
+            result['createTime' ] = DateTime.now().toString();
+            chatRepo.setChatRoomNotice(roomInfo!.id, NoticeModel.fromJson(result), BOL(result['isFirst']));
+          }
+        });
+        break;
+    }
   }
 }

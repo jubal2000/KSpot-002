@@ -20,12 +20,12 @@ class ChattingEditScreen extends StatelessWidget {
       this.selectedTab,
       { Key? key }) : super(key: key);
 
-  ChatType selectedTab;
+  int selectedTab;
   final _viewModel = ChatEditViewModel();
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context, selectedTab == ChatType.public ? 0 : 1);
+    _viewModel.init(context, selectedTab);
     return SafeArea(
       top: false,
       child: Scaffold(

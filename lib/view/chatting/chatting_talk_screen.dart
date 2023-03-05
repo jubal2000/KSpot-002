@@ -26,6 +26,7 @@ import '../../services/cache_service.dart';
 import '../../utils/local_utils.dart';
 import '../../utils/utils.dart';
 import '../../view_model/chat_talk_view_model.dart';
+import '../../view_model/chat_view_model.dart';
 import '../../widget/card_scroll_viewer.dart';
 import '../../widget/chat_item.dart';
 
@@ -42,13 +43,12 @@ class ChatTalkScreen extends StatefulWidget {
 class ChatTalkScreenState extends State<ChatTalkScreen> {
   final chatRepo    = ChatRepository();
   final _viewModel  = ChatTalkViewModel();
-  var isAdmin = false;
 
   @override
   void initState() {
     _viewModel.initData(widget.roomInfo);
+    _viewModel.getChatData();
     _viewModel.refreshListYPos();
-    isAdmin = widget.roomInfo.userId == AppData.USER_ID;
     super.initState();
   }
 
@@ -70,21 +70,21 @@ class ChatTalkScreenState extends State<ChatTalkScreen> {
               appBar: AppBar(
                 title: Row(
                   children: [
-                    if (widget.roomInfo.type == 0)...[
+                    if (widget.roomInfo.type == ChatType.public)...[
                       if (widget.roomInfo.pic.isNotEmpty)...[
                         viewModel.showTitleWithPic(),
                         SizedBox(width: 10),
                       ],
-                      Column(
+                      Obx(() => Column(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(STR(widget.roomInfo.title), style: AppBarTitleStyle(context)),
+                          Text(viewModel.roomTitle.value, style: ChatTitleStyle(context)),
                           viewModel.showMemberListText(),
                         ]
-                      ),
+                      )),
                     ],
-                    if (widget.roomInfo.type == 1)...[
+                    if (widget.roomInfo.type == ChatType.private)...[
                       if (widget.roomInfo.pic.isNotEmpty)...[
                         viewModel.showTitleWithPic(),
                         SizedBox(width: 10),
@@ -94,7 +94,7 @@ class ChatTalkScreenState extends State<ChatTalkScreen> {
                   ],
                 ),
                 actions: [
-                  DropdownButtonHideUnderline(
+                  Obx(() => DropdownButtonHideUnderline(
                     child: DropdownButton2(
                       customButton: Container(
                         width: 30,
@@ -110,40 +110,13 @@ class ChatTalkScreenState extends State<ChatTalkScreen> {
                       buttonWidth: 30,
                       itemPadding: const EdgeInsets.only(left: 12, right: 12),
                       offset: const Offset(0, 8),
-                      items: [
-                        ...DropdownItems.chatRoomMenu1.map((item) => DropdownMenuItem<DropdownItem>(
-                          value: item,
-                          child: DropdownItems.buildItem(context, item),
-                        )),
-                        if (isAdmin)
-                          ...DropdownItems.chatRoomMenu2.map((item) => DropdownMenuItem<DropdownItem>(
-                            value: item,
-                            child: DropdownItems.buildItem(context, item),
-                          )),
-                      ],
+                      items: viewModel.roomMenuList(),
                       onChanged: (value) {
                         var selected = value as DropdownItem;
-                        switch(selected.type) {
-                          case DropdownItemType.exit:
-                            if (widget.roomInfo.userId == AppData.USER_ID) {
-                              ShowToast('You are currently an admin'.tr);
-                              return;
-                            }
-                            showAlertYesNoCheckDialog(context, widget.roomTitle, 'Would you like to leave the chat room?'.tr,
-                                'Leave quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
-                              if (result > 0) {
-                                chatRepo.exitChatRoom(widget.roomInfo.id, result == 1).then((result2) {
-                                  if (result2 != null && JSON_EMPTY(result2['error'])) {
-                                    Get.back();
-                                  }
-                                });
-                              }
-                            });
-                            break;
-                        }
+                        viewModel.onRoomMenuAction(selected.type);
                       },
                     ),
-                  ),
+                  )),
                   SizedBox(width: 10),
                 ],
                 titleSpacing: 0,
@@ -160,6 +133,8 @@ class ChatTalkScreenState extends State<ChatTalkScreen> {
                         ]
                       ),
                       viewModel.showChatButtonBox(),
+                      if (LIST_NOT_EMPTY(viewModel.roomInfo!.noticeData))
+                        viewModel.showChatNotice(),
                     ]
                   )
                 )

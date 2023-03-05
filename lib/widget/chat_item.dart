@@ -86,16 +86,24 @@ class ChatItemState extends State<ChatItem> {
       var text = '';
       var color = Colors.yellowAccent;
       switch(action) {
-        case 1:
+        case 1: // ChatActionType.enter
           text = 'has enter the room';
           break;
-        case 2:
-        case 4:
+        case 2: // ChatActionType.exit
+        case 4: // ChatActionType.kick
           text = 'has left the room';
           color = Colors.lightBlueAccent;
           break;
-        case 3:
+        case 3: // ChatActionType.admin
           text = 'has [admin] the room';
+          color = Colors.purpleAccent;
+          break;
+        case 5: // ChatActionType.title
+          text = 'changed the room title';
+          color = Colors.purpleAccent;
+          break;
+        case 6: // ChatActionType.notice
+          text = 'changed the notice';
           color = Colors.purpleAccent;
           break;
       }

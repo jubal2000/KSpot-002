@@ -169,3 +169,26 @@ Map<String, dynamic> _$DescDataToJson(DescData instance) => <String, dynamic>{
       'id': instance.id,
       'desc': instance.desc,
     };
+
+NoticeModel _$NoticeModelFromJson(Map<String, dynamic> json) => NoticeModel(
+      id: json['id'] as String,
+      status: json['status'] as int,
+      desc: json['desc'] as String,
+      userId: json['userId'] as String,
+      userName: json['userName'] as String,
+      createTime: json['createTime'] as String,
+      fileList: (json['fileList'] as List<dynamic>?)
+          ?.map((e) => UploadFileModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$NoticeModelToJson(NoticeModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'status': instance.status,
+      'desc': instance.desc,
+      'userId': instance.userId,
+      'userName': instance.userName,
+      'createTime': instance.createTime,
+      'fileList': instance.fileList?.map((e) => e.toJson()).toList(),
+    };

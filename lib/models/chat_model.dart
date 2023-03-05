@@ -83,6 +83,7 @@ class ChatRoomModel {
   String? groupId;        // 이벤트 그룹 Id
   String? country;
   String? countryState;
+  List<NoticeModel>? noticeData;  // 채팅 맴버 목록
 
   ChatRoomModel({
     required this.id,
@@ -101,6 +102,7 @@ class ChatRoomModel {
     this.groupId,
     this.country,
     this.countryState,
+    this.noticeData,
   });
   factory ChatRoomModel.fromJson(JSON json) => _$ChatRoomModelFromJson(json);
   JSON toJson() => _$ChatRoomModelToJson(this);

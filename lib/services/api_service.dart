@@ -2040,6 +2040,62 @@ class ApiService extends GetxService {
     return null;
   }
 
+  Future<JSON?> setChatRoomTitle(String roomId, String title, String userId) async {
+    LOG('------> setChatRoomTitle : $roomId / $title');
+    try {
+      var ref = firestore!.collection(ChatRoomCollection);
+      var snapshot = await ref.doc(roomId).get();
+      if (snapshot.data() != null) {
+        var roomInfo = FROM_SERVER_DATA(snapshot.data() as JSON);
+        if (STR(roomInfo['userId']) == userId) {
+          roomInfo['title'] = title;
+          await ref.doc(roomId).update(Map<String, dynamic>.from({
+            'title': title,
+          }));
+          return roomInfo;
+        }
+      }
+    } catch (e) {
+      LOG('--> setChatRoomTitle error : $e');
+    }
+    return null;
+  }
+
+  Future<JSON?> setChatRoomNotice(String roomId, JSON notice, String userId) async {
+    LOG('------> setChatRoomNotice : $roomId / $notice');
+    try {
+      var ref = firestore!.collection(ChatRoomCollection);
+      var snapshot = await ref.doc(roomId).get();
+      if (snapshot.data() != null) {
+        var roomInfo = FROM_SERVER_DATA(snapshot.data() as JSON);
+        if (STR(roomInfo['userId']) == userId) {
+          var isAdd = true;
+          if (STR(notice['id']).isNotEmpty && LIST_NOT_EMPTY(roomInfo['noticeData'])) {
+            for (var item in roomInfo['noticeData']) {
+              if (item['id'] == notice['id']) {
+                item = notice;
+                isAdd = false;
+                break;
+              }
+            }
+          }
+          if (isAdd) {
+            if (STR(notice['id']).isEmpty) notice['id'] = ref.doc().id;
+            roomInfo['noticeData'] ??= [];
+            roomInfo['noticeData'].add(notice);
+          }
+          await ref.doc(roomId).update(Map<String, dynamic>.from({
+            'noticeData': roomInfo['noticeData'],
+          }));
+          return roomInfo;
+        }
+      }
+    } catch (e) {
+      LOG('--> setChatRoomNotice error : $e');
+    }
+    return null;
+  }
+
   setChatRoomKickUser(String roomId, String targetId, String targetName, String userId) async {
     LOG('------> setChatRoomKickUser : $roomId / $targetId <- $userId');
     try {

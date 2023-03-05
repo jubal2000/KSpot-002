@@ -57,11 +57,14 @@ ChatRoomModel _$ChatRoomModelFromJson(Map<String, dynamic> json) =>
       updateTime: json['updateTime'] as String,
       createTime: json['createTime'] as String,
       memberList: (json['memberList'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+        .map((e) => e as String)
+        .toList(),
       memberData: (json['memberData'] as List<dynamic>)
-          .map((e) => MemberData.fromJson(e as Map<String, dynamic>))
-          .toList(),
+        .map((e) => MemberData.fromJson(e as Map<String, dynamic>))
+        .toList(),
+      noticeData: (json['noticeData'] as List<dynamic>?)
+        ?.map((e) => NoticeModel.fromJson(e as Map<String, dynamic>))
+        .toList(),
       groupId: json['groupId'] as String?,
       country: json['country'] as String?,
       countryState: json['countryState'] as String?,
@@ -81,6 +84,7 @@ Map<String, dynamic> _$ChatRoomModelToJson(ChatRoomModel instance) =>
       'createTime': instance.createTime,
       'memberList': instance.memberList,
       'memberData': instance.memberData.map((e) => e.toJson()).toList(),
+      'noticeData': instance.noticeData != null ? instance.noticeData!.map((e) => e.toJson()).toList() : [],
       'groupId': instance.groupId,
       'country': instance.country,
       'countryState': instance.countryState,

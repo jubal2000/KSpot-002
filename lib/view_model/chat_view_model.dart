@@ -23,23 +23,22 @@ import '../services/api_service.dart';
 import '../services/cache_service.dart';
 import '../utils/utils.dart';
 import '../view/chatting/chatting_group_item.dart';
-import '../view/chatting/chatting_tab_screen.dart';
 import '../view/chatting/chatting_talk_screen.dart';
 import '../view/home/home_top_menu.dart';
 import '../widget/user_item_widget.dart';
 import 'app_view_model.dart';
 
-enum ChatType {
-  public,
-  private,
-  one,
+class ChatType {
+  static int get public   => 0;
+  static int get private  => 1;
+  static int get one      => 2;
 }
 
-enum ChatRoomType {
-  publicMy,
-  public,
-  private,
-  one,
+class ChatRoomType {
+  static int get publicMy => 0;
+  static int get public   => 1;
+  static int get private  => 2;
+  static int get one      => 3;
 }
 
 class ChatViewModel extends ChangeNotifier {
@@ -52,7 +51,7 @@ class ChatViewModel extends ChangeNotifier {
   int currentTab = 0;
 
   List<ChatGroupItem> mainShowList = [];
-  List<ChatTabScreen> tabList = [];
+  List<String> tabList = [];
   List<GlobalKey> tabKeyList = [];
   var isTabOpen = [true, true];
 
@@ -65,8 +64,8 @@ class ChatViewModel extends ChangeNotifier {
   initMessageTab() {
     tabKeyList = List.generate(3, (index) => GlobalKey());
     tabList = [
-      ChatTabScreen(ChatType.public , 'Public chat'.tr , key: tabKeyList[0]),
-      ChatTabScreen(ChatType.private, 'Private chat'.tr, key: tabKeyList[1]),
+      'Public chat'.tr,
+      'Private chat'.tr,
     ];
   }
 
@@ -96,12 +95,13 @@ class ChatViewModel extends ChangeNotifier {
   enterRoom(roomId, roomInfo, isShow) {
     chatRepo.enterChatRoom(roomId, isShow).then((result2) {
       if (result2 != null && JSON_EMPTY(result2['error'])) {
-        showTalkScreen(roomInfo);
+        showTalkScreen(ChatRoomModel.fromJson(result2));
       }
     });
   }
 
   showTalkScreen(item) {
+    LOG('--> showTalkScreen');
     Get.to(() => ChatTalkScreen(item))!.then((_) {
       notifyListeners();
     });
@@ -116,7 +116,9 @@ class ChatViewModel extends ChangeNotifier {
     JSON unOpenCount = {};
 
     // current show room type
-    var roomType = currentTab == 1 ? ChatRoomType.private : (currentTab == 0 && isMy) ? ChatRoomType.publicMy : ChatRoomType.public;
+    var roomType = currentTab == ChatType.private ? ChatRoomType.private :
+      (currentTab == ChatType.public && isMy) ? ChatRoomType.publicMy : ChatRoomType.public;
+    var lastUpdateTime = '';
 
     if (cache.chatData.isNotEmpty) {
       for (var item in cache.chatData.entries) {
@@ -137,13 +139,14 @@ class ChatViewModel extends ChangeNotifier {
           if (!isMyMsg && isTimeCheck && (item.value.openList == null || !item.value.openList!.contains(AppData.USER_ID))) {
             var open = unOpenCount[roomId];
             if (open == null) {
-              unOpenCount[roomId] = {'id': roomId, 'count': 0};
+              unOpenCount[roomId] = 0;
             }
-            unOpenCount[roomId]['count']++;
-            unOpenCount[roomId]['updateTime'] = item.value.updateTime;
+            unOpenCount[roomId]++;
+            // unOpenCount[roomId]['updateTime'] = item.value.updateTime;
           }
           // LOG('--> unOpenCount [$roomId] : ${unOpenCount[roomId].toString()} / $isMyMsg, $isTimeCheck, ${item.value.openList}, ${AppData.USER_ID}');
         }
+        lastUpdateTime = item.value.updateTime;
       }
     }
     // create show group..
@@ -154,19 +157,19 @@ class ChatViewModel extends ChangeNotifier {
 
       if (item.value.type == currentTab &&
           !cache.blockData.containsKey(item.value.userId) &&
-         ((item.value.type == 0 && COMPARE_GROUP_COUNTRY(item.value.toJson()) && (
+         ((item.value.type == ChatType.public && COMPARE_GROUP_COUNTRY(item.value.toJson()) && (
          ((isMy && item.value.memberList.contains(AppData.USER_ID)) ||
           (!isMy && !item.value.memberList.contains(AppData.USER_ID))))) ||
-          ((item.value.type == 1 && item.value.memberList.contains(AppData.USER_ID))))) {
+          ((item.value.type == ChatType.private && item.value.memberList.contains(AppData.USER_ID))))) {
         // set last message..
         if (descList[item.value.id] != null) {
           item.value.lastMessage = descList[item.value.id].desc ?? '';
+          item.value.updateTime  = descList[item.value.id].updateTime ?? '';
         }
         // set unread count..
         var unOpen = 0;
         if (unOpenCount[item.key] != null) {
-          item.value.updateTime = unOpenCount[item.key]['updateTime'];
-          unOpen = INT(unOpenCount[item.key]['count']);
+          unOpen = INT(unOpenCount[item.key]);
         }
         // add group item..
         var addGroup = ChatGroupItem(item.value, isBlocked: reportData != null, roomType: roomType,
@@ -227,11 +230,11 @@ class ChatViewModel extends ChangeNotifier {
             case DropdownItemType.alarmOff:
               break;
             case DropdownItemType.bookmarkOn:
-              cache.setRoomIndexTop(roomType.index, item.key);
+              cache.setRoomIndexTop(roomType, item.key);
               notifyListeners();
               break;
             case DropdownItemType.bookmarkOff:
-              cache.removeRoomIndexTop(roomType.index, item.key);
+              cache.removeRoomIndexTop(roomType, item.key);
               notifyListeners();
               break;
           }
@@ -264,7 +267,7 @@ class ChatViewModel extends ChangeNotifier {
     }
     // sort index..
     for (ChatGroupItem item in showList) {
-      var index = cache.getRoomIndexTop(item.roomType.index, item.groupItem!.id);
+      var index = cache.getRoomIndexTop(item.roomType, item.groupItem!.id);
       if (index >= 0 && index < showResultList.length) {
         // LOG('--> showResultList : ${showResultList.toString()} / $index');
         showResultList.insert(index, item);

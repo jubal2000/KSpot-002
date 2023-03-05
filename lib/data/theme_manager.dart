@@ -313,19 +313,19 @@ MainTitleStyle(BuildContext context) {
 }
 
 DialogTitleStyle(BuildContext context) {
-  return TextStyle(fontSize: 20, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600);
+  return TextStyle(fontSize: 16, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600);
 }
 
 DialogDescStyle(BuildContext context) {
-  return TextStyle(fontSize: 18, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600);
+  return TextStyle(fontSize: 14, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600);
 }
 
 DialogDescErrorStyle(BuildContext context) {
-  return TextStyle(fontSize: 18, color: Theme.of(context).errorColor, fontWeight: FontWeight.w800);
+  return TextStyle(fontSize: 14, color: Theme.of(context).errorColor, fontWeight: FontWeight.w800);
 }
 
 DialogDescExStyle(BuildContext context) {
-  return TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.secondary, fontWeight: FontWeight.w600);
+  return TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.secondary, fontWeight: FontWeight.w600);
 }
 
 DialogDescExErrorStyle(BuildContext context) {
@@ -580,6 +580,10 @@ GroupTitleOutlineStyle(BuildContext context, Color borderColor) {
       shadows: outlinedText(strokeColor: borderColor), height: 1.1);
 }
 
+ChatTitleStyle(BuildContext context) {
+  return TextStyle(fontSize: 14, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600);
+}
+
 SubTitleBar(BuildContext context, String title, {double horizontalPadding = 20, double height = 30, IconData? icon, Function(String)? onActionSelect}) {
   Widget? child;
   if (icon != null) {
@@ -597,8 +601,11 @@ SubTitleBarEx(BuildContext context, String title, {double horizontalPadding = 20
       width: MediaQuery.of(context).size.width,
       height: height,
       padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-      color: SubTitleBackColor(context),
       alignment: Alignment.centerLeft,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(4)),
+        color: SubTitleBackColor(context),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

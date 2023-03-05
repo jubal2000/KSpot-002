@@ -50,7 +50,10 @@ class ChattingScreen extends StatelessWidget {
                     indicatorColor: Theme
                         .of(context)
                         .primaryColor,
-                    tabs: List<Widget>.from(AppData.chatViewModel.tabList.map((item) => item.getTab()).toList()),
+                    tabs: [
+                      Tab(text: AppData.chatViewModel.tabList[0], height: 40),
+                      Tab(text: AppData.chatViewModel.tabList[1], height: 40),
+                    ],
                   ),
                 ),
                 body: ChangeNotifierProvider<AppViewModel>.value(

@@ -14,6 +14,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:kspot_002/services/api_service.dart';
 import 'package:kspot_002/services/cache_service.dart';
@@ -954,42 +955,39 @@ Future<JSON> showTextInputLimitExDialog(BuildContext context, String title, Stri
                     backgroundColor: DialogBackColor(context),
                     content: Container(
                         constraints: BoxConstraints(
-                            minWidth: 350
+                          minWidth: 350,
+                          minHeight: 200,
                         ),
-                        child: SizedBox(
-                            height: lineMax * 50 + (message.isNotEmpty ? 60 : 30),
-                            child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (message.isNotEmpty)...[
-                                    SizedBox(height: 10),
-                                    Text(message, style: ItemTitleStyle(context), maxLines: 1),
-                                    SizedBox(height: 10),
-                                  ],
-                                  TextFormField(
-                                    controller: _titleController,
-                                    decoration: inputLabel(context, '', ''),
-                                    keyboardType: inputType,
-                                    autofocus: exButtonText.isEmpty,
-                                    maxLines: lineMax,
-                                    maxLength: maxText,
-                                    toolbarOptions: ToolbarOptions(
-                                      paste: true,
-                                    ),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _resultStr = value;
-                                        _isChecked = isWillOverwrite(_resultStr);
-                                      });
-                                    },
-                                  )
-                                ]
+                        child: Column(
+                          children: [
+                            if (message.isNotEmpty)...[
+                              SizedBox(height: 10),
+                              Text(message, style: ItemTitleStyle(context), maxLines: 1),
+                              SizedBox(height: 10),
+                            ],
+                            TextFormField(
+                              controller: _titleController,
+                              decoration: inputLabel(context, '', ''),
+                              keyboardType: inputType,
+                              autofocus: exButtonText.isEmpty,
+                              maxLines: lineMax,
+                              maxLength: maxText,
+                              toolbarOptions: ToolbarOptions(
+                                paste: true,
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  _resultStr = value;
+                                  _isChecked = isWillOverwrite(_resultStr);
+                                });
+                              },
                             )
+                          ]
                         )
                     ),
                     actions: [
                       TextButton(
-                        child: Text('Paste'.tr),
+                        child: Icon(Icons.copy, size: 20),
                         onPressed: () {
                           Clipboard.getData(Clipboard.kTextPlain).then((result) {
                             if (result != null && result.text != null) {
@@ -1001,7 +999,6 @@ Future<JSON> showTextInputLimitExDialog(BuildContext context, String title, Stri
                           });
                         },
                       ),
-                      showVerticalDivider(Size(40, 12)),
                       if (exButtonText.isNotEmpty)...[
                         TextButton(
                           child: Text(exButtonText),
@@ -1012,7 +1009,7 @@ Future<JSON> showTextInputLimitExDialog(BuildContext context, String title, Stri
                         showVerticalDivider(Size(2, 20)),
                       ],
                       TextButton(
-                        child: Text('Cancel'.tr),
+                        child: Text('Cancel'.tr, style: ItemTitleExStyle(context)),
                         onPressed: () {
                           Navigator.of(context).pop({'desc': '', 'result': 'cancel'});
                         },
@@ -1944,7 +1941,7 @@ Future<JSON> showEditCommentDialog(BuildContext context, CommentType type, Strin
 
   picLocalImage() async {
     List<XFile>? pickList = await ImagePicker().pickMultiImage(maxWidth: PIC_IMAGE_SIZE_MAX, maxHeight: PIC_IMAGE_SIZE_MAX);
-    if (pickList != null) {
+    if (pickList.isNotEmpty) {
       for (var i=0; i<pickList.length; i++) {
         var image = pickList[i];
         var imageUrl = await ShowImageCroper(image.path);
@@ -2976,7 +2973,7 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
 
   picLocalImage() async {
     List<XFile>? pickList = await ImagePicker().pickMultiImage(maxWidth: PIC_IMAGE_SIZE_MAX, maxHeight: PIC_IMAGE_SIZE_MAX);
-    if (pickList != null) {
+    if (pickList.isNotEmpty) {
       for (var i=0; i<pickList.length; i++) {
         var image = pickList[i];
         var imageUrl = await ShowImageCroper(image.path);
@@ -3155,6 +3152,142 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
                               });
                             });
                           });
+                        }
+                    )
+                  ],
+                );
+              }
+          ),
+        );
+      }
+  );
+}
+
+showNoticeEditDialog(BuildContext context, String title, JSON noticeData, [bool isFirst = false]) async {
+  final _editController  = TextEditingController();
+  final _imageGalleryKey = GlobalKey();
+  JSON imageData = {};
+
+  refreshImage() {
+    noticeData['imageData'] = imageData.entries.map((e) => e.value).toList();
+  }
+
+  refreshGallery() {
+    var gallery = _imageGalleryKey.currentState as CardScrollViewerState;
+    gallery.refresh();
+    refreshImage();
+  }
+
+  picLocalImage() async {
+    List<XFile>? pickList = await ImagePicker().pickMultiImage(maxWidth: PIC_IMAGE_SIZE_MAX, maxHeight: PIC_IMAGE_SIZE_MAX);
+    if (pickList.isNotEmpty) {
+      for (var i=0; i<pickList.length; i++) {
+        var image = pickList[i];
+        var imageUrl = await ShowImageCroper(image.path);
+        var data = await ReadFileByte(imageUrl);
+        var key = Uuid().v1();
+        imageData[key] = {'id': key, 'data': data};
+      }
+      refreshGallery();
+    }
+  }
+
+  initData() {
+    if (noticeData['imageData'] != null) {
+      imageData = {};
+      for (var item in noticeData['imageData']) {
+        var key = Uuid().v1();
+        imageData[key] = JSON.from(jsonDecode('{"id": "$key", "url": "$item"}'));
+      }
+    }
+    _editController.text = STR(noticeData['desc']);
+  }
+
+  initData();
+
+  return await showDialog(
+      context: context,
+      builder: (BuildContext _context) {
+        return PointerInterceptor(
+          child: StatefulBuilder(
+              builder: (context, setState) {
+                return AlertDialog(
+                  scrollable: true,
+                  title: Text(title.tr, style: DialogTitleStyle(context)),
+                  insetPadding: EdgeInsets.symmetric(horizontal: 15),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                  actionsPadding: EdgeInsets.fromLTRB(15, 0, 15, 5),
+                  backgroundColor: DialogBackColor(context),
+                  content: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                      constraints: BoxConstraints(
+                        minWidth: MediaQuery.of(context).size.width,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ImageEditScrollViewer(
+                            imageData,
+                            key: _imageGalleryKey,
+                            title: 'IMAGE SELECT'.tr,
+                            isEditable: true,
+                            itemWidth: 60,
+                            itemHeight: 60,
+                            onActionCallback: (key, status) {
+                              setState(() {
+                                switch (status) {
+                                  case 1: {
+                                    picLocalImage();
+                                    break;
+                                  }
+                                  case 2: {
+                                    imageData.remove(key);
+                                    refreshGallery();
+                                    break;
+                                  }
+                                }
+                              });
+                            }
+                          ),
+                          SizedBox(height: 20),
+                          TextFormField(
+                            controller: _editController,
+                            decoration: inputLabel(context, 'Description'.tr, ''),
+                            keyboardType: TextInputType.multiline,
+                            maxLines: 4,
+                            maxLength: COMMENT_LENGTH,
+                            style: TextStyle(fontSize: 14),
+                            onChanged: (value) {
+                              setState(() {
+                                noticeData['desc'] = value;
+                              });
+                            },
+                          ),
+                          Row(
+                            children: [
+                              Checkbox(value: isFirst, onChanged: (value) {
+                                setState(() {
+                                  isFirst = !isFirst;
+                                });
+                              }),
+                              Text('Display this notice at the top'.tr)
+                            ],
+                          )
+                        ],
+                      )
+                  ),
+                  actions: [
+                    TextButton(
+                      child: Text('Cancel'.tr, style: ItemTitleExStyle(context)),
+                      onPressed: () {
+                        Navigator.pop(_context);
+                      },
+                    ),
+                    TextButton(
+                        child: Text('OK'.tr, style: ItemTitleStyle(context)),
+                        onPressed: () {
+                          noticeData['isFirst'] = isFirst;
+                          Navigator.pop(_context, noticeData);
                         }
                     )
                   ],

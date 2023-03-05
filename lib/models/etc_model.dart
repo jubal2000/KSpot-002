@@ -1,5 +1,6 @@
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:kspot_002/models/upload_model.dart';
 import 'package:kspot_002/models/user_model.dart';
 import '../utils/utils.dart';
 
@@ -199,4 +200,31 @@ class DescData {
   });
   factory DescData.fromJson(JSON json) => _$DescDataFromJson(json);
   JSON toJson() => _$DescDataToJson(this);
+}
+
+@JsonSerializable(
+  explicitToJson: true,
+)
+class NoticeModel {
+  String  id;
+  int     status;   // 상태 (0:removed, 1:active, 2:disable, 3:ready)
+  String  desc;
+  String  userId;
+  String  userName;
+  String  createTime;     // 생성 시간
+
+  List<UploadFileModel>? fileList;
+
+  NoticeModel({
+    required this.id,
+    required this.status,
+    required this.desc,
+    required this.userId,
+    required this.userName,
+    required this.createTime,
+
+    this.fileList,
+  });
+  factory NoticeModel.fromJson(JSON json) => _$NoticeModelFromJson(json);
+  JSON toJson() => _$NoticeModelToJson(this);
 }

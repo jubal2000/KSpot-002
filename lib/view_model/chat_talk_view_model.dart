@@ -1,5 +1,6 @@
 
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -439,6 +440,19 @@ class ChatTalkViewModel extends ChangeNotifier {
   }
 
   noticeItem(NoticeModel notice, [int index = 0]) {
+    const imageSize = 40.0;
+    JSON noticeFileData = {};
+    if (notice.fileData != null && notice.fileData!.isNotEmpty) {
+      // LOG("--> thumbList : ${widget.messageItem['fileData']}");
+      for (var item in notice.fileData!) {
+        LOG("--> fileData item : ${item.toJson()}");
+        JSON addItem = {'id': item.id};
+        addItem['url']      = item.thumb;
+        addItem['linkPic']  = item.url;
+        // addItem['title']    = IS_IMAGE_FILE(item.extension) ? '' : item.name;
+        noticeFileData[item.id] = addItem;
+      }
+    }
     return Container(
       width: Get.width * 0.9,
       padding: EdgeInsets.fromLTRB(isAdmin.value ? 10 : UI_HORIZONTAL_SPACE_M, UI_HORIZONTAL_SPACE,
@@ -479,28 +493,54 @@ class ChatTalkViewModel extends ChangeNotifier {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(DESC(notice.desc), style: ItemDescStyle(buildContext!)),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(DESC(notice.desc), style: ItemDescStyle(buildContext!)),
+                    ),
+                    SizedBox(
+                        width: 30,
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              if (index == 0)
+                                GestureDetector(
+                                  onTap: () {
+                                    isNoticeShow.value = false;
+                                  },
+                                  child: Icon(Icons.highlight_remove, size: 24),
+                                ),
+                            ]
+                        )
+                    )
+                  ]
+                ),
                 SizedBox(height: 5),
-                Text(SERVER_TIME_STR(notice.createTime), style: ItemDescExInfoStyle(buildContext!)),
               // Text('$index. ${SERVER_TIME_STR(notice.createTime)}', style: ItemDescExInfoStyle(buildContext!)),
+                if (noticeFileData.isNotEmpty)...[
+                  SizedBox(
+                    width: noticeFileData.length * imageSize,
+                    child: CardScrollViewer(
+                      noticeFileData,
+                      itemWidth: imageSize,
+                      itemHeight: imageSize,
+                      itemRound: 8,
+                      sidePadding: 0,
+                      isImageExView: true,
+                      backgroundPadding: EdgeInsets.zero,
+                      onActionCallback: (key, status) {
+                        LOG('--> onActionCallback : $key / $status');
+                        showImageSlideDialog(buildContext!, noticeFileData.entries.map((e) => STR(e.value['linkPic']).toString()).toList(), 0, true);
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                ],
+                Text(SERVER_TIME_STR(notice.createTime), style: ItemDescExInfoStyle(buildContext!)),
               ],
             )
           ),
-          SizedBox(
-            width: 30,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (index == 0)
-                  GestureDetector(
-                    onTap: () {
-                      isNoticeShow.value = false;
-                    },
-                    child: Icon(Icons.highlight_remove, size: 24),
-                  ),
-              ]
-            )
-          )
         ]
       )
     );
@@ -625,15 +665,40 @@ class ChatTalkViewModel extends ChangeNotifier {
         break;
       case DropdownItemType.noticeAdd:
         if (JSON_EMPTY(roomInfo!.noticeData) || roomInfo!.noticeData!.length < CHAT_NOTICE_MAX) {
-          showNoticeEditDialog(buildContext!, 'Notice Add'.tr, {}).then((result) {
+          showNoticeEditDialog(buildContext!, 'Notice Add'.tr, {}).then((result) async {
             if (result != null) {
-              result['id'         ] ??= '';
-              result['status'     ] = 1;
-              result['index'      ] = 0;
-              result['userId'     ] = AppData.USER_ID;
-              result['userName'   ] = AppData.USER_NICKNAME;
-              result['createTime' ] = DateTime.now().toString();
-              chatRepo.setChatRoomNotice(roomInfo!.id, NoticeModel.fromJson(result), BOL(result['isFirst']));
+              JSON addItem = {};
+              addItem['id'         ] ??= '';
+              addItem['status'     ] = 1;
+              addItem['index'      ] = 0;
+              if (JSON_NOT_EMPTY(result['fileData'])) {
+                showLoadingDialog(buildContext!, 'Uploading now...'.tr);
+                for (JSON item in result['fileData']) {
+                  if (item['data'] != null) {
+                    var result = await api.uploadData(item['data'], item['id'], 'chat_notice_img');
+                    if (result != null && item['thumbData'] != null) {
+                      var thumbResult = await api.uploadData(item['thumbData'], item['id'], 'chat_notice_img_thumb');
+                      if (thumbResult != null) {
+                        item['url'] = result;
+                        item['thumb'] = thumbResult;
+                      }
+                    }
+                  } else {
+                    var result = await api.uploadFile(File.fromUri(Uri.parse(item['path'])), 'chat_notice_file', item['id']);
+                    if (result != null) {
+                      item['url'] = result;
+                    }
+                  }
+                  addItem['fileData'] ??= [];
+                  addItem['fileData'].add(item);
+                }
+              }
+              addItem['desc'       ] = STR(result['desc']);
+              addItem['userId'     ] = AppData.USER_ID;
+              addItem['userName'   ] = AppData.USER_NICKNAME;
+              addItem['createTime' ] = DateTime.now().toString();
+              chatRepo.setChatRoomNotice(roomInfo!.id, NoticeModel.fromJson(addItem), BOL(result['isFirst']));
+              hideLoadingDialog();
             }
           });
         } else {

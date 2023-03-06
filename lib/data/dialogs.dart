@@ -3169,7 +3169,8 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData) async 
   final _editController  = TextEditingController();
   final fileSelectKey = GlobalKey();
   JSON fileData = {};
-  bool isFirst = false;
+  var isFirst = false;
+  var descStr = '';
 
   initData() {
     fileData = {};
@@ -3177,54 +3178,59 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData) async 
       for (var item in noticeData['fileData']) {
         // var key = Uuid().v1();
         // fileData[key] = JSON.from(jsonDecode('{"id": "$key", "url": "$item"}'));
+        if (!IS_IMAGE_FILE(item['extension'])) {
+          item['url'] = item['thumb'];
+        }
         fileData[item['id']] = item;
       }
     }
-    _editController.text = STR(noticeData['desc']);
-  }
-
-  refreshImage() {
-    noticeData['fileData'] = fileData.entries.map((e) => e.value).toList();
+    descStr = STR(noticeData['desc']);
+    _editController.text = descStr;
   }
 
   refreshGallery() {
     var gallery = fileSelectKey.currentState as CardScrollViewerState;
     gallery.refresh();
-    refreshImage();
   }
 
   picLocalFiles() async {
-    if (!AppData.isMainActive) return;
+    if (!AppData.isMainActive) return false;
     AppData.isMainActive = false;
     FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
     if (result != null) {
-      for (var item in result.files) {
-        var addItem = UploadFileModel(
-          id: Uuid().v4(),
-          status: 1,
-          name: item.name,
-          size: item.size,
-          extension: item.extension ?? '',
-          thumb: '',
-          url: '',
-          path: item.path,
-        );
-        if (IS_IMAGE_FILE(addItem.extension) && item.path != null) {
-          var data = await ReadFileByte(item.path!);
-          var thumbData = await resizeImage(data!, 128) as Uint8List;
-          var imageItem = {'id': addItem.id, 'data': data, 'thumb': thumbData};
-          addItem.data = data;
-          addItem.thumbData = thumbData;
-          fileData[addItem.id] = imageItem;
-        } else {
-          var imageItem = {'id': addItem.id, 'url': 'assets/file_icons/icon_${addItem.extension}.png'};
-          fileData[addItem.id] = imageItem;
+      try {
+        for (var item in result.files) {
+          var createItem = UploadFileModel(
+            id: Uuid().v4(),
+            status: 1,
+            name: item.name,
+            size: item.size,
+            extension: item.extension ?? '',
+            thumb: '',
+            url: '',
+            path: item.path,
+          );
+          var addItem = createItem.toJson();
+          if (IS_IMAGE_FILE(createItem.extension) && item.path != null) {
+            var data = await ReadFileByte(item.path!);
+            if (data != null) {
+              var thumbData = await resizeImage(data, 128) as Uint8List;
+              addItem['data'] = data;
+              addItem['thumbData'] = thumbData;
+            }
+          } else {
+            addItem['url'] = 'assets/file_icons/icon_${createItem.extension}.png';
+            addItem['thumb'] = addItem['url'];
+          }
+          fileData[createItem.id] = addItem;
+          // LOG('--> uploadFileData addItem : ${addItem.toString()}');
         }
-        LOG('--> uploadFileData addItem : ${addItem.toJson()}');
+      } catch (e) {
+        LOG('--> uploadFileData error : $e');
       }
     }
-    refreshImage();
     AppData.isMainActive = true;
+    return true;
   }
 
   picLocalImage() async {
@@ -3272,19 +3278,21 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData) async 
                             itemWidth: 60,
                             itemHeight: 60,
                             onActionCallback: (key, status) {
-                              setState(() {
-                                switch (status) {
-                                  case 1: {
-                                    picLocalFiles();
-                                    break;
-                                  }
-                                  case 2: {
+                              switch (status) {
+                                case 1: {
+                                  picLocalFiles().then((_) {
+                                    setState(() {});
+                                  });
+                                  break;
+                                }
+                                case 2: {
+                                  setState(() {
                                     fileData.remove(key);
                                     refreshGallery();
-                                    break;
-                                  }
+                                  });
+                                  break;
                                 }
-                              });
+                              }
                             }
                           ),
                           SizedBox(height: 20),
@@ -3296,10 +3304,8 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData) async 
                             maxLength: COMMENT_LENGTH,
                             style: TextStyle(fontSize: 14),
                             onChanged: (value) {
-                              setState(() {
-                                noticeData['desc'] = value;
-                                LOG('--> desc : $value');
-                              });
+                              descStr = value;
+                              LOG('--> desc : $value');
                             },
                           ),
                           Row(
@@ -3333,7 +3339,10 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData) async 
                     TextButton(
                         child: Text('OK'.tr, style: ItemTitleStyle(context)),
                         onPressed: () {
-                          noticeData['isFirst'] = isFirst;
+                          if (descStr.isEmpty) return;
+                          noticeData['isFirst'  ] = isFirst;
+                          noticeData['desc'     ] = descStr;
+                          noticeData['fileData' ] = fileData.entries.map((e) => e.value).toList();
                           Navigator.pop(_context, noticeData);
                         }
                     )

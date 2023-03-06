@@ -178,7 +178,7 @@ NoticeModel _$NoticeModelFromJson(Map<String, dynamic> json) => NoticeModel(
       userId: json['userId'] as String,
       userName: json['userName'] as String,
       createTime: json['createTime'] as String,
-      fileList: (json['fileList'] as List<dynamic>?)
+      fileData: (json['fileData'] as List<dynamic>?)
           ?.map((e) => UploadFileModel.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
@@ -192,5 +192,5 @@ Map<String, dynamic> _$NoticeModelToJson(NoticeModel instance) =>
       'userId': instance.userId,
       'userName': instance.userName,
       'createTime': instance.createTime,
-      'fileList': instance.fileList?.map((e) => e.toJson()).toList(),
+      'fileData': instance.fileData?.map((e) => e.toJson()).toList(),
     };

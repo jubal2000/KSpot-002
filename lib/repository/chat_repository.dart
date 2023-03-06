@@ -80,7 +80,6 @@ class ChatRepository {
       'createTime': CURRENT_SERVER_TIME(),
     };
     if (fileData != null && fileData.isNotEmpty) {
-      var upCount = 0;
       for (var item in fileData.entries) {
         // LOG('--> fileData item : ${item.value.toJson()}');
         if (item.value.data != null) {
@@ -88,25 +87,20 @@ class ChatRepository {
           if (result != null && item.value.thumbData != null) {
             var thumbResult = await api.uploadData(item.value.thumbData, item.key, 'chat_img_thumb');
             if (thumbResult != null) {
-              addItem['thumbList'] ??= [];
-              addItem['thumbList'].add(thumbResult);
+              item.value.url = result;
+              item.value.thumb = thumbResult;
             }
-            item.value.url = result;
-            item.value.thumb = thumbResult;
-            upCount++;
           }
         } else {
           var result = await api.uploadFile(File.fromUri(Uri.parse(item.value.path!)), 'chat_file', item.key);
           if (result != null) {
             item.value.url = result;
-            upCount++;
           }
         }
         var upItem = item.value.toJson();
         addItem['fileData'] ??= [];
         addItem['fileData'].add(upItem);
       }
-      LOG('--> upload image result : $upCount');
     }
     LOG('--> createChatItem : ${addItem.toString()}');
     return await addChatItem(addItem);

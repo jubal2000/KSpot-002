@@ -214,7 +214,7 @@ class NoticeModel {
   String  userName;
   String  createTime;     // 생성 시간
 
-  List<UploadFileModel>? fileList;
+  List<UploadFileModel>? fileData;
 
   NoticeModel({
     required this.id,
@@ -225,7 +225,7 @@ class NoticeModel {
     required this.userName,
     required this.createTime,
 
-    this.fileList,
+    this.fileData,
   });
   factory NoticeModel.fromJson(JSON json) => _$NoticeModelFromJson(json);
   JSON toJson() => _$NoticeModelToJson(this);

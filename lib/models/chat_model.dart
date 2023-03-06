@@ -119,6 +119,25 @@ class ChatRoomModel {
     return result;
   }
 
+  get noticeDataMap {
+    JSON result = {};
+    if (noticeData != null) {
+      for (var item in noticeData!) {
+        result[item.id] = item.toJson();
+      }
+    }
+    return result;
+  }
+
+  get noticeSortedList {
+    if (noticeData == null) return [];
+    for (var item in noticeData!) {
+      LOG('--> noticeSortedList index [${item.id}] : ${item.index}');
+    }
+    noticeData!.sort((a, b) => a.index > b.index ? 1 : -1);
+    return noticeData!;
+  }
+
   removeMemberData(String key) {
     for (var item in memberData) {
       if (item.id.toLowerCase() == key.toLowerCase()) {

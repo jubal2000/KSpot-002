@@ -208,6 +208,7 @@ class DescData {
 class NoticeModel {
   String  id;
   int     status;   // 상태 (0:removed, 1:active, 2:disable, 3:ready)
+  int     index;    // sort index.. 0 is first view..
   String  desc;
   String  userId;
   String  userName;
@@ -218,6 +219,7 @@ class NoticeModel {
   NoticeModel({
     required this.id,
     required this.status,
+    required this.index,
     required this.desc,
     required this.userId,
     required this.userName,

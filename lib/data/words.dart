@@ -413,7 +413,9 @@ class Words extends Translations {
       'Display this notice at the top': '이 공지를 제일 위에 표시합니다',
       'Room Exit': '방 나가기',
       'Room Title': '방제 수정',
-      'Room Notice': '공지사항 수정',
+      'Notice Add': '공지사항 작성',
+      'Notice is the maximum number': '공지가 최대 갯수입니다',
+      'File Select': '파일 선택',
 
       // promotion_list_screen
       'PROMOTION RECORD': '홍보 기록',

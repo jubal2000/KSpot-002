@@ -2061,33 +2061,50 @@ class ApiService extends GetxService {
     return null;
   }
 
-  Future<JSON?> setChatRoomNotice(String roomId, JSON notice, String userId) async {
-    LOG('------> setChatRoomNotice : $roomId / $notice');
+  Future<JSON?> setChatRoomNotice(String roomId, JSON notice, String userId, [bool isFirst = false]) async {
+    LOG('------> setChatRoomNotice : $roomId / $notice / $isFirst');
     try {
       var ref = firestore!.collection(ChatRoomCollection);
       var snapshot = await ref.doc(roomId).get();
       if (snapshot.data() != null) {
-        var roomInfo = FROM_SERVER_DATA(snapshot.data() as JSON);
+        var roomInfo = snapshot.data() as JSON;
         if (STR(roomInfo['userId']) == userId) {
-          var isAdd = true;
+          var selectIndex = -1;
+          var index = 1;
           if (STR(notice['id']).isNotEmpty && LIST_NOT_EMPTY(roomInfo['noticeData'])) {
             for (var item in roomInfo['noticeData']) {
+              var i = roomInfo['noticeData'].indexOf(item);
               if (item['id'] == notice['id']) {
-                item = notice;
-                isAdd = false;
-                break;
+                notice['index'] = isFirst ? 0 : roomInfo['noticeData'].length + 1;
+                roomInfo['noticeData'][i] = notice;
+                selectIndex = i;
+                LOG('--> noticeData set : ${roomInfo['noticeData']}');
+              } else if (isFirst) {
+                item['index'] = index++;
+                roomInfo['noticeData'][i] = item;
               }
             }
           }
-          if (isAdd) {
-            if (STR(notice['id']).isEmpty) notice['id'] = ref.doc().id;
+          LOG('--> noticeData : ${roomInfo['noticeData']} / $selectIndex');
+          if (selectIndex < 0) {
             roomInfo['noticeData'] ??= [];
+            if (STR(notice['id']).isEmpty) notice['id'] = ref.doc().id;
+            notice['index'] = isFirst ? 0 : roomInfo['noticeData'].length + 1;
+            if (isFirst && LIST_NOT_EMPTY(roomInfo['noticeData'])) {
+              for (var item in roomInfo['noticeData']) {
+                var i = roomInfo['noticeData'].indexOf(item);
+                item['index'] = index++;
+                roomInfo['noticeData'][i] = item;
+              }
+            }
             roomInfo['noticeData'].add(notice);
+          } else if (INT(notice['status']) == 0) {
+            roomInfo['noticeData'].removeAt(selectIndex);
           }
           await ref.doc(roomId).update(Map<String, dynamic>.from({
-            'noticeData': roomInfo['noticeData'],
+            'noticeData': LIST_INDEX_SORT(List<JSON>.from(roomInfo['noticeData'])),
           }));
-          return roomInfo;
+          return FROM_SERVER_DATA(roomInfo);
         }
       }
     } catch (e) {
@@ -2124,7 +2141,7 @@ class ApiService extends GetxService {
             await ref.doc(roomId).update(Map<String, dynamic>.from({
               'memberData': roomInfo['memberData'],
               'memberList': roomInfo['memberList'],
-              'kickData'  : roomInfo['kickData'],
+              'banData'   : roomInfo['banData'],
             }));
           }
         }
@@ -2203,6 +2220,8 @@ class ApiService extends GetxService {
       }
       if (INT(addItem['action']) != 0) {
         addItem['memberData'] = roomInfo['memberData'];
+        addItem['noticeData'] = roomInfo['noticeData'];
+        addItem['banData'   ] = roomInfo['banData'   ];
       }
       addItem['memberList'] = roomInfo['memberList'];
       addItem['updateTime'] = CURRENT_SERVER_TIME();

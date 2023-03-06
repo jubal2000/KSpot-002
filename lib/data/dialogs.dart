@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +25,7 @@ import 'package:uuid/uuid.dart';
 
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
+import '../models/upload_model.dart';
 import '../services/local_service.dart';
 import '../utils/address_utils.dart';
 import '../widget/card_scroll_viewer.dart';
@@ -3163,19 +3165,66 @@ showReportDialog(BuildContext context, ReportType type, String title, String tar
   );
 }
 
-showNoticeEditDialog(BuildContext context, String title, JSON noticeData, [bool isFirst = false]) async {
+showNoticeEditDialog(BuildContext context, String title, JSON noticeData) async {
   final _editController  = TextEditingController();
-  final _imageGalleryKey = GlobalKey();
-  JSON imageData = {};
+  final fileSelectKey = GlobalKey();
+  JSON fileData = {};
+  bool isFirst = false;
+
+  initData() {
+    fileData = {};
+    if (noticeData['fileData'] != null) {
+      for (var item in noticeData['fileData']) {
+        // var key = Uuid().v1();
+        // fileData[key] = JSON.from(jsonDecode('{"id": "$key", "url": "$item"}'));
+        fileData[item['id']] = item;
+      }
+    }
+    _editController.text = STR(noticeData['desc']);
+  }
 
   refreshImage() {
-    noticeData['imageData'] = imageData.entries.map((e) => e.value).toList();
+    noticeData['fileData'] = fileData.entries.map((e) => e.value).toList();
   }
 
   refreshGallery() {
-    var gallery = _imageGalleryKey.currentState as CardScrollViewerState;
+    var gallery = fileSelectKey.currentState as CardScrollViewerState;
     gallery.refresh();
     refreshImage();
+  }
+
+  picLocalFiles() async {
+    if (!AppData.isMainActive) return;
+    AppData.isMainActive = false;
+    FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (result != null) {
+      for (var item in result.files) {
+        var addItem = UploadFileModel(
+          id: Uuid().v4(),
+          status: 1,
+          name: item.name,
+          size: item.size,
+          extension: item.extension ?? '',
+          thumb: '',
+          url: '',
+          path: item.path,
+        );
+        if (IS_IMAGE_FILE(addItem.extension) && item.path != null) {
+          var data = await ReadFileByte(item.path!);
+          var thumbData = await resizeImage(data!, 128) as Uint8List;
+          var imageItem = {'id': addItem.id, 'data': data, 'thumb': thumbData};
+          addItem.data = data;
+          addItem.thumbData = thumbData;
+          fileData[addItem.id] = imageItem;
+        } else {
+          var imageItem = {'id': addItem.id, 'url': 'assets/file_icons/icon_${addItem.extension}.png'};
+          fileData[addItem.id] = imageItem;
+        }
+        LOG('--> uploadFileData addItem : ${addItem.toJson()}');
+      }
+    }
+    refreshImage();
+    AppData.isMainActive = true;
   }
 
   picLocalImage() async {
@@ -3186,21 +3235,10 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData, [bool 
         var imageUrl = await ShowImageCroper(image.path);
         var data = await ReadFileByte(imageUrl);
         var key = Uuid().v1();
-        imageData[key] = {'id': key, 'data': data};
+        fileData[key] = {'id': key, 'data': data};
       }
       refreshGallery();
     }
-  }
-
-  initData() {
-    if (noticeData['imageData'] != null) {
-      imageData = {};
-      for (var item in noticeData['imageData']) {
-        var key = Uuid().v1();
-        imageData[key] = JSON.from(jsonDecode('{"id": "$key", "url": "$item"}'));
-      }
-    }
-    _editController.text = STR(noticeData['desc']);
   }
 
   initData();
@@ -3227,9 +3265,9 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData, [bool 
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ImageEditScrollViewer(
-                            imageData,
-                            key: _imageGalleryKey,
-                            title: 'IMAGE SELECT'.tr,
+                            fileData,
+                            key: fileSelectKey,
+                            title: 'File Select'.tr,
                             isEditable: true,
                             itemWidth: 60,
                             itemHeight: 60,
@@ -3237,11 +3275,11 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData, [bool 
                               setState(() {
                                 switch (status) {
                                   case 1: {
-                                    picLocalImage();
+                                    picLocalFiles();
                                     break;
                                   }
                                   case 2: {
-                                    imageData.remove(key);
+                                    fileData.remove(key);
                                     refreshGallery();
                                     break;
                                   }
@@ -3260,6 +3298,7 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData, [bool 
                             onChanged: (value) {
                               setState(() {
                                 noticeData['desc'] = value;
+                                LOG('--> desc : $value');
                               });
                             },
                           ),
@@ -3277,6 +3316,14 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData, [bool 
                       )
                   ),
                   actions: [
+                    if (STR(noticeData['id']).isNotEmpty)
+                      TextButton(
+                        child: Text('Delete'.tr, style: ItemTitleExStyle(context)),
+                        onPressed: () {
+                          noticeData['status'] = 0;
+                          Navigator.pop(_context, noticeData);
+                        },
+                      ),
                     TextButton(
                       child: Text('Cancel'.tr, style: ItemTitleExStyle(context)),
                       onPressed: () {

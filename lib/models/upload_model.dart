@@ -32,6 +32,7 @@ class UploadFileModel {
     required this.path,
 
     this.data,
+    this.thumbData,
   });
 
   factory UploadFileModel.fromJson(JSON json) => _$UploadFileModelFromJson(json);

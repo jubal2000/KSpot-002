@@ -31,14 +31,19 @@ class ChatRepository {
 
   getChatRoomData() async {
     Map<String, ChatRoomModel> result = {};
-    final openData = await api.getChatOpenRoomData(AppData.USER_ID,
-        AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
-    for (var item in openData.entries) {
-      result[item.key] = ChatRoomModel.fromJson(item.value);
-    }
-    final closeData = await api.getChatCloseRoomData(AppData.USER_ID);
-    for (var item in closeData.entries) {
-      result[item.key] = ChatRoomModel.fromJson(item.value);
+    try {
+      final openData = await api.getChatOpenRoomData(AppData.USER_ID,
+          AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
+      for (var item in openData.entries) {
+        result[item.key] = ChatRoomModel.fromJson(item.value);
+      }
+      final closeData = await api.getChatCloseRoomData(AppData.USER_ID);
+      for (var item in closeData.entries) {
+        result[item.key] = ChatRoomModel.fromJson(item.value);
+      }
+      LOG('--> getChatRoomData done : ${result.length}');
+    } catch (e) {
+      LOG('--> getChatRoomData error : $e');
     }
     return result;
   }
@@ -62,11 +67,11 @@ class ChatRepository {
     stream = api.startChatStreamData(roomId, startTime, onChanged);
   }
 
-  createChatItem(ChatRoomModel roomInfo, String sendText, [Map<String, UploadFileModel>? fileData]) async {
+  createChatItem(ChatRoomModel roomInfo, String id, String sendText, [int action = 0, Map<String, UploadFileModel>? fileData]) async {
     var addItem = {
-      'id':         '',
+      'id':         id,
       'status':     1,
-      'action':     0,
+      'action':     action,
       'roomId':     roomInfo.id,
       'senderId':   STR(AppData.USER_ID),
       'senderName': STR(AppData.USER_NICKNAME),
@@ -182,7 +187,7 @@ class ChatRepository {
   }
 
   setChatRoomNotice(String roomId, NoticeModel notice, [bool isFirst = false]) async {
-    var result = await api.setChatRoomNotice(roomId, notice.toJson(), AppData.USER_ID);
+    var result = await api.setChatRoomNotice(roomId, notice.toJson(), AppData.USER_ID, isFirst);
     if (result != null) {
       addChatActionItem(roomId, ChatActionType.notice, notice.desc);
       // JSON addItem = {

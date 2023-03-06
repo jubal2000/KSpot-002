@@ -41,7 +41,7 @@ class ChatTalkViewModel extends ChangeNotifier {
 
   var  sendText = '';
   JSON showList = {};
-  JSON imageData = {};
+  JSON fileData = {};
   Map<String, UploadFileModel> uploadFileData = {};
   DateTime? startTime;
 
@@ -167,9 +167,18 @@ class ChatTalkViewModel extends ChangeNotifier {
         }
         if (action == ChatActionType.title) {
           roomInfo!.title = STR(item.value['desc']);
-          LOG('--> title changed ! : ${roomInfo!.title}');
           roomTitle.value = roomInfo!.title;
+          LOG('--> title changed ! : ${roomInfo!.title}');
         } else {
+          if (action == ChatActionType.notice) {
+            if (JSON_NOT_EMPTY(item.value['noticeData'])) {
+              roomInfo!.noticeData = List<NoticeModel>.from(item.value['noticeData'].map((e) => NoticeModel.fromJson(e)).toList());
+            } else {
+              roomInfo!.noticeData = [];
+            }
+            isNoticeShow.value = true;
+            LOG('--> notice changed ! : ${roomInfo!.noticeData!.toString()}');
+          }
           initMemberList();
           memberList.refresh();
           cache.setChatRoomItem(roomInfo!);
@@ -203,10 +212,10 @@ class ChatTalkViewModel extends ChangeNotifier {
           var imageItem = {'id': addItem.id, 'data': data, 'thumb': thumbData};
           addItem.data = data;
           addItem.thumbData = thumbData;
-          imageData[addItem.id] = imageItem;
+          fileData[addItem.id] = imageItem;
         } else {
           var imageItem = {'id': addItem.id, 'url': 'assets/file_icons/icon_${addItem.extension}.png'};
-          imageData[addItem.id] = imageItem;
+          fileData[addItem.id] = imageItem;
         }
         LOG('--> addItem : ${addItem.toJson()}');
         uploadFileData[addItem.id] = addItem;
@@ -323,13 +332,13 @@ class ChatTalkViewModel extends ChangeNotifier {
       child: Column(
         children: [
           SizedBox(height: 10),
-          if (imageData.isNotEmpty)...[
+          if (fileData.isNotEmpty)...[
             Row(
               children: [
                 Container(
                   width: Get.width - UI_HORIZONTAL_SPACE * 2 - 50,
                   child: ImageEditScrollViewer(
-                    imageData,
+                    fileData,
                     itemWidth: 40.0,
                     itemHeight: 40.0,
                     isEditable: true,
@@ -341,7 +350,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                           selectAttachFile();
                           break;
                         case 2:
-                          imageData.remove(key);
+                          fileData.remove(key);
                           uploadFileData.remove(key);
                           notifyListeners();
                         break;
@@ -353,7 +362,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                   onPressed: () {
                     showAlertYesNoDialog(buildContext!, 'Remove'.tr, 'Remove all files?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
                       if (result == 1) {
-                        imageData.clear();
+                        fileData.clear();
                         uploadFileData.clear();
                         notifyListeners();
                       }
@@ -388,21 +397,21 @@ class ChatTalkViewModel extends ChangeNotifier {
                 padding: EdgeInsets.only(left: 10),
                 child: ElevatedButton(
                     onPressed: () async {
-                      if (!AppData.isMainActive || (sendText.isEmpty && imageData.isEmpty)) return;
-                      if (imageData.length > UPLOAD_IMAGE_MAX) {
-                        showAlertDialog(buildContext!, 'Image'.tr,
-                            'You can\'t add any more'.tr, '${'Max'.tr}: $UPLOAD_IMAGE_MAX', 'OK'.tr);
+                      if (!AppData.isMainActive || (sendText.isEmpty && fileData.isEmpty)) return;
+                      if (fileData.length > UPLOAD_FILE_MAX) {
+                        showAlertDialog(buildContext!, 'Upload'.tr,
+                            'You can\'t add any more'.tr, '${'Max'.tr}: $UPLOAD_FILE_MAX', 'OK'.tr);
                         return;
                       }
                       AppData.isMainActive = false;
                       if (uploadFileData.isNotEmpty) {
                         showLoadingDialog(buildContext!, 'Uploading now...'.tr);
                       }
-                      chatRepo.createChatItem(roomInfo!, sendText, uploadFileData).then((result) {
+                      chatRepo.createChatItem(roomInfo!, '', sendText, 0, uploadFileData).then((result) {
                         hideLoadingDialog();
                         textController.text = '';
                         sendText = '';
-                        imageData.clear();
+                        fileData.clear();
                         uploadFileData.clear();
                         AppData.isMainActive = true;
                         notifyListeners();
@@ -429,56 +438,66 @@ class ChatTalkViewModel extends ChangeNotifier {
     );
   }
 
-  noticeItem(NoticeModel notice, [bool isShowMenu = false]) {
+  noticeItem(NoticeModel notice, [int index = 0]) {
     return Container(
       width: Get.width * 0.9,
-      padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE_M, UI_HORIZONTAL_SPACE_S, UI_HORIZONTAL_SPACE_S, UI_HORIZONTAL_SPACE_S),
+      padding: EdgeInsets.fromLTRB(isAdmin.value ? 10 : UI_HORIZONTAL_SPACE_M, UI_HORIZONTAL_SPACE,
+          10, UI_HORIZONTAL_SPACE_S),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(DESC(notice.desc), style: ItemTitleStyle(buildContext!)),
-                SizedBox(height: 5),
-                Text(SERVER_TIME_STR(notice.createTime), style: ItemDescExInfoStyle(buildContext!)),
-              ],
-            )
-          ),
-          SizedBox(
-            width: 40,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (isShowMenu)
-                  SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: GestureDetector(
-                      onTap: () {
-                        isNoticeShow.value = false;
-                      },
-                      child: Icon(Icons.highlight_remove, size: 24),
-                    ),
-                  ),
-                if (isAdmin.value)...[
+          if (isAdmin.value)...[
+            SizedBox(
+              width: 30,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   GestureDetector(
                     onTap: () {
-                      showNoticeEditDialog(buildContext!, 'Notice Edit'.tr, notice.toJson()).then((result) {
+                      showNoticeEditDialog(buildContext!, 'Notice Edit'.tr,
+                          notice.toJson()).then((result) {
+                        LOG('--> showNoticeEditDialog result : $result');
                         if (result != null) {
                           result['id'         ] ??= '';
-                          result['status'     ] = 1;
+                          result['index'      ] = 0;
                           result['userId'     ] = AppData.USER_ID;
                           result['userName'   ] = AppData.USER_NICKNAME;
                           result['createTime' ] = DateTime.now().toString();
-                          chatRepo.setChatRoomNotice(roomInfo!.id, NoticeModel.fromJson(result), BOL(result['isFirst']));
+                          chatRepo.setChatRoomNotice(roomInfo!.id,
+                              NoticeModel.fromJson(result), BOL(result['isFirst']));
                         }
                       });
                     },
                     child: Icon(Icons.edit_note, size: 24),
                   ),
                 ]
+              )
+            ),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(DESC(notice.desc), style: ItemDescStyle(buildContext!)),
+                SizedBox(height: 5),
+                Text(SERVER_TIME_STR(notice.createTime), style: ItemDescExInfoStyle(buildContext!)),
+              // Text('$index. ${SERVER_TIME_STR(notice.createTime)}', style: ItemDescExInfoStyle(buildContext!)),
+              ],
+            )
+          ),
+          SizedBox(
+            width: 30,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (index == 0)
+                  GestureDetector(
+                    onTap: () {
+                      isNoticeShow.value = false;
+                    },
+                    child: Icon(Icons.highlight_remove, size: 24),
+                  ),
               ]
             )
           )
@@ -502,9 +521,10 @@ class ChatTalkViewModel extends ChangeNotifier {
             child: Column(
               children: [
                 if (!isNoticeAll.value || roomInfo!.noticeData!.length <= 1)
-                  noticeItem(roomInfo!.noticeData!.first, true),
+                  noticeItem(roomInfo!.noticeData!.first, 0),
                 if (isNoticeAll.value && roomInfo!.noticeData!.length > 1)
-                  ...roomInfo!.noticeData!.map((e) => noticeItem(e, roomInfo!.noticeData!.indexOf(e) == 0)).toList(),
+                  ...roomInfo!.noticeSortedList!.map((e) =>
+                    noticeItem(e, e.index)).toList(),
                 if ((LIST_NOT_EMPTY(roomInfo!.noticeData) && roomInfo!.noticeData!.length > 1))
                   GestureDetector(
                     onTap: () {
@@ -567,16 +587,10 @@ class ChatTalkViewModel extends ChangeNotifier {
         child: DropdownItems.buildItem(buildContext!, item),
       )),
       if (isAdmin.value)...[
-        if (LIST_NOT_EMPTY(roomInfo!.noticeData))
-          ...DropdownItems.chatRoomAdmin0.map((item) => DropdownMenuItem<DropdownItem>(
-            value: item,
-            child: DropdownItems.buildItem(buildContext!, item),
-          )),
-        if (LIST_EMPTY(roomInfo!.noticeData))
-          ...DropdownItems.chatRoomAdmin1.map((item) => DropdownMenuItem<DropdownItem>(
-            value: item,
-            child: DropdownItems.buildItem(buildContext!, item),
-          )),
+        ...DropdownItems.chatRoomAdmin1.map((item) => DropdownMenuItem<DropdownItem>(
+          value: item,
+          child: DropdownItems.buildItem(buildContext!, item),
+        )),
       ]
     ];
   }
@@ -610,16 +624,21 @@ class ChatTalkViewModel extends ChangeNotifier {
         isNoticeShow.value = true;
         break;
       case DropdownItemType.noticeAdd:
-        showNoticeEditDialog(buildContext!, 'Room Notice'.tr, {}).then((result) {
-          if (result != null) {
-            result['id'         ] ??= '';
-            result['status'     ] = 1;
-            result['userId'     ] = AppData.USER_ID;
-            result['userName'   ] = AppData.USER_NICKNAME;
-            result['createTime' ] = DateTime.now().toString();
-            chatRepo.setChatRoomNotice(roomInfo!.id, NoticeModel.fromJson(result), BOL(result['isFirst']));
-          }
-        });
+        if (JSON_EMPTY(roomInfo!.noticeData) || roomInfo!.noticeData!.length < CHAT_NOTICE_MAX) {
+          showNoticeEditDialog(buildContext!, 'Notice Add'.tr, {}).then((result) {
+            if (result != null) {
+              result['id'         ] ??= '';
+              result['status'     ] = 1;
+              result['index'      ] = 0;
+              result['userId'     ] = AppData.USER_ID;
+              result['userName'   ] = AppData.USER_NICKNAME;
+              result['createTime' ] = DateTime.now().toString();
+              chatRepo.setChatRoomNotice(roomInfo!.id, NoticeModel.fromJson(result), BOL(result['isFirst']));
+            }
+          });
+        } else {
+          ShowToast('Notice is the maximum number'.tr);
+        }
         break;
     }
   }

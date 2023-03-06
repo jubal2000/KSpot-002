@@ -173,6 +173,7 @@ Map<String, dynamic> _$DescDataToJson(DescData instance) => <String, dynamic>{
 NoticeModel _$NoticeModelFromJson(Map<String, dynamic> json) => NoticeModel(
       id: json['id'] as String,
       status: json['status'] as int,
+      index: json['index'] as int,
       desc: json['desc'] as String,
       userId: json['userId'] as String,
       userName: json['userName'] as String,
@@ -186,6 +187,7 @@ Map<String, dynamic> _$NoticeModelToJson(NoticeModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'status': instance.status,
+      'index': instance.index,
       'desc': instance.desc,
       'userId': instance.userId,
       'userName': instance.userName,

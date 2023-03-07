@@ -19,6 +19,7 @@ import 'package:kspot_002/data/theme_manager.dart';
 import 'package:image/image.dart' as IMG;
 import 'package:kspot_002/services/api_service.dart';
 import 'package:material_tag_editor/tag_editor.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import '../data/app_data.dart';
@@ -2575,4 +2576,44 @@ final extImageList = [
 
 IS_IMAGE_FILE(String ext) {
   return extImageList.contains(ext.toLowerCase());
+}
+
+class StatefulWrapper extends StatefulWidget {
+  final Function onInit;
+  final Widget child;
+  const StatefulWrapper({required this.onInit, required this.child});
+  @override
+  _StatefulWrapperState createState() => _StatefulWrapperState();
+}
+class _StatefulWrapperState extends State<StatefulWrapper> {
+  @override
+  void initState() {
+    if(widget.onInit != null) {
+      widget.onInit();
+    }
+    super.initState();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
+getFileSavePath() async {
+  var tempDir = '';
+  bool dirDownloadExists = true;
+  if (Platform.isIOS) {
+    var dir = await getDownloadsDirectory();
+    if (dir == null) return;
+    tempDir = dir.path;
+  } else {
+    tempDir = "/storage/emulated/0/Download/";
+    dirDownloadExists = await Directory(tempDir).exists();
+    if(dirDownloadExists){
+      tempDir = "/storage/emulated/0/Download/";
+    }else{
+      tempDir = "/storage/emulated/0/Downloads/";
+    }
+  }
+  return tempDir;
 }

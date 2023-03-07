@@ -229,4 +229,14 @@ class NoticeModel {
   });
   factory NoticeModel.fromJson(JSON json) => _$NoticeModelFromJson(json);
   JSON toJson() => _$NoticeModelToJson(this);
+
+  get fileDataMap {
+    JSON result = {};
+    if (fileData != null) {
+      for (var item in fileData!) {
+        result[item.id] = item.toJson();
+      }
+    }
+    return result;
+  }
 }

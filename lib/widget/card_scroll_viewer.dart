@@ -84,7 +84,8 @@ class CardScrollViewer extends StatefulWidget {
         this.backgroundColor = Colors.transparent,
         this.selectTextStyle = const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.white),
         this.imageColor,
-        this.onActionCallback
+        this.onActionCallback,
+        this.onPageChanged,
       }) : super(key: key);
 
   JSON   itemList;
@@ -116,6 +117,7 @@ class CardScrollViewer extends StatefulWidget {
   Color  backgroundColor;
 
   Function(String, int)? onActionCallback; // key, status - 0: select, 1: add,  2: delete
+  Function(int)? onPageChanged;
 
   @override
   CardScrollViewerState createState() => CardScrollViewerState();
@@ -173,206 +175,208 @@ class CardScrollViewerState extends State<CardScrollViewer> {
       // for (var item in widget.itemList.entries) {
       //   LOG('--> CardScrollViewerState item.value : ${item.value} / ${item.value['url'] is String}');
       // }
-      _cardList = widget.itemList.entries.map((item) =>
-          Container(
-              color: Colors.transparent,
-              child: GestureDetector(
-                  onLongPress: () {
-                    if (!widget.isShowMenu) {
-                      if (widget.selectedId == item.key) {
-                        showAlertDialog(context, 'Delete'.tr, 'Representative images cannot be deleted'.tr, '', 'OK'.tr);
-                        // } else if (widget.imageMax < 2) {
-                        //   showAlertDialog(context, '이미지 삭제', '대표이미지는 삭제할 수 없습니다.', '', '확인');
-                      } else {
-                        showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
-                          if (result == 1) {
-                            onSelected(item.key, 2);
-                          }
-                        });
+      _cardList = widget.itemList.entries.map((item) {
+        return Container(
+          color: Colors.transparent,
+          child: GestureDetector(
+              onLongPress: () {
+                if (!widget.isShowMenu) {
+                  if (widget.selectedId == item.key) {
+                    showAlertDialog(context, 'Delete'.tr, 'Representative images cannot be deleted'.tr, '', 'OK'.tr);
+                    // } else if (widget.imageMax < 2) {
+                    //   showAlertDialog(context, '이미지 삭제', '대표이미지는 삭제할 수 없습니다.', '', '확인');
+                  } else {
+                    showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+                      if (result == 1) {
+                        onSelected(item.key, 2);
                       }
-                    }
-                  },
-                  onTap: () {
-                    // log('---> select image item.key: $index -> ${item.key} / ${widget.itemList}');
-                    if (widget.selectText.isNotEmpty) {
-                      setState(() {
-                        widget.selectedId = item.key;
-                        onSelected(item.key, 0);
-                      });
-                    } else if (widget.isImageExView) {
-                      onSelected(item.key, 0);
-                    } else if (widget.imageMax == 1) {
-                      onSelected(item.key, 1);
-                    }
-                  },
-                  child: Stack(
-                      children: [
-                        Container(
-                            width: widget.itemWidth,
-                            padding: EdgeInsets.symmetric(horizontal: widget.isVerticalScroll ? 0 : 2.5, vertical: widget.isVerticalScroll ? 5 : 0),
-                            color: Colors.transparent,
-                            child: Column(
-                                children: [
-                                  if (item.value['data'] != null || item.value['url'] != null || (widget.isThumbShow && item.value['thumbData'] != null) || item.value['icon'] != null)
-                                    SizedBox(
-                                      width: widget.itemWidth,
-                                      height: widget.itemHeight - (STR(item.value['title']).isNotEmpty ? 30 : 0),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(widget.itemRound),
-                                        child: widget.isThumbShow && item.value['thumbData'] != null
-                                            ? Image.memory(item.value['thumbData'], fit: widget.backFit) :
-                                        item.value['data'] != null
-                                            ? Image.memory(item.value['data'], fit: widget.backFit) :
-                                        showImageWidget(item.value['url'], widget.backFit, color: widget.imageColor),
-                                      ),
-                                    ),
-                                  if (STR(item.value['title']).isNotEmpty)
-                                    Container(
-                                      padding: EdgeInsets.only(top: 5),
-                                      child: Text(STR(item.value['title']), style: CardDescStyle(context), maxLines: 2),
-                                    )
-                                ]
-                            )
-                        ),
-                        if (widget.selectedId == item.key && widget.selectText.isNotEmpty)...[
-                          Container(
-                            width: widget.itemWidth,
-                            padding: EdgeInsets.only(bottom: 5),
-                            alignment: Alignment.bottomCenter,
-                            child: Text(widget.selectText, style: widget.selectTextStyle),
-                          )
-                        ],
-                        if (item.value['pic'] != null)
-                          Positioned(
-                              left: 5,
-                              bottom: 0,
-                              child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Container(
-                                      width: widget.itemWidth * 0.45,
-                                      height: widget.itemWidth * 0.45,
-                                      decoration: BoxDecoration(
-                                        color: Colors.black87,
-                                        image: DecorationImage(
-                                          image: AssetImage(item.value['pic']),
-                                          fit: BoxFit.cover,
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(60.0)),
-                                        border: Border.all(
-                                          color: Colors.white,
-                                          width: 2.0,
-                                        ),
-                                      ),
-                                    ),
-                                    if (item.value['nickName'] != null) ...[
-                                      Padding(
-                                        padding: EdgeInsets.only(left: 5, bottom: 5),
-                                        child: Text(STR(item.value['nickName']), style: Theme.of(context).textTheme.subtitle1, maxLines: 2),
-                                      )
-                                    ],
-                                    // if (item.value['name'] != null) ...[
-                                    //   Padding(
-                                    //     padding: EdgeInsets.only(
-                                    //         left: 5, bottom: 5),
-                                    //     child: Text(item.value['name'],
-                                    //         style: MainTheme.textTheme.headline5,
-                                    //         maxLines: 2),
-                                    //   )
-                                    // ]
-                                  ]
-                              )
-                          ),
-                        if (widget.isShowMenu)...[
-                          if (item.value['linkTarget'] != null)
-                            Positioned(
-                              top: 10,
-                              left: 10,
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.link,
-                                    size: 20,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Icon(
-                                    item.value['linkType'] == 'goods' ? Icons.card_giftcard : Icons.movie_outlined,
-                                    size: 20,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(STR(item.value['linkTitle']), style:Theme.of(context).textTheme.bodyText1!, maxLines: 4),
-                                ],
-                              ),
-                            ),
-                          Positioned(
-                            bottom: widget.isVerticalScroll ? 10 : 5,
-                            right: 5,
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton2(
-                                customButton: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      Icon(Icons.settings_sharp, color: Colors.black.withOpacity(0.5), size: 28),
-                                      Icon(Icons.settings_sharp, color: Colors.white, size: 24),
-                                    ]
+                    });
+                  }
+                }
+              },
+              onTap: () {
+                // log('---> select image item.key: $index -> ${item.key} / ${widget.itemList}');
+                if (widget.selectText.isNotEmpty) {
+                  setState(() {
+                    widget.selectedId = item.key;
+                    onSelected(item.key, 0);
+                  });
+                } else if (widget.isImageExView) {
+                  onSelected(item.key, 0);
+                } else if (widget.imageMax == 1) {
+                  onSelected(item.key, 1);
+                }
+              },
+              child: Stack(
+                children: [
+                  Container(
+                      width: widget.itemWidth,
+                      padding: EdgeInsets.symmetric(horizontal: widget.isVerticalScroll ? 0 : 2.5, vertical: widget.isVerticalScroll ? 5 : 0),
+                      color: Colors.transparent,
+                      child: Column(
+                          children: [
+                            if (item.value['data'] != null || item.value['url'] != null || (widget.isThumbShow && item.value['thumbData'] != null) || item.value['icon'] != null)
+                              SizedBox(
+                                width: widget.itemWidth,
+                                height: widget.itemHeight - (STR(item.value['title']).isNotEmpty ? 30 : 0),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(widget.itemRound),
+                                  child: widget.isThumbShow && item.value['thumbData'] != null
+                                      ? Image.memory(item.value['thumbData'], fit: widget.backFit) :
+                                  item.value['data'] != null
+                                      ? Image.memory(item.value['data'], fit: widget.backFit) :
+                                  showImageWidget(widget.isThumbShow && item.value['thumb'] != null ? item.value['thumb'] : item.value['url'],
+                                      widget.backFit, color: widget.imageColor),
                                 ),
-                                buttonPadding: EdgeInsets.zero,
-                                dropdownPadding: EdgeInsets.zero,
-                                items: [
-                                  ...DropdownItems.bannerEditItems.map(
-                                        (item) =>
-                                        DropdownMenuItem<DropdownItem>(
-                                          value: item,
-                                          child: DropdownItems.buildItem(context, item),
-                                        ),
-                                  ),
-                                ],
-                                // customItemsHeights: const [3],
-                                onChanged: (value) {
-                                  var selected = value as DropdownItem;
-                                  LOG("--> selected.index : ${item.key} / ${selected.type}");
-                                  switch (selected.type) {
-                                    case DropdownItemType.historyLink: // history link
-                                      AppData.listSelectData = {};
-                                      if (STR(item.value['linkType']) == 'history' && item.value['linkTarget'] != null) {
-                                        AppData.listSelectData[item.value['linkTarget']] = {'key': item.value['linkTarget']};
-                                      }
-                                      // Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(HistoryScreen(AppData.userInfo, isSelectable: true, selectMax: 1))).then((value) {
-                                      //   LOG("--> AppData.listSelectData : ${AppData.listSelectData.length}");
-                                      //   onSelected(item.key, 0);
-                                      // });
-                                      break;
-                                    case DropdownItemType.goodsLink: // goods link
-                                      AppData.listSelectData = {};
-                                      if (STR(item.value['linkType']) == 'goods' && item.value['linkTarget'] != null) {
-                                        AppData.listSelectData[item.value['linkTarget']] = {'key': item.value['linkTarget']};
-                                      }
-                                      // Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(GoodsScreen(AppData.userInfo, isSelectable: true, selectMax: 1))).then((value) {
-                                      //   LOG("--> AppData.listSelectData : ${AppData.listSelectData.length}");
-                                      //   onSelected(item.key, 1);
-                                      // });
-                                      break;
-                                    default:
-                                      onSelected(item.key, 2);
-                                  }
-                                },
-                                itemHeight: 45,
-                                dropdownWidth: 140,
-                                buttonHeight: 30,
-                                buttonWidth: 30,
-                                itemPadding: const EdgeInsets.only(left: 16, right: 16),
-                                offset: const Offset(0, 8),
                               ),
+                            if (STR(item.value['title']).isNotEmpty)
+                              Container(
+                                padding: EdgeInsets.only(top: 5),
+                                child: Text(STR(item.value['title']), style: CardDescStyle(context), maxLines: 2),
+                              )
+                          ]
+                      )
+                  ),
+                  if (widget.selectedId == item.key && widget.selectText.isNotEmpty)...[
+                    Container(
+                      width: widget.itemWidth,
+                      padding: EdgeInsets.only(bottom: 5),
+                      alignment: Alignment.bottomCenter,
+                      child: Text(widget.selectText, style: widget.selectTextStyle),
+                    )
+                  ],
+                  if (item.value['pic'] != null)
+                    Positioned(
+                        left: 5,
+                        bottom: 0,
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Container(
+                                width: widget.itemWidth * 0.45,
+                                height: widget.itemWidth * 0.45,
+                                decoration: BoxDecoration(
+                                  color: Colors.black87,
+                                  image: DecorationImage(
+                                    image: AssetImage(item.value['pic']),
+                                    fit: BoxFit.cover,
+                                  ),
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(60.0)),
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2.0,
+                                  ),
+                                ),
+                              ),
+                              if (item.value['nickName'] != null) ...[
+                                Padding(
+                                  padding: EdgeInsets.only(left: 5, bottom: 5),
+                                  child: Text(STR(item.value['nickName']), style: Theme.of(context).textTheme.subtitle1, maxLines: 2),
+                                )
+                              ],
+                              // if (item.value['name'] != null) ...[
+                              //   Padding(
+                              //     padding: EdgeInsets.only(
+                              //         left: 5, bottom: 5),
+                              //     child: Text(item.value['name'],
+                              //         style: MainTheme.textTheme.headline5,
+                              //         maxLines: 2),
+                              //   )
+                              // ]
+                            ]
+                        )
+                    ),
+                  if (widget.isShowMenu)...[
+                    if (item.value['linkTarget'] != null)
+                      Positioned(
+                        top: 10,
+                        left: 10,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.link,
+                              size: 20,
+                              color: Colors.white,
                             ),
+                            SizedBox(width: 5),
+                            Icon(
+                              item.value['linkType'] == 'goods' ? Icons.card_giftcard : Icons.movie_outlined,
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 5),
+                            Text(STR(item.value['linkTitle']), style:Theme.of(context).textTheme.bodyText1!, maxLines: 4),
+                          ],
+                        ),
+                      ),
+                    Positioned(
+                      bottom: widget.isVerticalScroll ? 10 : 5,
+                      right: 5,
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton2(
+                          customButton: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Icon(Icons.settings_sharp, color: Colors.black.withOpacity(0.5), size: 28),
+                                Icon(Icons.settings_sharp, color: Colors.white, size: 24),
+                              ]
                           ),
-                        ]
-                      ]
-                  )
+                          buttonPadding: EdgeInsets.zero,
+                          dropdownPadding: EdgeInsets.zero,
+                          items: [
+                            ...DropdownItems.bannerEditItems.map(
+                                  (item) =>
+                                  DropdownMenuItem<DropdownItem>(
+                                    value: item,
+                                    child: DropdownItems.buildItem(context, item),
+                                  ),
+                            ),
+                          ],
+                          // customItemsHeights: const [3],
+                          onChanged: (value) {
+                            var selected = value as DropdownItem;
+                            LOG("--> selected.index : ${item.key} / ${selected.type}");
+                            switch (selected.type) {
+                              case DropdownItemType.historyLink: // history link
+                                AppData.listSelectData = {};
+                                if (STR(item.value['linkType']) == 'history' && item.value['linkTarget'] != null) {
+                                  AppData.listSelectData[item.value['linkTarget']] = {'key': item.value['linkTarget']};
+                                }
+                                // Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(HistoryScreen(AppData.userInfo, isSelectable: true, selectMax: 1))).then((value) {
+                                //   LOG("--> AppData.listSelectData : ${AppData.listSelectData.length}");
+                                //   onSelected(item.key, 0);
+                                // });
+                                break;
+                              case DropdownItemType.goodsLink: // goods link
+                                AppData.listSelectData = {};
+                                if (STR(item.value['linkType']) == 'goods' && item.value['linkTarget'] != null) {
+                                  AppData.listSelectData[item.value['linkTarget']] = {'key': item.value['linkTarget']};
+                                }
+                                // Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(GoodsScreen(AppData.userInfo, isSelectable: true, selectMax: 1))).then((value) {
+                                //   LOG("--> AppData.listSelectData : ${AppData.listSelectData.length}");
+                                //   onSelected(item.key, 1);
+                                // });
+                                break;
+                              default:
+                                onSelected(item.key, 2);
+                            }
+                          },
+                          itemHeight: 45,
+                          dropdownWidth: 140,
+                          buttonHeight: 30,
+                          buttonWidth: 30,
+                          itemPadding: const EdgeInsets.only(left: 16, right: 16),
+                          offset: const Offset(0, 8),
+                        ),
+                      ),
+                    ),
+                  ]
+                ]
               )
-          )
+            )
+          );
+        }
       ).toList();
 
       if (widget.isEditable && widget.isCanAdd && widget.itemList.length < widget.imageMax) {

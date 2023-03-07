@@ -39,7 +39,7 @@ class ChatGroupItem extends StatelessWidget {
 
   final cache = Get.find<CacheService>();
   final showMemberMax = 4;
-  var itemHeight = 0.0;
+  var itemHeight = 65.0;
   var isEnter = false;
   var fixIndex = -1;
   var isAdmin = false;
@@ -55,7 +55,7 @@ class ChatGroupItem extends StatelessWidget {
       if (i > showMemberMax) return;
       showList.add(groupItem!.memberData[i]);
     }
-    LOG('--> ChatGroupItem initData [${groupItem!.id}] : $fixIndex / $isAdmin - ${groupItem!.toJson()}');
+    // LOG('--> ChatGroupItem initData [${groupItem!.id}] : $fixIndex / $itemHeight');
   }
 
   @override
@@ -162,28 +162,22 @@ class ChatGroupItem extends StatelessWidget {
                         ],
                         if (groupItem!.type == ChatType.public)
                           Row(
-                              children: [
-                                Text(STR(groupItem!.title), style: isBlocked ? ItemTitleDisableStyle(context) : ItemTitleStyle(context), maxLines: 1),
-                                if (!isBlocked)...[
-                                  SizedBox(width: 10),
-                                  Text('${groupItem!.memberData.length}', style: ItemTitleBoldStyle(context)),
-                                ],
-                              ]
-                          ),
-                        if (groupItem!.type == ChatType.private)
-                          Row(
-                              children: [
-                                for (var item in showList)
-                                  // Row(
-                                  //   children: [
-                                  //     UserCardWidget(item.toJson(), faceSize: FACE_CIRCLE_SIZE_SE, faceCircleSize: 1.0, isShowName: false),
-                                  //     Text(item.nickName, style: ItemTitleBoldStyle(context)),
-                                  //   ]
-                                  // ),
-                                  Text(showList.indexOf(item) > 0 ? ', ${item.nickName}' : item.nickName, style: ItemTitleStyle(context)),
+                            children: [
+                              Text(STR(groupItem!.title), style: isBlocked ? ItemTitleDisableStyle(context) : ItemTitleStyle(context), maxLines: 1),
+                              if (!isBlocked)...[
                                 SizedBox(width: 10),
                                 Text('${groupItem!.memberData.length}', style: ItemTitleBoldStyle(context)),
                               ],
+                            ]
+                          ),
+                        if (groupItem!.type == ChatType.private)
+                          Row(
+                            children: [
+                              for (var item in showList)
+                                Text(showList.indexOf(item) > 0 ? ', ${item.nickName}' : item.nickName, style: ItemTitleStyle(context)),
+                              SizedBox(width: 10),
+                              Text('${groupItem!.memberData.length}', style: ItemTitleBoldStyle(context)),
+                            ],
                           ),
                         Expanded(child: SizedBox(height: 1)),
                         if (roomType != ChatRoomType.public && unOpenCount > 0)...[

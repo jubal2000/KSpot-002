@@ -4,6 +4,8 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
+import 'package:kspot_002/data/theme_manager.dart';
+import 'package:kspot_002/widget/csc_picker/csc_picker.dart';
 import 'package:kspot_002/widget/page_dot_widget.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:video_player/video_player.dart';
@@ -227,18 +229,40 @@ class ImageScrollViewerState extends State<ImageScrollViewer> {
                       },
                       itemBuilder: (context, index) {
                         index = index % widget.itemList.length;
-                        // LOG('--> widget.itemList[$index] : ${widget.itemList[index]}');
+                        var item = widget.itemList[index];
+                        var isFile = item.runtimeType != String && item['extension'] != null && !IS_IMAGE_FILE(item['extension']);
+                        LOG('--> widget.itemList[$index] : $isFile / $item');
                         return GestureDetector(
-                          child: StatefulBuilder(
-                            builder: (context, snapshot) {
-                              return Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                child: showImageWidget(
-                                  widget.itemList[index].runtimeType == String ? widget.itemList[index] :
-                                  widget.itemList[index]['url'] ?? widget.itemList[index]['pic'], widget.imageFit
-                                )
-                              );
+                          child: LayoutBuilder(
+                            builder: (context, layout) {
+                              if (isFile) {
+                                return Container(
+                                  width: layout.maxWidth,
+                                  height: layout.maxWidth,
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        SizedBox(
+                                          width: layout.maxWidth * 0.4,
+                                          height: layout.maxWidth * 0.6,
+                                          child: showImageWidget(item['thumb'], widget.imageFit),
+                                        ),
+                                        SizedBox(height: 10),
+                                        Text(STR(item['name']), style: ItemTitleStyle(context), maxLines: 5),
+                                      ],
+                                    )
+                                  )
+                                );
+                              } else {
+                                return Container(
+                                  width: layout.maxWidth,
+                                  height: layout.maxWidth,
+                                  child: showImageWidget(
+                                    item.runtimeType == String ? item :
+                                    item['url'] ?? item['pic'], widget.imageFit)
+                                );
+                              }
                             }
                           ),
                           onHorizontalDragStart: (pos) {
@@ -258,11 +282,11 @@ class ImageScrollViewerState extends State<ImageScrollViewer> {
                           },
                           onTap: () {
                             if (widget.onSelected != null) {
-                              LOG('--> image widget.onSelected [$index] : ${widget.itemList[index]}');
-                              if (widget.itemList[index].runtimeType == String) {
-                                widget.onSelected!(widget.itemList[index]);
+                              LOG('--> image widget.onSelected [$index] : $item');
+                              if (item.runtimeType == String) {
+                                widget.onSelected!(item);
                               } else {
-                                widget.onSelected!(widget.itemList[index]['id']);
+                                widget.onSelected!(item['id']);
                               }
                             }
                           },

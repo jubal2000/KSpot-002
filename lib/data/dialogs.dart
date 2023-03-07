@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
@@ -19,9 +20,12 @@ import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:kspot_002/services/api_service.dart';
 import 'package:kspot_002/services/cache_service.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:uuid/uuid.dart';
+import 'package:path/path.dart' as p;
 
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
@@ -405,6 +409,158 @@ Future showImageSlideDialog(BuildContext context, List<String> imageData, int st
                 child: Text('Close'.tr)
               )
             ]
+          ),
+        );
+      }
+  ) ?? '';
+}
+
+Future showFileSlideDialog(BuildContext context, JSON fileData, {bool isCanDownload = false, String? startKey}) async {
+  LOG('--> showFileSlideDialog : $fileData');
+  var currentPage = 0;
+  List<JSON> fileList = [];
+
+  saveImage(String url, [String? fileName]) async {
+    var response = await Dio().get(url, options: Options(responseType: ResponseType.bytes));
+    final result = await ImageGallerySaver.saveImage(
+        Uint8List.fromList(response.data),
+        quality: 100,
+        name: fileName ?? "KSpot-download-${Uuid().v1()}-${DATETIME_FULL_STR(DateTime.now())}");
+    LOG('--> saveImage result : $result');
+  }
+
+  void showDownloadProgress(received, total) {
+    if (total != -1) {
+      LOG('---> downloading : ${(received / total * 100).toStringAsFixed(0)}%');
+    }
+  }
+
+  saveFile(String url, String savePath) async {
+    try {
+      var response = await Dio().get(url,
+        onReceiveProgress: showDownloadProgress,
+        //Received data with List<int>
+        options: Options(
+            responseType: ResponseType.bytes,
+            followRedirects: false,
+            validateStatus: (status) {
+              return status! < 500;
+            }),
+      );
+      LOG('--> response.headers : ${response.headers}');
+      File file = File(savePath);
+      var raf = file.openSync(mode: FileMode.write);
+      raf.writeFromSync(response.data);
+      await raf.close();
+    } catch (e) {
+      LOG('--> response error : $e');
+    }
+  }
+
+  downloadFile(JSON item) async {
+    var isFile = item.runtimeType != String && item['extension'] != null && !IS_IMAGE_FILE(item['extension']);
+    if (isFile) {
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.storage,
+      ].request();
+
+      if (statuses[Permission.storage]!.isGranted){
+        var tempDir = await getFileSavePath();
+        if (tempDir.isNotEmpty) {
+          var fullPath = '$tempDir/${item['name']}';
+          await saveFile(STR(item['url']), fullPath);
+        }
+      }
+    } else {
+      await saveImage(STR(item['url']));
+    }
+  }
+
+  initData() {
+    fileList.clear();
+    currentPage = 0;
+    var i=0;
+    for (var item in fileData.entries) {
+      fileList.add(item.value);
+      if (startKey == item.key) {
+        currentPage = i;
+      }
+      i++;
+    }
+  }
+
+  initData();
+
+  return await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return PointerInterceptor(
+          child: AlertDialog(
+              scrollable: true,
+              insetPadding: EdgeInsets.zero,
+              contentPadding: EdgeInsets.fromLTRB(10, 20, 10, 10),
+              actionsPadding: EdgeInsets.fromLTRB(10, 0, 10, 10),
+              backgroundColor: DialogBackColor(context),
+              content: Container(
+                width: MediaQuery.of(context).size.width,
+                child: ImageScrollViewer(
+                    fileList,
+                    startIndex: currentPage,
+                    rowHeight: MediaQuery.of(context).size.width - 30,
+                    backgroundColor: Colors.transparent,
+                    imageFit: BoxFit.contain,
+                    showArrow: true,
+                    showPage: false,
+                    autoScroll: false,
+                    onPageChanged: (index) {
+                      currentPage = index;
+                    }
+                ),
+              ),
+              actions: [
+                if (isCanDownload)...[
+                  IconButton(
+                      onPressed: () async {
+                        showLoadingDialog(context, 'Downloading...'.tr);
+                        if (currentPage < fileData.length) {
+                          var item = fileData.entries.elementAt(currentPage);
+                          await downloadFile(item.value);
+                        }
+                        hideLoadingDialog();
+                        ShowToast('Download complete'.tr);
+                      },
+                      icon: Column(
+                        children: [
+                          Icon(Icons.download_outlined, size: 24),
+                          Text('Save'.tr, style: TextStyle(fontSize: 10)),
+                        ],
+                      )
+                  ),
+                  IconButton(
+                      onPressed: () async {
+                        showLoadingDialog(context, 'Downloading...'.tr);
+                        for (var item in fileData.entries) {
+                          await downloadFile(item.value);
+                        }
+                        hideLoadingDialog();
+                        ShowToast('Download complete'.tr);
+                      },
+                      icon: Column(
+                        children: [
+                          Icon(Icons.download_rounded, size: 24),
+                          Text('Save all'.tr, style: TextStyle(fontSize: 10)),
+                        ],
+                      )
+                  )
+                ],
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Close'.tr)
+                )
+              ]
           ),
         );
       }
@@ -3176,11 +3332,6 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData) async 
     fileData = {};
     if (noticeData['fileData'] != null) {
       for (var item in noticeData['fileData']) {
-        // var key = Uuid().v1();
-        // fileData[key] = JSON.from(jsonDecode('{"id": "$key", "url": "$item"}'));
-        if (!IS_IMAGE_FILE(item['extension'])) {
-          item['url'] = item['thumb'];
-        }
         fileData[item['id']] = item;
       }
     }
@@ -3217,10 +3368,12 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData) async 
               var thumbData = await resizeImage(data, 128) as Uint8List;
               addItem['data'] = data;
               addItem['thumbData'] = thumbData;
+              addItem['upStatue'] = 1;
             }
           } else {
             addItem['url'] = 'assets/file_icons/icon_${createItem.extension}.png';
             addItem['thumb'] = addItem['url'];
+            addItem['upStatue'] = 1;
           }
           fileData[createItem.id] = addItem;
           // LOG('--> uploadFileData addItem : ${addItem.toString()}');
@@ -3233,125 +3386,111 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData) async 
     return true;
   }
 
-  picLocalImage() async {
-    List<XFile>? pickList = await ImagePicker().pickMultiImage(maxWidth: PIC_IMAGE_SIZE_MAX, maxHeight: PIC_IMAGE_SIZE_MAX);
-    if (pickList.isNotEmpty) {
-      for (var i=0; i<pickList.length; i++) {
-        var image = pickList[i];
-        var imageUrl = await ShowImageCroper(image.path);
-        var data = await ReadFileByte(imageUrl);
-        var key = Uuid().v1();
-        fileData[key] = {'id': key, 'data': data};
-      }
-      refreshGallery();
-    }
-  }
-
   initData();
 
   return await showDialog(
-      context: context,
-      builder: (BuildContext _context) {
-        return PointerInterceptor(
-          child: StatefulBuilder(
-              builder: (context, setState) {
-                return AlertDialog(
-                  scrollable: true,
-                  title: Text(title.tr, style: DialogTitleStyle(context)),
-                  insetPadding: EdgeInsets.symmetric(horizontal: 15),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                  actionsPadding: EdgeInsets.fromLTRB(15, 0, 15, 5),
-                  backgroundColor: DialogBackColor(context),
-                  content: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                      constraints: BoxConstraints(
-                        minWidth: MediaQuery.of(context).size.width,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ImageEditScrollViewer(
-                            fileData,
-                            key: fileSelectKey,
-                            title: 'File Select'.tr,
-                            isEditable: true,
-                            itemWidth: 60,
-                            itemHeight: 60,
-                            onActionCallback: (key, status) {
-                              switch (status) {
-                                case 1: {
-                                  picLocalFiles().then((_) {
-                                    setState(() {});
-                                  });
-                                  break;
-                                }
-                                case 2: {
-                                  setState(() {
-                                    fileData.remove(key);
-                                    refreshGallery();
-                                  });
-                                  break;
-                                }
-                              }
-                            }
-                          ),
-                          SizedBox(height: 20),
-                          TextFormField(
-                            controller: _editController,
-                            decoration: inputLabel(context, 'Description'.tr, ''),
-                            keyboardType: TextInputType.multiline,
-                            maxLines: 4,
-                            maxLength: COMMENT_LENGTH,
-                            style: TextStyle(fontSize: 14),
-                            onChanged: (value) {
-                              descStr = value;
-                              LOG('--> desc : $value');
-                            },
-                          ),
-                          Row(
-                            children: [
-                              Checkbox(value: isFirst, onChanged: (value) {
-                                setState(() {
-                                  isFirst = !isFirst;
-                                });
-                              }),
-                              Text('Display this notice at the top'.tr)
-                            ],
-                          )
-                        ],
-                      )
+    context: context,
+    builder: (BuildContext _context) {
+      return PointerInterceptor(
+        child: StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                scrollable: true,
+                title: Text(title.tr, style: DialogTitleStyle(context)),
+                insetPadding: EdgeInsets.symmetric(horizontal: 15),
+                contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                actionsPadding: EdgeInsets.fromLTRB(15, 0, 15, 5),
+                backgroundColor: DialogBackColor(context),
+                content: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  constraints: BoxConstraints(
+                    minWidth: MediaQuery.of(context).size.width,
                   ),
-                  actions: [
-                    if (STR(noticeData['id']).isNotEmpty)
-                      TextButton(
-                        child: Text('Delete'.tr, style: ItemTitleExStyle(context)),
-                        onPressed: () {
-                          noticeData['status'] = 0;
-                          Navigator.pop(_context, noticeData);
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ImageEditScrollViewer(
+                        fileData,
+                        key: fileSelectKey,
+                        title: 'File Select'.tr,
+                        isEditable: true,
+                        itemWidth: 60,
+                        itemHeight: 60,
+                        onActionCallback: (key, status) {
+                          switch (status) {
+                            case 1: {
+                              picLocalFiles().then((_) {
+                                setState(() {});
+                              });
+                              break;
+                            }
+                            case 2: {
+                              setState(() {
+                                fileData.remove(key);
+                                refreshGallery();
+                              });
+                              break;
+                            }
+                          }
+                        }
+                      ),
+                      SizedBox(height: 20),
+                      TextFormField(
+                        controller: _editController,
+                        decoration: inputLabel(context, 'Description'.tr, ''),
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 4,
+                        maxLength: COMMENT_LENGTH,
+                        style: TextStyle(fontSize: 14),
+                        onChanged: (value) {
+                          descStr = value;
+                          LOG('--> desc : $value');
                         },
                       ),
-                    TextButton(
-                      child: Text('Cancel'.tr, style: ItemTitleExStyle(context)),
-                      onPressed: () {
-                        Navigator.pop(_context);
-                      },
-                    ),
-                    TextButton(
-                        child: Text('OK'.tr, style: ItemTitleStyle(context)),
-                        onPressed: () {
-                          if (descStr.isEmpty) return;
-                          noticeData['isFirst'  ] = isFirst;
-                          noticeData['desc'     ] = descStr;
-                          noticeData['fileData' ] = fileData.entries.map((e) => e.value).toList();
-                          Navigator.pop(_context, noticeData);
-                        }
-                    )
-                  ],
-                );
-              }
-          ),
-        );
-      }
+                      Row(
+                        children: [
+                          Checkbox(value: isFirst, onChanged: (value) {
+                            setState(() {
+                              isFirst = !isFirst;
+                            });
+                          }),
+                          Text('Display this notice at the top'.tr)
+                        ],
+                      )
+                    ],
+                  )
+              ),
+              actions: [
+                if (STR(noticeData['id']).isNotEmpty)
+                  TextButton(
+                    child: Text('Delete'.tr, style: ItemTitleExStyle(context)),
+                    onPressed: () {
+                      noticeData['status'] = 0;
+                      Navigator.pop(_context, noticeData);
+                    },
+                  ),
+                TextButton(
+                  child: Text('Cancel'.tr, style: ItemTitleExStyle(context)),
+                  onPressed: () {
+                    Navigator.pop(_context);
+                  },
+                ),
+                TextButton(
+                  child: Text('OK'.tr, style: ItemTitleStyle(context)),
+                  onPressed: () {
+                    if (descStr.isEmpty) return;
+                    noticeData['desc'     ] = descStr;
+                    noticeData['isFirst'  ] = isFirst;
+                    noticeData['fileData' ] = fileData.entries.map((e) => e.value).toList();
+                    Navigator.pop(_context, noticeData);
+                  }
+                )
+              ],
+            );
+          }
+        ),
+      );
+    }
   );
 }
 

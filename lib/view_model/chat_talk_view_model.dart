@@ -441,18 +441,6 @@ class ChatTalkViewModel extends ChangeNotifier {
 
   noticeItem(NoticeModel notice, [int index = 0]) {
     const imageSize = 40.0;
-    JSON noticeFileData = {};
-    if (notice.fileData != null && notice.fileData!.isNotEmpty) {
-      // LOG("--> thumbList : ${widget.messageItem['fileData']}");
-      for (var item in notice.fileData!) {
-        LOG("--> fileData item : ${item.toJson()}");
-        JSON addItem = {'id': item.id};
-        addItem['url']      = item.thumb;
-        addItem['linkPic']  = item.url;
-        // addItem['title']    = IS_IMAGE_FILE(item.extension) ? '' : item.name;
-        noticeFileData[item.id] = addItem;
-      }
-    }
     return Container(
       width: Get.width * 0.9,
       padding: EdgeInsets.fromLTRB(isAdmin.value ? 10 : UI_HORIZONTAL_SPACE_M, UI_HORIZONTAL_SPACE,
@@ -469,19 +457,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      showNoticeEditDialog(buildContext!, 'Notice Edit'.tr,
-                          notice.toJson()).then((result) {
-                        LOG('--> showNoticeEditDialog result : $result');
-                        if (result != null) {
-                          result['id'         ] ??= '';
-                          result['index'      ] = 0;
-                          result['userId'     ] = AppData.USER_ID;
-                          result['userName'   ] = AppData.USER_NICKNAME;
-                          result['createTime' ] = DateTime.now().toString();
-                          chatRepo.setChatRoomNotice(roomInfo!.id,
-                              NoticeModel.fromJson(result), BOL(result['isFirst']));
-                        }
-                      });
+                      startNoticeEdit('Notice Edit'.tr, notice.toJson());
                     },
                     child: Icon(Icons.edit_note, size: 24),
                   ),
@@ -500,29 +476,29 @@ class ChatTalkViewModel extends ChangeNotifier {
                       child: Text(DESC(notice.desc), style: ItemDescStyle(buildContext!)),
                     ),
                     SizedBox(
-                        width: 30,
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              if (index == 0)
-                                GestureDetector(
-                                  onTap: () {
-                                    isNoticeShow.value = false;
-                                  },
-                                  child: Icon(Icons.highlight_remove, size: 24),
-                                ),
-                            ]
-                        )
+                      width: 30,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          if (index == 0)
+                            GestureDetector(
+                              onTap: () {
+                                isNoticeShow.value = false;
+                              },
+                              child: Icon(Icons.highlight_remove, size: 24),
+                            ),
+                        ]
+                      )
                     )
                   ]
                 ),
                 SizedBox(height: 5),
               // Text('$index. ${SERVER_TIME_STR(notice.createTime)}', style: ItemDescExInfoStyle(buildContext!)),
-                if (noticeFileData.isNotEmpty)...[
+                if (notice.fileData != null && notice.fileData!.isNotEmpty)...[
                   SizedBox(
-                    width: noticeFileData.length * imageSize,
+                    width: notice.fileData!.length * imageSize,
                     child: CardScrollViewer(
-                      noticeFileData,
+                      notice.fileDataMap,
                       itemWidth: imageSize,
                       itemHeight: imageSize,
                       itemRound: 8,
@@ -531,7 +507,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                       backgroundPadding: EdgeInsets.zero,
                       onActionCallback: (key, status) {
                         LOG('--> onActionCallback : $key / $status');
-                        showImageSlideDialog(buildContext!, noticeFileData.entries.map((e) => STR(e.value['linkPic']).toString()).toList(), 0, true);
+                        showFileSlideDialog(buildContext!, notice.fileDataMap, isCanDownload: true, startKey: key);
                       },
                     ),
                   ),
@@ -635,6 +611,50 @@ class ChatTalkViewModel extends ChangeNotifier {
     ];
   }
 
+  startNoticeEdit(String title, JSON notice) {
+    showNoticeEditDialog(buildContext!, title, notice).then((result) async {
+      if (result != null) {
+        if (result['fileData'] != null) LOG('--> showNoticeEditDialog result : ${result['fileData'].length}} ${result['fileData']}');
+        JSON addItem = {};
+        addItem['id'    ] = result['id'] ?? '';
+        addItem['status'] = result['status'] ?? 1;
+        addItem['index' ] = result['index'] ?? 0;
+        addItem['desc'  ] = result['desc'] ?? '';
+        if (INT(addItem['status']) > 0 && JSON_NOT_EMPTY(result['fileData'])) {
+          showLoadingDialog(buildContext!, 'Uploading now...'.tr);
+          for (JSON item in result['fileData']) {
+            if (BOL(item['upStatue'])) {
+              if (item['data'] != null) {
+                var result = await api.uploadData(item['data'], item['id'], 'chat_notice_img');
+                if (result != null && item['thumbData'] != null) {
+                  var thumbResult = await api.uploadData(item['thumbData'], item['id'], 'chat_notice_img_thumb');
+                  if (thumbResult != null) {
+                    item['url'] = result;
+                    item['thumb'] = thumbResult;
+                  }
+                }
+              } else if (!IS_IMAGE_FILE(STR(item['extension']))) {
+                var result = await api.uploadFile(File.fromUri(Uri.parse(item['path'])), 'chat_notice_file', item['id']);
+                if (result != null) {
+                  item['url'] = result;
+                }
+              }
+            }
+            addItem['fileData'] ??= [];
+            addItem['fileData'].add(item);
+          }
+          Future.delayed(Duration(milliseconds: 200)).then((_) {
+            hideLoadingDialog();
+          });
+        }
+        addItem['userId'     ] = AppData.USER_ID;
+        addItem['userName'   ] = AppData.USER_NICKNAME;
+        addItem['createTime' ] = DateTime.now().toString();
+        chatRepo.setChatRoomNotice(roomInfo!.id, NoticeModel.fromJson(addItem), BOL(result['isFirst']));
+      }
+    });
+  }
+
   onRoomMenuAction(DropdownItemType type) {
     switch(type) {
       case DropdownItemType.exit:
@@ -665,42 +685,7 @@ class ChatTalkViewModel extends ChangeNotifier {
         break;
       case DropdownItemType.noticeAdd:
         if (JSON_EMPTY(roomInfo!.noticeData) || roomInfo!.noticeData!.length < CHAT_NOTICE_MAX) {
-          showNoticeEditDialog(buildContext!, 'Notice Add'.tr, {}).then((result) async {
-            if (result != null) {
-              JSON addItem = {};
-              addItem['id'         ] ??= '';
-              addItem['status'     ] = 1;
-              addItem['index'      ] = 0;
-              if (JSON_NOT_EMPTY(result['fileData'])) {
-                showLoadingDialog(buildContext!, 'Uploading now...'.tr);
-                for (JSON item in result['fileData']) {
-                  if (item['data'] != null) {
-                    var result = await api.uploadData(item['data'], item['id'], 'chat_notice_img');
-                    if (result != null && item['thumbData'] != null) {
-                      var thumbResult = await api.uploadData(item['thumbData'], item['id'], 'chat_notice_img_thumb');
-                      if (thumbResult != null) {
-                        item['url'] = result;
-                        item['thumb'] = thumbResult;
-                      }
-                    }
-                  } else {
-                    var result = await api.uploadFile(File.fromUri(Uri.parse(item['path'])), 'chat_notice_file', item['id']);
-                    if (result != null) {
-                      item['url'] = result;
-                    }
-                  }
-                  addItem['fileData'] ??= [];
-                  addItem['fileData'].add(item);
-                }
-              }
-              addItem['desc'       ] = STR(result['desc']);
-              addItem['userId'     ] = AppData.USER_ID;
-              addItem['userName'   ] = AppData.USER_NICKNAME;
-              addItem['createTime' ] = DateTime.now().toString();
-              chatRepo.setChatRoomNotice(roomInfo!.id, NoticeModel.fromJson(addItem), BOL(result['isFirst']));
-              hideLoadingDialog();
-            }
-          });
+          startNoticeEdit('Notice Add'.tr, {});
         } else {
           ShowToast('Notice is the maximum number'.tr);
         }

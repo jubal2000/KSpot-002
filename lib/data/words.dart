@@ -416,6 +416,8 @@ class Words extends Translations {
       'Notice Add': '공지사항 작성',
       'Notice is the maximum number': '공지가 최대 갯수입니다',
       'File Select': '파일 선택',
+      'Storage permission denied!': '저장소 권한이 없습니다',
+      'Downloading...': '다운로드중입니다...',
 
       // promotion_list_screen
       'PROMOTION RECORD': '홍보 기록',

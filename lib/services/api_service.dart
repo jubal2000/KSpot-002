@@ -2075,7 +2075,7 @@ class ApiService extends GetxService {
             for (var item in roomInfo['noticeData']) {
               var i = roomInfo['noticeData'].indexOf(item);
               if (item['id'] == notice['id']) {
-                notice['index'] = isFirst ? 0 : roomInfo['noticeData'].length + 1;
+                if (isFirst) notice['index'] = 0;
                 roomInfo['noticeData'][i] = notice;
                 selectIndex = i;
                 LOG('--> noticeData set : ${roomInfo['noticeData']}');
@@ -2086,6 +2086,7 @@ class ApiService extends GetxService {
             }
           }
           LOG('--> noticeData : ${roomInfo['noticeData']} / $selectIndex');
+          // create new item..
           if (selectIndex < 0) {
             roomInfo['noticeData'] ??= [];
             if (STR(notice['id']).isEmpty) notice['id'] = ref.doc().id;

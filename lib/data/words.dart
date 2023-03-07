@@ -538,6 +538,10 @@ class Words extends Translations {
       'Report has been received and is being processed': '신고가 접수되어 처리중입니다',
       'Report has been rejected': '신고가 보류되었습니다',
       'Report has been processed': '신고가 처리 완료되었습니다',
+      'BAN LIST': '강퇴 목록',
+      'Ban List': '강퇴 목록',
+      'Ban cancel': '강퇴 해제',
+      'You can not enter': '지금 입장할 수 없습니다',
 
       // setup_contact_screen
       'Verify link has been sent': '인증 ',

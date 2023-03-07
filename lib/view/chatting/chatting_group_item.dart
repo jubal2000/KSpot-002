@@ -235,7 +235,7 @@ class ChatGroupItem extends StatelessWidget {
               offset: const Offset(0, 8),
               items: [
                 if (isBlocked)...[
-                  DropdownMenuItem<DropdownItem>(value: userMenuMsgUnReport, child: UserMenuItems.buildItem(context, userMenuMsgUnReport)),
+                  DropdownMenuItem<DropdownItem>(value: userMenuMsgUnReport, child: DropdownItems.buildItem(context, userMenuMsgUnReport)),
                 ],
                 if (!isBlocked)...[
                   if (!isEnter)...[
@@ -244,7 +244,7 @@ class ChatGroupItem extends StatelessWidget {
                       child: DropdownItems.buildItem(context,item),
                     )),
                     if (roomType != ChatRoomType.publicMy)...[
-                      DropdownMenuItem<DropdownItem>(value: userMenuMsgReport, child: UserMenuItems.buildItem(context, userMenuMsgReport)),
+                      DropdownMenuItem<DropdownItem>(value: userMenuMsgReport, child: DropdownItems.buildItem(context, userMenuMsgReport)),
                     ],
                   ],
                   if (isEnter)...[
@@ -273,16 +273,16 @@ class ChatGroupItem extends StatelessWidget {
   List<DropdownMenuItem> alarmMenu(context) {
     var item = cache.roomAlarmData.contains(groupItem!.id) ? dropMenuAlarmOff : dropMenuAlarmOn;
     return [
-        DropdownMenuItem<DropdownItem>(value: item, child: UserMenuItems.buildItem(context, item)),
+        DropdownMenuItem<DropdownItem>(value: item, child: DropdownItems.buildItem(context, item)),
     ];
   }
 
   List<DropdownMenuItem> indexMenu(context) {
     return [
       if (fixIndex != 0)
-        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOn, child: UserMenuItems.buildItem(context, dropMenuIndexBkOn)),
+        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOn, child: DropdownItems.buildItem(context, dropMenuIndexBkOn)),
       if (fixIndex >= 0)
-        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOff, child: UserMenuItems.buildItem(context, dropMenuIndexBkOff)),
+        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOff, child: DropdownItems.buildItem(context, dropMenuIndexBkOff)),
     ];
   }
 }

@@ -250,6 +250,8 @@ class ImageScrollViewerState extends State<ImageScrollViewer> {
                                         ),
                                         SizedBox(height: 10),
                                         Text(STR(item['name']), style: ItemTitleStyle(context), maxLines: 5),
+                                        SizedBox(height: 10),
+                                        Text('${FILE_SIZE_STR(item['size'])}', style: ItemTitleNormalStyle(context), maxLines: 1),
                                       ],
                                     )
                                   )

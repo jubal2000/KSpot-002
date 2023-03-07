@@ -63,7 +63,7 @@ class ChatItemState extends State<ChatItem> {
           addItem['url'] = fileItem.thumb;
           addItem['linkPic'] = fileItem.url;
         } else {
-          addItem['url'] = 'assets/file_icons/icon_${fileItem.extension}.png';
+          addItem['url'] = FILE_ICON(fileItem.extension);
           addItem['linkPic'] = addItem['url'];
           addItem['title'] = fileItem.name;
         }

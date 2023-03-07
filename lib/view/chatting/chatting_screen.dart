@@ -61,16 +61,16 @@ class ChattingScreen extends StatelessWidget {
                   child: Consumer<AppViewModel>(
                     builder: (context, appViewModel, _) {
                       LOG('--> AppViewModel');
-                      return FutureBuilder(
-                        future: AppData.chatViewModel.getChatRoomData(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            return LayoutBuilder(
-                              builder: (context, layout) {
-                                return ChangeNotifierProvider<ChatViewModel>.value(
-                                    value: AppData.chatViewModel,
-                                    child: Consumer<ChatViewModel>(builder: (context, viewModel, _) {
-                                      LOG('--> ChatViewModel refresh');
+                      return ChangeNotifierProvider<ChatViewModel>.value(
+                          value: AppData.chatViewModel,
+                          child: Consumer<ChatViewModel>(builder: (context, viewModel, _) {
+                            LOG('--> ChatViewModel refresh');
+                            return FutureBuilder(
+                              future: AppData.chatViewModel.getChatRoomData(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return LayoutBuilder(
+                                    builder: (context, layout) {
                                       return StreamBuilder(
                                         stream: viewModel.stream!,
                                         builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -78,16 +78,16 @@ class ChattingScreen extends StatelessWidget {
                                         }
                                       );
                                     }
-                                  )
-                                );
+                                  );
+                                } else {
+                                  return Center(
+                                    child: showLoadingFullPage(context),
+                                  );
+                                }
                               }
                             );
-                          } else {
-                            return Center(
-                              child: showLoadingFullPage(context),
-                            );
                           }
-                        }
+                        )
                       );
                     }
                   )

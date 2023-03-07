@@ -84,6 +84,7 @@ class ChatRoomModel {
   String? country;
   String? countryState;
   List<NoticeModel>? noticeData;  // 채팅 맴버 목록
+  List<BanData>? banData;          // 밴 맴버 목록
 
   ChatRoomModel({
     required this.id,
@@ -103,6 +104,7 @@ class ChatRoomModel {
     this.country,
     this.countryState,
     this.noticeData,
+    this.banData,
   });
   factory ChatRoomModel.fromJson(JSON json) => _$ChatRoomModelFromJson(json);
   JSON toJson() => _$ChatRoomModelToJson(this);
@@ -136,6 +138,14 @@ class ChatRoomModel {
     }
     noticeData!.sort((a, b) => a.index > b.index ? 1 : -1);
     return noticeData!;
+  }
+
+  checkBanUser(String userId) {
+    if (banData == null) return false;
+    for (var item in banData!) {
+      if (item.id == userId) return true;
+    }
+    return false;
   }
 
   removeMemberData(String key) {

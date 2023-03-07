@@ -175,6 +175,10 @@ class ChatViewModel extends ChangeNotifier {
         var addGroup = ChatGroupItem(item.value, isBlocked: reportData != null, roomType: roomType,
           unOpenCount: unOpen, onSelected: (key) {
           if (!item.value.memberList.contains(AppData.USER_ID)) {
+            if (item.value.checkBanUser(AppData.USER_ID)) {
+              ShowToast('You can not enter now'.tr);
+              return;
+            }
             showAlertYesNoCheckDialog(buildContext!, item.value.title, 'Would you like to enter the chat room?'.tr,
               'Enter quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
               if (result > 0) {
@@ -188,6 +192,10 @@ class ChatViewModel extends ChangeNotifier {
           LOG('--> onMenuSelected [$key] : $menu');
           switch(menu) {
             case DropdownItemType.enter:
+              if (item.value.checkBanUser(AppData.USER_ID)) {
+                ShowToast('You can not enter now'.tr);
+                return;
+              }
               showAlertYesNoCheckDialog(buildContext!, item.value.title, 'Would you like to enter the chat room?'.tr,
                 'Enter quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
                 if (result > 0) {

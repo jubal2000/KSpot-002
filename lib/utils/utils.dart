@@ -351,6 +351,30 @@ PRICE_FULL_STR(price, currency, [bool isShowEx = true]) {
 }
 
 // ignore: non_constant_identifier_names
+FILE_SIZE_STR(size) {
+  if (size == null || size.toString().isEmpty) return '0';
+  var value = 0.0;
+  if (size is String) {
+    value = double.parse(size);
+  } else {
+    value = double.parse('$size');
+  }
+  var priceFormat = NumberFormat('###,###,###,###.##');
+  return '${priceFormat.format(value / 1000).toString()} Kbyte';
+}
+
+var fileIconList = ['ai','avi','doc','docx','fla','html','mp3','mp4','pdf','ppt','pptx','psd','txt','xls','xlsx'];
+
+// ignore: non_constant_identifier_names
+FILE_ICON(String? ext) {
+  if (ext == null) return NO_IMAGE;
+  if (fileIconList.contains(ext)) {
+    return 'assets/file_icons/icon_$ext.png';
+  }
+  return 'assets/file_icons/icon_none.png';
+}
+
+// ignore: non_constant_identifier_names
 SALE_STR(value) {
   if (value == null) return '';
   double tmpNum = value;
@@ -638,6 +662,7 @@ STR_EMPTY(dynamic data) {
 
 // ignore: non_constant_identifier_names
 PARAMETER_JSON(String key, dynamic value) {
+  if (value == null) return {};
   return {key: json.encode(value)};
 }
 
@@ -1001,12 +1026,12 @@ ShowToast(text, [Color backColor = Colors.black45, Color textColor = Colors.whit
       timeInSecForIosWeb: 1,
       backgroundColor: backColor,
       textColor: textColor,
-      fontSize: 14.0
+      fontSize: 16.0
   );
 }
 
 ShowErrorToast(text)  {
-  ShowToast(text, Colors.black45, Colors.deepPurpleAccent);
+  ShowToast(text, Colors.deepOrange.withOpacity(0.8), Colors.yellowAccent);
 }
 
 enum DropdownItemType {
@@ -1064,6 +1089,7 @@ enum DropdownItemType {
 
   profile,
   kick,
+  banList,
   title,
   noticeAdd,
   noticeShow,
@@ -1107,6 +1133,7 @@ const userMenuDeclare     = DropdownItem(DropdownItemType.showDeclar, text: 'VIE
 const userMenuReDeclare   = DropdownItem(DropdownItemType.reDeclar, text: 'REPORT RESULT', icon: Icons.announcement);
 const userMenuUnDeclare   = DropdownItem(DropdownItemType.unDeclar, text: 'REPORT CANCEL', icon: Icons.clear);
 const userMenuKick        = DropdownItem(DropdownItemType.kick, text: 'DROP OUT', icon: Icons.clear, manager: true);
+const userMenuBanList     = DropdownItem(DropdownItemType.banList, text: 'BAN LIST', icon: Icons.playlist_remove, manager: true);
 const userMenuAdmin       = DropdownItem(DropdownItemType.admin, text: 'CHANGE ADMIN', icon: Icons.perm_identity, manager: true);
 const userMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
 
@@ -1205,8 +1232,9 @@ class DropdownItems {
   static const List<DropdownItem> reserve2          = [confirm, reject];
   static const List<DropdownItem> secondItems = [];
   static const List<DropdownItem> chatRoomMenu0     = [dropMenuEnter];
-  static const List<DropdownItem> chatRoomMenu1     = [dropMenuExit, dropMenuNoticeShow];
-  static const List<DropdownItem> chatRoomAdmin0    = [dropMenuTitle, dropMenuNoticeSet];
+  static const List<DropdownItem> chatRoomMenu1     = [dropMenuExit];
+  static const List<DropdownItem> chatRoomMenu2     = [dropMenuExit, dropMenuNoticeShow];
+  static const List<DropdownItem> chatRoomAdmin0    = [dropMenuTitle, dropMenuNoticeAdd, userMenuBanList];
   static const List<DropdownItem> chatRoomAdmin1    = [dropMenuTitle, dropMenuNoticeAdd];
 
   static const content      = DropdownItem(DropdownItemType.content, text: 'HISTORY +', icon: Icons.movie_creation);
@@ -2574,7 +2602,8 @@ final extImageList = [
   'tiff',
 ];
 
-IS_IMAGE_FILE(String ext) {
+IS_IMAGE_FILE(String? ext) {
+  if (ext == null) return false;
   return extImageList.contains(ext.toLowerCase());
 }
 
@@ -2585,6 +2614,7 @@ class StatefulWrapper extends StatefulWidget {
   @override
   _StatefulWrapperState createState() => _StatefulWrapperState();
 }
+
 class _StatefulWrapperState extends State<StatefulWrapper> {
   @override
   void initState() {

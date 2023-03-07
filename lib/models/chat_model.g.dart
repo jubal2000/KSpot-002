@@ -68,6 +68,9 @@ ChatRoomModel _$ChatRoomModelFromJson(Map<String, dynamic> json) =>
       noticeData: (json['noticeData'] as List<dynamic>?)
           ?.map((e) => NoticeModel.fromJson(e as Map<String, dynamic>))
           .toList(),
+      banData: (json['banData'] as List<dynamic>?)
+          ?.map((e) => BanData.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$ChatRoomModelToJson(ChatRoomModel instance) =>
@@ -88,4 +91,5 @@ Map<String, dynamic> _$ChatRoomModelToJson(ChatRoomModel instance) =>
       'country': instance.country,
       'countryState': instance.countryState,
       'noticeData': instance.noticeData?.map((e) => e.toJson()).toList(),
+      'banData': instance.banData?.map((e) => e.toJson()).toList(),
     };

@@ -50,7 +50,7 @@ class ChatTalkViewModel extends ChangeNotifier {
   var  isAdmin = false.obs;
   var  roomTitle = ''.obs;
   var  isNoticeShow = true.obs;
-  var  isNoticeAll  = true.obs;
+  var  isNoticeAll  = false.obs;
 
   init(context) {
     buildContext = context;
@@ -85,7 +85,11 @@ class ChatTalkViewModel extends ChangeNotifier {
       isAdmin.value = true;
     }
     if (!memberCheck) {
-      Get.back();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(Duration(milliseconds: 500)).then((_) {
+          Get.back();
+        });
+      });
     }
   }
 
@@ -177,7 +181,7 @@ class ChatTalkViewModel extends ChangeNotifier {
             } else {
               roomInfo!.noticeData = [];
             }
-            isNoticeShow.value = true;
+            // isNoticeShow.value = true;
             LOG('--> notice changed ! : ${roomInfo!.noticeData!.toString()}');
           }
           initMemberList();
@@ -215,7 +219,7 @@ class ChatTalkViewModel extends ChangeNotifier {
           addItem.thumbData = thumbData;
           fileData[addItem.id] = imageItem;
         } else {
-          var imageItem = {'id': addItem.id, 'url': 'assets/file_icons/icon_${addItem.extension}.png'};
+          var imageItem = {'id': addItem.id, 'url': FILE_ICON(addItem.extension)};
           fileData[addItem.id] = imageItem;
         }
         LOG('--> addItem : ${addItem.toJson()}');
@@ -525,7 +529,7 @@ class ChatTalkViewModel extends ChangeNotifier {
   showChatNotice() {
     return Obx(() => TopCenterAlign(
       child: AnimatedSize(
-      duration: Duration(milliseconds: 200),
+        duration: Duration(milliseconds: 200),
         child: Container(
           margin: EdgeInsets.only(top: 10),
           height: isNoticeShow.value ? null : 0,
@@ -596,21 +600,6 @@ class ChatTalkViewModel extends ChangeNotifier {
     );
   }
 
-  roomMenuList() {
-    return [
-      ...DropdownItems.chatRoomMenu1.map((item) => DropdownMenuItem<DropdownItem>(
-        value: item,
-        child: DropdownItems.buildItem(buildContext!, item),
-      )),
-      if (isAdmin.value)...[
-        ...DropdownItems.chatRoomAdmin1.map((item) => DropdownMenuItem<DropdownItem>(
-          value: item,
-          child: DropdownItems.buildItem(buildContext!, item),
-        )),
-      ]
-    ];
-  }
-
   startNoticeEdit(String title, JSON notice) {
     showNoticeEditDialog(buildContext!, title, notice).then((result) async {
       if (result != null) {
@@ -655,6 +644,27 @@ class ChatTalkViewModel extends ChangeNotifier {
     });
   }
 
+  roomMenuList() {
+    return [
+      ...DropdownItems.chatRoomMenu2.map((item) => DropdownMenuItem<DropdownItem>(
+        value: item,
+        child: DropdownItems.buildItem(buildContext!, item),
+      )),
+      if (isAdmin.value)...[
+        if (LIST_NOT_EMPTY(roomInfo!.banData))
+          ...DropdownItems.chatRoomAdmin0.map((item) => DropdownMenuItem<DropdownItem>(
+            value: item,
+            child: DropdownItems.buildItem(buildContext!, item),
+          )),
+        if (LIST_EMPTY(roomInfo!.banData))
+          ...DropdownItems.chatRoomAdmin1.map((item) => DropdownMenuItem<DropdownItem>(
+            value: item,
+            child: DropdownItems.buildItem(buildContext!, item),
+          )),
+      ]
+    ];
+  }
+
   onRoomMenuAction(DropdownItemType type) {
     switch(type) {
       case DropdownItemType.exit:
@@ -679,6 +689,23 @@ class ChatTalkViewModel extends ChangeNotifier {
             chatRepo.setChatRoomTitle(roomInfo!.id, result);
           }
         });
+        break;
+      case DropdownItemType.banList:
+        JSON banList = {};
+        if (LIST_NOT_EMPTY(roomInfo!.banData)) {
+          for (var item in roomInfo!.banData!) {
+            banList[item.id] = {'key': item.id, 'title': item.nickName, 'desc': SERVER_TIME_STR(item.createTime, true), 'check': 0};
+          }
+          showJsonMultiSelectDialog(buildContext!, 'Ban List'.tr, banList, 'Ban cancel'.tr).then((result) async {
+            if (result != null) {
+              for (var item in result.entries) {
+                await chatRepo.setChatRoomKickUser(roomInfo!.id, item.key, item.value['title'], 1);
+              }
+              initData(cache.chatRoomData[roomInfo!.id] ?? roomInfo!);
+              notifyListeners();
+            }
+          });
+        }
         break;
       case DropdownItemType.noticeShow:
         isNoticeShow.value = true;

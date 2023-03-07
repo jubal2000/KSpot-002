@@ -498,7 +498,7 @@ Future showFileSlideDialog(BuildContext context, JSON fileData, {bool isCanDownl
         return PointerInterceptor(
           child: AlertDialog(
               scrollable: true,
-              insetPadding: EdgeInsets.zero,
+              insetPadding: EdgeInsets.all(10),
               contentPadding: EdgeInsets.fromLTRB(10, 20, 10, 10),
               actionsPadding: EdgeInsets.fromLTRB(10, 0, 10, 10),
               backgroundColor: DialogBackColor(context),
@@ -537,7 +537,8 @@ Future showFileSlideDialog(BuildContext context, JSON fileData, {bool isCanDownl
                         ],
                       )
                   ),
-                  IconButton(
+                  if (fileData.length > 1)
+                    IconButton(
                       onPressed: () async {
                         showLoadingDialog(context, 'Downloading...'.tr);
                         for (var item in fileData.entries) {
@@ -552,7 +553,7 @@ Future showFileSlideDialog(BuildContext context, JSON fileData, {bool isCanDownl
                           Text('Save all'.tr, style: TextStyle(fontSize: 10)),
                         ],
                       )
-                  )
+                    )
                 ],
                 TextButton(
                     onPressed: () {
@@ -2978,10 +2979,7 @@ Future showButtonDialog(BuildContext context,
   );
 }
 
-Future<JSON> showJsonMultiSelectDialog(BuildContext context, String title, JSON jsonData) async {
-  TextStyle _titleText      = TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black);
-  TextStyle _itemTitleText  = TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Colors.black);
-  TextStyle _itemDescText   = TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.grey);
+Future<JSON?> showJsonMultiSelectDialog(BuildContext context, String title, JSON jsonData, [String okStr = 'OK']) async {
   var _editMode = false;
   var _selectCount = 0;
   var _itemHeight = 50.0;
@@ -2992,110 +2990,112 @@ Future<JSON> showJsonMultiSelectDialog(BuildContext context, String title, JSON 
       if (BOL(value['check'])) _selectCount++;
     });
   }
-
   initSelect() {
     _selectCount = 0;
     jsonData.forEach((key, value) {
       value['check'] = '';
     });
   }
-
   return await showDialog(
-      context: context,
-      builder: (BuildContext _context) {
-        return PointerInterceptor(
-          child: StatefulBuilder(
-              builder: (context, setState) {
-                return AlertDialog(
-                    title: Text(title, style: _titleText),
-                    // insetPadding: EdgeInsets.all(10),
-                    contentPadding: EdgeInsets.only(top: 20),
-                    backgroundColor: DialogBackColor(context),
-                    content: Container(
-                      constraints: BoxConstraints(
-                        minWidth: 300,
-                        maxHeight: jsonData.entries.length * _itemHeight + 30,
+    context: context,
+    builder: (BuildContext _context) {
+      return PointerInterceptor(
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(title, style: DialogTitleStyle(context)),
+              insetPadding: EdgeInsets.all(10),
+              contentPadding: EdgeInsets.all(20),
+              actionsPadding: EdgeInsets.fromLTRB(20, 0, 20, 5),
+              backgroundColor: DialogBackColor(context),
+              content: Container(
+                constraints: BoxConstraints(
+                  minWidth: 300,
+                  maxHeight: Get.height * 0.6
+                ),
+                child: SingleChildScrollView(
+                  child: ListBody(
+                    children: jsonData.entries.map((item) => Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      alignment: Alignment.centerLeft,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                        color: Theme.of(context).canvasColor.withOpacity(0.5),
                       ),
-                      child: SingleChildScrollView(
-                        child: ListBody(
-                          children: jsonData.entries.map((item) => Container(
-                              width: double.infinity,
-                              height: _itemHeight,
-                              padding: EdgeInsets.symmetric(horizontal: 15),
-                              alignment: Alignment.centerLeft,
-                              child: Row(
-                                  children: [
-                                    SizedBox(width: 10),
-                                    Expanded(
-                                      child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(item.value['title'], style: _itemTitleText, maxLines: 1),
-                                            if (item.value['desc'] != null)...[
-                                              SizedBox(height: 2),
-                                              Text(item.value['desc'], style: _itemDescText, maxLines: 1),
-                                            ]
-                                          ]
-                                      ),
-                                    ),
-                                    if (!BOL(jsonData[item.key]['disable']))
-                                      Checkbox(value: BOL(jsonData[item.key]['check']),
-                                          onChanged: (value) {
-                                            setState(() {
-                                              jsonData[item.key]['check'] = BOL(jsonData[item.key]['check']) ? '' : '1';
-                                              refreshCount();
-                                              LOG( '--> jsonData[${item.key}] : $_selectCount / $value / ${jsonData[item.key]}');
-                                            });
-                                          }
-                                      ),
-                                    if (BOL(jsonData[item.key]['disable']))...[
-                                      Icon(Icons.check, color: Colors.green, size: 22),
-                                      SizedBox(width: 5),
-                                    ],
+                      child: Row(
+                        children: [
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(item.value['title'], style: DialogDescStyle(context), maxLines: 1),
+                                  if (item.value['desc'] != null)...[
+                                    SizedBox(height: 2),
+                                    Text(item.value['desc'], style: DialogDescExStyle(context), maxLines: 1),
                                   ]
-                              )
-                          )
-                          ).toList(),
-                        ),
-                      ),
-                    ),
-                    actions: [
-                      SizedBox(
-                          child: Row(
-                            children: [
-                              if (_selectCount > 0)...[
-                                TextButton(
-                                  child: Text('Deselect'.tr),
-                                  onPressed: () {
-                                    setState(() {
-                                      initSelect();
-                                    });
-                                  },
-                                ),
-                              ],
-                              Expanded(child: SizedBox(height: 1)),
-                              TextButton(
-                                child: Text('Cancel'.tr),
-                                onPressed: () {
-                                  Navigator.pop(_context, {});
-                                },
+                                ]
                               ),
-                              TextButton(
-                                child: Text('OK'.tr),
-                                onPressed: () {
-                                  Navigator.pop(_context, jsonData);
-                                },
+                            ),
+                            if (!BOL(jsonData[item.key]['disable']))
+                              Checkbox(value: BOL(jsonData[item.key]['check']),
+                                onChanged: (value) {
+                                  setState(() {
+                                    jsonData[item.key]['check'] = BOL(jsonData[item.key]['check']) ? '' : '1';
+                                    refreshCount();
+                                    LOG( '--> jsonData[${item.key}] : $_selectCount / $value / ${jsonData[item.key]}');
+                                  });
+                                }
                               ),
+                            if (BOL(jsonData[item.key]['disable']))...[
+                              Icon(Icons.check, color: Colors.green, size: 22),
+                              SizedBox(width: 5),
                             ],
-                          )
+                          ]
+                        )
                       )
-                    ]
-                );
-              }
-          ),
-        );
-      }
-  ) ?? '';
+                    ).toList(),
+                  ),
+                ),
+              ),
+              actions: [
+                SizedBox(
+                  child: Row(
+                    children: [
+                      if (_selectCount > 0)...[
+                        TextButton(
+                          child: Text('Deselect'.tr),
+                          onPressed: () {
+                            setState(() {
+                              initSelect();
+                            });
+                          },
+                        ),
+                      ],
+                      Expanded(child: SizedBox(height: 1)),
+                      TextButton(
+                        child: Text('Cancel'.tr, style: ItemTitleExStyle(context)),
+                        onPressed: () {
+                          Navigator.pop(_context);
+                        },
+                      ),
+                      TextButton(
+                        child: Text(okStr.tr, style: ItemTitleAlertStyle(context)),
+                        onPressed: () {
+                          Navigator.pop(_context, jsonData);
+                        },
+                      ),
+                    ],
+                  )
+                )
+              ]
+            );
+          }
+        ),
+      );
+    }
+  );
 }
 
 enum ReportType {
@@ -3371,7 +3371,7 @@ showNoticeEditDialog(BuildContext context, String title, JSON noticeData) async 
               addItem['upStatue'] = 1;
             }
           } else {
-            addItem['url'] = 'assets/file_icons/icon_${createItem.extension}.png';
+            addItem['url'] = FILE_ICON(createItem.extension);
             addItem['thumb'] = addItem['url'];
             addItem['upStatue'] = 1;
           }

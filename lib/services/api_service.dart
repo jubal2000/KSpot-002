@@ -2114,8 +2114,8 @@ class ApiService extends GetxService {
     return null;
   }
 
-  setChatRoomKickUser(String roomId, String targetId, String targetName, String userId) async {
-    LOG('------> setChatRoomKickUser : $roomId / $targetId <- $userId');
+  setChatRoomKickUser(String roomId, String targetId, String targetName, int status, String userId) async {
+    LOG('------> setChatRoomKickUser : $roomId / $targetId <- $status');
     try {
       var ref = firestore!.collection(ChatRoomCollection);
       var snapshot = await ref.doc(roomId).get();
@@ -2132,13 +2132,29 @@ class ApiService extends GetxService {
               break;
             }
           }
-          if (isOk) {
-            roomInfo['banData'] ??= {};
-            roomInfo['banData'][targetId] = {
+          if (isOk || status == 1) {
+            roomInfo['banData'] ??= [];
+            JSON newBanItem = {
               'id': targetId,
               'nickName': targetName,
               'createTime': CURRENT_SERVER_TIME(),
             };
+            var isAdd = true;
+            for (var bItem in roomInfo['banData']) {
+              if (bItem['id'] == targetId) {
+                if (status == 0) {
+                  bItem = newBanItem;
+                } else {
+                  roomInfo['banData'].remove(bItem);
+                  LOG('--> setChatRoomKickUser removed : ${roomInfo['banData']}');
+                }
+                isAdd = false;
+                break;
+              }
+            }
+            if (isAdd) {
+              roomInfo['banData'].add(newBanItem);
+            }
             await ref.doc(roomId).update(Map<String, dynamic>.from({
               'memberData': roomInfo['memberData'],
               'memberList': roomInfo['memberList'],

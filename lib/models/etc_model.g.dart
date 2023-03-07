@@ -194,3 +194,15 @@ Map<String, dynamic> _$NoticeModelToJson(NoticeModel instance) =>
       'createTime': instance.createTime,
       'fileData': instance.fileData?.map((e) => e.toJson()).toList(),
     };
+
+BanData _$BanDataFromJson(Map<String, dynamic> json) => BanData(
+      id: json['id'] as String,
+      nickName: json['nickName'] as String,
+      createTime: json['createTime'] as String,
+    );
+
+Map<String, dynamic> _$BanDataToJson(BanData instance) => <String, dynamic>{
+      'id': instance.id,
+      'nickName': instance.nickName,
+      'createTime': instance.createTime,
+    };

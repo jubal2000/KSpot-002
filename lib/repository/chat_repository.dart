@@ -144,17 +144,6 @@ class ChatRepository {
     if (result != null) {
       addChatActionItem(roomId, ChatActionType.admin, '$targetName change admin',
         userId: targetId, userName: targetName, userPic: '');
-      // JSON addItem = {
-      //   'id': '',
-      //   'status': 1,
-      //   'action': 3,
-      //   'desc': '$targetName change admin',
-      //   'roomId': roomId,
-      //   'senderId': targetId,
-      //   'senderName': targetName,
-      //   'senderPic': '',
-      // };
-      // api.addChatItem(addItem);
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
     }
     return result;
@@ -164,17 +153,6 @@ class ChatRepository {
     var result = await api.setChatRoomTitle(roomId, title, AppData.USER_ID);
     if (result != null) {
       addChatActionItem(roomId, ChatActionType.title, title);
-      // JSON addItem = {
-      //   'id': '',
-      //   'status': 1,
-      //   'action': 5,
-      //   'desc': title,
-      //   'roomId': roomId,
-      //   'senderId': AppData.USER_ID,
-      //   'senderName': AppData.USER_NICKNAME,
-      //   'senderPic': AppData.USER_PIC,
-      // };
-      // api.addChatItem(addItem);
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
     }
     return result;
@@ -184,38 +162,18 @@ class ChatRepository {
     var result = await api.setChatRoomNotice(roomId, notice.toJson(), AppData.USER_ID, isFirst);
     if (result != null) {
       addChatActionItem(roomId, ChatActionType.notice, notice.desc);
-      // JSON addItem = {
-      //   'id': '',
-      //   'status': 1,
-      //   'action': 6,
-      //   'desc': notice.desc,
-      //   'roomId': roomId,
-      //   'senderId': AppData.USER_ID,
-      //   'senderName': AppData.USER_NICKNAME,
-      //   'senderPic': AppData.USER_PIC,
-      // };
-      // api.addChatItem(addItem);
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
     }
     return result;
   }
 
-  setChatRoomKickUser(String roomId, String targetId, String targetName) async {
-    var result = await api.setChatRoomKickUser(roomId, targetId, targetName, AppData.USER_ID);
+  setChatRoomKickUser(String roomId, String targetId, String targetName, [int status = 0]) async {
+    var result = await api.setChatRoomKickUser(roomId, targetId, targetName, status, AppData.USER_ID);
     if (result != null) {
-      addChatActionItem(roomId, ChatActionType.kick, '$targetName has kicked',
-        userId: targetId, userName: targetName, userPic: '');
-      // JSON addItem = {
-      //   'id': '',
-      //   'status': 1,
-      //   'action': 4,
-      //   'desc': '$targetName has kicked',
-      //   'roomId': roomId,
-      //   'senderId': targetId,
-      //   'senderName': targetName,
-      //   'senderPic': '',
-      // };
-      // api.addChatItem(addItem);
+      if (status == 0) {
+        addChatActionItem(
+            roomId, ChatActionType.kick, '$targetName has kicked', userId: targetId, userName: targetName, userPic: '');
+      }
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
     }
     return result;
@@ -225,17 +183,6 @@ class ChatRepository {
     final result = await api.enterChatRoom(roomId, AppData.userInfo.toJson());
     if (result != null && JSON_EMPTY(result['error'])) {
       addChatActionItem(roomId, isEnterShow ? ChatActionType.enter : -1, '${AppData.USER_NICKNAME} enter');
-      // JSON addItem = {
-      //   'id': '',
-      //   'status': 1,
-      //   'action': isEnterShow ? ChatActionType.enter : -1,
-      //   'desc': '${AppData.USER_NICKNAME} enter',
-      //   'roomId': roomId,
-      //   'senderId': AppData.USER_ID,
-      //   'senderName': AppData.USER_NICKNAME,
-      //   'senderPic': AppData.USER_PIC,
-      // };
-      // api.addChatItem(addItem);
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
     }
     return result;
@@ -245,17 +192,6 @@ class ChatRepository {
     final result = await api.exitChatRoom(roomId, AppData.USER_ID);
     if (result != null && JSON_EMPTY(result['error'])) {
       addChatActionItem(roomId, isExitShow ? ChatActionType.exit : -2, '${AppData.USER_NICKNAME} leave');
-      // JSON addItem = {
-      //   'id': '',
-      //   'status': 1,
-      //   'action': isExitShow ? ChatActionType.exit : -2,
-      //   'desc': '${AppData.USER_NICKNAME} leave',
-      //   'roomId': roomId,
-      //   'senderId': AppData.USER_ID,
-      //   'senderName': AppData.USER_NICKNAME,
-      //   'senderPic': AppData.USER_PIC,
-      // };
-      // api.addChatItem(addItem);
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
     }
     return result;

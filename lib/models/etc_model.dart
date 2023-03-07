@@ -240,3 +240,17 @@ class NoticeModel {
     return result;
   }
 }
+
+@JsonSerializable()
+class BanData {
+  String id;
+  String nickName;
+  String createTime;
+  BanData({
+    required this.id,
+    required this.nickName,
+    required this.createTime,
+  });
+  factory BanData.fromJson(JSON json) => _$BanDataFromJson(json);
+  JSON toJson() => _$BanDataToJson(this);
+}

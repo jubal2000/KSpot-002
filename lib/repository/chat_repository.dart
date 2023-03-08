@@ -14,6 +14,7 @@ import '../services/cache_service.dart';
 import '../utils/utils.dart';
 
 class ChatActionType {
+  static int get hide   => -1;
   static int get normal => 0;
   static int get enter  => 1;
   static int get exit   => 2;
@@ -21,6 +22,7 @@ class ChatActionType {
   static int get kick   => 4;
   static int get title  => 5;
   static int get notice => 6;
+  static int get delete => -7;
 }
 
 class ChatRepository {
@@ -67,10 +69,10 @@ class ChatRepository {
     stream = api.startChatStreamData(roomId, startTime, onChanged);
   }
 
-  createChatItem(ChatRoomModel roomInfo, String id, String sendText, [int action = 0, Map<String, UploadFileModel>? fileData]) async {
+  createChatItem(ChatRoomModel roomInfo, String id, String sendText, [int status = 1, int action = 0, Map<String, UploadFileModel>? fileData]) async {
     var addItem = {
       'id':         id,
-      'status':     1,
+      'status':     status,
       'action':     action,
       'roomId':     roomInfo.id,
       'senderId':   STR(AppData.USER_ID),
@@ -110,6 +112,13 @@ class ChatRepository {
     return await api.addChatItem(addItem);
   }
 
+  setChatItemState(String roomId, String chatId, int status) async {
+    var result = await api.setChatInfo(chatId, {'status': status});
+    if (result) {
+      addChatActionItem(roomId, ChatActionType.delete, 'deleted chat item', chatId: chatId);
+    }
+  }
+
   addRoomItem(ChatRoomModel room) async {
     return await api.addRoomItem(room.toJson());
   }
@@ -125,13 +134,15 @@ class ChatRepository {
     stream = null;
   }
 
-  addChatActionItem(String roomId, int action, String desc, {String? userId, String? userName, String? userPic}) {
+  addChatActionItem(String roomId, int action, String desc, {String? chatId, String? userId, String? userName, String? userPic, String? roomPic}) {
     JSON addItem = {
       'id': '',
       'status'    : 1,
       'action'    : action,
       'desc'      : desc,
       'roomId'    : roomId,
+      'roomPic'   : roomPic ?? '',
+      'chatId'    : chatId ?? '',
       'senderId'  : userId ?? AppData.USER_ID,
       'senderName': userName ?? AppData.USER_NICKNAME,
       'senderPic' : userPic ?? AppData.USER_PIC,
@@ -149,10 +160,17 @@ class ChatRepository {
     return result;
   }
 
-  setChatRoomTitle(String roomId, String title) async {
-    var result = await api.setChatRoomTitle(roomId, title, AppData.USER_ID);
+  setChatRoomTitle(String roomId, String title, [JSON? imageInfo]) async {
+    String? imageURL;
+    if (JSON_NOT_EMPTY(imageInfo)) {
+      var result = await uploadImageInfo(imageInfo!);
+      if (result != null) {
+        imageURL = result;
+      }
+    }
+    var result = await api.setChatRoomTitle(roomId, title, AppData.USER_ID, imageURL);
     if (result != null) {
-      addChatActionItem(roomId, ChatActionType.title, title);
+      addChatActionItem(roomId, ChatActionType.title, title, roomPic: imageURL);
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
     }
     return result;

@@ -65,7 +65,7 @@ class ChatGroupItem extends StatelessWidget {
       width: double.infinity,
       height: itemHeight,
       margin: EdgeInsets.symmetric(vertical: 3),
-      padding: EdgeInsets.all(5.sp),
+      padding: EdgeInsets.all(5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(UI_ROUND_RADIUS)),
         color: Theme.of(context).cardColor
@@ -75,23 +75,23 @@ class ChatGroupItem extends StatelessWidget {
           if (groupItem!.type == 0 && groupItem!.pic.isNotEmpty)...[
             GestureDetector(
               onTap: () async {
-                // var userInfo = await userRepo.getUserInfo(widget.targetId);
-                // if (userInfo != null) {
-                //   Get.to(() => TargetProfileScreen(userInfo!))!.then((value) {});
-                // } else {
-                //   showUserAlertDialog(context, '${'Target user'.tr} : ${widget.targetName}');
-                // }
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: showImageFit(groupItem!.pic),
+                child: Container(
+                  height: itemHeight - 10,
+                  constraints: BoxConstraints (
+                    maxWidth: itemHeight * 1.5,
+                  ),
+                  child: showImageFit(groupItem!.pic),
+                )
               ),
             ),
           ],
         if (groupItem!.type == 1 && groupItem!.memberData.length != 2)...[
           Container(
-            width: itemHeight - 10.sp,
-            height: itemHeight - 10.sp,
+            width: itemHeight - 10,
+            height: itemHeight - 10,
             child: MasonryGridView.count(
               shrinkWrap: true,
               itemCount: showList.length,
@@ -109,8 +109,8 @@ class ChatGroupItem extends StatelessWidget {
         ],
         if (groupItem!.type == 1 && groupItem!.memberData.length == 2)...[
           Container(
-            width: itemHeight - 10.sp,
-            height: itemHeight - 10.sp,
+            width: itemHeight - 10,
+            height: itemHeight - 10,
             child: Stack(
               children: [
                 TopLeftAlign(

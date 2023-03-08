@@ -813,7 +813,6 @@ Widget showImageFit(dynamic imagePath) {
 }
 
 Widget showImageWidget(dynamic imagePath, BoxFit fit, {Color? color}) {
-  // LOG('--> showImageWidget : $imagePath');
   if (imagePath != null && imagePath.isNotEmpty) {
     try {
       if (imagePath.runtimeType == String && imagePath
@@ -846,7 +845,7 @@ Widget showImageWidget(dynamic imagePath, BoxFit fit, {Color? color}) {
           );
         } else if (url.contains('/cache')) {
           return Image.file(File(url), fit: fit, color: color);
-        } else {
+        } else if (url.contains('assets')) {
           return Image.asset(url, fit: fit, color: color);
         }
       } else if (imagePath.runtimeType == Uint8List) {
@@ -1095,6 +1094,8 @@ enum DropdownItemType {
   noticeShow,
   noticeSet,
   admin,
+  copy,
+  toNotice,
 }
 
 class DropdownItem {
@@ -1200,6 +1201,9 @@ const dropMenuTitle       = DropdownItem(DropdownItemType.title, text: 'TITLE CH
 const dropMenuNoticeShow  = DropdownItem(DropdownItemType.noticeShow, text: 'NOTICE', icon: Icons.campaign_outlined);
 const dropMenuNoticeSet   = DropdownItem(DropdownItemType.noticeSet, text: 'NOTICE SET', icon: Icons.campaign_rounded, manager: true);
 const dropMenuNoticeAdd   = DropdownItem(DropdownItemType.noticeAdd, text: 'NOTICE ADD', icon: Icons.campaign_rounded, manager: true);
+const dropMenuCopy        = DropdownItem(DropdownItemType.copy, text: 'COPY MESSAGE', icon: Icons.copy);
+const dropMenuDelete      = DropdownItem(DropdownItemType.delete, text: 'DELETE IT', icon: Icons.delete_forever);
+const dropMenuToNotice    = DropdownItem(DropdownItemType.toNotice, text: 'TO NOTICE', icon: Icons.campaign, manager: true);
 const dropMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
 
 
@@ -1236,6 +1240,10 @@ class DropdownItems {
   static const List<DropdownItem> chatRoomMenu2     = [dropMenuExit, dropMenuNoticeShow];
   static const List<DropdownItem> chatRoomAdmin0    = [dropMenuTitle, dropMenuNoticeAdd, userMenuBanList];
   static const List<DropdownItem> chatRoomAdmin1    = [dropMenuTitle, dropMenuNoticeAdd];
+  static const List<DropdownItem> chatRoomAdmin2    = [dropMenuNoticeAdd];
+  static const List<DropdownItem> chatItemMenu0     = [dropMenuCopy];
+  static const List<DropdownItem> chatItemMenu1     = [dropMenuDelete];
+  static const List<DropdownItem> chatItemMenu2     = [dropMenuToNotice];
 
   static const content      = DropdownItem(DropdownItemType.content, text: 'HISTORY +', icon: Icons.movie_creation);
   static const talent       = DropdownItem(DropdownItemType.talent, text: 'TALENT +', icon: Icons.star);

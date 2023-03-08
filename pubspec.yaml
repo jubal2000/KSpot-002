@@ -89,6 +89,7 @@ dependencies:
   image_gallery_saver: ^1.7.1
   date_picker_timeline: ^1.2.3
   file_picker: ^5.2.5
+  emoji_picker_flutter: ^1.5.2
 
   # ui..
   cupertino_icons: any

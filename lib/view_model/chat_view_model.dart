@@ -124,7 +124,7 @@ class ChatViewModel extends ChangeNotifier {
       for (var item in cache.chatData.entries) {
         final roomId = item.value.roomId;
         // get last message..
-        if (item.value.action == 0) {
+        if (item.value.status > 0 && item.value.action == 0) {
           var desc = descList[roomId];
           if (desc == null || DateTime.parse(desc.updateTime).isBefore(DateTime.parse(item.value.updateTime))) {
             descList[roomId] = item.value;

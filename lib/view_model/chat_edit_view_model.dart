@@ -51,7 +51,7 @@ class ChatEditViewModel extends ChangeNotifier {
       case 0:
         return editItem!.title.isNotEmpty && inviteMessage.isNotEmpty;
       default:
-        return memberData.isNotEmpty && editItem!.password.isNotEmpty && inviteMessage.isNotEmpty;
+        return memberData.isNotEmpty && inviteMessage.isNotEmpty;
     }
   }
 

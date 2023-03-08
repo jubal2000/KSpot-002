@@ -2,14 +2,17 @@
 import 'dart:collection';
 import 'dart:io';
 
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter/foundation.dart' as foundation;
 
 import '../data/app_data.dart';
 import '../data/dialogs.dart';
@@ -24,6 +27,7 @@ import '../services/cache_service.dart';
 import '../utils/utils.dart';
 import '../widget/card_scroll_viewer.dart';
 import '../widget/chat_item.dart';
+import 'chat_view_model.dart';
 
 class ChatTalkViewModel extends ChangeNotifier {
   final chatRepo = ChatRepository();
@@ -39,8 +43,8 @@ class ChatTalkViewModel extends ChangeNotifier {
 
   final iconSize      = 24.0;
   final showMemberMax = 4;
+  final emojiHeight   = 200.0;
 
-  var  sendText = '';
   JSON showList = {};
   JSON fileData = {};
   Map<String, UploadFileModel> uploadFileData = {};
@@ -49,8 +53,12 @@ class ChatTalkViewModel extends ChangeNotifier {
   var  memberList = [].obs;
   var  isAdmin = false.obs;
   var  roomTitle = ''.obs;
+  var  roomPic = ''.obs;
   var  isNoticeShow = true.obs;
   var  isNoticeAll  = false.obs;
+  var  isEmojiShow  = false.obs;
+
+  var sendText = '';
 
   init(context) {
     buildContext = context;
@@ -60,7 +68,19 @@ class ChatTalkViewModel extends ChangeNotifier {
     roomInfo = room;
     LOG('--> initData room : $isAdmin / ${roomInfo!.noticeData}');
     roomTitle.value = roomInfo!.title;
+    roomPic.value = roomInfo!.pic;
+    JSON roomFlag = cache.chatRoomFlagData[roomInfo!.id] ?? {};
+    isNoticeShow.value = roomFlag['noticeShow'] ?? true;
     initMemberList();
+  }
+
+  clearData() {
+    sendText = textController.text;
+    textController.text = '';
+    fileData.clear();
+    uploadFileData.clear();
+    AppData.isMainActive = true;
+    notifyListeners();
   }
 
   initMemberList() {
@@ -134,14 +154,90 @@ class ChatTalkViewModel extends ChangeNotifier {
     }
   }
 
-  showTitleWithPic() {
-    return SizedBox(
-      width: 40,
-      height: 40,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(roomInfo!.type == 0 ? 8 : 100),
-        child: showImageFit(roomInfo!.pic),
-      ),
+  showTitlePic(String pic) {
+    const itemHeight = 50;
+    LOG('--> showTitlePic : ${roomInfo!.memberData.length}');
+    return Stack(
+      children: [
+        if (roomInfo!.type == 0 && roomInfo!.pic.isNotEmpty)...[
+          GestureDetector(
+            onTap: () async {
+            },
+            child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  height: itemHeight - 10,
+                  constraints: BoxConstraints (
+                    maxWidth: itemHeight * 1.5,
+                  ),
+                  child: showImageFit(pic),
+                )
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  showMemberPic() {
+    const itemHeight = 40;
+    LOG('--> showMemberPic : ${roomInfo!.memberData.length}');
+    return Stack(
+      children: [
+        if (roomInfo!.type == 1 && roomInfo!.memberData.length != 2)...[
+          Container(
+            width: itemHeight - 10,
+            height: itemHeight - 10,
+            child: MasonryGridView.count(
+                shrinkWrap: true,
+                itemCount: roomInfo!.memberData.length,
+                crossAxisCount: 2,
+                mainAxisSpacing: 2,
+                crossAxisSpacing: 2,
+                itemBuilder: (BuildContext context, int index) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                    child: showImageWidget(roomInfo!.memberData[index].pic, BoxFit.fill),
+                  );
+                }
+            ),
+          )
+        ],
+        if (roomInfo!.type == 1 && roomInfo!.memberData.length == 2)...[
+          Container(
+            width: itemHeight - 10,
+            height: itemHeight - 10,
+            child: Stack(
+              children: [
+                TopLeftAlign(
+                    child: SizedBox(
+                        width: itemHeight * 0.5,
+                        height: itemHeight * 0.5,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                          child: showImageWidget(roomInfo!.memberData[0].pic, BoxFit.fill),
+                        )
+                    )
+                ),
+                BottomRightAlign(
+                    child: Container(
+                        width: itemHeight * 0.5,
+                        height: itemHeight * 0.5,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                            border: Border.all(color: Theme.of(buildContext!).cardColor)
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                          child: showImageWidget(roomInfo!.memberData[1].pic, BoxFit.fill),
+                        )
+                    )
+                )
+              ],
+            ),
+          )
+        ],
+      ],
     );
   }
 
@@ -156,24 +252,29 @@ class ChatTalkViewModel extends ChangeNotifier {
     ));
   }
 
-  refreshMemberList() {
+  setChatAction() {
     final reverseM = JSON.from(LinkedHashMap.fromEntries(showList.entries.toList().reversed));
     for (var item in reverseM.entries) {
       // LOG('--> reverseM item : ${item.value.toString()}');
       var action = INT(item.value['action']);
-      if (action != 0 && JSON_NOT_EMPTY(item.value['memberData'])) {
-        roomInfo!.memberData.clear();
-        for (var mItem in item.value['memberData']) {
-          roomInfo!.memberData.add(MemberData.fromJson(mItem));
-          // set admin id..
-          if (INT(mItem['status']) == 2) {
-            roomInfo!.userId = STR(mItem['id']);
+      if (action != 0) {
+        // refresh member list..
+        if (JSON_NOT_EMPTY(item.value['memberData'])) {
+          roomInfo!.memberData.clear();
+          for (var mItem in item.value['memberData']) {
+            roomInfo!.memberData.add(MemberData.fromJson(mItem));
+            // refresh admin id..
+            if (INT(mItem['status']) == 2) {
+              roomInfo!.userId = STR(mItem['id']);
+            }
           }
         }
         if (action == ChatActionType.title) {
           roomInfo!.title = STR(item.value['desc']);
+          roomInfo!.pic   = STR(item.value['roomPic']);
           roomTitle.value = roomInfo!.title;
-          LOG('--> title changed ! : ${roomInfo!.title}');
+          roomPic.value   = roomInfo!.pic;
+          LOG('--> ChatActionType.title ! : ${roomInfo!.title} / ${roomInfo!.pic}');
         } else {
           if (action == ChatActionType.notice) {
             if (JSON_NOT_EMPTY(item.value['noticeData'])) {
@@ -183,6 +284,13 @@ class ChatTalkViewModel extends ChangeNotifier {
             }
             // isNoticeShow.value = true;
             LOG('--> notice changed ! : ${roomInfo!.noticeData!.toString()}');
+          }
+          else if (action == ChatActionType.delete && STR(item.value['chatId']).isNotEmpty) {
+            var chatId = STR(item.value['chatId']);
+            if (showList.containsKey(chatId)) {
+              showList[chatId]['status'] = 0;
+              cache.setChatItem(ChatModel.fromJson(showList[chatId]));
+            }
           }
           initMemberList();
           memberList.refresh();
@@ -247,9 +355,11 @@ class ChatTalkViewModel extends ChangeNotifier {
   }
 
   showChatList() {
+    // chat action message..
+    setChatAction();
+
     List<Widget> result = [];
     var parentId = '';
-    refreshMemberList();
     for (var i=0; i<showList.length; i++) {
       var isShowDate = true;
       var item = showList.entries.elementAt(i);
@@ -287,8 +397,11 @@ class ChatTalkViewModel extends ChangeNotifier {
             isOpened: isOpened,
             isShowFace: isShowFace,
             isShowDate: isShowDate,
-            onSelected: (key, status) {
+            onSelected: (key, desc, status) {
               switch(status) {
+                case 0:
+                  showChatMessageMenu(key, desc, isOwner);
+                  break;
                 case 8: // room update
                   refreshRoomInfo();
                   break;
@@ -312,6 +425,39 @@ class ChatTalkViewModel extends ChangeNotifier {
     }
     return result;
   }
+
+  showChatMessageMenu(String key, String desc, bool isOwner) {
+    onSelected(type) {
+      Navigator.pop(buildContext!, {});
+      switch (type) {
+        case DropdownItemType.copy:
+          Clipboard.setData(ClipboardData(text: desc)).then((result) {
+            ShowToast('copied to clipboard'.tr);
+          });
+          break;
+        case DropdownItemType.delete:
+          showAlertYesNoDialog(buildContext!, 'Delete'.tr, 'Are you sure you want to delete?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+            if (result == 1) {
+              chatRepo.setChatItemState(roomInfo!.id, key, 0);
+            }
+          });
+          break;
+        case DropdownItemType.toNotice:
+          setChatToNotice(desc);
+          break;
+      }
+    }
+    unFocusAll(buildContext!);
+    List<Widget> btnList = [
+        ...DropdownItems.chatItemMenu0.map((item) => UserMenuItems.buildItem(buildContext!, item, onSelected: onSelected)),
+      if (isOwner)
+        ...DropdownItems.chatItemMenu1.map((item) => UserMenuItems.buildItem(buildContext!, item, onSelected: onSelected)),
+      if (isAdmin.value)...[
+        ...DropdownItems.chatItemMenu2.map((item) => UserMenuItems.buildItem(buildContext!, item, onSelected: onSelected)),
+      ],
+    ];
+    showButtonListDialog(buildContext!, btnList);
+  }
   
   showChatMainList() {
     return Expanded(
@@ -330,117 +476,157 @@ class ChatTalkViewModel extends ChangeNotifier {
   }
   
   showChatEditBox() {
-    return Container(
-      width: Get.width,
-      padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-      color: Theme.of(buildContext!).dialogBackgroundColor,
-      child: Column(
-        children: [
-          SizedBox(height: 10),
-          if (fileData.isNotEmpty)...[
-            Row(
-              children: [
-                Container(
-                  width: Get.width - UI_HORIZONTAL_SPACE * 2 - 50,
-                  child: ImageEditScrollViewer(
-                    fileData,
-                    itemWidth: 40.0,
-                    itemHeight: 40.0,
-                    isEditable: true,
-                    sidePadding: 0,
-                    onActionCallback: (key, status) {
-                      LOG('--> onActionCallback : $key / $status');
-                      switch (status) {
-                        case 1:
-                          selectAttachFile();
-                          break;
-                        case 2:
-                          fileData.remove(key);
-                          uploadFileData.remove(key);
-                          notifyListeners();
-                        break;
-                      }
-                    },
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    showAlertYesNoDialog(buildContext!, 'Remove'.tr, 'Remove all files?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
-                      if (result == 1) {
-                        fileData.clear();
-                        uploadFileData.clear();
-                        notifyListeners();
-                      }
-                    });
-                  },
-                  icon: Icon(Icons.close, size: 20),
-                )
-              ],
-            ),
+    return Obx(() => AnimatedSize(
+      duration: Duration(milliseconds: 200),
+        child: Container(
+        width: Get.width,
+        padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+        color: Theme.of(buildContext!).dialogBackgroundColor,
+        child: Column(
+          children: [
             SizedBox(height: 10),
-          ],
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: textController,
-                  decoration: inputChatSuffix(buildContext!),
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  maxLength: 200,
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Theme.of(buildContext!).primaryColor),
-                  onChanged: (value) {
-                    sendText = value;
-                    scrollController.jumpTo(0);
-                  },
-                )
-              ),
-              Container(
-                width: 80,
-                height: 40,
-                padding: EdgeInsets.only(left: 10),
-                child: ElevatedButton(
-                    onPressed: () async {
-                      if (!AppData.isMainActive || (sendText.isEmpty && fileData.isEmpty)) return;
-                      if (fileData.length > UPLOAD_FILE_MAX) {
-                        showAlertDialog(buildContext!, 'Upload'.tr,
-                            'You can\'t add any more'.tr, '${'Max'.tr}: $UPLOAD_FILE_MAX', 'OK'.tr);
-                        return;
-                      }
-                      AppData.isMainActive = false;
-                      if (uploadFileData.isNotEmpty) {
-                        showLoadingDialog(buildContext!, 'Uploading now...'.tr);
-                      }
-                      chatRepo.createChatItem(roomInfo!, '', sendText, 0, uploadFileData).then((result) {
-                        hideLoadingDialog();
-                        textController.text = '';
-                        sendText = '';
-                        fileData.clear();
-                        uploadFileData.clear();
-                        AppData.isMainActive = true;
-                        notifyListeners();
+            if (fileData.isNotEmpty)...[
+              Row(
+                children: [
+                  Container(
+                    width: Get.width - UI_HORIZONTAL_SPACE * 2 - 50,
+                    child: ImageEditScrollViewer(
+                      fileData,
+                      itemWidth: 40.0,
+                      itemHeight: 40.0,
+                      isEditable: true,
+                      sidePadding: 0,
+                      onActionCallback: (key, status) {
+                        LOG('--> onActionCallback : $key / $status');
+                        switch (status) {
+                          case 1:
+                            selectAttachFile();
+                            break;
+                          case 2:
+                            fileData.remove(key);
+                            uploadFileData.remove(key);
+                            notifyListeners();
+                          break;
+                        }
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      showAlertYesNoDialog(buildContext!, 'Remove'.tr, 'Remove all files?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+                        if (result == 1) {
+                          fileData.clear();
+                          uploadFileData.clear();
+                          notifyListeners();
+                        }
                       });
                     },
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          )
+                    icon: Icon(Icons.close, size: 20),
+                  )
+                ],
+              ),
+              SizedBox(height: 10),
+            ],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: textController,
+                    decoration: inputChatSuffix(buildContext!),
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                    maxLength: 200,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Theme.of(buildContext!).primaryColor),
+                    onChanged: (value) {
+                      scrollController.jumpTo(0);
+                    },
+                  )
+                ),
+                Container(
+                  width: 80,
+                  height: 40,
+                  padding: EdgeInsets.only(left: 10),
+                  child: ElevatedButton(
+                      onPressed: () async {
+                        if (!AppData.isMainActive || (textController.text.isEmpty && fileData.isEmpty)) return;
+                        if (sendText == textController.text) return; // block spam message..
+                        if (fileData.length > UPLOAD_FILE_MAX) {
+                          showAlertDialog(buildContext!, 'Upload'.tr,
+                              'You can\'t add any more'.tr, '${'Max'.tr}: $UPLOAD_FILE_MAX', 'OK'.tr);
+                          return;
+                        }
+                        AppData.isMainActive = false;
+                        if (uploadFileData.isNotEmpty) {
+                          showLoadingDialog(buildContext!, 'Uploading now...'.tr);
+                        }
+                        chatRepo.createChatItem(roomInfo!, '', textController.text, 1, 0, uploadFileData).then((result) {
+                          hideLoadingDialog();
+                          clearData();
+                        });
+                      },
+                      style: ButtonStyle(
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            )
+                        ),
+                        backgroundColor: MaterialStateProperty.all<Color>(Theme.of(buildContext!).primaryColor),
                       ),
-                      backgroundColor: MaterialStateProperty.all<Color>(Theme.of(buildContext!).primaryColor),
-                    ),
-                    child: Text('Send'.tr,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
-                        color: Theme.of(buildContext!).colorScheme.inversePrimary))
+                      child: Text('Send'.tr,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
+                          color: Theme.of(buildContext!).colorScheme.inversePrimary))
+                  )
                 )
-              )
+              ]
+            ),
+            SizedBox(height: 20),
+            if (isEmojiShow.value)
+              SizedBox(
+                height: emojiHeight,
+                child: EmojiPicker(
+                  onEmojiSelected: (Category? category, Emoji emoji) {
+                    // Do something when emoji is tapped (optional)
+                    textController.selection = TextSelection.fromPosition(TextPosition(offset: textController.text.length));
+                  },
+                  // onBackspacePressed: () {
+                  //   // Do something when the user taps the backspace button (optional)
+                  //   // Set it to null to hide the Backspace-Button
+                  // },
+                  textEditingController: textController, // pass here the same [TextEditingController] that is connected to your input field, usually a [TextFormField]
+                  config: Config(
+                    columns: 8,
+                    emojiSizeMax: 26 * (foundation.defaultTargetPlatform == TargetPlatform.iOS ? 1.30 : 1.0), // Issue: https://github.com/flutter/flutter/issues/28894
+                    verticalSpacing: 0,
+                    horizontalSpacing: 0,
+                    gridPadding: EdgeInsets.zero,
+                    initCategory: Category.RECENT,
+                    bgColor: Color(0xFFF2F2F2),
+                    indicatorColor: Colors.blue,
+                    iconColor: Colors.grey,
+                    iconColorSelected: Colors.blue,
+                    backspaceColor: Colors.blue,
+                    skinToneDialogBgColor: Colors.white,
+                    skinToneIndicatorColor: Colors.grey,
+                    enableSkinTones: true,
+                    showRecentsTab: true,
+                    recentsLimit: 28,
+                    noRecents: const Text(
+                      'No Recents',
+                      style: TextStyle(fontSize: 20, color: Colors.black26),
+                      textAlign: TextAlign.center,
+                    ), // Needs to be const Widget
+                    loadingIndicator: const SizedBox.shrink(), // Needs to be const Widget
+                    tabIndicatorAnimDuration: kTabScrollDuration,
+                    categoryIcons: const CategoryIcons(),
+                    buttonMode: ButtonMode.MATERIAL,
+                  ),
+                )
+              ),
             ]
-          ),
-          SizedBox(height: 20),
-        ]
+          )
       )
-    );
+    ));
   }
 
   noticeItem(NoticeModel notice, [int index = 0]) {
@@ -488,6 +674,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                             GestureDetector(
                               onTap: () {
                                 isNoticeShow.value = false;
+                                cache.setChatRoomFlag(roomInfo!.id, isNoticeShow: false);
                               },
                               child: Icon(Icons.highlight_remove, size: 24),
                             ),
@@ -566,9 +753,9 @@ class ChatTalkViewModel extends ChangeNotifier {
   }
 
   showChatButtonBox() {
-    return Positioned(
+    return Obx(() => Positioned(
       left: 15,
-      bottom: 0,
+      bottom: isEmojiShow.value ? emojiHeight : 0,
       child: Container(
         padding: EdgeInsets.only(bottom: 10),
         child: Row(
@@ -579,7 +766,15 @@ class ChatTalkViewModel extends ChangeNotifier {
                 selectAttachFile();
               },
               child: Icon(Icons.attach_file, size: iconSize,
-                color: Theme.of(buildContext!).primaryColor.withOpacity(0.5)),
+                  color: Theme.of(buildContext!).primaryColor.withOpacity(uploadFileData.isNotEmpty ? 1 : 0.5)),
+            ),
+            SizedBox(width: 15),
+            GestureDetector(
+              onTap: () {
+                isEmojiShow.value = !isEmojiShow.value;
+              },
+              child: Icon(Icons.emoji_emotions_outlined, size: iconSize,
+                  color: Theme.of(buildContext!).primaryColor.withOpacity(isEmojiShow.value ? 1 : 0.5)),
             ),
             SizedBox(width: 15),
             GestureDetector(
@@ -587,8 +782,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                 // paste..
                 ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
                 if (cdata != null) {
-                  sendText = cdata.text.toString();
-                  textController.text = sendText;
+                  textController.text = cdata.text.toString();
                 }
               },
               child: Icon(Icons.paste, size: iconSize,
@@ -597,7 +791,17 @@ class ChatTalkViewModel extends ChangeNotifier {
           ],
         )
       )
-    );
+    ));
+  }
+
+  setChatToNotice(String desc) {
+    JSON notice = {
+      'id': '',
+      'status': 1,
+      'index': 0,
+      'desc': desc,
+    };
+    startNoticeEdit('Notice Add'.tr, notice);
   }
 
   startNoticeEdit(String title, JSON notice) {
@@ -651,13 +855,20 @@ class ChatTalkViewModel extends ChangeNotifier {
         child: DropdownItems.buildItem(buildContext!, item),
       )),
       if (isAdmin.value)...[
-        if (LIST_NOT_EMPTY(roomInfo!.banData))
-          ...DropdownItems.chatRoomAdmin0.map((item) => DropdownMenuItem<DropdownItem>(
-            value: item,
-            child: DropdownItems.buildItem(buildContext!, item),
-          )),
-        if (LIST_EMPTY(roomInfo!.banData))
-          ...DropdownItems.chatRoomAdmin1.map((item) => DropdownMenuItem<DropdownItem>(
+        if (roomInfo!.type == ChatType.public)...[
+          if (LIST_NOT_EMPTY(roomInfo!.banData))
+            ...DropdownItems.chatRoomAdmin0.map((item) => DropdownMenuItem<DropdownItem>(
+              value: item,
+              child: DropdownItems.buildItem(buildContext!, item),
+            )),
+          if (LIST_EMPTY(roomInfo!.banData))
+            ...DropdownItems.chatRoomAdmin1.map((item) => DropdownMenuItem<DropdownItem>(
+              value: item,
+              child: DropdownItems.buildItem(buildContext!, item),
+            )),
+        ],
+        if (roomInfo!.type == ChatType.private)
+          ...DropdownItems.chatRoomAdmin2.map((item) => DropdownMenuItem<DropdownItem>(
             value: item,
             child: DropdownItems.buildItem(buildContext!, item),
           )),
@@ -684,9 +895,13 @@ class ChatTalkViewModel extends ChangeNotifier {
         });
         break;
       case DropdownItemType.title:
-        showTextInputDialog(buildContext!, 'Room Title'.tr, '', roomInfo!.title, 1, null).then((result) {
-          if (result.isNotEmpty && roomInfo!.title != result) {
-            chatRepo.setChatRoomTitle(roomInfo!.id, result);
+        JSON? imageInfo = roomInfo!.type == ChatType.public ? {roomInfo!.id: {'id': roomInfo!.id, 'url': roomInfo!.pic}} : null;
+        showTextInputImageDialog(buildContext!, 'Room Title'.tr, '', roomInfo!.title, 1, null, imageInfo: imageInfo).then((result) {
+          if (JSON_NOT_EMPTY(result['desc'])) {
+            JSON? imageResult = JSON_NOT_EMPTY(result['imageInfo']) ? result['imageInfo'].entries.toList()[0].value : null;
+            if (roomInfo!.title != STR(result['desc']) || (JSON_NOT_EMPTY(imageResult) && BOL(imageResult!['imageChanged']))) {
+              chatRepo.setChatRoomTitle(roomInfo!.id, STR(result['desc']), imageResult);
+            }
           }
         });
         break;
@@ -709,6 +924,7 @@ class ChatTalkViewModel extends ChangeNotifier {
         break;
       case DropdownItemType.noticeShow:
         isNoticeShow.value = true;
+        cache.setChatRoomFlag(roomInfo!.id, isNoticeShow: true);
         break;
       case DropdownItemType.noticeAdd:
         if (JSON_EMPTY(roomInfo!.noticeData) || roomInfo!.noticeData!.length < CHAT_NOTICE_MAX) {

@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,12 +34,14 @@ class CacheService extends GetxService {
   List<String> publicMyRoomIndexData = [];
   List<String> publicIndexData = [];
   List<String> privateIndexData = [];
+  Map<String, JSON> chatRoomFlagData = {};
 
   Future<CacheService> init() async {
     eventListItemData = {};
     eventMapItemData  = {};
     storyListItemData = {};
     chatRoomData      = {};
+    await loadChatRoomFlag(); // from local..
     return this;
   }
 
@@ -96,6 +99,25 @@ class CacheService extends GetxService {
       chatItemData.clear();
     }
     LOG('--> setChatRoomItem [${addItem.id}] :  ${chatRoomData.length}');
+  }
+
+  setChatRoomFlag(String roomId, {var isNoticeShow = true}) {
+    var addItem = {'id': roomId, 'noticeShow': isNoticeShow};
+    chatRoomFlagData[roomId] = addItem;
+    var localData = List<String>.from(chatRoomFlagData.entries.map((e) => jsonEncode(e.value))).toList();
+    StorageManager.saveData('chatRoomFlag', localData);
+   }
+
+  loadChatRoomFlag() async {
+    chatRoomFlagData.clear();
+    var localData = await StorageManager.readData('chatRoomFlag');
+    if (localData != null) {
+      for (var item in localData) {
+        JSON addItem = jsonDecode(item);
+        chatRoomFlagData[addItem['id']] = addItem;
+      }
+    }
+    LOG('--> loadChatRoomFlag : ${chatRoomFlagData.toString()}');
   }
 
   readRoomIndexData() async {

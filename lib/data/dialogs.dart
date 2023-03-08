@@ -1077,116 +1077,185 @@ Future<String> showTextFieldInputDialog(BuildContext context, String title, Stri
   return await showTextInputLimitDialog(context, title, message, text, 6, DESC_LENGTH, lineMax, null);
 }
 
-Future<String> showTextInputLimitDialog(BuildContext context, String title, String message, String text, int minText, int maxText, int lineMax, List<String>? checkList) async {
-  var result = await showTextInputLimitExDialog(context, title, message, text, minText, maxText, lineMax, lineMax == 1 ? TextInputType.text : TextInputType.multiline, checkList, '');
+Future<JSON> showTextInputImageDialog(BuildContext context, String title, String message, String text, int lineMax, List<String>? checkList, {JSON? imageInfo, int imageMax = 1}) async {
+  return await showTextInputLimitExDialog(context, title, message, text, 1, DESC_LENGTH,
+    lineMax, lineMax == 1 ? TextInputType.text : TextInputType.multiline, checkList, '', imageInfo: imageInfo, imageMax: imageMax);
+}
+
+Future<String> showTextInputLimitDialog(BuildContext context, String title, String message, String text, int minText, int maxText, int lineMax, List<String>? checkList, {JSON? imageInfo}) async {
+  var result = await showTextInputLimitExDialog(context, title, message, text, minText, maxText, lineMax, lineMax == 1 ? TextInputType.text : TextInputType.multiline, checkList, '', imageInfo: imageInfo);
   return result['desc'];
 }
 
 Future<JSON> showTextInputLimitExDialog(BuildContext context, String title, String message, String text,
-    int minText, int maxText, int lineMax, TextInputType inputType,  List<String>? checkList, String exButtonText) async {
+    int minText, int maxText, int lineMax, TextInputType inputType,  List<String>? checkList, String exButtonText, {JSON? imageInfo, int imageMax = 1}) async {
 
-  final _titleController = TextEditingController();
-  var _resultStr = text;
+  final titleController = TextEditingController();
+  final imageEditKey = GlobalKey();
   var _isChecked = false;
   var _isOverwriteCheck = checkList != null && checkList.isNotEmpty;
+  var imageChanged = false;
 
-  _titleController.text = text;
+  titleController.text = text;
 
   isWillOverwrite(String checkStr) {
     if (!_isOverwriteCheck) return true;
     return checkList.contains(checkStr);
   }
 
-  _isChecked = isWillOverwrite(_resultStr);
+  refreshGallery() {
+    var gallery = imageEditKey.currentState as CardScrollViewerState;
+    gallery.refresh();
+    imageChanged = true;
+  }
+
+  picLocalImage() async {
+    XFile? pickImage = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: PIC_IMAGE_SIZE_MAX, maxHeight: PIC_IMAGE_SIZE_MAX);
+    if (pickImage != null) {
+      var imageUrl = await ShowImageCroper(pickImage.path);
+      var imageData = await ReadFileByte(imageUrl);
+      var key = Uuid().v1();
+      imageInfo = {};
+      imageInfo![key] = {'id': key, 'data': imageData};
+    }
+  }
+
+  picLocalImages() async {
+    List<XFile>? pickList = await ImagePicker().pickMultiImage(maxWidth: PIC_IMAGE_SIZE_MAX, maxHeight: PIC_IMAGE_SIZE_MAX);
+    if (pickList.isNotEmpty) {
+      for (var i=0; i<pickList.length; i++) {
+        var image = pickList[i];
+        var imageUrl = await ShowImageCroper(image.path);
+        var imageData = await ReadFileByte(imageUrl);
+        var key = Uuid().v1();
+        imageInfo ??= {};
+        imageInfo![key] = {'id': key, 'data': imageData};
+      }
+    }
+  }
+
+  _isChecked = isWillOverwrite(text);
   LOG('--> checkList $_isChecked : $checkList');
 
   return await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return PointerInterceptor(
-            child: StatefulBuilder(
-                builder: (context, setState) {
-                  return AlertDialog(
-                    title: Text(title, style: DialogTitleStyle(context)),
-                    scrollable: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                    insetPadding: EdgeInsets.all(10),
-                    backgroundColor: DialogBackColor(context),
-                    content: Container(
-                        constraints: BoxConstraints(
-                          minWidth: 350,
-                          minHeight: 200,
-                        ),
-                        child: Column(
-                          children: [
-                            if (message.isNotEmpty)...[
-                              SizedBox(height: 10),
-                              Text(message, style: ItemTitleStyle(context), maxLines: 1),
-                              SizedBox(height: 10),
-                            ],
-                            TextFormField(
-                              controller: _titleController,
-                              decoration: inputLabel(context, '', ''),
-                              keyboardType: inputType,
-                              autofocus: exButtonText.isEmpty,
-                              maxLines: lineMax,
-                              maxLength: maxText,
-                              toolbarOptions: ToolbarOptions(
-                                paste: true,
-                              ),
-                              onChanged: (value) {
+    context: context,
+    builder: (BuildContext context) {
+      return PointerInterceptor(
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(title, style: DialogTitleStyle(context)),
+              scrollable: true,
+              contentPadding: EdgeInsets.all(20),
+              insetPadding: EdgeInsets.all(20),
+              actionsPadding: EdgeInsets.fromLTRB(20, 0, 20, 10),
+              backgroundColor: DialogBackColor(context),
+              content: Container(
+                constraints: BoxConstraints(
+                  minWidth: 350,
+                ),
+                child: Column(
+                  children: [
+                    if (message.isNotEmpty)...[
+                      SizedBox(height: 10),
+                      Text(message, style: ItemTitleStyle(context), maxLines: 1),
+                      SizedBox(height: 10),
+                    ],
+                    if (imageInfo != null)
+                      ImageEditScrollViewer(
+                        imageInfo!,
+                        key: imageEditKey,
+                        title: 'IMAGE EDIT'.tr,
+                        isEditable: true,
+                        itemWidth: 80,
+                        itemHeight: 80,
+                        selectText: '',
+                        imageMax: 1,
+                        onActionCallback: (key, status) {
+                          setState(() {
+                            switch (status) {
+                              case 1: {
+                                if (imageMax == 1) {
+                                  picLocalImage().then((_) {
+                                    setState(() => refreshGallery());
+                                  });
+                                } else {
+                                  picLocalImages().then((_) {
+                                    setState(() => refreshGallery());
+                                  });
+                                }
+                                break;
+                              }
+                              case 2: {
                                 setState(() {
-                                  _resultStr = value;
-                                  _isChecked = isWillOverwrite(_resultStr);
+                                  imageInfo!.remove(key);
+                                  refreshGallery();
                                 });
-                              },
-                            )
-                          ]
-                        )
-                    ),
-                    actions: [
-                      TextButton(
-                        child: Icon(Icons.copy, size: 20),
-                        onPressed: () {
-                          Clipboard.getData(Clipboard.kTextPlain).then((result) {
-                            if (result != null && result.text != null) {
-                              setState(() {
-                                _resultStr = result.text!;
-                                _titleController.text = _resultStr;
-                              });
+                                break;
+                              }
                             }
                           });
-                        },
+                        }
                       ),
-                      if (exButtonText.isNotEmpty)...[
-                        TextButton(
-                          child: Text(exButtonText),
-                          onPressed: () {
-                            Navigator.of(context).pop({'desc': _resultStr, 'exButton' : 1});
-                          },
-                        ),
-                        showVerticalDivider(Size(2, 20)),
-                      ],
-                      TextButton(
-                        child: Text('Cancel'.tr, style: ItemTitleExStyle(context)),
-                        onPressed: () {
-                          Navigator.of(context).pop({'desc': '', 'result': 'cancel'});
-                        },
+                    SizedBox(height: 10),
+                    TextFormField(
+                      controller: titleController,
+                      decoration: inputLabel(context, '', ''),
+                      keyboardType: inputType,
+                      autofocus: exButtonText.isEmpty,
+                      maxLines: lineMax,
+                      maxLength: maxText,
+                      toolbarOptions: ToolbarOptions(
+                        paste: true,
                       ),
-                      TextButton(
-                        child: Text(_resultStr.isNotEmpty && _isOverwriteCheck && _isChecked ? 'Update'.tr : 'OK'.tr,
-                            style:TextStyle(fontWeight: FontWeight.w600, color: _resultStr.length >= minText ? Theme.of(context).primaryColor : Colors.grey)),
-                        onPressed: () {
-                          if (_resultStr.length < minText || _resultStr.length > maxText) return;
-                          Navigator.of(context).pop({'desc': _resultStr, 'result': 'ok'});
-                        },
-                      ),
-                    ],
-                  );
-                }
-            )
-        );
-      }
+                      onChanged: (value) {
+                      },
+                    )
+                  ]
+                )
+              ),
+              actions: [
+                TextButton(
+                  child: Icon(Icons.copy, size: 20),
+                  onPressed: () {
+                    Clipboard.getData(Clipboard.kTextPlain).then((result) {
+                      if (result != null && result.text != null) {
+                        titleController.text = result.text!;
+                      }
+                    });
+                  },
+                ),
+                if (exButtonText.isNotEmpty)...[
+                  TextButton(
+                    child: Text(exButtonText),
+                    onPressed: () {
+                      Navigator.of(context).pop({'desc': titleController.text, 'exButton' : 1});
+                    },
+                  ),
+                  showVerticalDivider(Size(2, 20)),
+                ],
+                TextButton(
+                  child: Text('Cancel'.tr, style: ItemTitleExStyle(context)),
+                  onPressed: () {
+                    Navigator.of(context).pop({'desc': '', 'result': 'cancel'});
+                  },
+                ),
+                TextButton(
+                  child: Text(titleController.text.isNotEmpty && _isOverwriteCheck && _isChecked ? 'Update'.tr : 'OK'.tr,
+                      style:TextStyle(fontWeight: FontWeight.w600, color: titleController.text.length >= minText ? Theme.of(context).primaryColor : Colors.grey)),
+                  onPressed: () {
+                    var textResult = titleController.text;
+                    if ((textResult.length >= minText && textResult.length < maxText) || imageChanged) {
+                      Navigator.of(context).pop({'desc': textResult, 'imageInfo': imageInfo, 'imageChanged': imageChanged ? '1' : '', 'result': 'ok'});
+                    }
+                  },
+                ),
+              ],
+            );
+          }
+        )
+      );
+    }
   );
 }
 
@@ -1403,7 +1472,7 @@ Future<JSON>? showOptionItemAddDialog(BuildContext context, JSON optionItem, JSO
     var imageByte = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (imageByte != null) {
       return imageByte.readAsBytes().then((value) {
-        optionItem['image'] = value;
+        optionItem['data'] = value;
         return imageByte.name;
       });
     } else {
@@ -2397,7 +2466,7 @@ Future<JSON> showEditCommentMultiSendDialog(BuildContext context, CommentType ty
         var imageUrl = await ShowImageCroper(image.path);
         var imageData = await ReadFileByte(imageUrl);
         var key = Uuid().v1();
-        _imageData[key] = {'id': key, 'image': imageData};
+        _imageData[key] = {'id': key, 'data': imageData};
       }
       refreshGallery();
     }
@@ -2911,17 +2980,16 @@ Future showButtonListDialog(BuildContext context, List<Widget> buttonList)
     builder: (BuildContext context) {
       return PointerInterceptor(
         child: AlertDialog(
-          contentPadding: EdgeInsets.fromLTRB(30, 30, 30, 0),
+          contentPadding: EdgeInsets.fromLTRB(40, 30, 40, 0),
           actionsPadding: EdgeInsets.fromLTRB(30, 0, 30, 10),
           backgroundColor: DialogBackColor(context),
           content: SingleChildScrollView(
             child: Container(
               color: Colors.transparent,
-              constraints: BoxConstraints (
+              constraints: BoxConstraints(
                 maxWidth: 200,
               ),
-              width: MediaQuery.of(context).size.width * 0.9,
-              child: ListBody(
+              child: Column(
                 children: [
                   ...buttonList
                 ]

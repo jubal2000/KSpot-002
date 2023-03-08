@@ -34,7 +34,7 @@ class ChatItem extends StatefulWidget {
   bool isShowFace;
   bool isShowDate;
   bool isChatMode;
-  Function(String, int)? onSelected;
+  Function(String, String, int)? onSelected;
   Function(JSON)? onSetOpened;
 
   @override
@@ -51,8 +51,11 @@ class ChatItemState extends State<ChatItem> {
   final faceSize = 40.0;
   final JSON fileData = {};
   var action = 0;
+  Color? myMessageColor;
+  Color? messageColor;
+  Color? disableColor;
 
-  init() {
+  init(context) {
     if (LIST_NOT_EMPTY(widget.messageItem['fileData'])) {
       // LOG("--> thumbList : ${widget.messageItem['fileData']}");
       widget.messageItem['fileData'].forEach((item) {
@@ -70,6 +73,9 @@ class ChatItemState extends State<ChatItem> {
         fileData[fileItem.id] = addItem;
       });
     }
+    myMessageColor  = Theme.of(context).colorScheme.inversePrimary;
+    messageColor    = Theme.of(context).primaryColorDark;
+    disableColor    = Theme.of(context).colorScheme.secondaryContainer;
     // LOG('--> ChatItemState init [${widget.messageItem['desc']}]: ${widget.isOwner} / ${widget.isOpened} / ${widget.openCount} => ${widget.messageItem['openList']}');
   }
 
@@ -81,7 +87,7 @@ class ChatItemState extends State<ChatItem> {
 
   @override
   Widget build(BuildContext context) {
-    init();
+    init(context);
     if (action > 0) {
       var text = '';
       var color = Colors.yellowAccent;
@@ -107,22 +113,28 @@ class ChatItemState extends State<ChatItem> {
           color = Colors.purpleAccent;
           break;
       }
-      return Container(
-        padding: EdgeInsets.symmetric(vertical: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(STR(widget.messageItem['senderName']), style: ItemDescColorBoldStyle(context, color)),
-            Text(' ${text.tr}', style: ItemDescStyle(context)),
-            SizedBox(width: 10),
-            Text(SERVER_TIME_STR(widget.messageItem['createTime'], true), style: ItemChatTimeStyle(context)),
-          ],
-        ),
+      return GestureDetector(
+        onTap: () {
+          showUserMenu();
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 20),
+          color: Colors.transparent,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(STR(widget.messageItem['senderName']), style: ItemDescColorBoldStyle(context, color)),
+              Text(' ${text.tr}', style: ItemDescStyle(context)),
+              SizedBox(width: 10),
+              Text(SERVER_TIME_STR(widget.messageItem['createTime'], true), style: ItemChatTimeStyle(context)),
+            ],
+          ),
+        )
       );
     } else {
       return GestureDetector(
         onTap: () {
-          if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], 0);
+          if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], STR(widget.messageItem['desc']), 0);
         },
         child: Container(
           padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE_ES, 0, UI_HORIZONTAL_SPACE_ES, 5),
@@ -172,13 +184,8 @@ class ChatItemState extends State<ChatItem> {
                                 .width * 0.6,
                           ),
                           decoration: BoxDecoration(
-                            color: widget.isOwner ? Theme
-                                .of(context)
-                                .colorScheme
-                                .inversePrimary : Theme
-                                .of(context)
-                                .colorScheme
-                                .secondaryContainer,
+                            color: widget.isOwner && widget.messageItem['status'] > 0 ? myMessageColor :
+                              widget.messageItem['status'] < 1 ? disableColor : messageColor,
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(widget.isOwner ? radiusSize : 0),
                               topRight: Radius.circular(widget.isOwner ? 0 : radiusSize),
@@ -231,6 +238,7 @@ class ChatItemState extends State<ChatItem> {
                                 },
                                 key: GlobalKey(),
                                 child: Text(cache.blockData[widget.messageItem['senderId']] != null ? '....' :
+                                    INT(widget.messageItem['status']) < 1 ? 'Deleted'.tr :
                                     DESC(widget.messageItem['desc']), maxLines: null, style: Theme
                                     .of(context)
                                     .textTheme
@@ -294,14 +302,14 @@ class ChatItemState extends State<ChatItem> {
       case DropdownItemType.block:
         userRepo.addBlockUser(context, userInfo, (result) {
           setState(() {
-            if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], 9);
+            if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], STR(widget.messageItem['desc']), 9);
           });
         });
         break;
       case DropdownItemType.report:
         userRepo.addReportItem(context, 'user', userInfo, (result) {
           setState(() {
-            if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], 9);
+            if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], STR(widget.messageItem['desc']), 9);
           });
         });
         break;
@@ -314,7 +322,7 @@ class ChatItemState extends State<ChatItem> {
               if (result2 != null) {
                 LOG('--> admin changed : ${result2.toString()}');
                 cache.setChatRoomItem(ChatRoomModel.fromJson(result2), true);
-                if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], 8);
+                if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], STR(widget.messageItem['desc']), 8);
               }
             });
           }
@@ -328,13 +336,27 @@ class ChatItemState extends State<ChatItem> {
               if (result2 != null) {
                 LOG('--> admin changed : ${result2.toString()}');
                 cache.setChatRoomItem(ChatRoomModel.fromJson(result2), true);
-                if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], 8);
+                if (widget.onSelected != null) widget.onSelected!(widget.messageItem['id'], STR(widget.messageItem['desc']), 8);
               }
             });
           }
         });
         break;
     }
+  }
+
+  showUserMenu() {
+    if (widget.isOwner) return;
+    unFocusAll(context);
+    List<Widget> btnList = [
+      ...UserMenuItems.chatUserMenu.map((item) => UserMenuItems.buildItem(context, item, onSelected: onSelected)),
+      if (widget.isManager)...[
+        ...UserMenuItems.chatAdminMenu0.map((item) => UserMenuItems.buildItem(context, item, onSelected: onSelected)),
+        if (!cache.blockData.containsKey(STR(widget.messageItem['senderId'])))
+          ...UserMenuItems.chatAdminMenu1.map((item) => UserMenuItems.buildItem(context, item, onSelected: onSelected)),
+      ],
+    ];
+    showButtonListDialog(context, btnList);
   }
 
   showUserPic(context) {
@@ -356,17 +378,7 @@ class ChatItemState extends State<ChatItem> {
     }
     return GestureDetector(
       onTap: () {
-        if (widget.isOwner) return;
-        unFocusAll(context);
-        List<Widget> btnList = [
-          ...UserMenuItems.chatUserMenu.map((item) => UserMenuItems.buildItem(context, item, onSelected: onSelected)),
-          if (widget.isManager)...[
-            ...UserMenuItems.chatAdminMenu0.map((item) => UserMenuItems.buildItem(context, item, onSelected: onSelected)),
-            if (!cache.blockData.containsKey(STR(widget.messageItem['senderId'])))
-              ...UserMenuItems.chatAdminMenu1.map((item) => UserMenuItems.buildItem(context, item, onSelected: onSelected)),
-          ],
-        ];
-        showButtonListDialog(context, btnList);
+        showUserMenu();
       },
       child: Container(
         width:  faceSize,

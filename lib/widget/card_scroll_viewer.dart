@@ -245,48 +245,48 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                       child: Text(widget.selectText, style: widget.selectTextStyle),
                     )
                   ],
-                  if (item.value['pic'] != null)
-                    Positioned(
-                        left: 5,
-                        bottom: 0,
-                        child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Container(
-                                width: widget.itemWidth * 0.45,
-                                height: widget.itemWidth * 0.45,
-                                decoration: BoxDecoration(
-                                  color: Colors.black87,
-                                  image: DecorationImage(
-                                    image: AssetImage(item.value['pic']),
-                                    fit: BoxFit.cover,
-                                  ),
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(60.0)),
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 2.0,
-                                  ),
-                                ),
-                              ),
-                              if (item.value['nickName'] != null) ...[
-                                Padding(
-                                  padding: EdgeInsets.only(left: 5, bottom: 5),
-                                  child: Text(STR(item.value['nickName']), style: Theme.of(context).textTheme.subtitle1, maxLines: 2),
-                                )
-                              ],
-                              // if (item.value['name'] != null) ...[
-                              //   Padding(
-                              //     padding: EdgeInsets.only(
-                              //         left: 5, bottom: 5),
-                              //     child: Text(item.value['name'],
-                              //         style: MainTheme.textTheme.headline5,
-                              //         maxLines: 2),
-                              //   )
-                              // ]
-                            ]
-                        )
-                    ),
+                  // if (item.value['pic'] != null)
+                  //   Positioned(
+                  //       left: 5,
+                  //       bottom: 0,
+                  //       child: Row(
+                  //           crossAxisAlignment: CrossAxisAlignment.end,
+                  //           children: [
+                  //             Container(
+                  //               width: widget.itemWidth * 0.45,
+                  //               height: widget.itemWidth * 0.45,
+                  //               decoration: BoxDecoration(
+                  //                 color: Colors.black87,
+                  //                 image: DecorationImage(
+                  //                   image: AssetImage(item.value['pic']),
+                  //                   fit: BoxFit.cover,
+                  //                 ),
+                  //                 borderRadius: BorderRadius.all(
+                  //                     Radius.circular(60.0)),
+                  //                 border: Border.all(
+                  //                   color: Colors.white,
+                  //                   width: 2.0,
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //             if (item.value['nickName'] != null) ...[
+                  //               Padding(
+                  //                 padding: EdgeInsets.only(left: 5, bottom: 5),
+                  //                 child: Text(STR(item.value['nickName']), style: Theme.of(context).textTheme.subtitle1, maxLines: 2),
+                  //               )
+                  //             ],
+                  //             // if (item.value['name'] != null) ...[
+                  //             //   Padding(
+                  //             //     padding: EdgeInsets.only(
+                  //             //         left: 5, bottom: 5),
+                  //             //     child: Text(item.value['name'],
+                  //             //         style: MainTheme.textTheme.headline5,
+                  //             //         maxLines: 2),
+                  //             //   )
+                  //             // ]
+                  //           ]
+                  //       )
+                  //   ),
                   if (widget.isShowMenu)...[
                     if (item.value['linkTarget'] != null)
                       Positioned(

@@ -72,7 +72,7 @@ class ChatTalkScreenState extends State<ChatTalkScreen> {
                   children: [
                     if (widget.roomInfo.type == ChatType.public)...[
                       if (widget.roomInfo.pic.isNotEmpty)...[
-                        viewModel.showTitleWithPic(),
+                        Obx(() => viewModel.showTitlePic(viewModel.roomPic.value)),
                         SizedBox(width: 10),
                       ],
                       Obx(() => Column(
@@ -85,10 +85,6 @@ class ChatTalkScreenState extends State<ChatTalkScreen> {
                       )),
                     ],
                     if (widget.roomInfo.type == ChatType.private)...[
-                      if (widget.roomInfo.pic.isNotEmpty)...[
-                        viewModel.showTitleWithPic(),
-                        SizedBox(width: 10),
-                      ],
                       viewModel.showMemberListText(),
                     ],
                   ],

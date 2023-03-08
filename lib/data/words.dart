@@ -440,6 +440,7 @@ class Words extends Translations {
       'Promotion has stopped': '홍보가 중지되었습니다',
       'Promotion stop failed': '홍보 중지에 실패했습니다',
       'Are you sure you want to delete it now?': '지금 삭제하시겠습까?',
+      'Are you sure you want to delete?': '삭제하시겠습까?',
       '(After deletion, it is not visible in the list)': '(삭제후에는 목록에서 보이지않습니다)',
       'TOTAL PRICE': '총 금액',
       'PROMOTION PERIOD': '홍보 기간',
@@ -465,6 +466,9 @@ class Words extends Translations {
       'Deletion is complete': '삭제가 완료되었습니다',
       'Are you sure you want to delete your reservation?': '예약을 삭제하시겠습니까?',
       'Would you like to make a reservation?': '예약 하시겠습니까?',
+      'COPY': '복사하기',
+      'COPY MESSAGE': '메시지 복사',
+      'TO NOTICE': '공지사항으로',
 
       // reserve_my_screen
       'MY RESERVATION': '내 예약',
@@ -721,6 +725,7 @@ class Words extends Translations {
       'Are you sure you want to quit the Sign Up?': '회원가입을 종료 하시겠습니까?',
       'copied to clipboard': '클립보드에 복사되었습니다',
       'Update is complete': '업데이트가 완료되었습니다',
+      'DELETE IT': '삭제하기',
       'Deleted': '삭제 되었습니다',
       'Spot group select': '스팟 그룹 선택',
       'Group select': '그룹 선택',

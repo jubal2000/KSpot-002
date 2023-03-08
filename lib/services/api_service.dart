@@ -2040,8 +2040,8 @@ class ApiService extends GetxService {
     return null;
   }
 
-  Future<JSON?> setChatRoomTitle(String roomId, String title, String userId) async {
-    LOG('------> setChatRoomTitle : $roomId / $title');
+  Future<JSON?> setChatRoomTitle(String roomId, String title, String userId, [String? imageURL]) async {
+    LOG('------> setChatRoomTitle : $roomId / $title / $imageURL');
     try {
       var ref = firestore!.collection(ChatRoomCollection);
       var snapshot = await ref.doc(roomId).get();
@@ -2049,8 +2049,12 @@ class ApiService extends GetxService {
         var roomInfo = FROM_SERVER_DATA(snapshot.data() as JSON);
         if (STR(roomInfo['userId']) == userId) {
           roomInfo['title'] = title;
+          if (imageURL != null) {
+            roomInfo['pic'] = imageURL;
+          }
           await ref.doc(roomId).update(Map<String, dynamic>.from({
-            'title': title,
+            'title': roomInfo['title'],
+            'pic': roomInfo['pic'],
           }));
           return roomInfo;
         }

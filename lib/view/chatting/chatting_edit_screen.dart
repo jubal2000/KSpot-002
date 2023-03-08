@@ -59,8 +59,8 @@ class ChattingEditScreen extends StatelessWidget {
                               if (viewModel.type == 1)...[
                                 SubTitle(context, 'INFO'.tr),
                                 SizedBox(height: UI_LIST_TEXT_SPACE_S),
-                                viewModel.showPassword(),
-                                SizedBox(height: UI_LIST_TEXT_SPACE_S),
+                                // viewModel.showPassword(),
+                                // SizedBox(height: UI_LIST_TEXT_SPACE_S),
                               ],
                               viewModel.showInviteMessage(),
                               SizedBox(height: UI_LIST_TEXT_SPACE_S),

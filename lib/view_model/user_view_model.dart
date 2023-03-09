@@ -35,6 +35,12 @@ class UserViewModel extends ChangeNotifier {
   initUserModel(UserModel user) {
     userInfo = user;
     isMyProfile = userInfo!.checkOwner(AppData.USER_ID);
+    tabKeyList = List.generate(3, (index) => GlobalKey());
+    tabList = [
+      MainMyTab(ProfileMainTab.profile , 'PROFILE'.tr  , this, key: tabKeyList[0]),
+      MainMyTab(ProfileMainTab.follow  , 'FOLLOW'.tr   , this, key: tabKeyList[1]),
+      MainMyTab(ProfileMainTab.like    , 'BOOKMARK'.tr , this, key: tabKeyList[2]),
+    ];
   }
 
   initUserModelFromId(String userId) async {
@@ -44,13 +50,8 @@ class UserViewModel extends ChangeNotifier {
     }
   }
 
-  initProfile() {
-    tabKeyList = List.generate(3, (index) => GlobalKey());
-    tabList = [
-      MainMyTab(ProfileMainTab.profile , 'PROFILE'.tr  , this, key: tabKeyList[0]),
-      MainMyTab(ProfileMainTab.follow  , 'FOLLOW'.tr   , this, key: tabKeyList[1]),
-      MainMyTab(ProfileMainTab.like    , 'BOOKMARK'.tr , this, key: tabKeyList[2]),
-    ];
+  refresh() {
+    notifyListeners();
   }
 
   setContext(context) {
@@ -65,8 +66,8 @@ class UserViewModel extends ChangeNotifier {
     return repo.getStoryFromUserId(userInfo!.id);
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  setMainTab(index) {
+    currentTab = index;
+    notifyListeners();
   }
 }

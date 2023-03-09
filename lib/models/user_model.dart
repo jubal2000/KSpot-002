@@ -6,89 +6,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'etc_model.dart';
 part 'user_model.g.dart';
 
-class UserModelEx extends UserModel {
-  UserModelEx.empty(String id) : super(
-    id: id,
-    status: 0,
-    loginId: '',
-    loginType: '',
-    nickName: '',
-    pic: '',
-    message: '',
-    birthYear: 0,
-    gender: '',
-    mobile: '',
-    mobileIntl: '',
-    email: '',
-    country: '',
-    countryState: '',
-    followCount: 0,
-    followerCount: 0,
-    pushToken: '',
-    deviceType: '',
-    updateTime: '',
-    createTime: '',
-    mobileVerifyTime: '',
-    emailVerifyTime: '',
-    mobileVerified: false,
-    emailVerified: false,
-  );
-
-  UserModelEx.create(loginId, loginType, {String nickName = '', String pic = ''}) : super(
-    id: '',
-    status: 1,
-    loginId: loginId,
-    loginType: loginType,
-    nickName: nickName,
-    pic: pic,
-    message: '',
-    birthYear: 0,
-    gender: '',
-    mobile: '',
-    mobileIntl: '',
-    email: '',
-    country: '',
-    countryState: '',
-    followCount: 0,
-    followerCount: 0,
-    pushToken: '',
-    deviceType: '',
-    updateTime: '',
-    createTime: '',
-    mobileVerifyTime: '',
-    emailVerifyTime: '',
-    mobileVerified: false,
-    emailVerified: false,
-  );
-
-  UserModelEx.signOut() : super(
-    id: '',
-    status: 0,
-    loginId: '',
-    loginType: '',
-    nickName: '',
-    pic: '',
-    message: '',
-    birthYear: 0,
-    gender: '',
-    mobile: '',
-    mobileIntl: '',
-    email: '',
-    country: '',
-    countryState: '',
-    followCount: 0,
-    followerCount: 0,
-    pushToken: '',
-    deviceType: '',
-    updateTime: '',
-    createTime: '',
-    mobileVerifyTime: '',
-    emailVerifyTime: '',
-    mobileVerified: false,
-    emailVerified: false,
-  );
-}
-
 @JsonSerializable(
   explicitToJson: true,
 )
@@ -98,25 +15,36 @@ class UserModel {
   String    loginId;
   String    loginType;  // 로그인 방식 ('', 'phone'..)
   String    nickName;
+  @JsonKey(defaultValue: '')
+  String    realName;
   String    pic;
   String    message;
   int       birthYear;
   String    gender;
+
   String    mobile;
   String    mobileIntl;
+  @JsonKey(defaultValue: 0)
+  int       mobileShow; // 0:hide 1:show 2:for follower
+  String    mobileVerifyTime;
+
   String    email;
+  @JsonKey(defaultValue: 0)
+  int       emailShow; // 0:hide 1:show 2:for follower
+  String    emailVerifyTime;
+
   String    country;
   String    countryState;
+
   int       followCount;
   int       followerCount;
   String    pushToken;
   String    deviceType;
   String    updateTime;
   String    createTime;
-  String    mobileVerifyTime;
-  String    emailVerifyTime;
-  bool      mobileVerified;
-  bool      emailVerified;
+
+  String?   emailNew;
+  BankData? refundBank;
 
   List<String>?       likeGroup;
   List<String>?       likePlace;
@@ -132,13 +60,18 @@ class UserModel {
     required this.loginId,
     required this.loginType,
     required this.nickName,
+    required this.realName,
     required this.pic,
     required this.message,
     required this.birthYear,
     required this.gender,
     required this.mobile,
     required this.mobileIntl,
+    required this.mobileShow,
+    required this.mobileVerifyTime,
     required this.email,
+    required this.emailShow,
+    required this.emailVerifyTime,
     required this.country,
     required this.countryState,
     required this.followCount,
@@ -147,11 +80,8 @@ class UserModel {
     required this.deviceType,
     required this.updateTime,
     required this.createTime,
-    required this.mobileVerifyTime,
-    required this.emailVerifyTime,
-    required this.mobileVerified,
-    required this.emailVerified,
 
+    this.emailNew,
     this.likeGroup,
     this.likePlace,
     this.likeEvent,
@@ -160,6 +90,40 @@ class UserModel {
     this.optionData,
     this.optionPush,
   });
+
+  static get empty {
+    return UserModel.create('', '');
+  }
+
+  static create(loginId, loginType, {nickName = '',pic = ''}) {
+    return UserModel(
+      id: '',
+      status: 1,
+      loginId: loginId,
+      loginType: loginType,
+      nickName: nickName,
+      realName: '',
+      pic: pic,
+      message: '',
+      birthYear: 0,
+      gender: '',
+      mobile: '',
+      mobileIntl: '',
+      mobileShow: 0,
+      mobileVerifyTime: '',
+      email: '',
+      emailShow: 0,
+      emailVerifyTime: '',
+      country: '',
+      countryState: '',
+      followCount: 0,
+      followerCount: 0,
+      pushToken: '',
+      deviceType: '',
+      updateTime: '',
+      createTime: '',
+    );
+  }
 
   factory UserModel.fromJson(JSON json) => _$UserModelFromJson(json);
   JSON toJson() => _$UserModelToJson(this);

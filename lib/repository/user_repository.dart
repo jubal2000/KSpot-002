@@ -149,7 +149,7 @@ class UserRepository {
       return orgUser;
     } else {
       final newUser = await createNewUser(
-        UserModelEx.create(
+        UserModel.create(
             AppData.loginInfo.loginId,
             type,
             nickName: AppData.loginInfo.nickName,
@@ -202,8 +202,12 @@ class UserRepository {
 
   Future<bool> setUserInfoItem(UserModel user, String key) async {
     final userInfo = user.toJson();
-    LOG('--> setUserInfoItem : ${user.id} - $key / ${userInfo[key]}');
+    LOG('--> setUserInfoItem : ${user.id} - $key / ${user.toJson()}');
     return api.setUserInfoItem(userInfo, key);
+  }
+
+  Future<bool> setMyUserInfo() async {
+    return api.setUserInfo(AppData.userInfo.toJson());
   }
 
   Future<UserModel?> createNewUser(UserModel user) async {

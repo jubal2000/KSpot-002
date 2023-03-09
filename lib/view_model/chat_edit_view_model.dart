@@ -19,7 +19,7 @@ import '../repository/user_repository.dart';
 import '../services/cache_service.dart';
 import '../utils/utils.dart';
 import '../view/follow/follow_screen.dart';
-import '../view/profile/target_profile.dart';
+import '../view/profile/profile_target_screen.dart';
 import '../widget/card_scroll_viewer.dart';
 import '../widget/edit/edit_component_widget.dart';
 import '../widget/edit/edit_list_widget.dart';
@@ -95,7 +95,7 @@ class ChatEditViewModel extends ChangeNotifier {
         if (status == 0) {
           var userInfo = await userRepo.getUserInfo(memberData[key]['id']);
           if (userInfo != null) {
-            Get.to(() => TargetProfileScreen(userInfo));
+            Get.to(() => ProfileTargetScreen(userInfo));
           } else {
             showUserAlertDialog(buildContext!, '${memberData[key]['id']}');
           }
@@ -116,7 +116,7 @@ class ChatEditViewModel extends ChangeNotifier {
   showTypeSelect() {
     return Column(
     children: [
-      SubTitle(buildContext!, 'TYPE SELECT'.tr, child: SubTitleSmall(buildContext!, '(You can choose only one type)'.tr, 15.w)),
+      SubTitle(buildContext!, 'TYPE SELECT'.tr, child: SubTitleSmall(buildContext!, '(You can choose only one type)'.tr, height: 15)),
       SizedBox(height: 10.w),
       Row(
         children: tabText.map((item) => Expanded(
@@ -130,18 +130,18 @@ class ChatEditViewModel extends ChangeNotifier {
                 notifyListeners();
             },
             child: Container(
-              height: 45.w,
-              padding: EdgeInsets.symmetric(horizontal: 5.w),
+              height: 45,
+              padding: EdgeInsets.symmetric(horizontal: 5),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: type == tabText.indexOf(item) ? Theme.of(buildContext!).colorScheme.tertiaryContainer :
                 Theme.of(buildContext!).colorScheme.primary.withOpacity(0.05),
                 borderRadius: tabText.indexOf(item) == 0 ? BorderRadius.only(
-                    topLeft:Radius.circular(10.sp),
-                    bottomLeft:Radius.circular(10.sp)
+                    topLeft:Radius.circular(10),
+                    bottomLeft:Radius.circular(10)
                 ) :  BorderRadius.only(
-                    topRight:Radius.circular(10.sp),
-                    bottomRight:Radius.circular(10.sp)
+                    topRight:Radius.circular(10),
+                    bottomRight:Radius.circular(10)
                 ),
                 border: Border.all(
                     color: type == tabText.indexOf(item) ? Theme.of(buildContext!).colorScheme.tertiary.withOpacity(0.8) :

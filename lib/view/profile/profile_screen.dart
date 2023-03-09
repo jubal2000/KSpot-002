@@ -10,6 +10,8 @@ import 'package:provider/provider.dart';
 
 import '../../data/app_data.dart';
 import '../../data/theme_manager.dart';
+import '../../utils/utils.dart';
+import '../setup/setup_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   ProfileScreen({ Key? key, this.isShowBack = false }) : super(key: key);
@@ -23,26 +25,28 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final auth = Get.find<AuthService>();
   final _viewModel = UserViewModel();
+  final GlobalKey<ScaffoldState> _key = GlobalKey();
 
   @override
   void initState() {
     _viewModel.initUserModel(AppData.userInfo);
-    _viewModel.initProfile();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     _viewModel.setContext(context);
-    return  SafeArea(
+    return SafeArea(
       top: false,
       child: ChangeNotifierProvider<UserViewModel>.value(
         value: _viewModel,
         child: Consumer<UserViewModel>(
           builder: (context, viewModel, _) {
+            LOG('--> UserViewModel redraw');
             return DefaultTabController(
               length: viewModel.tabList.length,
               child: Scaffold(
+                key: _key,
                 appBar: AppBar(
                   title: Text(viewModel.isMyProfile ? 'MY'.tr : ''),
                   titleTextStyle: AppBarTitleStyle(context),
@@ -51,18 +55,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   automaticallyImplyLeading: widget.isShowBack,
                   actions: [
                     IconButton(
-                        onPressed: () {
-                          Get.to(() => MessageScreen());
-                        },
-                        icon: Icon(Icons.mail_outline)
+                      onPressed: () {
+                        Get.to(() => MessageScreen());
+                      },
+                      icon: Icon(Icons.mail_outline)
                     ),
                     IconButton(
                       onPressed: () {
-                        showAlertYesNoDialog(context, 'SIGN OUT'.tr, 'Would you like to sign out now?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
-                          if (result == 1) {
-                            auth.signOut();
-                          }
-                        });
+                        _key.currentState!.openEndDrawer();
+                        // showAlertYesNoDialog(context, 'SIGN OUT'.tr, 'Would you like to sign out now?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+                        //   if (result == 1) {
+                        //     auth.signOut();
+                        //   }
+                        // });
                       },
                       icon: Icon(Icons.settings)
                     ),
@@ -83,6 +88,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 body: TabBarView(
                   physics: NeverScrollableScrollPhysics(),
                   children: List<Widget>.from(viewModel.tabList),
+                ),
+                endDrawer: Drawer(
+                  backgroundColor: Theme.of(context).canvasColor,
+                  child: ListView(
+                    children: [
+                      ListTile(
+                        contentPadding: EdgeInsets.all(10),
+                        tileColor: Theme.of(context).primaryColorDark,
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        title: Row(
+                          children: [
+                            SizedBox(width: 10),
+                            Icon(Icons.settings, size: 30),
+                            SizedBox(width: 10),
+                            Text('Setup'.tr, style: AppBarTitleStyle(context))
+                          ],
+                        ),
+                      ),
+                      ...showSetupList((refresh) {
+                        if (refresh) {
+                          viewModel.initUserModel(AppData.userInfo);
+                          viewModel.refresh();
+                        }
+                      }),
+                    ]
+                  ),
                 ),
               ),
             );

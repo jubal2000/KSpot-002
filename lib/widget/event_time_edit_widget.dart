@@ -302,10 +302,10 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
           appBar: AppBar(
             title: Text(widget.isEdit ? 'SET TIME'.tr : 'ADD TIME'.tr, style: AppBarTitleStyle(context)),
             titleSpacing: 0,
-            toolbarHeight: 50.w,
+            toolbarHeight: 50,
           ),
           body: Container(
-            height: MediaQuery.of(context).size.height - 50.h,
+            height: MediaQuery.of(context).size.height - 50,
             child: Stack(
               children: [
                 Container(
@@ -314,7 +314,7 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                     child: Form(
                       child: Column(
                         children: [
-                          SubTitle(context, 'INFO'.tr, height: 40.0.w),
+                          SubTitle(context, 'INFO'.tr, height: 40.0),
                           SizedBox(height: 5),
                           TextFormField(
                             controller: _textController[TextType.title.index],
@@ -327,8 +327,8 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                             },
                           ),
                           SizedBox(height: _lineSpace),
-                          SubTitle(context, 'TYPE SELECT'.tr, child: SubTitleSmall(context, '(You can choose only one type)'.tr, 15.w)),
-                          SizedBox(height: 10.w),
+                          SubTitle(context, 'TYPE SELECT'.tr, child: SubTitleSmall(context, '(You can choose only one type)'.tr, height: 15)),
+                          SizedBox(height: 10),
                           Row(
                             children: _tabText.map((item) => Expanded(
                               child: GestureDetector(
@@ -349,11 +349,11 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                                   color: _selectTab == item ? Theme.of(context).colorScheme.tertiaryContainer :
                                     Theme.of(context).colorScheme.primary.withOpacity(0.05),
                                   borderRadius: _tabText.indexOf(item) == 0 ? BorderRadius.only(
-                                      topLeft:Radius.circular(10.sp),
-                                      bottomLeft:Radius.circular(10.sp)
+                                      topLeft:Radius.circular(10),
+                                      bottomLeft:Radius.circular(10)
                                   ) :  BorderRadius.only(
-                                      topRight:Radius.circular(10.sp),
-                                      bottomRight:Radius.circular(10.sp)
+                                      topRight:Radius.circular(10),
+                                      bottomRight:Radius.circular(10)
                                   ),
                                   border: Border.all(
                                       color: _selectTab == item ? Theme.of(context).colorScheme.tertiary.withOpacity(0.8) :
@@ -368,7 +368,7 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                         ),
                         if (_selectTab != _tabText.first)...[
                           SizedBox(height: UI_LIST_TEXT_SPACE),
-                          SubTitle(context, _tabText[1], height: 60.w),
+                          SubTitle(context, _tabText[1], height: 60),
                           Row(
                             children: [
                               Expanded(
@@ -393,7 +393,7 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                                 )
                               ),
                               Padding(
-                                padding: EdgeInsets.all(10.sp),
+                                padding: EdgeInsets.all(10),
                                 child: Text(' ~ '),
                               ),
                               Expanded(
@@ -443,8 +443,8 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                                 });
                               },
                               child: Container(
-                                height: 40.w,
-                                padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 10.w),
+                                height: 40,
+                                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                                 decoration: BoxDecoration(
                                   color: _timeData['week'].contains(item) ? Theme.of(context).splashColor : Theme.of(context).backgroundColor,
                                   borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -504,7 +504,7 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                           EditListWidget(_timeData['dayMap'], EditListType.day, onItemAdd, onItemSelected),
                         ],
                         SizedBox(height: UI_LIST_TEXT_SPACE),
-                        SubTitle(context, 'TIME SELECT'.tr, height: 60.0.w),
+                        SubTitle(context, 'TIME SELECT'.tr, height: 60.0),
                         Row(
                           children: [
                             Expanded(
@@ -530,7 +530,7 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                               )
                             ),
                             Padding(
-                              padding: EdgeInsets.all(10.sp),
+                              padding: EdgeInsets.all(10),
                               child: Text(' ~ ', style: ItemTitleStyle(context)),
                             ),
                             Expanded(
@@ -560,7 +560,7 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                         SizedBox(height: UI_LIST_TEXT_SPACE),
                         EditListSortWidget(_timeData['customMap'], EditListType.customField,
                              onItemAdd, onItemSelected, onListItemChanged: onListItemChanged),
-                        SizedBox(height: _bottomHeight.w + 20.w),
+                        SizedBox(height: _bottomHeight.w + 20),
                       ]
                     )
                     )

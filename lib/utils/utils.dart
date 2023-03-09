@@ -975,11 +975,11 @@ Future<Uint8List?> ReadFileByte(String filePath) async {
   return bytes;
 }
 
-inputLabel(BuildContext context, String label, String hint, {double width = 2}) {
-  return inputLabelSuffix(context, label, hint, width:width);
+inputLabel(BuildContext context, String label, String hint, {double width = 2, EdgeInsets? padding}) {
+  return inputLabelSuffix(context, label, hint, width: width, padding: padding);
 }
 
-inputLabelSuffix(BuildContext context, String label, String hint, {String suffix = '', bool isEnabled = true, double width = 1}) {
+inputLabelSuffix(BuildContext context, String label, String hint, {String suffix = '', bool isEnabled = true, double width = 1, EdgeInsets? padding}) {
   return InputDecoration(
     filled: true,
     isDense: true,
@@ -988,7 +988,7 @@ inputLabelSuffix(BuildContext context, String label, String hint, {String suffix
     suffixText: suffix,
     labelText: label,
     enabled: isEnabled,
-    contentPadding: EdgeInsets.all(10),
+    contentPadding: padding ?? EdgeInsets.all(10),
     hintStyle: TextStyle(color: Theme.of(context).hintColor.withOpacity(0.5), fontSize: 10),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -1094,6 +1094,7 @@ enum DropdownItemType {
   noticeShow,
   noticeSet,
   admin,
+  invite,
   copy,
   toNotice,
 }
@@ -1204,6 +1205,7 @@ const dropMenuNoticeAdd   = DropdownItem(DropdownItemType.noticeAdd, text: 'NOTI
 const dropMenuCopy        = DropdownItem(DropdownItemType.copy, text: 'COPY MESSAGE', icon: Icons.copy);
 const dropMenuDelete      = DropdownItem(DropdownItemType.delete, text: 'DELETE IT', icon: Icons.delete_forever);
 const dropMenuToNotice    = DropdownItem(DropdownItemType.toNotice, text: 'TO NOTICE', icon: Icons.campaign, manager: true);
+const dropMenuInvite      = DropdownItem(DropdownItemType.invite, text: 'USER INVITE', icon: Icons.person_add_alt_1_outlined, manager: true);
 const dropMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
 
 
@@ -1238,6 +1240,7 @@ class DropdownItems {
   static const List<DropdownItem> chatRoomMenu0     = [dropMenuEnter];
   static const List<DropdownItem> chatRoomMenu1     = [dropMenuExit];
   static const List<DropdownItem> chatRoomMenu2     = [dropMenuExit, dropMenuNoticeShow];
+  static const List<DropdownItem> chatUserInvite    = [dropMenuInvite];
   static const List<DropdownItem> chatRoomAdmin0    = [dropMenuTitle, dropMenuNoticeAdd, userMenuBanList];
   static const List<DropdownItem> chatRoomAdmin1    = [dropMenuTitle, dropMenuNoticeAdd];
   static const List<DropdownItem> chatRoomAdmin2    = [dropMenuNoticeAdd];
@@ -1559,12 +1562,12 @@ SubTitle(BuildContext context, String title, {double height = 30, double topPadd
 }
 
 // ignore: non_constant_identifier_names
-SubTitleSmall(BuildContext context, String title, [double height = 30, double topPadding = 0, double bottomPadding = 0]) {
+SubTitleSmall(BuildContext context, String title, {double height = 30, double topPadding = 0, double bottomPadding = 0, Color? color}) {
   return Container(
       height: height,
       alignment: Alignment.centerLeft,
       padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-      child: Text(title, style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontWeight: FontWeight.w500, fontSize: 12))
+      child: Text(title, style: TextStyle(color: color ?? Theme.of(context).colorScheme.secondary, fontWeight: FontWeight.w500, fontSize: 12))
   );
 }
 
@@ -1611,8 +1614,9 @@ RoundRectButton(String title, double? height, Function()? onPressed) {
 }
 
 // ignore: non_constant_identifier_names
-RoundRectButtonEx(BuildContext context, String title, {double height = 40, bool isEnabled = true, Function()? onPressed}) {
+RoundRectButtonEx(BuildContext context, String title, {double height = 40, double? width, bool isEnabled = true, Function()? onPressed}) {
   return SizedBox(
+    width: width,
     height: height,
     child: ElevatedButton(
       onPressed: () {
@@ -1627,7 +1631,7 @@ RoundRectButtonEx(BuildContext context, String title, {double height = 40, bool 
           alignment: Alignment.center,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
-              side: BorderSide(color: Theme.of(context).primaryColor.withOpacity(isEnabled ? 0.5 : 0.2), width: 2)
+              // side: BorderSide(color: Theme.of(context).primaryColor.withOpacity(isEnabled ? 0.5 : 0.2), width: 2)
           )
       ),
     ),

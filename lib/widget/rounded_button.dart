@@ -80,8 +80,8 @@ class RoundedButton extends RoundedButtonNormal {
   {
     Key? key,
     VoidCallback? onPressed,
-    Color textColor = Colors.white,
-    Color backgroundColor = Colors.black45,
+    Color textColor = Colors.white30,
+    Color backgroundColor = Colors.white10,
     Color borderColor = Colors.transparent,
     bool fullWidth = true,
     EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 20),

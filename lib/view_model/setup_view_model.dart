@@ -1,24 +1,15 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../data/app_data.dart';
-import '../../data/theme_manager.dart';
-import '../../services/api_service.dart';
-import '../../utils/utils.dart';
+import '../data/app_data.dart';
+import '../utils/utils.dart';
+import '../view/setup/setup_profile_screen.dart';
 
-class SetupScreen extends StatefulWidget {
-  SetupScreen({Key? key, this.moveTo}) : super (key : key);
+class SetupViewModel extends ChangeNotifier {
 
-  String? moveTo;
-
-  @override
-  State<StatefulWidget> createState() => SetupScreenState();
-}
-
-class SetupScreenState extends State<SetupScreen> with AutomaticKeepAliveClientMixin<SetupScreen> {
-  final api = Get.find<ApiService>();
-  late final List<ListItemEx> _itemList = [
+  late final List<ListItemEx> setupList = [
     // ListItemEx("프로필 편집", code: 0, callback: onSelect),
     ListItemEx('info', "Profile edit".tr, callback: onSelect),
     ListItemEx('contact', "Contact edit".tr, callback: onSelect),
@@ -42,26 +33,23 @@ class SetupScreenState extends State<SetupScreen> with AutomaticKeepAliveClientM
   onSelect(code) async {
     switch (code) {
       case 'info':
-        // Get.to(() => SetupProfileScreen())!.then((result) {
-        //   if (result == 'edited') {
-        //   }
-        // });
+        Get.to(() => SetupProfileScreen())!.then((result) {
+          if (result == 'edited') {
+            AppData.appViewModel.refresh();
+          }
+        });
         break;
       // case 'contact':
       //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupContactScreen()));
       //   break;
       // case 'sns':
       //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupSNSScreen())).then((result) {
-      //     setState(() {
-      //       AppData.isUpdateProfile = true;
-      //     });
+      //     AppData.isUpdateProfile = true;
       //   });
       //   break;
       // case 'creator':
       //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupCreatorScreen())).then((result) {
-      //     setState(() {
-      //       AppData.isUpdateProfile = true;
-      //     });
+      //     AppData.isUpdateProfile = true;
       //   });
       //   break;
       // case 'push':
@@ -111,7 +99,7 @@ class SetupScreenState extends State<SetupScreen> with AutomaticKeepAliveClientM
   }
 
   logOut(code) {
-    LOG('---> logout');
+    LOG('---> logout ${AppData.userInfo.loginType} / ${AppData.userInfo.loginId}');
     // switch (AppData.loginType) {
     //   case 'google':
     //     await signOutWithGoogle();
@@ -134,47 +122,7 @@ class SetupScreenState extends State<SetupScreen> with AutomaticKeepAliveClientM
     // writeLocalInfo();
     // AppData.loginMode = 0;
     // AppData.isLogoutUser = true;
-    ShowToast('Sign out done'.tr);
-    Navigator.of(context).pop();
-
-    Future.delayed(const Duration(milliseconds: 500), () {
-      FirebaseAuth.instance.signOut();
-    });
+    AppData.appViewModel.signOut();
   }
 
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  void initState() {
-    if (widget.moveTo != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        onSelect(widget.moveTo ?? '');
-      });
-    }
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('APP SETTING'.tr, style: AppBarTitleStyle(context)),
-          titleSpacing: 0,
-          toolbarHeight: 50,
-        ),
-        body: Container(
-          // height: MediaQuery.of(context).size.height,
-            child: ListView.builder(
-             itemCount: _itemList.length,
-             itemBuilder: (BuildContext context, int index) {
-               return _itemList[index];
-             }
-            )
-          ),
-        )
-    );
-  }
 }

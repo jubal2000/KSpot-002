@@ -158,266 +158,210 @@ class MainMyTabState extends State<MainMyTab> {
           controller: _scrollController,
           // physics: BouncingScrollPhysics(),
           child: Column(
-              children: [
-                // if (!_isMyProfile && widget.userViewModel.userInfo!['bannerData'] != null)
-                //   BannerScrollViewer(
-                //     widget.userViewModel.userInfo!['bannerData'],
-                //     rowHeight: 160,
-                //     showArrow: true,
-                //   ),
-                // if (_isMyProfile && JSON_NOT_EMPTY(widget.userViewModel.userInfo!['bannerData']))...[
-                //   Stack(
-                //     children: [
-                //       BannerScrollViewer(
-                //         widget.userViewModel.userInfo!['bannerData'],
-                //         rowHeight: 200,
-                //         showArrow: widget.userViewModel.userInfo!['bannerData'] != null,
-                //         isOwner : true,
-                //         onSelected: (key) async {
-                //           debugPrint('--> banner item select : $key');
-                //           for (var i=0; i<widget.userViewModel.userInfo!['bannerData'].length; i++) {
-                //             var bannerItem = widget.userViewModel.userInfo!['bannerData'][i];
-                //             if (key == bannerItem['id']) {
-                //               if (bannerItem['linkType'] == 'history') {
-                //                 var historyInfo = await api.getHistoryFromId(bannerItem['linkTarget']);
-                //                 var homeItem = HomeItem(historyInfo['id'], widget.userViewModel.userInfo!, widget.userViewModel.userInfo!, historyInfo);
-                //                 Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(ShowHistoryDetail(homeItem)));
-                //               } else if (bannerItem['linkType'] == 'goods') {
-                //                 var goodsInfo = await api.getGoodsDataFromId(bannerItem['linkTarget']);
-                //                 Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(ShowGoodsDetail(goodsInfo)));
-                //               }
-                //               break;
-                //             }
-                //           }
-                //         },
-                //       ),
-                //       Positioned(
-                //         right: 5,
-                //         bottom: 5,
-                //         child: IconButton(
-                //           icon: Stack(
-                //             alignment: Alignment.center,
-                //             children: [
-                //               Icon(Icons.settings_sharp, color: Colors.black.withOpacity(0.5), size: 28),
-                //               Icon(Icons.settings_sharp, color: Colors.white, size: 24),
-                //             ]
-                //           ),
-                //           onPressed: () {
-                //             Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(BannerEditScreen())).then((result) {
-                //               setState(() {
-                //                 widget.userViewModel.userInfo! = AppData.userInfo;
-                //                 debugPrint("--> BannerEditScreen result : ${widget.userViewModel.userInfo!['bannerData']}");
-                //               });
-                //             });
-                //           },
-                //         )
-                //       )
-                //     ],
-                //   ),
-                // ],
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.only(left: 15),
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.45,
-                        ),
-                        child: Column(
-                            children : [
-                              SizedBox(
-                                  width: _facePicSize,
-                                  height: _facePicSize,
-                                  child: Stack(
-                                      children: [
-                                        Container(
-                                          width: 300,
-                                          height: 300,
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xff7c94b6),
-                                            borderRadius: BorderRadius.all(Radius.circular(300)),
-                                            border: Border.all(
-                                              color: Theme.of(context).colorScheme.secondary,
-                                              width: 4.0,
-                                            ),
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.only(left: 15),
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.45,
+                      ),
+                      child: Column(
+                          children : [
+                            SizedBox(
+                                width: _facePicSize,
+                                height: _facePicSize,
+                                child: Stack(
+                                    children: [
+                                      Container(
+                                        width: 300,
+                                        height: 300,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xff7c94b6),
+                                          borderRadius: BorderRadius.all(Radius.circular(300)),
+                                          border: Border.all(
+                                            color: Theme.of(context).colorScheme.secondary,
+                                            width: 4.0,
                                           ),
-                                          child: getCircleImage(widget.userViewModel.userInfo!.pic, 300),
                                         ),
-                                        if (_isMyProfile)
-                                          Positioned(
-                                              right: 2,
-                                              bottom: 2,
-                                              child: IconButton(
-                                                icon: Stack(
-                                                    alignment: Alignment.center,
-                                                    children: [
-                                                      Icon(Icons.edit, color: Colors.black.withOpacity(0.5), size: 26),
-                                                      Icon(Icons.edit, color: Colors.white, size: 22),
-                                                    ]
-                                                ),
-                                                onPressed: () {
-                                                  setUserPic(context);
-                                                },
-                                              )
-                                          )
-                                      ]
-                                  )
-                              ),
-                              SizedBox(height: 15),
-                              Column(
-                                children: [
-                                  Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(widget.userViewModel.userInfo!.nickName, style: ItemTitleLargeStyle(context)),
-                                        // if (_isMyProfile)...[
-                                        //   SizedBox(width: 5),
-                                        //   GestureDetector(
-                                        //     child: Icon(Icons.edit, color: Colors.grey, size: 20),
-                                        //     onTap: () {
-                                        //       showTextInputLimitDialog(context, '닉네임 수정', '', widget.userViewModel.userInfo!['nickName'], 1, 12, 1, null).then((result) async {
-                                        //         if (result.isNotEmpty) {
-                                        //           widget.userViewModel.userInfo!['nickName'] = result;
-                                        //           showLoadingDialog(context, 'Now Uploading...');
-                                        //           var setResult = await setUserInfoItem(widget.userViewModel.userInfo!, 'nickName');
-                                        //           Navigator.of(dialogContext!).pop();
-                                        //           if (setResult) {
-                                        //             setState(() {
-                                        //               AppData.USER_NICKNAME = result;
-                                        //             });
-                                        //           }
-                                        //         }
-                                        //       });
-                                        //     },
-                                        //   )
-                                        // ]
-                                      ]
-                                  ),
-                                  if (widget.userViewModel.userInfo!.email.isNotEmpty)...[
-                                    SizedBox(height: 10),
-                                    GestureDetector(
-                                      onTap: () {
-                                        Clipboard.setData(ClipboardData(text: STR(widget.userViewModel.userInfo!.email)));
-                                        ShowToast('copied to clipboard'.tr);
-                                      },
-                                      child: Text(widget.userViewModel.userInfo!.email, style: ItemDescStyle(context), maxLines: 3),
-                                    ),
-                                  ]
-                                ],
-                              ),
-                              Container(
-                                padding: EdgeInsets.fromLTRB(20, 10, 20, 0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    if (!_isMyProfile)...[
-                                      showSendMessageWidget(context, widget.userViewModel.userInfo!, title: 'TALK'.tr),
-                                      SizedBox(width: 2),
-                                    ],
-                                    LikeWidget(context, 'user', widget.userViewModel.userInfo!.toJson(), showCount: true, isEnabled: !_isMyProfile),
-                                  ],
-                                  // children: _shareLink,
-                                ),
-                              ),
-                              if (_snsData.isNotEmpty)...[
-                                Container(
-                                    padding: EdgeInsets.only(top: 10, bottom: 20),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                      children: [
-                                        for (var item in _snsData.entries)...[
-                                          if (_snsData.containsKey(STR(item.value['id'])))...[
-                                            GestureDetector(
-                                                onTap: () async {
-                                                  final snsItem = getSNSItemFromUser(STR(item.value['id']), _snsData);
-                                                  var protocolUrl = '';
-                                                  var launchMode = LaunchMode.platformDefault;
-                                                  LOG('--> SNS select : $snsItem');
-                                                  switch(STR(item.value['id'])) {
-                                                    case 'facebook':
-                                                      protocolUrl = 'fb://facewebmodal/f?href=${STR(snsItem['link'])}';
-                                                      break;
-                                                    case 'instagram':
-                                                      protocolUrl = 'instagram://user?username=${STR(snsItem['link']).toString().replaceAll("@", '')}';
-                                                      break;
-                                                    default:
-                                                      protocolUrl = STR(snsItem['link']);
-                                                      launchMode = LaunchMode.externalApplication;
-                                                      break;
-                                                  }
-                                                  LOG('--> protocolUrl : $protocolUrl');
-                                                  var url = Uri.parse(protocolUrl);
-                                                  await launchUrl(url, mode: launchMode);
-                                                },
-                                                child: showImage(STR(item.value['icon']), Size(_snsPicSize, _snsPicSize), color: Theme.of(context).hintColor)
-                                            ),
-                                          ]
-                                        ]
-                                      ],
-                                    )
+                                        child: getCircleImage(widget.userViewModel.userInfo!.pic, 300),
+                                      ),
+                                      if (_isMyProfile)
+                                        Positioned(
+                                            right: 2,
+                                            bottom: 2,
+                                            child: IconButton(
+                                              icon: Stack(
+                                                  alignment: Alignment.center,
+                                                  children: [
+                                                    Icon(Icons.edit, color: Colors.black.withOpacity(0.5), size: 26),
+                                                    Icon(Icons.edit, color: Colors.white, size: 22),
+                                                  ]
+                                              ),
+                                              onPressed: () {
+                                                setUserPic(context);
+                                              },
+                                            )
+                                        )
+                                    ]
                                 )
-                              ]
+                            ),
+                            SizedBox(height: 15),
+                            Column(
+                              children: [
+                                Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(widget.userViewModel.userInfo!.nickName, style: ItemTitleLargeStyle(context)),
+                                      // if (_isMyProfile)...[
+                                      //   SizedBox(width: 5),
+                                      //   GestureDetector(
+                                      //     child: Icon(Icons.edit, color: Colors.grey, size: 20),
+                                      //     onTap: () {
+                                      //       showTextInputLimitDialog(context, '닉네임 수정', '', widget.userViewModel.userInfo!['nickName'], 1, 12, 1, null).then((result) async {
+                                      //         if (result.isNotEmpty) {
+                                      //           widget.userViewModel.userInfo!['nickName'] = result;
+                                      //           showLoadingDialog(context, 'Now Uploading...');
+                                      //           var setResult = await setUserInfoItem(widget.userViewModel.userInfo!, 'nickName');
+                                      //           Navigator.of(dialogContext!).pop();
+                                      //           if (setResult) {
+                                      //             setState(() {
+                                      //               AppData.USER_NICKNAME = result;
+                                      //             });
+                                      //           }
+                                      //         }
+                                      //       });
+                                      //     },
+                                      //   )
+                                      // ]
+                                    ]
+                                ),
+                                if (widget.userViewModel.userInfo!.email.isNotEmpty)...[
+                                  SizedBox(height: 10),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Clipboard.setData(ClipboardData(text: STR(widget.userViewModel.userInfo!.email)));
+                                      ShowToast('copied to clipboard'.tr);
+                                    },
+                                    child: Text(widget.userViewModel.userInfo!.email, style: ItemDescStyle(context), maxLines: 3),
+                                  ),
+                                ]
+                              ],
+                            ),
+                            Container(
+                              padding: EdgeInsets.fromLTRB(20, 10, 20, 0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (!_isMyProfile)...[
+                                    showSendMessageWidget(context, widget.userViewModel.userInfo!, title: 'TALK'.tr),
+                                    SizedBox(width: 2),
+                                  ],
+                                  LikeWidget(context, 'user', widget.userViewModel.userInfo!.toJson(), showCount: true, isEnabled: !_isMyProfile),
+                                ],
+                                // children: _shareLink,
+                              ),
+                            ),
+                            if (_snsData.isNotEmpty)...[
+                              Container(
+                                  padding: EdgeInsets.only(top: 10, bottom: 20),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      for (var item in _snsData.entries)...[
+                                        if (_snsData.containsKey(STR(item.value['id'])))...[
+                                          GestureDetector(
+                                              onTap: () async {
+                                                final snsItem = getSNSItemFromUser(STR(item.value['id']), _snsData);
+                                                var protocolUrl = '';
+                                                var launchMode = LaunchMode.platformDefault;
+                                                LOG('--> SNS select : $snsItem');
+                                                switch(STR(item.value['id'])) {
+                                                  case 'facebook':
+                                                    protocolUrl = 'fb://facewebmodal/f?href=${STR(snsItem['link'])}';
+                                                    break;
+                                                  case 'instagram':
+                                                    protocolUrl = 'instagram://user?username=${STR(snsItem['link']).toString().replaceAll("@", '')}';
+                                                    break;
+                                                  default:
+                                                    protocolUrl = STR(snsItem['link']);
+                                                    launchMode = LaunchMode.externalApplication;
+                                                    break;
+                                                }
+                                                LOG('--> protocolUrl : $protocolUrl');
+                                                var url = Uri.parse(protocolUrl);
+                                                await launchUrl(url, mode: launchMode);
+                                              },
+                                              child: showImage(STR(item.value['icon']), Size(_snsPicSize, _snsPicSize), color: Theme.of(context).hintColor)
+                                          ),
+                                        ]
+                                      ]
+                                    ],
+                                  )
+                              )
                             ]
+                          ]
                         ),
                       ),
                       Expanded(
                         child: Container(
                           padding: EdgeInsets.only(left: 10, right: 15),
                           child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children : [
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 10),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                          child: Column(
-                                            children: [
-                                              Text(NUMBER_K(widget.userViewModel.userInfo!.followCount), style: ItemTitleStyle(context)),
-                                              Text("FOLLOW".tr, style: _followTextStyle),
-                                            ],
-                                          )
-                                      ),
-                                      Expanded(
-                                          child: Column(
-                                            children: [
-                                              Text(NUMBER_K(widget.userViewModel.userInfo!.followerCount), style: ItemTitleStyle(context)),
-                                              Text("FOLLOWER".tr, style: _followTextStyle),
-                                            ],
-                                          )
-                                      ),
-                                    ],
-                                  ),
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children : [
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                        child: Column(
+                                          children: [
+                                            Text(NUMBER_K(widget.userViewModel.userInfo!.followCount), style: ItemTitleStyle(context)),
+                                            Text("FOLLOW".tr, style: _followTextStyle),
+                                          ],
+                                        )
+                                    ),
+                                    Expanded(
+                                        child: Column(
+                                          children: [
+                                            Text(NUMBER_K(widget.userViewModel.userInfo!.followerCount), style: ItemTitleStyle(context)),
+                                            Text("FOLLOWER".tr, style: _followTextStyle),
+                                          ],
+                                        )
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(height: 20),
-                                Stack(
-                                    children: [
-                                      TextField(
-                                        readOnly: true,
-                                        controller: _msgTextController,
-                                        maxLines: 8,
-                                        decoration: inputLabel(context, '', ''),
-                                        onTap: () {
-                                          onMessageEdit();
-                                        },
-                                      ),
-                                      if (_isMyProfile)
-                                        Positioned(
-                                            right: 10,
-                                            bottom: 10,
-                                            child: GestureDetector(
-                                                onTap: () {
-                                                  onMessageEdit();
-                                                },
-                                                child: Icon(Icons.edit, color: Theme.of(context).hintColor)
-                                            )
-                                        ),
-                                    ]
-                                )
-                              ]
+                              ),
+                              SizedBox(height: 20),
+                              Stack(
+                                children: [
+                                  TextField(
+                                    readOnly: true,
+                                    controller: _msgTextController,
+                                    maxLines: 6,
+                                    decoration: inputLabel(context, '', ''),
+                                    onTap: () {
+                                      onMessageEdit();
+                                    },
+                                  ),
+                                  if (_isMyProfile)
+                                    Positioned(
+                                      right: 10,
+                                      bottom: 10,
+                                      child: GestureDetector(
+                                          onTap: () {
+                                            onMessageEdit();
+                                          },
+                                          child: Icon(Icons.edit, color: Theme.of(context).hintColor)
+                                      )
+                                    ),
+                                ]
+                              )
+                            ]
                           ),
                         ),
                       ),
@@ -574,7 +518,8 @@ class MyProfileTab extends StatelessWidget {
                 refreshShowList();
                 return StatefulBuilder(
                     builder: (context, setState) {
-                      return Column(
+                      return ListView(
+                        shrinkWrap: true,
                           children: [
                             ListView.builder(
                               shrinkWrap: true,

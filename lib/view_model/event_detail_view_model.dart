@@ -19,7 +19,7 @@ import '../repository/user_repository.dart';
 import '../services/cache_service.dart';
 import '../utils/utils.dart';
 import '../view/event/event_edit_screen.dart';
-import '../view/profile/target_profile.dart';
+import '../view/profile/profile_target_screen.dart';
 import '../widget/comment_widget.dart';
 import '../widget/content_item_card.dart';
 import '../widget/custom_field_widget.dart';
@@ -188,7 +188,7 @@ class EventDetailViewModel extends ChangeNotifier {
             child: UserCardWidget(user.value, onSelected: (userId) {
               userRepo.getUserInfo(user.value['userId'] ?? user.value['id']).then((userInfo) {
                 if (JSON_NOT_EMPTY(userInfo)) {
-                  Get.to(() => TargetProfileScreen(userInfo!));
+                  Get.to(() => ProfileTargetScreen(userInfo!));
                 } else {
                   showUserAlertDialog(buildContext!, '${user.value['userId']}');
                 }

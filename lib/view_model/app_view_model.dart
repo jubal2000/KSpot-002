@@ -41,6 +41,7 @@ const COUNTRY_LOG_MAX = 5;
 
 class AppViewModel extends ChangeNotifier {
   final cache = Get.find<CacheService>();
+  final fire  = Get.find<FirebaseService>();
   var isShowDialog = false;
   var isCanStart = false;
   BuildContext? buildContext;
@@ -51,6 +52,14 @@ class AppViewModel extends ChangeNotifier {
 
   init(BuildContext context) {
     buildContext = context;
+  }
+
+  signOut() {
+    Future.delayed(const Duration(milliseconds: 500), () {
+      fire.fireAuth!.signOut();
+      notifyListeners();
+      ShowToast('Sign out done'.tr);
+    });
   }
 
   setCanStart(value) {

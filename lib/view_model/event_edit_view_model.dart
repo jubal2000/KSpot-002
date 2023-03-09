@@ -20,7 +20,7 @@ import '../repository/event_repository.dart';
 import '../utils/utils.dart';
 import '../view/follow/follow_screen.dart';
 import '../widget/event_time_edit_widget.dart';
-import '../view/profile/target_profile.dart';
+import '../view/profile/profile_target_screen.dart';
 import '../widget/card_scroll_viewer.dart';
 import '../widget/edit/edit_list_widget.dart';
 import '../widget/event_group_dialog.dart';
@@ -217,7 +217,7 @@ class EventEditViewModel extends ChangeNotifier {
         if (status == 0) {
           var userInfo = await userRepo.getUserInfo(managerData[key]['id']);
           if (userInfo != null) {
-            Get.to(() => TargetProfileScreen(userInfo))!.then((result) {
+            Get.to(() => ProfileTargetScreen(userInfo))!.then((result) {
 
             });
           } else {

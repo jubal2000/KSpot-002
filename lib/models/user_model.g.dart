@@ -12,13 +12,18 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       loginId: json['loginId'] as String,
       loginType: json['loginType'] as String,
       nickName: json['nickName'] as String,
+      realName: json['realName'] as String? ?? '',
       pic: json['pic'] as String,
       message: json['message'] as String,
       birthYear: json['birthYear'] as int,
       gender: json['gender'] as String,
       mobile: json['mobile'] as String,
       mobileIntl: json['mobileIntl'] as String,
+      mobileShow: json['mobileShow'] as int? ?? 0,
+      mobileVerifyTime: json['mobileVerifyTime'] as String,
       email: json['email'] as String,
+      emailShow: json['emailShow'] as int? ?? 0,
+      emailVerifyTime: json['emailVerifyTime'] as String,
       country: json['country'] as String,
       countryState: json['countryState'] as String,
       followCount: json['followCount'] as int,
@@ -27,10 +32,6 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       deviceType: json['deviceType'] as String,
       updateTime: json['updateTime'] as String,
       createTime: json['createTime'] as String,
-      mobileVerifyTime: json['mobileVerifyTime'] as String,
-      emailVerifyTime: json['emailVerifyTime'] as String,
-      mobileVerified: json['mobileVerified'] as bool,
-      emailVerified: json['emailVerified'] as bool,
       likeGroup: (json['likeGroup'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
@@ -52,7 +53,9 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       optionPush: (json['optionPush'] as List<dynamic>?)
           ?.map((e) => OptionData.fromJson(e as Map<String, dynamic>))
           .toList(),
-    );
+    )..refundBank = json['refundBank'] == null
+        ? null
+        : BankData.fromJson(json['refundBank'] as Map<String, dynamic>);
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'id': instance.id,
@@ -60,13 +63,18 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'loginId': instance.loginId,
       'loginType': instance.loginType,
       'nickName': instance.nickName,
+      'realName': instance.realName,
       'pic': instance.pic,
       'message': instance.message,
       'birthYear': instance.birthYear,
       'gender': instance.gender,
       'mobile': instance.mobile,
       'mobileIntl': instance.mobileIntl,
+      'mobileShow': instance.mobileShow,
+      'mobileVerifyTime': instance.mobileVerifyTime,
       'email': instance.email,
+      'emailShow': instance.emailShow,
+      'emailVerifyTime': instance.emailVerifyTime,
       'country': instance.country,
       'countryState': instance.countryState,
       'followCount': instance.followCount,
@@ -75,10 +83,7 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'deviceType': instance.deviceType,
       'updateTime': instance.updateTime,
       'createTime': instance.createTime,
-      'mobileVerifyTime': instance.mobileVerifyTime,
-      'emailVerifyTime': instance.emailVerifyTime,
-      'mobileVerified': instance.mobileVerified,
-      'emailVerified': instance.emailVerified,
+      'refundBank': instance.refundBank?.toJson(),
       'likeGroup': instance.likeGroup,
       'likePlace': instance.likePlace,
       'likeEvent': instance.likeEvent,

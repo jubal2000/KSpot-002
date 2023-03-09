@@ -2,6 +2,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:kspot_002/models/upload_model.dart';
 import 'package:kspot_002/models/user_model.dart';
+import 'package:uuid/uuid.dart';
 import '../utils/utils.dart';
 
 part 'etc_model.g.dart';
@@ -139,6 +140,34 @@ class OptionData {
   });
   factory OptionData.fromJson(JSON json) => _$OptionDataFromJson(json);
   JSON toJson() => _$OptionDataToJson(this);
+}
+
+@JsonSerializable()
+class BankData {
+  String  id;
+  int     status;
+  String  title;
+  String  name;     // bank name..
+  String  account;  // bank account..
+  String  author;   // bank author..
+  String  createTime;
+
+  BankData({
+    required this.id,
+    required this.status,
+    required this.title,
+    required this.name,
+    required this.account,
+    required this.author,
+    required this.createTime,
+  });
+
+  static get empty {
+    return BankData(id: Uuid().v4(), status: 1, title: '', name: '', account: '', author: '', createTime: '');
+  }
+
+  factory BankData.fromJson(JSON json) => _$BankDataFromJson(json);
+  JSON toJson() => _$BankDataToJson(this);
 }
 
 @JsonSerializable()

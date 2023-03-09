@@ -13,7 +13,7 @@ import '../../repository/user_repository.dart';
 import '../../services/api_service.dart';
 import '../../utils/utils.dart';
 import '../../widget/user_item_widget.dart';
-import '../profile/target_profile.dart';
+import '../profile/profile_target_screen.dart';
 
 class MessageGroupItem extends StatefulWidget {
   MessageGroupItem(this.targetId, this.targetName, this.targetPic, this.messageItem,
@@ -65,7 +65,7 @@ class MessageGroupItemState extends State<MessageGroupItem> {
             onTap: () async {
               var userInfo = await userRepo.getUserInfo(widget.targetId);
               if (userInfo != null) {
-                Get.to(() => TargetProfileScreen(userInfo!))!.then((value) {});
+                Get.to(() => ProfileTargetScreen(userInfo!))!.then((value) {});
               } else {
                 showUserAlertDialog(context, '${'Target user'.tr} : ${widget.targetName}');
               }

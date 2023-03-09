@@ -75,7 +75,7 @@ class SignInScreen extends StatelessWidget {
                                     LOG('--> userValue.user!.uid : ${userValue.user!.uid}');
                                     AppData.loginInfo.loginId   = userValue.user!.uid;
                                     AppData.loginInfo.loginType = 'phone';
-                                    AppData.loginInfo.mobileVerified = true;
+                                    AppData.loginInfo.mobileVerifyTime = CURRENT_SERVER_TIME();
                                     // viewModel.isMobileVerified = true;
                                     // Future.delayed(const Duration(milliseconds: 500), () async {
                                     //   Get.toNamed(Routes.HOME);

@@ -28,14 +28,16 @@ class AuthService extends GetxService {
   Function(int)? onError;
 
   var isLoginCheckDone = false;
+  var isSignOutStatus = false;
 
   initUserSignIn() {
     if (isLoginCheckDone) return;
+    isSignOutStatus = true;
     fire.fireAuth!.authStateChanges()
         .listen((User? user) async {
       // reset user info..
-      AppData.loginInfo = UserModelEx.signOut();
-      AppData.userInfo  = UserModelEx.signOut();
+      AppData.loginInfo = UserModel.empty;
+      AppData.userInfo  = UserModel.empty;
 
       if (user == null) {
         LOG('------> User is currently signed out!');

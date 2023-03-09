@@ -18,7 +18,7 @@ import '../../services/api_service.dart';
 import '../../utils/utils.dart';
 import '../../view_model/chat_view_model.dart';
 import '../../widget/user_item_widget.dart';
-import '../profile/target_profile.dart';
+import '../profile/profile_target_screen.dart';
 
 class ChatGroupItem extends StatelessWidget {
   ChatGroupItem(this.groupItem,

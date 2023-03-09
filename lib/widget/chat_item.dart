@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/models/upload_model.dart';
 import 'package:kspot_002/repository/user_repository.dart';
-import 'package:kspot_002/view/profile/target_profile.dart';
+import 'package:kspot_002/view/profile/profile_target_screen.dart';
 import 'package:uuid/uuid.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -293,7 +293,7 @@ class ChatItemState extends State<ChatItem> {
       case DropdownItemType.profile:
         var userInfo = await userRepo.getUserInfo(targetId);
         if (userInfo != null) {
-          Get.to(() => TargetProfileScreen(userInfo))!.then((value) {
+          Get.to(() => ProfileTargetScreen(userInfo))!.then((value) {
           });
         } else {
           showUserAlertDialog(context, '${'Target user'.tr} : ${widget.messageItem['senderName']}');
@@ -438,7 +438,7 @@ class ChatItemState extends State<ChatItem> {
     //         case DropdownItemType.profile:
     //           var userInfo = await userRepo.getUserInfo(widget.messageItem['senderId']);
     //           if (userInfo != null) {
-    //             Get.to(() => TargetProfileScreen(userInfo))!.then((value) {
+    //             Get.to(() => ProfileTargetScreen(userInfo))!.then((value) {
     //             });
     //           } else {
     //             showUserAlertDialog(context, '${'Target user'.tr} : ${widget.messageItem['senderName']}');

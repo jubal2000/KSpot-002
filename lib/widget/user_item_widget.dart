@@ -8,7 +8,7 @@ import '../data/dialogs.dart';
 import '../data/theme_manager.dart';
 import '../models/user_model.dart';
 import '../utils/utils.dart';
-import '../view/profile/target_profile.dart';
+import '../view/profile/profile_target_screen.dart';
 
 class UserCardWidget extends StatefulWidget {
   UserCardWidget(this.userInfo, { Key? key,
@@ -240,7 +240,7 @@ class UserIdCardOneWidget extends StatefulWidget {
 class _UserIdCardOneState extends State<UserIdCardOneWidget> {
   var userRepo = UserRepository();
   Future<UserModel?>? userInit;
-  UserModel userInfo = UserModelEx.empty('');
+  var userInfo = UserModel.empty;
   var isMyProfile = false;
   var isOpen = false;
 
@@ -274,7 +274,7 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
           if (widget.onSelected != null) {
             widget.onSelected!(userInfo.id);
           } else {
-            Get.to(() => TargetProfileScreen(userInfo))!.then((value) {
+            Get.to(() => ProfileTargetScreen(userInfo))!.then((value) {
               setState(() {});
             });
           }
@@ -532,7 +532,7 @@ class _UserInfoListCardState extends State<UserInfoListCardWidget> {
               widget.onSelected!(user['id']);
             } else {
               Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                  TargetProfileScreen(UserModel.fromJson(user)))).then((value) {
+                  ProfileTargetScreen(UserModel.fromJson(user)))).then((value) {
                 setState(() {});
               });
             }

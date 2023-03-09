@@ -33,10 +33,12 @@ enum VerifyStep {
 }
 
 class VerifyPhoneWidget extends StatefulWidget {
-  VerifyPhoneWidget(this.phoneNumber, {Key? key, this.isSignIn = true, this.onCheckComplete}) : super(key: key);
+  VerifyPhoneWidget(this.phoneNumber, {Key? key, this.phoneIntl, this.isSignIn = true, this.isValidated = false, this.onCheckComplete}) : super(key: key);
 
-  String phoneNumber;
-  bool isSignIn;
+  String  phoneNumber;
+  String? phoneIntl;
+  bool    isSignIn;
+  bool    isValidated;
   Function(UserCredential?)? onCheckComplete;
 
   @override
@@ -53,6 +55,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
   final countTimeValue = 0.obs;
   final phoneCheckSec = 30;
   final phoneResendSec = 20;
+  final buttonMinWidth = 100.0;
 
   String _phone       = '';
   String _phoneIntl   = '';
@@ -63,7 +66,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
 
   bool _phoneCheck      = false;
   bool _phoneCheck2     = false;
-  bool _phoneValidated  = AppData.userInfo.mobileVerified;
+  bool _phoneValidated  = false;
   bool _phoneCodeReady  = false;
   bool _hasError = false;
 
@@ -75,8 +78,9 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
 
   refreshData() {
     LOG('--> VerifyPhoneWidget refreshData : ${widget.phoneNumber}');
-    _phone = widget.phoneNumber.isNotEmpty ? widget.phoneNumber : '010';
-    _phoneCheck = widget.isSignIn;
+    _phone            = widget.phoneNumber.isNotEmpty ? widget.phoneNumber : '010';
+    _phoneCheck       = widget.isSignIn;
+    _phoneValidated   = widget.isValidated;
     _textController[SignUpPhoneText.phone.index].text = _phone;
     _textController[SignUpPhoneText.phoneCheck.index].text = '';
   }
@@ -191,15 +195,17 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
         return RoundedButton.disable(
           'SEND'.tr,
           fullWidth: false,
-          minWidth: 100.w,
+          minWidth: buttonMinWidth,
           radius: 8.w,
         );
       case VerifyStep.sendReady:
         return RoundedButton.active(
           'SEND'.tr,
           fullWidth: false,
-          minWidth: 100.w,
+          minWidth: buttonMinWidth,
           radius: 8.w,
+          textColor: Theme.of(context).primaryColor,
+          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.25),
           onPressed: () {
             sendPhoneVerifyCode();
           },
@@ -208,7 +214,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
         return RoundedButton.disable(
           '${'RESEND'.tr} ${phoneResendSec - (phoneCheckSec - countTimeValue.value)}',
           fullWidth: false,
-          minWidth: 100.w,
+          minWidth: buttonMinWidth,
           radius: 8.w,
         );
       case VerifyStep.resendReady:
@@ -218,8 +224,10 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
           },
           'RESEND'.tr,
           fullWidth: false,
-          minWidth: 100.w,
+          minWidth: buttonMinWidth,
           radius: 8.w,
+          textColor: Theme.of(context).primaryColor,
+          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.25),
         );
     }
   }
@@ -242,14 +250,18 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
   @override
   void initState() {
     refreshData();
-    if (CountryCodes[AppData.currentCountry] != null) {
-      var countryList = countries
-          .where((country) => CountryCodes[AppData.currentCountry]!.contains(country.code))
-          .toList();
-      _phoneIntl = '+${countryList.first.dialCode}';
+    if (widget.phoneIntl != null) {
+      _phoneIntl = widget.phoneIntl!;
     } else {
-      AppData.currentCountry = 'Korea South';
-      _phoneIntl = '+82';
+      if (CountryCodes[AppData.currentCountry] != null) {
+        var countryList = countries
+            .where((country) => CountryCodes[AppData.currentCountry]!.contains(country.code))
+            .toList();
+        _phoneIntl = '+${countryList.first.dialCode}';
+      } else {
+        AppData.currentCountry = 'Korea South';
+        _phoneIntl = '+82';
+      }
     }
     LOG('--> countryList : ${AppData.currentCountry} -> $_phoneIntl');
     super.initState();
@@ -291,11 +303,11 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                 )
               )
             ),
-            if (_phoneCheck)...[
+            if (!_phoneValidated)...[
               SizedBox(width: 10),
               phoneButtonWidget(context),
             ],
-            if (!_phoneCheck)...[
+            if (_phoneValidated)...[
               SizedBox(width: 10),
               Padding(
                   padding: EdgeInsets.only(top: 5),
@@ -371,7 +383,6 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                         LOG('--> updatePhoneNumber done : $_phone');
                         AppData.userInfo.mobile = _phone;
                         AppData.userInfo.mobileIntl = _phoneIntl;
-                        AppData.userInfo.mobileVerified = true;
                         AppData.userInfo.mobileVerifyTime = CURRENT_SERVER_TIME();
                         // api.setUserInfo(AppData.userInfo).then((result) {
                         //   setState(() {

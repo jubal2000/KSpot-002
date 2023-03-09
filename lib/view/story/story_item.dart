@@ -23,7 +23,7 @@ import '../../widget/share_widget.dart';
 import '../../widget/user_item_widget.dart';
 import '../event/event_detail_screen.dart';
 import '../place/place_detail_screen.dart';
-import '../profile/target_profile.dart';
+import '../profile/profile_target_screen.dart';
 
 class MainStoryItem extends StatefulWidget {
   MainStoryItem(this.itemInfo, {Key? key, this.index = 0,
@@ -101,7 +101,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
         onSelected: (_) async {
           var userInfo = await api.getUserInfoFromId(widget.itemInfo.userId);
           if (JSON_NOT_EMPTY(userInfo)) {
-            Get.to(() => TargetProfileScreen(UserModel.fromJson(userInfo!)))!.then((value) {
+            Get.to(() => ProfileTargetScreen(UserModel.fromJson(userInfo!)))!.then((value) {
 
             });
           } else {

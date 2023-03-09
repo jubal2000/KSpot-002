@@ -518,12 +518,16 @@ class Words extends Translations {
       'NAME': '이름',
       'Please check length': '길이를 확인해 주세요',
       'DEPOSIT & REFUND INFO': '입금 & 환불 정보',
+      'REFUND ACCOUNT INFO': '환불 계좌 정보',
       'Bank title': '은행명',
       'Bank account(number only)': '계좌번호(숫자만 입력)',
-      'Real name': '계좌실명',
+      'Bank Account holder name': '계좌 소유자 이름',
+      'Real name': '사용자 실명',
       'Do you want to save the modified profile?': '수정된 프로필을 저장하시겠습니까?',
       'Block date': '차단일시',
       'Report date': '신고일시',
+      'REAL NAME': '유저 실명',
+      'Real name is never disclosed': '실명은 절대로 공개되지 않습니다',
 
       // setup_block_screen
       'Block list': '차단 목록',
@@ -563,10 +567,10 @@ class Words extends Translations {
       'Invalid verification code': '잘못된 인증코드입니다',
       'Re-login is required': '재로그인이 필요합니다',
       'Email verify done': '이메일 인증 완료',
-      'Need email verify': '이메일 인증이 필요',
+      'Need email verify': '이메일 인증이 필요합니다',
       'Waiting for email validate': '이메일 인증 대기중',
       '(Check your email or spam box)': '(이메일 상자나 스팸보관함 확인)',
-      'Need phone verify': '전화번호 인증',
+      'Need phone verify': '전화번호 인증이 필요합니다',
       'Phone change completed': '전화번호 변경 완료',
       'Too many requests': '이미 전송되었습니다',
 
@@ -725,6 +729,7 @@ class Words extends Translations {
       'Are you sure you want to quit the Sign Up?': '회원가입을 종료 하시겠습니까?',
       'copied to clipboard': '클립보드에 복사되었습니다',
       'Update is complete': '업데이트가 완료되었습니다',
+      'Update is failed': '업데이트에 실패했습니다',
       'DELETE IT': '삭제하기',
       'Deleted': '삭제 되었습니다',
       'Spot group select': '스팟 그룹 선택',
@@ -754,6 +759,8 @@ class Words extends Translations {
       'Added': '추가됨',
       'Don\'t see again': '다시 안보기',
       'Go to market': '마켓으로 이동',
+      'UPDATE': '수정하기',
+      'Profile Update': '프로필 수정',
 
       // category group
       'Sports / Fitness': '스포츠 / 피트니스',

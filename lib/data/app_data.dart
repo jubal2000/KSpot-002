@@ -22,16 +22,18 @@ import '../view_model/story_view_model.dart';
 const SCROLL_SPEED = 250;
 const APP_VERSION = '0.0.1';
 
-const ORG_SCREEN_WITH = 411;
+
 const NICKNAME_LENGTH = 12;
-const TITLE_LENGTH = 24;
 const PASSWORD_LENGTH = 12;
+
+const TITLE_LENGTH = 24;
 const DESC_LENGTH = 999;
 const STORY_DESC_LENGTH = 500;
 const COMMENT_LENGTH = 999;
 const IMAGE_SIZE_MAX = 512.0;
 const PIC_IMAGE_SIZE_MAX = 2048.0;
 const PIN_IMAGE_SIZE_MAX = 12.0;
+const ORG_SCREEN_WITH = 411;
 const UPLOAD_FILE_MAX = 5;
 const CHAT_NOTICE_MAX = 5;
 
@@ -90,8 +92,8 @@ class AppData {
   static var defaultInfoID = 'info0001';
 
   static StartModel? startInfo;
-  static UserModel userInfo = UserModelEx.empty('');
-  static UserModel loginInfo = UserModelEx.empty('');
+  static UserModel userInfo  = UserModel.empty;
+  static UserModel loginInfo = UserModel.empty;
 
   static JSON listSelectData = {};
   static int? localDataVer;

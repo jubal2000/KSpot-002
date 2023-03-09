@@ -388,7 +388,7 @@ class FollowListItemState extends State<FollowListItem> {
             //   AppData.listSelectData[_userInfo['id']] = _userInfo;
             // }
           } else {
-            // Navigator.push(context, MaterialPageRoute(builder: (context) => TargetProfileScreen(_userInfo)));
+            // Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileTargetScreen(_userInfo)));
           }
         },
         child: Container(

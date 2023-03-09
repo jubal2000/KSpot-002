@@ -128,6 +128,26 @@ Map<String, dynamic> _$OptionDataToJson(OptionData instance) =>
       'value': instance.value,
     };
 
+BankData _$BankDataFromJson(Map<String, dynamic> json) => BankData(
+      id: json['id'] as String,
+      status: json['status'] as int,
+      title: json['title'] as String,
+      name: json['name'] as String,
+      account: json['account'] as String,
+      author: json['author'] as String,
+      createTime: json['createTime'] as String,
+    );
+
+Map<String, dynamic> _$BankDataToJson(BankData instance) => <String, dynamic>{
+      'id': instance.id,
+      'status': instance.status,
+      'title': instance.title,
+      'name': instance.name,
+      'account': instance.account,
+      'author': instance.author,
+      'createTime': instance.createTime,
+    };
+
 AddressData _$AddressDataFromJson(Map<String, dynamic> json) => AddressData(
       address1: json['address1'] as String,
       address2: json['address2'] as String,

@@ -42,7 +42,7 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
                 LOG('--> ShowLikeWidget isOn [$_title] : $_isLiked / ${targetInfo['likeCount']}');
                 return GestureDetector(
                   child: Container(
-                      width:  35,
+                      width:  iconSize + 15,
                       color: Colors.transparent,
                       padding: padding,
                       child: Column(
@@ -74,8 +74,8 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
               }
           );
         } else {
-          return Container(
-            width: 35,
+          return SizedBox(
+            width: iconSize + 15,
             child: Center(
               child: showLoadingCircleSquare(20),
             )

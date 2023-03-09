@@ -872,6 +872,12 @@ class ChatTalkViewModel extends ChangeNotifier {
             value: item,
             child: DropdownItems.buildItem(buildContext!, item),
           )),
+      ],
+      if (isAdmin.value || roomInfo!.type == ChatType.public)...[
+        ...DropdownItems.chatUserInvite.map((item) => DropdownMenuItem<DropdownItem>(
+          value: item,
+          child: DropdownItems.buildItem(buildContext!, item),
+        )),
       ]
     ];
   }
@@ -893,6 +899,9 @@ class ChatTalkViewModel extends ChangeNotifier {
             });
           }
         });
+        break;
+      case DropdownItemType.invite:
+        // TODO: user invite..
         break;
       case DropdownItemType.title:
         JSON? imageInfo = roomInfo!.type == ChatType.public ? {roomInfo!.id: {'id': roomInfo!.id, 'url': roomInfo!.pic}} : null;

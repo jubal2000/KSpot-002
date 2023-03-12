@@ -292,12 +292,6 @@ CURRENT_SERVER_TIME() {
 }
 
 // ignore: non_constant_identifier_names
-CURRENT_TEXT_TIME() {
-  var format = DateFormat('yyyy-MM-dd HH:mm:ss');
-  return format.format(DateTime.now()).toString();
-}
-
-// ignore: non_constant_identifier_names
 OFFSET_CURRENT_SERVER_TIME(Duration duration) {
   var now = DateTime.now();
   Timestamp currentTime = Timestamp.fromDate(DateTime(now.year, now.month, now.day).add(duration));
@@ -317,6 +311,12 @@ CURRENT_SERVER_TIME_JSON() {
 CURRENT_SERVER_DATE() {
   var now = DateTime.now();
   return SERVER_DATE(now);
+}
+
+// ignore: non_constant_identifier_names
+CURRENT_LOCAL_DATE() {
+  var format = DateFormat('yyyy-MM-dd HH:mm:ss');
+  return format.format(DateTime.now()).toString();
 }
 
 // ignore: non_constant_identifier_names

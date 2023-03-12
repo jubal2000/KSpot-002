@@ -12,6 +12,7 @@ const double UI_ITEM_SPACE_M = 16.0;
 const double UI_ITEM_SPACE_L = 24.0;
 const double UI_ITEM_SPACE_HEIGHT = 5.0;
 const double UI_BUTTON_HEIGHT = 50.0;
+const double UI_BUTTON_WIDTH = 80.0;
 const double UI_ROUND_RADIUS = 12.0;
 const double UI_MAIN_LIST_BG_HEIGHT = 150.0;
 

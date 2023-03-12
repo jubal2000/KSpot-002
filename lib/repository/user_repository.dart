@@ -207,7 +207,7 @@ class UserRepository {
   }
 
   Future<bool> setMyUserInfo() async {
-    return api.setUserInfo(AppData.userInfo.toJson());
+    return await api.setUserInfo(AppData.userInfo.toJson());
   }
 
   Future<UserModel?> createNewUser(UserModel user) async {

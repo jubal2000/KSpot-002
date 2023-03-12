@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 import '../../data/app_data.dart';
 import '../../data/theme_manager.dart';
 import '../../utils/utils.dart';
-import '../setup/setup_screen.dart';
+import '../../view_model/setup_view_model.dart';
 
 class ProfileScreen extends StatefulWidget {
   ProfileScreen({ Key? key, this.isShowBack = false }) : super(key: key);
@@ -25,6 +25,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final auth = Get.find<AuthService>();
   final _viewModel = UserViewModel();
+  final _setupViewModel = SetupViewModel();
   final GlobalKey<ScaffoldState> _key = GlobalKey();
 
   @override
@@ -35,7 +36,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.setContext(context);
+    _viewModel.init(context);
+    _setupViewModel.init(context);
     return SafeArea(
       top: false,
       child: ChangeNotifierProvider<UserViewModel>.value(
@@ -89,34 +91,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   physics: NeverScrollableScrollPhysics(),
                   children: List<Widget>.from(viewModel.tabList),
                 ),
-                endDrawer: Drawer(
-                  backgroundColor: Theme.of(context).canvasColor,
-                  child: ListView(
-                    children: [
-                      ListTile(
-                        contentPadding: EdgeInsets.all(10),
-                        tileColor: Theme.of(context).primaryColorDark,
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        title: Row(
+                endDrawer:  ChangeNotifierProvider.value(
+                  value: _setupViewModel,
+                  child: Consumer<SetupViewModel>(
+                    builder: (context, viewModel, _) {
+                      LOG('--> SetupViewModel redraw');
+                      return Drawer(
+                        backgroundColor: Theme.of(context).canvasColor,
+                        child: ListView(
                           children: [
-                            SizedBox(width: 10),
-                            Icon(Icons.settings, size: 30),
-                            SizedBox(width: 10),
-                            Text('Setup'.tr, style: AppBarTitleStyle(context))
-                          ],
+                            ListTile(
+                              contentPadding: EdgeInsets.all(10),
+                              tileColor: Theme.of(context).primaryColorDark,
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              title: Row(
+                                children: [
+                                  SizedBox(width: 10),
+                                  Icon(Icons.settings, size: 30),
+                                  SizedBox(width: 10),
+                                  Text('Setup'.tr, style: AppBarTitleStyle(context))
+                                ],
+                              ),
+                            ),
+                            ...viewModel.showSetupList((refresh) {
+                              if (refresh) {
+                                _viewModel.initUserModel(AppData.userInfo);
+                                _viewModel.refresh();
+                              }
+                            }),
+                          ]
                         ),
-                      ),
-                      ...showSetupList((refresh) {
-                        if (refresh) {
-                          viewModel.initUserModel(AppData.userInfo);
-                          viewModel.refresh();
-                        }
-                      }),
-                    ]
-                  ),
-                ),
+                      );
+                    }
+                  )
+                )
               ),
             );
           }

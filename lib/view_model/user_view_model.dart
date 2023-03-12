@@ -26,11 +26,15 @@ class UserViewModel extends ChangeNotifier {
   UserModel? userInfo;
   List<MainMyTab> tabList = [];
   List<GlobalKey> tabKeyList = [];
-  BuildContext? buildContext;
+  BuildContext? context;
 
   var currentTab = 0;
   var isMyProfile = false;
   var tabListHeight = 0.0;
+
+  init(context) {
+    this.context = context;
+  }
 
   initUserModel(UserModel user) {
     userInfo = user;
@@ -52,10 +56,6 @@ class UserViewModel extends ChangeNotifier {
 
   refresh() {
     notifyListeners();
-  }
-
-  setContext(context) {
-    buildContext = context;
   }
 
   getEventData(bool addExpired) {

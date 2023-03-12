@@ -13,6 +13,7 @@ import 'package:get/get.dart';
 import '../data/app_data.dart';
 import '../data/dialogs.dart';
 import '../data/theme_manager.dart';
+import '../repository/user_repository.dart';
 import '../services/api_service.dart';
 import '../utils/address_utils.dart';
 import '../utils/local_utils.dart';
@@ -39,14 +40,15 @@ class VerifyPhoneWidget extends StatefulWidget {
   String? phoneIntl;
   bool    isSignIn;
   bool    isValidated;
-  Function(UserCredential?)? onCheckComplete;
+  Function(String intl, String number, UserCredential?)? onCheckComplete;
 
   @override
   _VerifyPhoneState createState() => _VerifyPhoneState();
 }
 
 class _VerifyPhoneState extends State<VerifyPhoneWidget> {
-  final api = ApiService();
+  final api = Get.find<ApiService>();
+  final userRepo = UserRepository();
   final _textController   = List<TextEditingController>.generate(SignUpPhoneText.values.length, (index) => TextEditingController());
   final _verifyFocusNode  = FocusScopeNode();
   final _phoneFormKey     = GlobalKey<FormState>();
@@ -79,10 +81,21 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
   refreshData() {
     LOG('--> VerifyPhoneWidget refreshData : ${widget.phoneNumber}');
     _phone            = widget.phoneNumber.isNotEmpty ? widget.phoneNumber : '010';
-    _phoneCheck       = widget.isSignIn;
+    _phoneCheck       = widget.isSignIn || !widget.isValidated;
     _phoneValidated   = widget.isValidated;
     _textController[SignUpPhoneText.phone.index].text = _phone;
     _textController[SignUpPhoneText.phoneCheck.index].text = '';
+
+    if (_phoneCheck) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_phoneFormKey.currentState!.validate()) {
+          setState(() {
+            currentVerifyStep = VerifyStep.sendReady;
+            LOG('--> refreshData : $_phone / $_phoneIntl');
+          });
+        }
+      });
+    }
   }
 
   sendPhoneVerifyCode() {
@@ -128,9 +141,9 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
           LOG('--> verificationFailed: ${e.toString()}');
           hideLoadingDialog();
           if (e.code.contains('invalid-phone-number')) {
-            showAlertDialog(context, 'Phone verify'.tr, 'Verify code send failed'.tr, 'Phone number is not valid'.tr, 'OK'.tr, true);
+            showAlertDialog(context, 'Mobile number verify'.tr, 'Verify code send failed'.tr, 'Mobile number is not valid'.tr, 'OK'.tr, true);
           } else {
-            showAlertDialog(context, 'Phone verify'.tr, 'Verify code send failed'.tr, e.code, 'OK'.tr, true);
+            showAlertDialog(context, 'Mobile number verify'.tr, 'Verify code send failed'.tr, e.code, 'OK'.tr, true);
           }
           _phoneCodeReady = false;
         },
@@ -144,8 +157,8 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
             _textController[SignUpPhoneText.phoneCheck.index].text = '';
             _verificationId = verificationId;
             _resendToken = resendToken ?? -1;
-            // FocusScope.of(context).requestFocus(_verifyFocusNode);
-            FocusScope.of(context).nextFocus();
+            FocusScope.of(context).requestFocus(_verifyFocusNode);
+            // FocusScope.of(context).nextFocus();
           });
         },
         codeAutoRetrievalTimeout: (String verificationId) {
@@ -172,11 +185,11 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
       if (error == 'too-many-requests') {
         ShowErrorToast('Too many requests'.tr);
       } else if (error.contains('phone-already-in-use')) {
-        showAlertDialog(context, 'Phone verify'.tr, 'Phone verify error'.tr, 'Phone number already in use'.tr, 'OK'.tr);
+        showAlertDialog(context, 'Mobile number verify'.tr, 'Mobile number verify error'.tr, 'Mobile number already in use'.tr, 'OK'.tr);
       } else if (error.contains('invalid-phone-number')) {
-        showAlertDialog(context, 'Phone verify'.tr, 'Phone verify error'.tr, 'The format of the phone number provided is incorrect'.tr, 'OK'.tr);
+        showAlertDialog(context, 'Mobile number verify'.tr, 'Mobile number verify error'.tr, 'The format of the Mobile number provided is incorrect'.tr, 'OK'.tr);
       } else if (error.contains('invalid-verification-code')) {
-        showAlertDialog(context, 'Phone verify'.tr, 'Phone verify error'.tr,
+        showAlertDialog(context, 'Mobile number verify'.tr, 'Mobile number verify error'.tr,
             'Auth credential is invalid'.tr, 'OK'.tr).then((_) {
           setState(() {
             _phoneCode = '';
@@ -184,7 +197,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
           });
         });
       } else {
-        showAlertDialog(context, 'Phone verify'.tr, 'Phone verify error'.tr, error, 'OK'.tr);
+        showAlertDialog(context, 'Mobile number verify'.tr, 'Mobile number verify error'.tr, error, 'OK'.tr);
       }
     });
   }
@@ -294,8 +307,9 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                         _phoneCheck2  = false;
                         _resendToken  = null;
                         if (_phoneFormKey.currentState!.validate()) {
+                          _phoneValidated = widget.isValidated && _phone == widget.phoneNumber && _phoneIntl == widget.phoneIntl;
                           currentVerifyStep = VerifyStep.sendReady;
-                          LOG('--> _phone completeNumber : $_phone / $_phoneIntl / ${CountryCodes[AppData.currentCountry]}');
+                          LOG('--> _phone completeNumber : $_phone / $_phoneIntl => $_phoneValidated / $currentVerifyStep');
                         }
                       });
                     },
@@ -310,12 +324,12 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
             if (_phoneValidated)...[
               SizedBox(width: 10),
               Padding(
-                  padding: EdgeInsets.only(top: 5),
-                  child: Icon(
-                    _phoneValidated ? Icons.check : Icons.close,
-                    size: 30,
-                    color: _phoneValidated ? Colors.green : Colors.grey,
-                  )
+                padding: EdgeInsets.only(top: 5),
+                child: Icon(
+                  _phoneValidated ? Icons.check : Icons.close,
+                  size: 30,
+                  color: _phoneValidated ? Colors.green : Colors.grey,
+                )
               )
             ]
           ]
@@ -371,7 +385,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                             countTimer!.cancel();
                             countTimer = null;
                           }
-                          if (widget.onCheckComplete != null) widget.onCheckComplete!(value);
+                          if (widget.onCheckComplete != null) widget.onCheckComplete!(_phoneIntl, _phone, value);
                         });
                       }).onError((error, stackTrace) {
                         LOG('--> FirebaseAuthException onError : $error');
@@ -379,20 +393,14 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                         sendPhoneVerifyError(error);
                       });
                     } else {
-                      FirebaseAuth.instance.currentUser!.updatePhoneNumber(credential).then((value) {
+                      FirebaseAuth.instance.currentUser!.updatePhoneNumber(credential).then((value) async {
                         LOG('--> updatePhoneNumber done : $_phone');
                         AppData.userInfo.mobile = _phone;
                         AppData.userInfo.mobileIntl = _phoneIntl;
-                        AppData.userInfo.mobileVerifyTime = CURRENT_SERVER_TIME();
-                        // api.setUserInfo(AppData.userInfo).then((result) {
-                        //   setState(() {
-                        //     initData();
-                        //     writeLocalData();
-                        //     _phoneValidated = true;
-                        //     AppData.userInfo = FROM_SERVER_DATA(AppData.userInfo);
-                        //     if (widget.onCheckComplete != null) widget.onCheckComplete!(null);
-                        //   });
-                        // });
+                        AppData.userInfo.mobileVerifyTime = CURRENT_LOCAL_DATE();
+                        if (await userRepo.setMyUserInfo()) {
+                          if (widget.onCheckComplete != null) widget.onCheckComplete!(_phoneIntl, _phone, null);
+                        }
                       }).onError((error, stackTrace) {
                         LOG('--> updatePhoneNumber error : $error');
                         _hasError = true;

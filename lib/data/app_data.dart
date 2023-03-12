@@ -25,6 +25,7 @@ const APP_VERSION = '0.0.1';
 
 const NICKNAME_LENGTH = 12;
 const PASSWORD_LENGTH = 12;
+const DEFAULT_TEXT_LENGTH = 20;
 
 const TITLE_LENGTH = 24;
 const DESC_LENGTH = 999;

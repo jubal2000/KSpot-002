@@ -243,7 +243,7 @@ class SignUpScreen extends StatelessWidget {
                 padding: EdgeInsets.only(top: UI_ITEM_SPACE.w),
                 child: VerifyPhoneWidget(
                   '010',
-                  onCheckComplete: (userValue) async {
+                  onCheckComplete: (intl, number, userValue) async {
                     LOG('--> userValue : $userValue');
                     if (userValue != null && userValue.user != null) {
                       LOG('--> userValue.user!.uid : ${userValue.user!.uid}');

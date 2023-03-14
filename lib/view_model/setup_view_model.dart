@@ -1,8 +1,11 @@
 
+import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/data/common_sizes.dart';
+import 'package:kspot_002/view/setup/setup_content_screen.dart';
 import 'package:kspot_002/widget/rounded_button.dart';
 
 import '../data/app_data.dart';
@@ -13,9 +16,12 @@ import '../models/user_model.dart';
 import '../repository/user_repository.dart';
 import '../services/api_service.dart';
 import '../utils/utils.dart';
+import '../view/setup/setup_block_screen.dart';
 import '../view/setup/setup_contact_screen.dart';
 import '../view/setup/setup_profile_screen.dart';
+import '../view/setup/setup_push_screen.dart';
 import '../widget/dropdown_widget.dart';
+import '../widget/edit/edit_setup_widget.dart';
 import '../widget/verify_phone_widget.dart';
 
 enum SetupTextType {
@@ -41,10 +47,14 @@ class SetupViewModel extends ChangeNotifier {
   final buttonHeight    = 60.0;
   final genderN         = {'f': 'Female', 'm': 'Male', 'n': 'No select'};
   final startYear       = DateTime.now().year - 12;
+  JSON pushSettingData  = {};
+  JSON optionData  = {};
 
   late final genderList   = List.generate(genderN.length, (index) => {'title': genderN[genderN.keys.elementAt(index)], 'key': genderN.keys.elementAt(index)});
   late final yearList     = List.generate(100, (index) => {'title': '${startYear - index}', 'key': '${startYear - index}'});
-  var isEditMode        = List.generate(SetupTextType.values.length, (index) => false);
+  var itemEditFlag        = List.generate(SetupTextType.values.length, (index) => false);
+  var isEditMode          = false;
+  var isEmailValidate     = false;
 
   Function(bool)? onRefresh;
   UserModel? editUserInfo;
@@ -99,7 +109,10 @@ class SetupViewModel extends ChangeNotifier {
     return setupList;
   }
 
-  showTextInputField(TextEditingController controller, Function(String)? onChanged, {
+  showTextInputField(
+    TextEditingController controller,
+    Function(String)? onChanged,
+    {
       bool? enabled,
       TextInputType? keyboardType,
       String? label,
@@ -110,16 +123,16 @@ class SetupViewModel extends ChangeNotifier {
     return TextFormField(
       enabled: enabled ?? true,
       controller: controller,
-      decoration: inputLabel(context!, label ?? '', ''),
+      decoration: enabled ?? true ? inputLabel(context!, label ?? '', '') : viewLabel(context!, label ?? '', ''),
       keyboardType: keyboardType ?? TextInputType.text,
       maxLines: maxLines ?? 1,
       maxLength: maxLength,
+      autovalidateMode: AutovalidateMode.always,
       style: ItemTitleNormalStyle(context!),
       validator: validator,
       onChanged: (value) {
         if (onChanged != null) onChanged(controller.text);
         isEdited = true;
-        notifyListeners();
       },
     );
   }
@@ -139,7 +152,6 @@ class SetupViewModel extends ChangeNotifier {
 
   showTextEditButton(SetupTextType type,
     {
-      String btnTitle   = 'CHANGE',
       bool isCanEdit    = true,
       bool isValidated  = true,
       bool isEnabled    = true,
@@ -159,19 +171,22 @@ class SetupViewModel extends ChangeNotifier {
           ),
           SizedBox(width: 10),
           if (isCanEdit)...[
-            RoundedButton.active(
-            btnTitle.tr,
-            fullWidth: false,
-            minWidth: UI_BUTTON_WIDTH,
-            radius: 8,
-            height: 40,
-            textColor: Theme.of(context!).colorScheme.inversePrimary,
-            backgroundColor: Theme.of(context!).primaryColor,
-            onPressed: () {
-              isEditMode[type.index] = !isEditMode[type.index];
-              if (onPressed != null) onPressed();
-              notifyListeners();
-            }),
+            if (isEditMode)
+              IconButton(
+                onPressed: () {
+                },
+                icon: Icon(Icons.edit, color: Theme.of(context!).disabledColor),
+              ),
+            if (!isEditMode)
+              IconButton(
+                onPressed: () {
+                  itemEditFlag[type.index] = !itemEditFlag[type.index];
+                  isEditMode = true;
+                  if (onPressed != null) onPressed();
+                  notifyListeners();
+                },
+                icon: Icon(Icons.edit),
+              ),
           ],
           if (!isCanEdit)...[
             Padding(
@@ -189,19 +204,106 @@ class SetupViewModel extends ChangeNotifier {
   }
 
   showMobileEdit() {
-    return VerifyPhoneWidget(
-      editUserInfo!.mobile,
-      phoneIntl: editUserInfo!.mobileIntl,
-      isSignIn: false,
-      isValidated: true,
-      onCheckComplete: (intl, number, _) {
-        isEditMode[SetupTextType.mobile.index] = false;
-        ShowToast('Mobile change completed'.tr);
-        refreshData();
-        notifyListeners();
-      }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        VerifyPhoneWidget(
+          editUserInfo!.mobile,
+          phoneIntl: editUserInfo!.mobileIntl,
+          isSignIn: false,
+          isValidated: true,
+          onCheckComplete: (intl, number, _) {
+            isEditMode = false;
+            itemEditFlag[SetupTextType.mobile.index] = false;
+            ShowToast('Mobile change completed'.tr);
+            refreshData();
+            notifyListeners();
+          },
+        ),
+        RoundedButton.edit(
+          'CANCEL'.tr,
+          fullWidth: false,
+          minWidth: 80.w,
+          radius: 8.w,
+          textColor: Theme.of(context!).colorScheme.inverseSurface,
+          backgroundColor: Theme.of(context!).colorScheme.secondary.withOpacity(0.5),
+          onPressed: () {
+            isEditMode = false;
+            itemEditFlag[SetupTextType.mobile.index] = false;
+            ShowToast('Mobile change canceled'.tr);
+            notifyListeners();
+          },
+        ),
+      ]
     );
   }
+
+  showEmailEdit() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: showTextInputField(
+                textController[SetupTextType.email.index],
+                (value) {
+                  editUserInfo!.emailNew = textController[SetupTextType.email.index].text;
+                  notifyListeners();
+                },
+                validator: (value) {
+                  if (!EmailValidator.validate(value)) return 'Please check email';
+                  return null;
+                }
+              )
+            ),
+            SizedBox(width: 10.w),
+            if (STR(editUserInfo!.emailNew).isNotEmpty &&
+              EmailValidator.validate(editUserInfo!.emailNew!) && editUserInfo!.emailNew != editUserInfo!.email)
+              RoundedButton.active(
+                'CHANGE'.tr,
+                fullWidth: false,
+                minWidth: 80.w,
+                radius: 8.w,
+                height: UI_BUTTON_HEIGHT_S.h,
+                textColor: Theme.of(context!).colorScheme.inverseSurface,
+                backgroundColor: Theme.of(context!).colorScheme.secondary.withOpacity(0.5),
+                onPressed: () {
+                  editUserInfo!.email = editUserInfo!.emailNew!;
+                  AppData.userInfo = editUserInfo!;
+                  userRepo.setUserInfoItem(AppData.userInfo, 'email').then((result) {
+                    if (result) {
+                      isEditMode = false;
+                      itemEditFlag[SetupTextType.email.index] = false;
+                      ShowToast('Email change success'.tr);
+                      notifyListeners();
+                    } else {
+                      ShowToast('Email change failed'.tr);
+                    }
+                  });
+                },
+              ),
+          ]
+        ),
+        SizedBox(height: 10),
+        RoundedButton.edit(
+          'CANCEL'.tr,
+          fullWidth: false,
+          minWidth: 80.w,
+          radius: 8.w,
+          textColor: Theme.of(context!).colorScheme.inverseSurface,
+          backgroundColor: Theme.of(context!).colorScheme.secondary.withOpacity(0.5),
+          onPressed: () {
+            isEditMode = false;
+            itemEditFlag[SetupTextType.email.index] = false;
+            ShowToast('Email change canceled'.tr);
+            notifyListeners();
+          },
+        ),
+      ]
+    );
+  }
+
 
   updateProfile(Function(bool) onEditEnd) {
     if (!isEdited || !AppData.isMainActive) return;
@@ -222,6 +324,85 @@ class SetupViewModel extends ChangeNotifier {
     }
   }
 
+  initPushSetting() {
+    pushSettingData = {};
+    if (LIST_EMPTY(AppData.userInfo.optionPush)) {
+      AppData.userInfo.optionPush = [];
+      for (var item in AppData.INFO_PUSH_OPTION.entries) {
+        if (item.value.runtimeType != String && item.value.runtimeType != int) {
+          pushSettingData[item.key] = item.value;
+        }
+      }
+      userRepo.setUserInfoItem(AppData.userInfo, 'optionPush');
+    } else {
+      for (var item in AppData.userInfo.optionPush!) {
+        LOG('--> initPushSetting : ${item.value.toString()}');
+        pushSettingData[item.id] = item.value;
+      }
+    }
+  }
+
+  showPushSetting() {
+    return EditSetupWidget(
+      'Push notification'.tr,
+      pushSettingData,
+      AppData.INFO_PUSH_OPTION,
+      showAllButton: true,
+      onDataChanged: (newOption) {
+        AppData.userInfo.optionPush = [];
+        for (var item in newOption.entries) {
+          if (BOL(item.value)) {
+            AppData.userInfo.optionPush!.add(OptionData(id: item.key, value: item.value));
+          }
+        }
+        userRepo.setUserInfoItem(AppData.userInfo, 'optionPush').then((result) {
+          if (result) {
+            initPushSetting();
+          }
+        });
+      }
+    );
+  }
+
+  initContentSetting() {
+    optionData = {};
+    if (LIST_EMPTY(AppData.userInfo.optionData)) {
+      AppData.userInfo.optionPush = [];
+      for (var item in AppData.INFO_PUSH_OPTION.entries) {
+        if (item.value.runtimeType != String && item.value.runtimeType != int) {
+          optionData[item.key] = item.value;
+        }
+      }
+      userRepo.setUserInfoItem(AppData.userInfo, 'optionData');
+    } else {
+      for (var item in AppData.userInfo.optionPush!) {
+        optionData[item.id] = item.value;
+      }
+    }
+  }
+
+  showContentSetting() {
+    return EditSetupWidget(
+      'Content setting'.tr,
+      optionData,
+      AppData.INFO_PLAY_OPTION,
+      showAllButton: true,
+      onDataChanged: (newOption) {
+        AppData.userInfo.optionData = [];
+        for (var item in newOption.entries) {
+          if (BOL(item.value)) {
+            AppData.userInfo.optionData!.add(OptionData(id: item.key, value: item.value));
+          }
+        }
+        userRepo.setUserInfoItem(AppData.userInfo, 'optionData').then((result) {
+          if (result) {
+            initContentSetting();
+          }
+        });
+      }
+    );
+  }
+
   onSelect(code) async {
     switch (code) {
       case 'info':
@@ -234,35 +415,21 @@ class SetupViewModel extends ChangeNotifier {
           if (onRefresh != null) onRefresh!(result != null && result);
         });
         break;
-      // case 'contact':
-      //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupContactScreen()));
-      //   break;
-      // case 'sns':
-      //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupSNSScreen())).then((result) {
-      //     AppData.isUpdateProfile = true;
-      //   });
-      //   break;
-      // case 'creator':
-      //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupCreatorScreen())).then((result) {
-      //     AppData.isUpdateProfile = true;
-      //   });
-      //   break;
-      // case 'push':
-      //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupPushScreen(
-      //     onChanged: (jsonData) {
-      //       AppData.userInfo['optionPush'] = {};
-      //       for (var item in jsonData.entries) {
-      //         AppData.userInfo['optionPush'][item.key] = item.value;
-      //       }
-      //     },
-      //   )));
-      //   break;
-      // case 'playAuto':
-      //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupPlayScreen()));
-      //   break;
-      // case 'block':
-      //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupBlockScreen()));
-      //   break;
+      case 'push':
+        Get.to(() => SetupPushScreen())!.then((result) {
+          if (onRefresh != null) onRefresh!(result != null && result);
+        });
+        break;
+      case 'playAuto':
+        Get.to(() => SetupContentScreen())!.then((result) {
+          if (onRefresh != null) onRefresh!(result != null && result);
+        });
+        break;
+      case 'block':
+        Get.to(() => SetupBlockScreen())!.then((result) {
+          if (onRefresh != null) onRefresh!(result != null && result);
+        });
+        break;
       // case 'shop':
       //   if (!AppData.isStoreInfoReady) {
       //     var result = await api.getStoreInfoFromUserId(AppData.USER_ID);
@@ -324,7 +491,7 @@ class SetupViewModel extends ChangeNotifier {
     // ListItemEx("프로필 편집", code: 0, callback: onSelect),
     ListItemEx('info', "Profile edit".tr, callback: onSelect),
     ListItemEx('contact', "Contact edit".tr, callback: onSelect),
-    ListItemEx('sns', "SNS link edit".tr, callback: onSelect),
+    // ListItemEx('sns', "SNS link edit".tr, callback: onSelect),
     // ListItemEx('creator', 'Creator mode', callback: onSelect),
     ListItemEx('push', "Notification setting".tr, callback: onSelect),
     ListItemEx('playAuto', "Content setting".tr, callback: onSelect),

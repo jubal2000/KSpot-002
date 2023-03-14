@@ -18,6 +18,7 @@ import '../services/api_service.dart';
 import '../utils/address_utils.dart';
 import '../utils/local_utils.dart';
 import '../utils/utils.dart';
+import 'edit/edit_setup_widget.dart';
 
 enum SignUpPhoneText {
   phone,
@@ -34,7 +35,8 @@ enum VerifyStep {
 }
 
 class VerifyPhoneWidget extends StatefulWidget {
-  VerifyPhoneWidget(this.phoneNumber, {Key? key, this.phoneIntl, this.isSignIn = true, this.isValidated = false, this.onCheckComplete}) : super(key: key);
+  VerifyPhoneWidget(this.phoneNumber,
+    {Key? key, this.phoneIntl, this.isSignIn = true, this.isValidated = false, this.onCheckComplete}) : super(key: key);
 
   String  phoneNumber;
   String? phoneIntl;
@@ -98,7 +100,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
     }
   }
 
-  sendPhoneVerifyCode() {
+  sendPhoneVerifyCode(context) {
     if (!_phoneFormKey.currentState!.validate()) return;
     setState(() {
       currentVerifyStep = VerifyStep.checkReady;
@@ -157,7 +159,9 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
             _textController[SignUpPhoneText.phoneCheck.index].text = '';
             _verificationId = verificationId;
             _resendToken = resendToken ?? -1;
-            FocusScope.of(context).requestFocus(_verifyFocusNode);
+            Future.delayed(Duration(milliseconds: 500)).then((_) {
+              FocusScope.of(context).requestFocus(pinFocus);
+            });
             // FocusScope.of(context).nextFocus();
           });
         },
@@ -217,10 +221,10 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
           fullWidth: false,
           minWidth: buttonMinWidth,
           radius: 8.w,
-          textColor: Theme.of(context).primaryColor,
-          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.25),
+          textColor: Theme.of(context).colorScheme.inversePrimary,
+          backgroundColor: Theme.of(context).primaryColor,
           onPressed: () {
-            sendPhoneVerifyCode();
+            sendPhoneVerifyCode(context);
           },
         );
       case VerifyStep.checkReady:
@@ -233,7 +237,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
       case VerifyStep.resendReady:
         return RoundedButton.active(
           onPressed: () {
-            sendPhoneVerifyCode();
+            sendPhoneVerifyCode(context);
           },
           'RESEND'.tr,
           fullWidth: false,
@@ -283,8 +287,8 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
   @override
   Widget build(BuildContext context) {
     final _titleStyle = ItemTitleNormalStyle(context);
-    return ListView(
-      shrinkWrap: true,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,6 +300,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                   key: _phoneFormKey,
                   child: IntlPhoneField(
                     controller: _textController[SignUpPhoneText.phone.index],
+                    autofocus: true,
                     decoration: inputLabel(context, '', ''),
                     initialCountryCode: CountryCodes[AppData.currentCountry] ?? 'KR',
                     style: _titleStyle,
@@ -306,8 +311,9 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                         _phoneCheck   = true;
                         _phoneCheck2  = false;
                         _resendToken  = null;
+                        _phoneValidated = widget.isValidated && _phone == widget.phoneNumber && _phoneIntl == widget.phoneIntl;
                         if (_phoneFormKey.currentState!.validate()) {
-                          _phoneValidated = widget.isValidated && _phone == widget.phoneNumber && _phoneIntl == widget.phoneIntl;
+                          _phoneValidated = _phone != widget.phoneNumber || _phoneIntl != widget.phoneIntl;
                           currentVerifyStep = VerifyStep.sendReady;
                           LOG('--> _phone completeNumber : $_phone / $_phoneIntl => $_phoneValidated / $currentVerifyStep');
                         }
@@ -331,7 +337,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                   color: _phoneValidated ? Colors.green : Colors.grey,
                 )
               )
-            ]
+            ],
           ]
         ),
         if (_phoneCheck2)...[
@@ -345,6 +351,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                   focusNode: pinFocus,
                   controller: pinController,
                   length: 6,
+                  autoFocus: true,
                   obscureText: false,
                   showCursor: false,
                   backgroundColor: Colors.transparent,

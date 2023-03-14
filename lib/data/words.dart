@@ -123,6 +123,9 @@ class Words extends Translations {
       'Promotion list': '홍보 기록',
       'Terms': '이용 약관',
       'Phone number verification': '전화번호 인증',
+      'Push setting success': '알림 설정 변경 완료',
+      'Push setting failed': '알림 설정 변경 실패',
+
 
       // target_profile
       'Would you like to follow?': '팔로우 하시겠습니까?',
@@ -269,6 +272,9 @@ class Words extends Translations {
       'No select': '선택안함',
       'Please check text length': '입력한 문자의 길이를 확인해주세요',
       'Please check email': '입력한 이메일을 확인해주세요',
+      'Email change success': '이메일 변경 완료',
+      'Email change failed': '이메일 변경 실패',
+      'Email change canceled': '이메일 변경 취소',
       'Nickname': '닉네임',
       'NICKNAME': '닉네임',
       'Name': '이름',

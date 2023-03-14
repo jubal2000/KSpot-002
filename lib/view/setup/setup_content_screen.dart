@@ -7,18 +7,18 @@ import '../../data/theme_manager.dart';
 import '../../utils/utils.dart';
 import '../../view_model/setup_view_model.dart';
 
-class SetupContactScreen extends StatelessWidget {
+class SetupContentScreen extends StatelessWidget {
   final _viewModel = SetupViewModel();
 
   @override
   Widget build(BuildContext context) {
     _viewModel.init(context);
-
+    _viewModel.initContentSetting();
     return SafeArea(
       top: false,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Contact edit'.tr, style: AppBarTitleStyle(context)),
+          title: Text('Content setting'.tr, style: AppBarTitleStyle(context)),
           titleSpacing: 0,
           toolbarHeight: 50,
         ),
@@ -34,19 +34,7 @@ class SetupContactScreen extends StatelessWidget {
                 child: ListView(
                   shrinkWrap: true,
                   children: [
-                    SubTitle(context, 'MOBILE'.tr),
-                    SizedBox(height: 5),
-                    if (!viewModel.itemEditFlag[SetupTextType.mobile.index])
-                      viewModel.showTextEditButton(SetupTextType.mobile, isEnabled: false),
-                    if (viewModel.itemEditFlag[SetupTextType.mobile.index])
-                      viewModel.showMobileEdit(),
-                    SizedBox(height: 20),
-                      SubTitle(context, 'EMAIL'.tr),
-                    SizedBox(height: 5),
-                    if (!viewModel.itemEditFlag[SetupTextType.email.index])
-                      viewModel.showTextEditButton(SetupTextType.email, isEnabled: false),
-                    if (viewModel.itemEditFlag[SetupTextType.email.index])
-                      viewModel.showEmailEdit(),
+                    viewModel.showContentSetting(),
                   ],
                 ),
               );

@@ -31,7 +31,7 @@ class SetupProfileScreen extends StatelessWidget {
       top: false,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('PROFILE EDIT'.tr, style: AppBarTitleStyle(context)),
+          title: Text('Profile edit'.tr, style: AppBarTitleStyle(context)),
           titleSpacing: 0,
           toolbarHeight: 50,
         ),

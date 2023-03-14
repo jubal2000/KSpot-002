@@ -241,7 +241,7 @@ class MainMyTabState extends State<MainMyTab> {
                                     ]
                                 ),
                                 if (widget.userViewModel.userInfo!.email.isNotEmpty)...[
-                                  SizedBox(height: 10),
+                                  SizedBox(height: 5),
                                   GestureDetector(
                                     onTap: () {
                                       Clipboard.setData(ClipboardData(text: STR(widget.userViewModel.userInfo!.email)));

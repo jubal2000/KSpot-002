@@ -259,6 +259,10 @@ class UserRepository {
     return await api.getBlockData(AppData.USER_ID);
   }
 
+  setReportDesc(String targetId, String desc) async {
+    return await api.setReportDesc(AppData.blockUserData, targetId, desc);
+  }
+
   /////////////////////////////////////////////////////////////////////////////////////////////
 
   Future<String?> uploadImageData(JSON imageInfo, String path) async {

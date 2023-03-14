@@ -15,8 +15,8 @@ class EditSetupWidget extends StatefulWidget {
 
   String title;
   double titlePadding;
-  JSON optionData;
-  JSON optionInfo; // INFO_GOODS_OPTION...
+  JSON optionData; // real option
+  JSON optionInfo; // info_option data..
   JSON customData;
   List<JSON> showOption;
   Function(JSON)? onDataChanged;
@@ -34,11 +34,11 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
   bool _isShowAll = true;
   BuildContext? _context;
 
-  initData() {
-    setState(() {
-      initLink();
-    });
-  }
+  // initData() {
+  //   setState(() {
+  //     initLink();
+  //   });
+  // }
 
   initLink() {
     _linkList = {};
@@ -56,7 +56,6 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
         }
       }
     }
-    checkSwitchAll();
   }
 
   refreshSwitch() {
@@ -91,7 +90,7 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
           // if (BOL(item.value['value']) && !widget.optionData.containsKey(item.key)) {
           //   widget.optionData[item.key] = '1';
           // }
-          widget.optionData[item.key] ??= item.value['value'];
+          // widget.optionData[item.key] ??= item.value['value'];
           _optionCount++;
           _itemList.add(SwitchListTile(
             key: Key(item.value['index'].toString()),
@@ -109,6 +108,7 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
         }
       }
     }
+    checkSwitchAll();
     _itemList.sort((a,b) => a.key.toString().compareTo(b.key.toString()));
   }
 
@@ -193,11 +193,9 @@ class EditSetupWidgetState extends State<EditSetupWidget> {
             padding: EdgeInsets.symmetric(horizontal: widget.titlePadding),
             child: Row(
               children: [
-                SubTitle(context, widget.title),
+                Text(widget.title, style: ItemTitleLargeStyle(context)),
                 if (widget.showAllButton)...[
-                  Expanded(
-                    child: SizedBox(height: 10),
-                  ),
+                  SizedBox(width: 10),
                   Switch(
                     value: _isShowAll, onChanged: (status) {
                       setState(() {

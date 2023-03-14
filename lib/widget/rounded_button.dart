@@ -116,6 +116,8 @@ class RoundedButton extends RoundedButtonNormal {
         EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 5),
         double? fontSize = UI_FONT_SIZE_S,
         double height = 35,
+        double radius = 48,
+        double minWidth = 50,
       }) : super(
       key: key,
       onPressed: onPressed,
@@ -126,7 +128,9 @@ class RoundedButton extends RoundedButtonNormal {
       fullWidth: fullWidth,
       padding: padding,
       fontSize: fontSize,
-      height: height
+      height: height,
+      radius: radius,
+      minWidth: minWidth,
   );
 
   const RoundedButton.delete(

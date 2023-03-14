@@ -979,7 +979,12 @@ inputLabel(BuildContext context, String label, String hint, {double width = 2, E
   return inputLabelSuffix(context, label, hint, width: width, padding: padding);
 }
 
-inputLabelSuffix(BuildContext context, String label, String hint, {String suffix = '', bool isEnabled = true, double width = 1, EdgeInsets? padding}) {
+viewLabel(BuildContext context, String label, String hint, {double width = 0, EdgeInsets? padding}) {
+  return inputLabelSuffix(context, label, hint, width: width, padding: padding, fillColor: Theme.of(context).canvasColor.withOpacity(0.2));
+}
+
+inputLabelSuffix(BuildContext context, String label, String hint,
+    {String suffix = '', bool isEnabled = true, double width = 1, EdgeInsets? padding, Color? fillColor}) {
   return InputDecoration(
     filled: true,
     isDense: true,
@@ -990,6 +995,7 @@ inputLabelSuffix(BuildContext context, String label, String hint, {String suffix
     enabled: isEnabled,
     contentPadding: padding ?? EdgeInsets.all(10),
     hintStyle: TextStyle(color: Theme.of(context).hintColor.withOpacity(0.5), fontSize: 10),
+    fillColor: fillColor,
     border: OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(8.0)),
       borderSide: BorderSide(width: width, color: Colors.yellow),

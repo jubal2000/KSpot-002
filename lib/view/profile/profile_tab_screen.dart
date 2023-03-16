@@ -130,9 +130,11 @@ class MainMyTabState extends State<MainMyTab> {
   }
 
   refreshTab(int tab) {
-    setState(() {
-      _currentTab = tab;
-    });
+    if (mounted) {
+      setState(() {
+        _currentTab = tab;
+      });
+    }
   }
 
   getSNSItemFromUser(String snsId, JSON snsData) {

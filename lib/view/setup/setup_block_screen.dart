@@ -143,10 +143,11 @@ class SetupBlockTabState extends State<SetupBlockTab> {
           if (value == 1) {
             showLoadingDialog(context, 'processing now...'.tr);
             api.setBlockItemStatus(key, 0).then((result) {
-              Navigator.of(dialogContext!).pop();
+              hideLoadingDialog();
               if (result) {
-                showAlertDialog(context, 'Unblock'.tr, 'Unblocking is complete'.tr, '', 'OK'.tr);
                 setState(() {
+                  ShowToast('Unblocking is complete'.tr);
+                  _itemData.remove(userInfo['id']);
                   refreshItemList();
                 });
               }
@@ -162,10 +163,10 @@ class SetupBlockTabState extends State<SetupBlockTab> {
             if (desc.isNotEmpty && message['exButton'] != null) {
               showLoadingDialog(context, 'processing now...'.tr);
               userRepo.setReportDesc(key, desc).then((result) {
-                Navigator.of(dialogContext!).pop();
+                hideLoadingDialog();
                 if (result) {
-                  showAlertDialog(context, 'Report'.tr, 'Update has been completed'.tr, '', 'OK'.tr);
                   setState(() {
+                    ShowToast('Update has been completed'.tr);
                     refreshItemList();
                   });
                 }
@@ -179,6 +180,8 @@ class SetupBlockTabState extends State<SetupBlockTab> {
           var descInfo = AppData.INFO_DECLAR[itemData['replayType']];
           if (descInfo != null) {
             showAlertDialog(context, TR(descInfo['title']), TR(descInfo['desc']), DESC(itemData['replayDesc']), 'OK'.tr);
+          } else {
+            ShowToast('Report is pending'.tr);
           }
         }
         break;
@@ -192,11 +195,12 @@ class SetupBlockTabState extends State<SetupBlockTab> {
               if (result == 1) {
                 showLoadingDialog(context, 'processing now...'.tr);
                 api.setReportItemStatus(key, 0).then((result2) {
-                  Navigator.of(dialogContext!).pop();
+                  hideLoadingDialog();
                   if (result2) {
                     setState(() {
-                      showAlertDialog(context, 'Report cancel'.tr, 'Processing is complete'.tr, '', 'OK'.tr);
-                      _itemData.remove(itemData['targetId']);
+                      ShowToast('Processing is complete'.tr);
+                      LOG('--> _itemData [${itemData['targetId']}] : ${_itemData.toString()}');
+                      _itemData['report'].remove(itemData['targetId']);
                       refreshItemList();
                     });
                   }
@@ -230,7 +234,7 @@ class SetupBlockTabState extends State<SetupBlockTab> {
         for (var item in _itemData[type].entries) {
           LOG('--> add report item : $type / ${item.value}');
           _itemList.add(UserListItem(UserListType.report,
-              item.value, onMenuSelected: onMenuSelected));
+              item.value, height: 80, padding: EdgeInsets.fromLTRB(20, 10, 10, 10), onMenuSelected: onMenuSelected));
         }
       }
     }
@@ -293,17 +297,19 @@ enum UserListType {
 }
 
 class UserListItem extends StatefulWidget {
-  UserListItem(this.type, this.userItem, {Key? key,
+  UserListItem(this.type, this.itemInfo, {Key? key,
     this.isSelectable = false,
     this.isShowMenu = true,
-    this.height = 80.0,
+    this.height = 70.0,
+    this.padding = const EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE, vertical: 5),
     this.onMenuSelected}) : super(key: key);
 
   UserListType type;
-  JSON userItem;
+  JSON itemInfo;
   bool isSelectable;
   bool isShowMenu;
   double height;
+  EdgeInsets padding;
 
   Function(DropdownItemType, String, JSON)? onMenuSelected;
 
@@ -323,9 +329,9 @@ class UserListItemState extends State<UserListItem> {
 
   @override
   void initState() {
-    _id = widget.userItem['targetId'] != null ? STR(widget.userItem['targetId']) : widget.userItem['id'];
+    _id = widget.itemInfo['targetId'] != null ? STR(widget.itemInfo['targetId']) : widget.itemInfo['id'];
     if (widget.type == UserListType.report) {
-      _replayType = STR(widget.userItem['replayType']);
+      _replayType = STR(widget.itemInfo['replayType']);
     } else {
       _userInit = api.getUserInfoFromId(_id);
     }
@@ -344,7 +350,7 @@ class UserListItemState extends State<UserListItem> {
         color: Theme.of(context).canvasColor,
       ),
       margin: EdgeInsets.symmetric(vertical: 5),
-      padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE, vertical: 5),
+      padding: widget.padding,
       child: FutureBuilder(
         future: _userInit,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -367,12 +373,16 @@ class UserListItemState extends State<UserListItem> {
                     }
                   ),
                 if (widget.type != UserListType.report) ...[
-                  SizedBox(
-                    width: widget.height - 10,
-                    height: widget.height - 10,
+                  Container(
+                    margin: EdgeInsets.all(5),
+                    padding: EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(60)),
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
                     child: ClipOval(
                         child: showImageFit(_userInfo['pic'] ?? 'assets/ui/main_picture_00.png')
-                    )
+                    ),
                   ),
                   SizedBox(width: 10),
                 ],
@@ -384,7 +394,7 @@ class UserListItemState extends State<UserListItem> {
                       //     TargetProfileScreen(_userInfo)));
                     },
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
@@ -393,7 +403,7 @@ class UserListItemState extends State<UserListItem> {
                               Text(STR(_userInfo['nickName']), style: ItemTitleStyle(context)),
                             ],
                             if (widget.type == UserListType.report) ...[
-                              Text(STR(widget.userItem['targetTitle']), style: ItemTitleStyle(context)),
+                              Text(STR(widget.itemInfo['targetTitle']), style: ItemTitleStyle(context)),
                             ],
                             if (_replayType.isNotEmpty && AppData.INFO_DECLAR[_replayType] != null)...[
                               SizedBox(width: 10),
@@ -414,17 +424,17 @@ class UserListItemState extends State<UserListItem> {
                             ]
                           ],
                         ),
-                        if (widget.type == UserListType.normal && _userInfo['message'].isNotEmpty) ...[
+                        if (widget.type == UserListType.normal && STR(_userInfo['message']).isNotEmpty) ...[
                           SizedBox(height: 5),
                           Text(DESC(_userInfo['message']), maxLines: 2, style: ItemDescStyle(context)),
                         ],
                         if (widget.type == UserListType.block || widget.type == UserListType.report) ...[
-                          if (STR(widget.userItem['desc']).isNotEmpty) ...[
+                          if (STR(widget.itemInfo['desc']).isNotEmpty) ...[
                             SizedBox(height: 5),
-                            Text(DESC(widget.userItem['desc']), maxLines: 2, style: ItemDescStyle(context)),
+                            Text(DESC(widget.itemInfo['desc']), maxLines: 2, style: ItemDescStyle(context)),
                           ],
                           SizedBox(height: 5),
-                          Text('$dateText${SERVER_TIME_STR(widget.userItem['createTime'])}',
+                          Text('$dateText${SERVER_TIME_STR(widget.itemInfo['createTime'])}',
                               maxLines: 2, style: ItemDescStyle(context)),
                         ]
                       ],
@@ -478,7 +488,7 @@ class UserListItemState extends State<UserListItem> {
         ],
         onChanged: (value) {
           var selected = value as DropdownItem;
-          if (widget.onMenuSelected != null) widget.onMenuSelected!(selected.type, widget.userItem['id'], _userInfo);
+          if (widget.onMenuSelected != null) widget.onMenuSelected!(selected.type, widget.itemInfo['id'], _userInfo);
         },
       ),
     );

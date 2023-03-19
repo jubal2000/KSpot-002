@@ -200,6 +200,12 @@ class UserRepository {
     return api.setUserInfoJSON(userId, items);
   }
 
+  Future<bool> setUserInfo(UserModel user) async {
+    final userInfo = user.toJson();
+    LOG('--> setUserInfo : ${user.id} / ${user.toJson()}');
+    return api.setUserInfo(userInfo);
+  }
+
   Future<bool> setUserInfoItem(UserModel user, String key) async {
     final userInfo = user.toJson();
     LOG('--> setUserInfoItem : ${user.id} - $key / ${user.toJson()}');

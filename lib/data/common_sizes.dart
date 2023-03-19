@@ -19,6 +19,8 @@ const double UI_BUTTON_WIDTH = 80.0;
 const double UI_ROUND_RADIUS = 12.0;
 const double UI_MAIN_LIST_BG_HEIGHT = 150.0;
 
+const double UI_FACE_SIZE = 400.0;
+
 const double UI_TOP_SPACE = 20.0;
 const double UI_APPBAR_TITLE_SPACE = 60.0;
 const double UI_TOP_TEXT_SPACE = 40.0;

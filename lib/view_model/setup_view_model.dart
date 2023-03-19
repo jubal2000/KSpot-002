@@ -18,8 +18,11 @@ import '../services/api_service.dart';
 import '../utils/utils.dart';
 import '../view/setup/setup_block_screen.dart';
 import '../view/setup/setup_contact_screen.dart';
+import '../view/setup/setup_faq_screen.dart';
+import '../view/setup/setup_notice_screen.dart';
 import '../view/setup/setup_profile_screen.dart';
 import '../view/setup/setup_push_screen.dart';
+import '../view/setup/setup_service_screen.dart';
 import '../widget/dropdown_widget.dart';
 import '../widget/edit/edit_setup_widget.dart';
 import '../widget/verify_phone_widget.dart';
@@ -430,29 +433,32 @@ class SetupViewModel extends ChangeNotifier {
           if (onRefresh != null) onRefresh!(result != null && result);
         });
         break;
-      // case 'shop':
-      //   if (!AppData.isStoreInfoReady) {
-      //     var result = await api.getStoreInfoFromUserId(AppData.USER_ID);
-      //     AppData.storeInfo = result;
-      //     AppData.isStoreInfoReady = true;
-      //   }
-      //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupMyShopScreen()));
-      //   break;
-      // case 'service':
-      //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupServiceScreen()));
-      //   break;
+      case 'service':
+        Get.to(() => SetupServiceScreen())!.then((result) {
+          if (onRefresh != null) onRefresh!(result != null && result);
+        });
+        break;
       // case 'promotion':
       //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(PromotionListScreen()));
+      //   Get.to(() => SetupServiceScreen())!.then((result) {
+      //     if (onRefresh != null) onRefresh!(result != null && result);
+      //   });
       //   break;
-      // case 'notice':
-      //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupNoticeScreen()));
-      //   break;
-      // case 'faq':
-      //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SetupFaqScreen()));
-      //   break;
+      case 'notice':
+        Get.to(() => SetupNoticeScreen())!.then((result) {
+          if (onRefresh != null) onRefresh!(result != null && result);
+        });
+        break;
+      case 'faq':
+        Get.to(() => SetupFaqScreen())!.then((result) {
+          if (onRefresh != null) onRefresh!(result != null && result);
+        });
+        break;
       // case 'terms':
-      //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(SignUpTermsScreen(isShowOnly: true)));
-      //   break;
+      //   Get.to(() => SignUpTermsScreen())!.then((result) {
+      //     if (onRefresh != null) onRefresh!(result != null && result);
+      //   });
+        break;
     }
   }
 

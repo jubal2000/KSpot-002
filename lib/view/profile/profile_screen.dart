@@ -65,11 +65,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     IconButton(
                       onPressed: () {
                         _key.currentState!.openEndDrawer();
-                        // showAlertYesNoDialog(context, 'SIGN OUT'.tr, 'Would you like to sign out now?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
-                        //   if (result == 1) {
-                        //     auth.signOut();
-                        //   }
-                        // });
                       },
                       icon: Icon(Icons.settings)
                     ),

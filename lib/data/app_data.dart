@@ -37,6 +37,7 @@ const PIN_IMAGE_SIZE_MAX = 12.0;
 const ORG_SCREEN_WITH = 411;
 const UPLOAD_FILE_MAX = 5;
 const CHAT_NOTICE_MAX = 5;
+const FAQ_SHOW_MAX = 12;
 
 const FACE_CIRCLE_SIZE_L = 120.0;
 const FACE_CIRCLE_SIZE_M = 50.0;
@@ -146,7 +147,7 @@ class AppData {
   static BuildContext? topMenuContext;
   static List<GlobalKey> searchWidgetKey = List.generate(SearchKeys.values.length, (index) => GlobalKey());
 
-  static JSON INFO_NOTICE = JSON.from(infoData['notice' ] ??= {});
+  static JSON INFO_NOTICE = JSON.from(infoData['notice'] ??= {});
   static JSON INFO_FAQ = JSON.from(infoData['faq' ] ??= {});
   // static JSON INFO_CATEGORY_GROUP = JSON.from(infoData['categoryGroup'] ??= {});
   // static JSON INFO_CATEGORY_TYPE = JSON.from(infoData['categoryType' ] ??= {});

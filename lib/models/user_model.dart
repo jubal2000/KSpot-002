@@ -133,10 +133,10 @@ class UserModel {
   }
 
   //------------------------------------------------------------------------------------------------------
-  //  TimeData
+  //  SNSData
   //
 
-  get getSnsDataMap {
+  get snsDataMap {
     JSON result = {};
     if (snsData != null) {
       for (var item in snsData!) {
@@ -145,6 +145,15 @@ class UserModel {
     }
     return result;
   }
+
+  setSnsData(JSON data) {
+    snsData ??= [];
+    for (var item in data.entries) {
+      snsData!.add(item.value);
+    }
+    return snsData;
+  }
+
 
 }
 

@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/common_sizes.dart';
@@ -58,7 +59,7 @@ class MainMyTabState extends State<MainMyTab> {
 
   initUserInfo() {
     _isMyProfile  = AppData.userInfo.checkOwner(widget.userViewModel.userInfo!.id);
-    _snsData      = widget.userViewModel.userInfo!.getSnsDataMap;
+    _snsData      = widget.userViewModel.userInfo!.snsDataMap;
     _tabList = [
       MyProfileTab(ProfileContentTab.event, _isMyProfile ? 'MY EVENT'.tr: 'EVENT'.tr, widget.userViewModel, onRefresh: refreshTab),
       MyProfileTab(ProfileContentTab.story, _isMyProfile ? 'MY STORY'.tr: 'STORY'.tr, widget.userViewModel, onRefresh: refreshTab),
@@ -162,13 +163,13 @@ class MainMyTabState extends State<MainMyTab> {
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.symmetric(vertical: 20),
+                padding: EdgeInsets.symmetric(vertical: UI_TOP_SPACE.w),
                 color: Theme.of(context).primaryColor.withOpacity(0.1),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      padding: EdgeInsets.only(left: 15),
+                      padding: EdgeInsets.only(left: UI_HORIZONTAL_SPACE.w),
                       constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width * 0.45,
                       ),
@@ -180,17 +181,17 @@ class MainMyTabState extends State<MainMyTab> {
                                 child: Stack(
                                     children: [
                                       Container(
-                                        width: 300,
-                                        height: 300,
+                                        width: UI_FACE_SIZE.w,
+                                        height: UI_FACE_SIZE.w,
                                         decoration: BoxDecoration(
                                           color: const Color(0xff7c94b6),
-                                          borderRadius: BorderRadius.all(Radius.circular(300)),
+                                          borderRadius: BorderRadius.all(Radius.circular(UI_FACE_SIZE.w)),
                                           border: Border.all(
                                             color: Theme.of(context).colorScheme.secondary,
                                             width: 4.0,
                                           ),
                                         ),
-                                        child: getCircleImage(widget.userViewModel.userInfo!.pic, 300),
+                                        child: getCircleImage(widget.userViewModel.userInfo!.pic, UI_FACE_SIZE.w),
                                       ),
                                       if (_isMyProfile)
                                         Positioned(
@@ -201,7 +202,7 @@ class MainMyTabState extends State<MainMyTab> {
                                                   alignment: Alignment.center,
                                                   children: [
                                                     Icon(Icons.edit, color: Colors.black.withOpacity(0.5), size: 26),
-                                                    Icon(Icons.edit, color: Colors.white, size: 22),
+                                                    Icon(Icons.edit, color: Colors.white, size: UI_MENU_ICON_SIZE.w),
                                                   ]
                                               ),
                                               onPressed: () {
@@ -255,7 +256,7 @@ class MainMyTabState extends State<MainMyTab> {
                               ],
                             ),
                             Container(
-                              padding: EdgeInsets.fromLTRB(20, 10, 20, 0),
+                              padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE.w, 10, UI_HORIZONTAL_SPACE.w, 0),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -270,40 +271,40 @@ class MainMyTabState extends State<MainMyTab> {
                             ),
                             if (_snsData.isNotEmpty)...[
                               Container(
-                                  padding: EdgeInsets.only(top: 10, bottom: 20),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                    children: [
-                                      for (var item in _snsData.entries)...[
-                                        if (_snsData.containsKey(STR(item.value['id'])))...[
-                                          GestureDetector(
-                                              onTap: () async {
-                                                final snsItem = getSNSItemFromUser(STR(item.value['id']), _snsData);
-                                                var protocolUrl = '';
-                                                var launchMode = LaunchMode.platformDefault;
-                                                LOG('--> SNS select : $snsItem');
-                                                switch(STR(item.value['id'])) {
-                                                  case 'facebook':
-                                                    protocolUrl = 'fb://facewebmodal/f?href=${STR(snsItem['link'])}';
-                                                    break;
-                                                  case 'instagram':
-                                                    protocolUrl = 'instagram://user?username=${STR(snsItem['link']).toString().replaceAll("@", '')}';
-                                                    break;
-                                                  default:
-                                                    protocolUrl = STR(snsItem['link']);
-                                                    launchMode = LaunchMode.externalApplication;
-                                                    break;
-                                                }
-                                                LOG('--> protocolUrl : $protocolUrl');
-                                                var url = Uri.parse(protocolUrl);
-                                                await launchUrl(url, mode: launchMode);
-                                              },
-                                              child: showImage(STR(item.value['icon']), Size(_snsPicSize, _snsPicSize), color: Theme.of(context).hintColor)
-                                          ),
-                                        ]
+                                padding: EdgeInsets.only(top: 10, bottom: 20),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                    for (var item in _snsData.entries)...[
+                                      if (_snsData.containsKey(STR(item.value['id'])))...[
+                                        GestureDetector(
+                                            onTap: () async {
+                                              final snsItem = getSNSItemFromUser(STR(item.value['id']), _snsData);
+                                              var protocolUrl = '';
+                                              var launchMode = LaunchMode.platformDefault;
+                                              LOG('--> SNS select : $snsItem');
+                                              switch(STR(item.value['id'])) {
+                                                case 'facebook':
+                                                  protocolUrl = 'fb://facewebmodal/f?href=${STR(snsItem['link'])}';
+                                                  break;
+                                                case 'instagram':
+                                                  protocolUrl = 'instagram://user?username=${STR(snsItem['link']).toString().replaceAll("@", '')}';
+                                                  break;
+                                                default:
+                                                  protocolUrl = STR(snsItem['link']);
+                                                  launchMode = LaunchMode.externalApplication;
+                                                  break;
+                                              }
+                                              LOG('--> protocolUrl : $protocolUrl');
+                                              var url = Uri.parse(protocolUrl);
+                                              await launchUrl(url, mode: launchMode);
+                                            },
+                                            child: showImage(STR(item.value['icon']), Size(_snsPicSize, _snsPicSize), color: Theme.of(context).hintColor)
+                                        ),
                                       ]
-                                    ],
-                                  )
+                                    ]
+                                  ],
+                                )
                               )
                             ]
                           ]
@@ -520,65 +521,42 @@ class MyProfileTab extends StatelessWidget {
                 refreshShowList();
                 return StatefulBuilder(
                     builder: (context, setState) {
-                      return ListView(
-                        shrinkWrap: true,
+                      return Container(
+                        padding: _edgeInsets,
+                        child: Column(
                           children: [
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              padding: _edgeInsets,
-                              itemCount: _showList.length,
-                              itemBuilder: (context, index) {
-                                var item = _showList[index];
-                                // var controller = AnimationController(duration: const Duration(milliseconds: 150), vsync: this);
-                                return EventCardItem(
-                                  EventModel.fromJson(item),
-                                  // animationController: controller,
-                                  isShowTheme: false,
-                                  isShowUser: false,
-                                  isShowHomeButton: false,
-                                  isShowLike: false,
-                                  itemHeight: 90,
-                                  onRefresh: (updateData) {
-                                    setState(() {
-                                      // _itemList![key] = updateData;
-                                      if (onRefresh != null) onRefresh!(selectedTab.index);
-                                    });
-                                  },
-                                );
-                              }
-                            ),
-                            if (userViewModel.isMyProfile)...[
-                              Container(
+                             ..._showList.map((item) => EventCardItem(
+                                EventModel.fromJson(item),
+                                // animationController: controller,
+                                isShowTheme: false,
+                                isShowUser: false,
+                                isShowHomeButton: false,
+                                isShowLike: false,
+                                itemHeight: _itemHeight,
+                                onRefresh: (updateData) {
+                                  setState(() {
+                                    // _itemList![key] = updateData;
+                                    if (onRefresh != null) onRefresh!(selectedTab.index);
+                                  });
+                                },
+                              )).toList(),
+                              if (userViewModel.isMyProfile)...[
+                                Container(
                                   padding: EdgeInsets.symmetric(horizontal: 15),
                                   child:
                                   Row(
-                                      children: [
-                                        Expanded(
-                                          child: contentAddButton(context, 'EVENT ADD'.tr, padding: EdgeInsets.symmetric(vertical: 5), onPressed: (_) {
-                                            // AddPlaceEventContent(context, null, EventListType.events, (result) {
-                                            //   if (result.isNotEmpty) {
-                                            //     setState(() {
-                                            //       if (onRefresh != null) onRefresh!(selectedTab.index);
-                                            //     });
-                                            //   }
-                                            // });
-                                          }),
-                                        ),
-                                        SizedBox(width: 5),
-                                        Expanded(
-                                          child: contentAddButton(context, 'CLASS ADD'.tr, padding: EdgeInsets.symmetric(vertical: 5), onPressed: (_) {
-                                            // AddPlaceEventContent(context, null, EventListType.classes, (result) {
-                                            //   if (result.isNotEmpty) {
-                                            //     setState(() {
-                                            //       if (onRefresh != null) onRefresh!(selectedTab.index);
-                                            //     });
-                                            //   }
-                                            // });
-                                          }),
-                                        ),
-                                      ]
-                                  )
+                                    children: [
+                                      Expanded(
+                                        child: contentAddButton(context, 'EVENT ADD'.tr, padding: EdgeInsets.symmetric(vertical: 5), onPressed: (_) {
+                                        }),
+                                      ),
+                                      SizedBox(width: 5),
+                                      Expanded(
+                                        child: contentAddButton(context, 'CLASS ADD'.tr, padding: EdgeInsets.symmetric(vertical: 5), onPressed: (_) {
+                                      }),
+                                    ),
+                                  ]
+                                )
                               )
                             ],
                             ShowPageControlWidget(context, _pageNow, _pageMax, (page) => {
@@ -588,6 +566,7 @@ class MyProfileTab extends StatelessWidget {
                               })
                             }, EdgeInsets.symmetric(horizontal: 15)),
                           ]
+                        )
                       );
                     }
                 );
@@ -607,7 +586,9 @@ class MyProfileTab extends StatelessWidget {
                 return StatefulBuilder(
                     builder: (context, setState) {
                       // refreshShowList(_itemHeight);
-                      return Column(
+                      return Container(
+                          padding: _edgeInsets,
+                          child: Column(
                           children: [
                             ListView.builder(
                                 shrinkWrap: true,
@@ -683,6 +664,7 @@ class MyProfileTab extends StatelessWidget {
                               })
                             }, EdgeInsets.symmetric(horizontal: 15)),
                           ]
+                        )
                       );
                     }
                 );

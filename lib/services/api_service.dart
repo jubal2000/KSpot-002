@@ -224,6 +224,7 @@ class ApiService extends GetxService {
       // LOG('--> get infoData from LOCAL : ${AppData.infoData}');
     }
     // getBlockList(user);
+    LOG('--> NOTICE : ${result['notice'].toString()}');
     return result;
   }
   
@@ -1749,7 +1750,7 @@ class ApiService extends GetxService {
     }
     return result;
   }
-  
+
   Future<JSON?> addReportItem(String userId, String type, String targetId, String desc) async {
     LOG('--> addReportItem : $type / $targetId / $desc');
     try {
@@ -2580,16 +2581,14 @@ class ApiService extends GetxService {
   final ServiceQnACollection  = 'data_serviceQnA';
   
   Stream getServiceQnAData() {
-    var ref = firestore!.collection(ServiceQnACollection);
-    var query = ref.where('status', isEqualTo: 1);
-    return query.orderBy('createTime', descending: true).limit(FREE_LOADING_QNA_MAX).snapshots();
+    return getServiceQnAData();
   }
   
-  Stream getServiceQnADataNext(JSON lastTime) {
+  Stream getServiceQnADataNext([DateTime? lastTime]) {
     var ref = firestore!.collection(ServiceQnACollection);
     var query = ref.where('status', isEqualTo: 1);
-    if (JSON_NOT_EMPTY(lastTime)) {
-      var startTime = Timestamp(lastTime['_seconds'], lastTime['_nanoseconds']);
+    if (lastTime != null) {
+      var startTime = Timestamp.fromDate(lastTime);
       LOG('--> getServiceQnADataNext : $startTime');
       query = query.where('createTime', isLessThan: startTime);
     }

@@ -55,8 +55,6 @@ class ProfileTargetState extends State<ProfileTargetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final _followTitle0 = TextStyle(fontSize: 16.0, fontWeight: FontWeight.w800);
-    final _followTitle1 = TextStyle(fontSize: 16.0, fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.inverseSurface);
     return SafeArea(
       top: false,
         child: Scaffold(
@@ -68,14 +66,12 @@ class ProfileTargetState extends State<ProfileTargetScreen> {
               showVerticalDivider(Size(5, 12)),
               SizedBox(width: 10),
               UserFollowWidget(widget.userInfo.toJson(), fontSize: 16),
-              // Text(_followType == 3 || _followType == 2 ? 'Following' : 'Follow+',
-              //     style: _followType == 3 || _followType == 2 ? _followTitle1 : _followTitle0),
             ]
           ),
           toolbarHeight: 50,
           titleSpacing: 0,
         ),
-        body: MainMyTab(ProfileMainTab.profile, '', userVewModel),
+        body: ProfileTabScreen(ProfileMainTab.profile, '', userVewModel),
         )
     );
   }

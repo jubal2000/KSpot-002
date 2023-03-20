@@ -23,6 +23,7 @@ import 'edit/edit_setup_widget.dart';
 enum SignUpPhoneText {
   phone,
   phoneCheck,
+  pin,
 }
 
 enum VerifyStep {
@@ -51,9 +52,11 @@ class VerifyPhoneWidget extends StatefulWidget {
 class _VerifyPhoneState extends State<VerifyPhoneWidget> {
   final api = Get.find<ApiService>();
   final userRepo = UserRepository();
-  final _textController   = List<TextEditingController>.generate(SignUpPhoneText.values.length, (index) => TextEditingController());
   final _verifyFocusNode  = FocusScopeNode();
   final _phoneFormKey     = GlobalKey<FormState>();
+
+  final textController = List<TextEditingController>.generate(SignUpPhoneText.values.length, (index) => TextEditingController());
+  final pinFocus = FocusNode();
 
   Timer? countTimer;
   final countTimeValue = 0.obs;
@@ -77,16 +80,16 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
   String phoneVerify  = '';
   String verifyError  = '';
   var   currentVerifyStep = VerifyStep.none;
-  final pinFocus = FocusNode();
-  final pinController = TextEditingController();
 
   refreshData() {
     LOG('--> VerifyPhoneWidget refreshData : ${widget.phoneNumber}');
     _phone            = widget.phoneNumber.isNotEmpty ? widget.phoneNumber : '010';
     _phoneCheck       = widget.isSignIn || !widget.isValidated;
     _phoneValidated   = widget.isValidated;
-    _textController[SignUpPhoneText.phone.index].text = _phone;
-    _textController[SignUpPhoneText.phoneCheck.index].text = '';
+
+    textController[SignUpPhoneText.phone.index].text = _phone;
+    textController[SignUpPhoneText.phoneCheck.index].text = '';
+    textController[SignUpPhoneText.pin.index].clear();
 
     if (_phoneCheck) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -106,8 +109,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
       currentVerifyStep = VerifyStep.checkReady;
       countTimeValue.value = phoneCheckSec;
       verifyError = '';
-      pinController.clear();
-
+      if (_phoneCheck2) textController[SignUpPhoneText.pin.index].clear();
       if (countTimer != null) {
         countTimer!.cancel();
         countTimer = null;
@@ -118,7 +120,6 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
           if (countTimeValue.value <= 0) {
             currentVerifyStep = VerifyStep.sendReady;
             verifyError = '';
-            pinController.clear();
             countTimer!.cancel();
             countTimer = null;
           } else if (countTimeValue.value < phoneCheckSec - phoneResendSec) {
@@ -156,9 +157,10 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
             ShowToast('Verify code sent'.tr);
             _phoneCheck2 = true;
             _phoneCodeReady = false;
-            _textController[SignUpPhoneText.phoneCheck.index].text = '';
             _verificationId = verificationId;
             _resendToken = resendToken ?? -1;
+            textController[SignUpPhoneText.phoneCheck.index].text = '';
+            textController[SignUpPhoneText.pin.index].text = '';
             Future.delayed(Duration(milliseconds: 500)).then((_) {
               FocusScope.of(context).requestFocus(pinFocus);
             });
@@ -197,7 +199,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
             'Auth credential is invalid'.tr, 'OK'.tr).then((_) {
           setState(() {
             _phoneCode = '';
-            _textController[SignUpPhoneText.phoneCheck.index].text = '';
+            textController[SignUpPhoneText.phoneCheck.index].text = '';
           });
         });
       } else {
@@ -299,7 +301,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                 child: Form(
                   key: _phoneFormKey,
                   child: IntlPhoneField(
-                    controller: _textController[SignUpPhoneText.phone.index],
+                    controller: textController[SignUpPhoneText.phone.index],
                     autofocus: true,
                     decoration: inputLabel(context, '', ''),
                     initialCountryCode: CountryCodes[AppData.currentCountry] ?? 'KR',
@@ -313,7 +315,7 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                         _resendToken  = null;
                         _phoneValidated = widget.isValidated && _phone == widget.phoneNumber && _phoneIntl == widget.phoneIntl;
                         if (_phoneFormKey.currentState!.validate()) {
-                          _phoneValidated = _phone != widget.phoneNumber || _phoneIntl != widget.phoneIntl;
+                          _phoneValidated = !widget.isSignIn && _phone == widget.phoneNumber && _phoneIntl == widget.phoneIntl;
                           currentVerifyStep = VerifyStep.sendReady;
                           LOG('--> _phone completeNumber : $_phone / $_phoneIntl => $_phoneValidated / $currentVerifyStep');
                         }
@@ -349,12 +351,14 @@ class _VerifyPhoneState extends State<VerifyPhoneWidget> {
                 child: PinCodeTextField(
                   appContext: context,
                   focusNode: pinFocus,
-                  controller: pinController,
+                  controller: textController[SignUpPhoneText.pin.index],
                   length: 6,
-                  autoFocus: true,
+                  // autoFocus: true,
                   obscureText: false,
                   showCursor: false,
+                  autoDisposeControllers: false,
                   backgroundColor: Colors.transparent,
+                  keyboardType: TextInputType.number,
                   animationType: AnimationType.slide,
                   animationDuration: Duration(milliseconds: 200),
                   pinTheme: PinTheme(

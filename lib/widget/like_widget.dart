@@ -26,7 +26,7 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
   var api = Get.find<ApiService>();
 
   return FutureBuilder(
-      future: api.getLikeJsonFromTargetId(AppData.userInfo.toJson(), type, targetInfo['id']),
+      future: api.getLikeJsonFromTargetId(AppData.userInfo.id, type, targetInfo['id']),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           var likeInfo = snapshot.data as JSON;

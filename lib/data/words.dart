@@ -22,10 +22,11 @@ class Words extends Translations {
       'MY STORY': '내 스토리',
       'PROFILE': '프로필',
       'FOLLOW': '팔로우',
-      'FOLLOWER': '팔로워',
+      'FOLLOWING': '내가 팔로우',
+      'FOLLOWER': '나를 팔로우',
       'FOLLOW LIST': '팔로우 목록',
       'BOOKMARK': '북마크',
-      'LIKE': '북마크',
+      'LIKE': '좋아요',
       'NEW STORY': 'NEW 스토리',
       'HOT STORY': 'HOT 스토리',
       'APP SETTING': '앱 설정',
@@ -102,6 +103,7 @@ class Words extends Translations {
       'Photo update is complete': '사진 업데이트가 완료되었습니다',
       'Edit message': '메시지 수정',
       'Enter your message to show here': '여기에 보여줄 메시지를 입력하세요',
+      'User Menu': '사용자 메뉴',
 
       // setup_screen
       'Profile edit': '프로필 편집',

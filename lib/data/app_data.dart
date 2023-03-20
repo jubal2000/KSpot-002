@@ -135,6 +135,8 @@ class AppData {
   static JSON infoData = {};
   static JSON timeData = {};
   static JSON serviceQnAData = {};
+  static JSON likeData = {};
+
   static List<String> refreshChatList = [];
 
   static Map<String, PlaceModel>    placeData = {};

@@ -128,8 +128,16 @@ class UserModel {
   factory UserModel.fromJson(JSON json) => _$UserModelFromJson(json);
   JSON toJson() => _$UserModelToJson(this);
 
-  checkOwner(userId) {
+  checkOwner(String userId) {
     return id == userId;
+  }
+
+  checkOption(String optionId) {
+    if (LIST_EMPTY(optionData)) return;
+    for (var item in optionData!) {
+      if (item.id == optionId) return true;
+    }
+    return false;
   }
 
   //------------------------------------------------------------------------------------------------------

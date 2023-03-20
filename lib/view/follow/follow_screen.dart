@@ -1,10 +1,12 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/repository/user_repository.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/app_data.dart';
+import '../../data/common_sizes.dart';
 import '../../data/dialogs.dart';
 import '../../data/theme_manager.dart';
 import '../../models/follow_model.dart';
@@ -12,6 +14,7 @@ import '../../models/user_model.dart';
 import '../../services/api_service.dart';
 import '../../utils/utils.dart';
 import '../../view_model/follow_view_model.dart';
+import '../profile/profile_target_screen.dart';
 
 class FollowScreen extends StatefulWidget {
   FollowScreen(this.userInfo, {Key? key,
@@ -43,9 +46,9 @@ class FollowScreenState extends State<FollowScreen> {
 
   refreshTab() {
     _tabList = [
-      FollowTab(0, "FOLLOW".tr  , AppData.followData, selectData: widget.selectData,
+      FollowTab(0, Icon(Icons.star, size: 16), "FOLLOWING".tr, AppData.followData, selectData: widget.selectData,
           isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
-      FollowTab(1, "FOLLOWER".tr, AppData.followData, selectData: widget.selectData,
+      FollowTab(1, Icon(Icons.star_border, size: 16), "FOLLOWER".tr, AppData.followData, selectData: widget.selectData,
           isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
     ];
   }
@@ -75,7 +78,7 @@ class FollowScreenState extends State<FollowScreen> {
       child: SafeArea(
         child: Scaffold(
           appBar: widget.isShowAppBar ? AppBar(
-            title: Text(widget.topTitle.isNotEmpty ? widget.topTitle : 'FOLLOW LIST', style: AppBarTitleStyle(context)),
+            title: Text(widget.topTitle.isNotEmpty ? widget.topTitle : 'FOLLOW LIST'.tr, style: AppBarTitleStyle(context)),
             titleSpacing: 0,
             toolbarHeight: 50,
             actions: [
@@ -131,11 +134,12 @@ class FollowScreenState extends State<FollowScreen> {
 
 class FollowTab extends StatefulWidget {
   final api = Get.find<ApiService>();
-  FollowTab(this.selectedTab, this.title, this.followData, {
+  FollowTab(this.selectedTab, this.icon, this.title, this.followData, {
     Key? key, this.isSelectable = false, this.isShowMe = false, this.selectMax = 9, this.selectData, this.onSelected
   }) : super(key: key);
 
   int selectedTab;
+  Icon icon;
   String title;
   Map<String, FollowModel> followData;
   bool isSelectable;
@@ -146,7 +150,8 @@ class FollowTab extends StatefulWidget {
   Function(JSON)? onSelected;
 
   Widget getTab() {
-    return Tab(text: title, height: 40);
+    return Tab(icon: icon, iconMargin: EdgeInsets.zero, text: title, height: UI_TAB_HEIGHT.w);
+    // return Tab(text: title, height: UI_APPBAR_TOOL_HEIGHT.w);
   }
 
   @override
@@ -378,110 +383,89 @@ class FollowListItemState extends State<FollowListItem> {
     userId = STR(widget.isFollowing ? widget.followItem['targetId'] : widget.followItem['userId']);
     _followInit = repo.getUserInfo(userId);
     return GestureDetector(
-        onTap: () {
-          if (widget.isSelectable) {
-            // if (widget.selectMax == 1) {
-            //   AppData.listSelectData.clear();
-            //   AppData.listSelectData[_userInfo['id']] = _userInfo;
-            //   Navigator.of(context).pop();
-            // } else {
-            //   AppData.listSelectData[_userInfo['id']] = _userInfo;
-            // }
+      onTap: () {
+        if (widget.isSelectable) {
+          if (widget.selectMax == 1) {
+            AppData.listSelectData.clear();
+            AppData.listSelectData[userInfo!.id] = userInfo;
+            Navigator.of(context).pop();
           } else {
-            // Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileTargetScreen(_userInfo)));
+            AppData.listSelectData[userInfo!.id] = userInfo;
           }
-        },
-        child: Container(
-            width: double.infinity,
-            height: widget.height,
-            color: Colors.transparent,
-            padding: EdgeInsets.symmetric(vertical: 5),
-            child: FutureBuilder(
-                future: _followInit,
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  if (snapshot.hasData) {
-                    refreshData(snapshot.data);
-                    return Row(
+        } else {
+          Get.to(() => ProfileTargetScreen(userInfo!));
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        height: widget.height,
+        color: Colors.transparent,
+        padding: EdgeInsets.symmetric(vertical: 5),
+        child: FutureBuilder(
+          future: _followInit,
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.hasData) {
+              refreshData(snapshot.data);
+              return Row(
+                children: [
+                  if (widget.isSelectable && widget.selectMax > 1)
+                    Checkbox(
+                      value: widget.isSelected,
+                      onChanged: (value) {
+                        setState(() {
+                          widget.isSelected = value!;
+                          if (widget.onSelected != null) widget.onSelected!(userInfo!.toJson(), value);
+                          // if (_isChecked) {
+                          //   if (widget.selectMax == 1) {
+                          //     AppData.listSelectData.clear();
+                          //     AppData.listSelectData[userId] = _userInfo;
+                          //     Navigator.of(context).pop();
+                          //   } else {
+                          //     AppData.listSelectData[userId] = _userInfo;
+                          //   }
+                          // } else {
+                          //   AppData.listSelectData.remove(userId);
+                          // }
+                        });
+                      }
+                    ),
+                  if (widget.isSelectable && widget.selectMax == 1)
+                    Icon(Icons.arrow_forward_ios, size: 24, color: Theme.of(context).primaryColor),
+                  SizedBox(
+                    width: widget.height - 10,
+                    height: widget.height - 10,
+                    child: ClipOval(
+                        child: showImageFit(userInfo!.pic)
+                    )
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (widget.isSelectable && widget.selectMax > 1)
-                          Checkbox(
-                              value: widget.isSelected,
-                              onChanged: (value) {
-                                setState(() {
-                                  widget.isSelected = value!;
-                                  if (widget.onSelected != null) widget.onSelected!(userInfo!.toJson(), value);
-                                  // if (_isChecked) {
-                                  //   if (widget.selectMax == 1) {
-                                  //     AppData.listSelectData.clear();
-                                  //     AppData.listSelectData[userId] = _userInfo;
-                                  //     Navigator.of(context).pop();
-                                  //   } else {
-                                  //     AppData.listSelectData[userId] = _userInfo;
-                                  //   }
-                                  // } else {
-                                  //   AppData.listSelectData.remove(userId);
-                                  // }
-                                });
-                              }
-                          ),
-                        if (widget.isSelectable && widget.selectMax == 1)
-                          Icon(Icons.arrow_forward_ios, size: 24, color: Theme.of(context).primaryColor),
-                        SizedBox(
-                            width: widget.height - 10,
-                            height: widget.height - 10,
-                            child: ClipOval(
-                                child: showImageFit(userInfo!.pic)
-                            )
-                        ),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(userInfo!.nickName, style: ItemTitleStyle(context)),
-                              if (userInfo!.message.isNotEmpty) ...[
-                                SizedBox(height: 5),
-                                Text(DESC(userInfo!.message), maxLines: 2, style: ItemDescStyle(context)),
-                              ]
-                            ],
-                          ),
-                        ),
-                        // SizedBox(width: 10),
-                        // Column(
-                        //   mainAxisAlignment: MainAxisAlignment.center,
-                        //   crossAxisAlignment: CrossAxisAlignment.end,
-                        //   children: [
-                        //     // Text(SERVER_TIME_STR(widget.followItem['createTime']), style: Theme
-                        //     //     .of(context)
-                        //     //     .textTheme
-                        //     //     .subtitle2),
-                        //     // SizedBox(height: 5),
-                        //     Container(
-                        //       width: 16,
-                        //       height: 16,
-                        //       child: Text("1", style: TextStyle(fontSize: 7, color: Colors.white)),
-                        //       alignment: Alignment.center,
-                        //       decoration: BoxDecoration(
-                        //           shape: BoxShape.circle,
-                        //           color: Colors.purple.withOpacity(0.6)
-                        //       ),
-                        //     )
-                        //   ],
-                        // ),
-                        if (!widget.isSelectable)
-                          EditMenuWidget,
+                        Text(userInfo!.nickName, style: ItemTitleStyle(context)),
+                        if (userInfo!.message.isNotEmpty) ...[
+                          Text(DESC(userInfo!.message), maxLines: 1, style: ItemDescStyle(context)),
+                        ],
+                        Text(DATE_STR(DateTime.parse(userInfo!.createTime)), style: ItemDescExStyle(context)),
                       ],
-                    );
-                  } else {
-                    return showLoadingFullPage(context);
-                  }
-                })
+                    ),
+                  ),
+                  if (!widget.isSelectable)
+                    editMenuWidget,
+                ],
+              );
+            } else {
+              return showLoadingFullPage(context);
+            }
+          }
         )
+      )
     );
   }
 
-  Widget get EditMenuWidget {
+  Widget get editMenuWidget {
     return  DropdownButtonHideUnderline(
       child: DropdownButton2(
         customButton: Container(
@@ -490,8 +474,6 @@ class FollowListItemState extends State<FollowListItem> {
           alignment: Alignment.centerRight,
           child: Icon(Icons.more_vert_outlined, size: 22, color: Colors.grey),
         ),
-        // customItemsIndexes: const [3],
-        // customItemsHeight: 3,
         itemHeight: 45,
         dropdownWidth: 160,
         buttonHeight: 30,
@@ -522,30 +504,30 @@ class FollowListItemState extends State<FollowListItem> {
 
   static Widget buildItem(DropdownItem item) {
     return Container(
-        child: Column(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 5),
-                  child: Row(
-                    children: [
-                      Icon(
-                          item.icon,
-                          color: Colors.grey,
-                          size: 20
-                      ),
-                      if (item.text != null)...[
-                        SizedBox(width: 3),
-                        Text(item.text!.tr, style: TextStyle(fontSize: 14), maxLines: 2),
-                      ]
-                    ],
+      child: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 5),
+              child: Row(
+                children: [
+                  Icon(
+                    item.icon,
+                    color: Colors.grey,
+                    size: 20
                   ),
-                ),
+                  if (item.text != null)...[
+                    SizedBox(width: 3),
+                    Text(item.text!.tr, style: TextStyle(fontSize: 14), maxLines: 2),
+                  ]
+                ],
               ),
-              if (item.isLine)
-                showHorizontalDivider(Size(double.infinity, 2), color: Colors.grey),
-            ]
-        )
+            ),
+          ),
+          if (item.isLine)
+            showHorizontalDivider(Size(double.infinity, 2), color: Colors.grey),
+        ]
+      )
     );
   }
 }

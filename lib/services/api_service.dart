@@ -877,14 +877,15 @@ class ApiService extends GetxService {
 
   final StoryCollection = 'data_story';
 
-  Future<JSON> getStoryFromId(String storyId) async {
+  Future<JSON?> getStoryFromId(String storyId) async {
     JSON result = {};
     var snapshot = await firestore!.collection(StoryCollection).doc(storyId).get();
     if (snapshot.data() != null) {
       result = FROM_SERVER_DATA(snapshot.data());
+      LOG('--> getStoryFromId Result : $result');
+      return result;
     }
-    LOG('--> getStoryFromId Result : $result');
-    return result;
+    return null;
   }
 
   Future<JSON> getStoryFromTargetId(String eventId, {DateTime? lastTime, int limit = 0}) async {
@@ -1131,7 +1132,28 @@ class ApiService extends GetxService {
   final ShareCollection = 'data_share';
   final LikeCollection = 'data_like';
 
-  Future<JSON?> getLikeFromTargetId(JSON user, String targetType, String targetId) async {
+  Future<JSON> getLikeFromUserId(String userId) async {
+    // LOG('--> getLikeFromTargetId [$targetType] : $targetId / $userId / ${AppData.USER_PLACE}');
+    JSON result = {};
+    var ref = firestore!.collection(LikeCollection);
+    try {
+      // get original info..
+      var snapshot = await ref
+          .where('status', isEqualTo: 1)
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        var item = snapshot.docs.first.data();
+        result[item['id']] = FROM_SERVER_DATA(item);
+      }
+    } catch (e) {
+      LOG('--> getLikeFromTargetId Error : $e');
+    }
+    return result;
+  }
+
+  Future<JSON?> getLikeFromTargetId(String userId, String targetType, String targetId) async {
     // LOG('--> getLikeFromTargetId [$targetType] : $targetId / $userId / ${AppData.USER_PLACE}');
     var ref = firestore!.collection(LikeCollection);
     try {
@@ -1140,7 +1162,7 @@ class ApiService extends GetxService {
           .where('status', isEqualTo: 1)
           .where('targetType', isEqualTo: targetType)
           .where('targetId', isEqualTo: targetId)
-          .where('userId', isEqualTo: STR(user['id']))
+          .where('userId', isEqualTo: userId)
           .limit(1)
           .get();
 
@@ -1153,8 +1175,8 @@ class ApiService extends GetxService {
     return null;
   }
 
-  Future<JSON> getLikeJsonFromTargetId(JSON user, String targetType, String targetId) async {
-    final result = await getLikeFromTargetId(user, targetType, targetId);
+  Future<JSON> getLikeJsonFromTargetId(String userId, String targetType, String targetId) async {
+    final result = await getLikeFromTargetId(userId, targetType, targetId);
     return result ?? {};
   }
 
@@ -2430,7 +2452,7 @@ class ApiService extends GetxService {
       if (addItem['targetType'] == 'story') {
         var targetId = addItem['targetId'];
         var storyInfo = await getStoryFromId(targetId);
-        if (storyInfo.isNotEmpty) {
+        if (storyInfo != null) {
           var count = INT(storyInfo['comments']) + 1;
           var newData = {'comments' : count};
           addItem['comments'] = count;

@@ -224,6 +224,14 @@ class UserRepository {
     return null;
   }
 
+  getEventFromId(String eventId) async {
+    final result = await api.getEventFromId(eventId);
+    if (result != null) {
+      return EventModel.fromJson(result);
+    }
+    return null;
+  }
+
   Future<Map<String, EventModel>> getEventFromUserId(String userId, [bool addExpired = false]) async {
     Map<String, EventModel> result = {};
     final response = await api.getEventFromUserId(userId, addExpired);
@@ -233,6 +241,14 @@ class UserRepository {
       }
     }
     return result;
+  }
+
+  getStoryFromId(String storyId) async {
+    final result = await api.getStoryFromId(storyId);
+    if (result != null) {
+      return StoryModel.fromJson(result);
+    }
+    return null;
   }
 
   Future<Map<String, StoryModel>> getStoryFromUserId(String userId) async {
@@ -267,6 +283,14 @@ class UserRepository {
 
   setReportDesc(String targetId, String desc) async {
     return await api.setReportDesc(AppData.blockUserData, targetId, desc);
+  }
+
+  getLikeFromUserId(String userId) {
+    return api.getLikeFromUserId(userId);
+  }
+
+  Future<JSON> getLikeFromTargetId(String userId) async {
+    return await api.getLikeFromUserId(userId);
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/data/dialogs.dart';
@@ -40,92 +41,91 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _setupViewModel.init(context);
     return SafeArea(
       top: false,
-      child: ChangeNotifierProvider<UserViewModel>.value(
-        value: _viewModel,
-        child: Consumer<UserViewModel>(
-          builder: (context, viewModel, _) {
-            LOG('--> UserViewModel redraw');
-            return DefaultTabController(
-              length: viewModel.tabList.length,
-              child: Scaffold(
-                key: _key,
-                appBar: AppBar(
-                  title: Text(viewModel.isMyProfile ? 'MY'.tr : ''),
-                  titleTextStyle: AppBarTitleStyle(context),
-                  titleSpacing: UI_HORIZONTAL_SPACE,
-                  toolbarHeight: UI_APPBAR_TITLE_SPACE,
-                  automaticallyImplyLeading: widget.isShowBack,
-                  actions: [
-                    IconButton(
-                      onPressed: () {
-                        Get.to(() => MessageScreen());
-                      },
-                      icon: Icon(Icons.mail_outline)
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        _key.currentState!.openEndDrawer();
-                      },
-                      icon: Icon(Icons.settings)
-                    ),
-                  ],
-                  bottom: TabBar(
-                    onTap: (index) {
-                      viewModel.currentTab = index;
-                    },
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    labelColor: Theme.of(context).primaryColor,
-                    labelStyle: ItemTitleStyle(context),
-                    unselectedLabelColor: Theme.of(context).hintColor,
-                    unselectedLabelStyle: ItemTitleStyle(context),
-                    indicatorColor: Theme.of(context).primaryColor,
-                    tabs: List<Widget>.from(viewModel.tabList.map((item) => item.getTab()).toList()),
-                  ),
-                ),
-                body: TabBarView(
-                  physics: NeverScrollableScrollPhysics(),
-                  children: List<Widget>.from(viewModel.tabList),
-                ),
-                endDrawer:  ChangeNotifierProvider.value(
-                  value: _setupViewModel,
-                  child: Consumer<SetupViewModel>(
-                    builder: (context, viewModel, _) {
-                      LOG('--> SetupViewModel redraw');
-                      return Drawer(
-                        backgroundColor: Theme.of(context).canvasColor,
-                        child: ListView(
-                          children: [
-                            ListTile(
-                              contentPadding: EdgeInsets.all(10),
-                              tileColor: Theme.of(context).primaryColorDark,
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              title: Row(
-                                children: [
-                                  SizedBox(width: 10),
-                                  Icon(Icons.settings, size: 30),
-                                  SizedBox(width: 10),
-                                  Text('Setup'.tr, style: AppBarTitleStyle(context))
-                                ],
-                              ),
-                            ),
-                            ...viewModel.showSetupList((refresh) {
-                              if (refresh) {
-                                _viewModel.initUserModel(AppData.userInfo);
-                                _viewModel.refresh();
-                              }
-                            }),
-                          ]
-                        ),
-                      );
-                    }
-                  )
-                )
+      child: DefaultTabController(
+        length: _viewModel.tabList.length,
+        child: Scaffold(
+          key: _key,
+          appBar: AppBar(
+            toolbarHeight: 30.w,
+            automaticallyImplyLeading: widget.isShowBack,
+            actions: [
+              IconButton(
+                onPressed: () {
+                  Get.to(() => MessageScreen());
+                },
+                icon: Icon(Icons.mail_outline)
               ),
-            );
-          }
-        )
+              IconButton(
+                onPressed: () {
+                  _key.currentState!.openEndDrawer();
+                },
+                icon: Icon(Icons.menu)
+              ),
+              SizedBox(width: 5.w),
+            ],
+            bottom: TabBar(
+              onTap: (index) {
+                _viewModel.currentTab = index;
+              },
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              labelColor: Theme.of(context).primaryColor,
+              labelStyle: ItemTitleStyle(context),
+              unselectedLabelColor: Theme.of(context).hintColor,
+              unselectedLabelStyle: ItemTitleStyle(context),
+              indicatorColor: Theme.of(context).primaryColor,
+              tabs: List<Widget>.from(_viewModel.tabList.map((item) => item.getTab()).toList()),
+            ),
+          ),
+          body: FutureBuilder(
+            future: _viewModel.getContentDataAll(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return TabBarView(
+                  physics: NeverScrollableScrollPhysics(),
+                  children: List<Widget>.from(_viewModel.tabList),
+                );
+              } else {
+                return showLoadingFullPage(context);
+              }
+            }
+          ),
+          endDrawer:  ChangeNotifierProvider.value(
+            value: _setupViewModel,
+            child: Consumer<SetupViewModel>(
+              builder: (context, viewModel, _) {
+                LOG('--> SetupViewModel redraw');
+                return Drawer(
+                  backgroundColor: Theme.of(context).canvasColor,
+                  child: ListView(
+                    children: [
+                      ListTile(
+                        contentPadding: EdgeInsets.all(10),
+                        tileColor: Theme.of(context).primaryColorDark,
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        title: Row(
+                          children: [
+                            SizedBox(width: 10.w),
+                            Icon(Icons.menu, size: 24.sp),
+                            SizedBox(width: 10.w),
+                            Text('User Menu'.tr, style: AppBarTitleStyle(context))
+                          ],
+                        ),
+                      ),
+                      ...viewModel.showSetupList((refresh) {
+                        if (refresh) {
+                          _viewModel.initUserModel(AppData.userInfo);
+                          _viewModel.refresh();
+                        }
+                      }),
+                    ]
+                  ),
+                );
+              }
+            )
+          )
+        ),
       )
     );
   }

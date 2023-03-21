@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:kspot_002/models/story_model.dart';
@@ -15,6 +16,7 @@ import '../utils/utils.dart';
 import '../models/user_model.dart';
 import '../repository/user_repository.dart';
 import '../view/event/event_item.dart';
+import '../view/profile/profile_content_sceen.dart';
 import '../view/profile/profile_tab_screen.dart';
 import '../view/story/story_item.dart';
 
@@ -24,7 +26,7 @@ enum ProfileMainTab {
   like,
 }
 
-enum ProfileContentTab {
+enum ProfileContentType {
   event,
   story,
 }
@@ -46,13 +48,11 @@ class UserViewModel extends ChangeNotifier {
   final listItemShowMax = 5;
   var listPageNow = 0;
   var listPageMax = 0;
-  var selectedTab = ProfileContentTab.event;
+  var selectedTab = ProfileContentType.event;
 
   Future<JSON>? listDataInit;
   Map<String, EventModel> eventData = {};
   Map<String, StoryModel> storyData = {};
-  List<EventModel> eventShowList = [];
-  List<StoryModel> storyShowList = [];
   JSON snsData = {};
 
   init(context) {
@@ -270,38 +270,38 @@ class UserViewModel extends ChangeNotifier {
   //  My Event, Story list..
   //
 
-  initListTab(selectedTab) {
-    this.selectedTab = selectedTab;
-  }
+  // initListTab(selectedTab) {
+  //   this.selectedTab = selectedTab;
+  // }
 
-  refreshContentShowList() {
-    switch(selectedTab) {
-      case ProfileContentTab.event:
-        eventShowList.clear();
-        for (var i=0; i<listPageMax; i++) {
-          var itemIndex = listPageNow * listItemShowMax + i;
-          if (itemIndex >= eventData.length) break;
-          var key = eventData.keys.elementAt(itemIndex);
-          if (eventData.containsKey(key)) {
-            eventShowList.add(eventData[key]!);
-          }
-        }
-        listPageMax = (eventShowList.length / listItemShowMax).floor() + (eventShowList.length % listItemShowMax > 0 ? 1 : 0);
-      break;
-      case ProfileContentTab.story:
-        storyShowList.clear();
-        for (var i=0; i<listPageMax; i++) {
-          var itemIndex = listPageNow * listItemShowMax + i;
-          if (itemIndex >= storyData.length) break;
-          var key = storyData.keys.elementAt(itemIndex);
-          if (storyData.containsKey(key)) {
-            storyShowList.add(storyData[key]!);
-          }
-        }
-        listPageMax = (storyShowList.length / listItemShowMax).floor() + (storyShowList.length % listItemShowMax > 0 ? 1 : 0);
-        break;
-    }
-  }
+  // refreshContentShowList() {
+  //   switch(selectedTab) {
+  //     case ProfileContentType.event:
+  //       eventShowList.clear();
+  //       for (var i=0; i<listPageMax; i++) {
+  //         var itemIndex = listPageNow * listItemShowMax + i;
+  //         if (itemIndex >= eventData.length) break;
+  //         var key = eventData.keys.elementAt(itemIndex);
+  //         if (eventData.containsKey(key)) {
+  //           eventShowList.add(eventData[key]!);
+  //         }
+  //       }
+  //       listPageMax = (eventShowList.length / listItemShowMax).floor() + (eventShowList.length % listItemShowMax > 0 ? 1 : 0);
+  //     break;
+  //     case ProfileContentType.story:
+  //       storyShowList.clear();
+  //       for (var i=0; i<listPageMax; i++) {
+  //         var itemIndex = listPageNow * listItemShowMax + i;
+  //         if (itemIndex >= storyData.length) break;
+  //         var key = storyData.keys.elementAt(itemIndex);
+  //         if (storyData.containsKey(key)) {
+  //           storyShowList.add(storyData[key]!);
+  //         }
+  //       }
+  //       listPageMax = (storyShowList.length / listItemShowMax).floor() + (storyShowList.length % listItemShowMax > 0 ? 1 : 0);
+  //       break;
+  //   }
+  // }
   
   contentItem(IconData icon, String title, String desc, int count, Function() onTap) {
     return InkWell(
@@ -358,69 +358,48 @@ class UserViewModel extends ChangeNotifier {
       children: [
         // if (userInfo!.checkOption('event_on'))
           contentItem(Icons.event_available, 'EVENT LIST'.tr, '', eventData.length, () {
+            Get.to(() => ProfileContentScreen(this, ProfileContentType.event, 'EVENT LIST'));
           }),
         // if (userInfo!.checkOption('story_on'))
           contentItem(Icons.event_available, 'STORY LIST'.tr, '', storyData.length, () {
-
+            Get.to(() => ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'.tr));
           }),
       ],
     );
   }
 
   showEventList() {
-    return Column(
+    LOG('-->  eventData [$isMyProfile] : ${eventData.length}');
+    return ListView(
+      shrinkWrap: true,
       children: [
-          ...eventShowList.map((item) => EventCardItem(
-          item,
+        SizedBox(height: 10.h),
+        ...eventData.entries.map((item) => EventCardItem(
+          item.value,
           // animationController: controller,
           isShowTheme: false,
           isShowUser: false,
           isShowHomeButton: false,
           isShowLike: false,
           itemHeight: UI_CONTENT_ITEM_HEIGHT.w,
+          itemPadding: EdgeInsets.only(bottom: 10),
           onRefresh: (updateData) {
             eventData[updateData['id']] = EventModel.fromJson(updateData);
             notifyListeners();
           }
         )).toList(),
-        if (isMyProfile)...[
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 15),
-            child:
-            Row(
-              children: [
-                Expanded(
-                  child: contentAddButton(
-                    context!, 'EVENT ADD'.tr,
-                    padding: EdgeInsets.symmetric(vertical: 5),
-                    onPressed: (_) {
-
-                    }
-                  ),
-                ),
-                // SizedBox(width: 5),
-                // Expanded(
-                //   child: contentAddButton(context, 'CLASS ADD'.tr, padding: EdgeInsets.symmetric(vertical: 5), onPressed: (_) {
-                //   }),
-                // ),
-              ]
-            )
-          )
-        ],
-        // ShowPageControlWidget(context, _pageNow, _pageMax, (page) => {
-        //   setState(() {
-        //     _pageNow = page;
-        //   })
-        // }, EdgeInsets.symmetric(horizontal: 15)),
+        SizedBox(height: 5.h),
       ]
     );
   }
 
   showStoryList() {
-    return Column(
+    return ListView(
+      shrinkWrap: true,
       children: [
-          ...storyShowList.map((item) => StoryCardItem(
-          item,
+        SizedBox(height: 10.h),
+        ...storyData.entries.map((item) => StoryCardItem(
+          item.value,
           itemHeight: UI_CONTENT_ITEM_HEIGHT.w,
           isShowHomeButton: false,
           isShowPlaceButton: false,
@@ -433,32 +412,17 @@ class UserViewModel extends ChangeNotifier {
             notifyListeners();
           }
         )).toList(),
-        if (isMyProfile)...[
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 15),
-            child:
-            Row(
-              children: [
-                Expanded(
-                  child: contentAddButton(
-                    context!,
-                    'STORY ADD'.tr,
-                    padding: EdgeInsets.symmetric(vertical: 5),
-                    onPressed: (_) {
-
-                    }
-                  ),
-                ),
-              ]
-            )
-          )
-        ],
-        // ShowPageControlWidget(context, _pageNow, _pageMax, (page) => {
-        //   setState(() {
-        //     _pageNow = page;
-        //   })
-        // }, EdgeInsets.symmetric(horizontal: 15)),
+        SizedBox(height: 5.h),
       ]
     );
+  }
+
+  showContentList(ProfileContentType type) {
+    switch(type) {
+      case ProfileContentType.event:
+        return showEventList();
+      case ProfileContentType.story:
+        return showStoryList();
+    }
   }
 }

@@ -89,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
             }
           ),
-          endDrawer:  ChangeNotifierProvider.value(
+          endDrawer: ChangeNotifierProvider.value(
             value: _setupViewModel,
             child: Consumer<SetupViewModel>(
               builder: (context, viewModel, _) {

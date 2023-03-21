@@ -176,7 +176,7 @@ class _EventCardItemState extends State<EventCardItem> {
                                           ),
                                         ),
                                       ),
-                                      if (_userListData.isNotEmpty)
+                                      if (widget.isShowUser && _userListData.isNotEmpty)
                                         UserIdCardWidget(_userListData),
                                     ]
                                   )

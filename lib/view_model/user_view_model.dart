@@ -12,6 +12,7 @@ import '../data/app_data.dart';
 import '../data/common_sizes.dart';
 import '../data/dialogs.dart';
 import '../models/event_model.dart';
+import '../repository/event_repository.dart';
 import '../utils/utils.dart';
 import '../models/user_model.dart';
 import '../repository/user_repository.dart';
@@ -33,6 +34,7 @@ enum ProfileContentType {
 
 class UserViewModel extends ChangeNotifier {
   final repo = UserRepository();
+  final eventRepo = EventRepository();
   final msgTextController = TextEditingController();
 
   UserModel? userInfo;
@@ -92,8 +94,13 @@ class UserViewModel extends ChangeNotifier {
   }
 
   getContentDataAll() async {
-    eventData = await repo.getEventFromUserId(userInfo!.id, isMyProfile);
-    storyData = await repo.getStoryFromUserId(userInfo!.id);
+    LOG('---> getContentDataAll : ${eventData.length} / ${storyData.length}');
+    if (eventData.isEmpty) {
+      eventData = await repo.getEventFromUserId(userInfo!.id, isMyProfile);
+    }
+    if (storyData.isEmpty) {
+      storyData = await repo.getStoryFromUserId(userInfo!.id);
+    }
     return true;
   }
 
@@ -361,7 +368,7 @@ class UserViewModel extends ChangeNotifier {
             Get.to(() => ProfileContentScreen(this, ProfileContentType.event, 'EVENT LIST'));
           }),
         // if (userInfo!.checkOption('story_on'))
-          contentItem(Icons.event_available, 'STORY LIST'.tr, '', storyData.length, () {
+          contentItem(Icons.photo_library_outlined, 'STORY LIST'.tr, '', storyData.length, () {
             Get.to(() => ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'.tr));
           }),
       ],
@@ -370,13 +377,14 @@ class UserViewModel extends ChangeNotifier {
 
   showEventList() {
     LOG('-->  eventData [$isMyProfile] : ${eventData.length}');
-    return ListView(
-      shrinkWrap: true,
-      children: [
-        SizedBox(height: 10.h),
-        ...eventData.entries.map((item) => EventCardItem(
+    // sort status..
+    List<List<Widget>> showItemList = List.generate(3, (index) => []);
+    for (var item in eventData.entries) {
+      var isExpired = eventRepo.checkIsExpired(item.value);
+      var eventItem = EventCardItem(
           item.value,
-          // animationController: controller,
+          isMyItem: isMyProfile,
+          isExpired: isExpired,
           isShowTheme: false,
           isShowUser: false,
           isShowHomeButton: false,
@@ -387,7 +395,21 @@ class UserViewModel extends ChangeNotifier {
             eventData[updateData['id']] = EventModel.fromJson(updateData);
             notifyListeners();
           }
-        )).toList(),
+      );
+      if (item.value.status == 1 && !isExpired) {
+        showItemList[0].add(eventItem);
+      } else if (item.value.status == 2 && !isExpired) {
+        showItemList[1].add(eventItem);
+      } else {
+        showItemList[2].add(eventItem);
+      }
+    }
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        SizedBox(height: 10.h),
+        for (var item in showItemList)
+          ...item,
         SizedBox(height: 5.h),
       ]
     );

@@ -1,7 +1,9 @@
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
+import 'package:kspot_002/data/dialogs.dart';
 
 import '../../data/app_data.dart';
 import '../../data/theme_manager.dart';
@@ -27,6 +29,8 @@ class EventCardItem extends StatefulWidget {
         this.isShowUser = true,
         this.isShowLike = true,
         this.isPromotion = false,
+        this.isMyItem = false,
+        this.isExpired = false,
         this.selectMax = 9,
         this.onShowDetail,
         this.onRefresh}) : super(key: key);
@@ -40,6 +44,8 @@ class EventCardItem extends StatefulWidget {
   bool isShowUser;
   bool isShowLike;
   bool isPromotion;
+  bool isMyItem;
+  bool isExpired;
   int selectMax;
 
   double itemHeight;
@@ -56,7 +62,6 @@ class _EventCardItemState extends State<EventCardItem> {
   final eventRepo = EventRepository();
   final api = Get.find<ApiService>();
   var _imageHeight = 0.0;
-  var _isExpired = false;
   List<JSON> _userListData = [];
 
   @override
@@ -72,7 +77,6 @@ class _EventCardItemState extends State<EventCardItem> {
     } else if (STR(widget.itemData.userId).isNotEmpty) {
       _userListData.add(widget.itemData.toJson());
     }
-    _isExpired = eventRepo.checkIsExpired(widget.itemData);
     final timeData = widget.itemData.getDateTimeData(AppData.currentDate);
     return GestureDetector(
         onTap: () {
@@ -83,10 +87,18 @@ class _EventCardItemState extends State<EventCardItem> {
           height: widget.itemHeight,
           padding: widget.itemPadding,
           child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(10),
+            child: ColorFiltered(
+              colorFilter: !widget.isExpired ? ColorFilter.mode(
+                Colors.transparent,
+                BlendMode.multiply,
+              ) : ColorFilter.mode(
+                Colors.grey,
+                BlendMode.saturation,
+              ),
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(bottomRight: Radius.circular(20)),
+                  borderRadius: BorderRadius.only(bottomRight: Radius.circular(widget.isShowUser ? 20 : 0)),
                   color: Theme.of(context).canvasColor,
                 ),
                 child: Row(
@@ -98,98 +110,178 @@ class _EventCardItemState extends State<EventCardItem> {
                       SizedBox(width: 5),
                     ],
                     SizedBox(
-                        width: _imageHeight,
-                        height: _imageHeight,
-                        child: Stack(
-                            children: [
-                              // if (widget.animationController != null)
-                              //   ScaleTransition(
-                              //     scale: Tween(begin: 1.0, end: 1.2).animate(CurvedAnimation(
-                              //         parent: widget.animationController!,
-                              //         curve: Curves.linear)
-                              //     ),
-                              //     child: showImage(STR(widget.itemData['pic']), Size(_imageHeight, _imageHeight)),
-                              //   ),
-                              // if (widget.animationController == null)
-                              showImage(widget.itemData.pic, Size(_imageHeight, _imageHeight)),
-                              if (widget.itemData.status == 2)
-                                ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, 3, 3),
-                              if (_isExpired)
-                                Center(
-                                    child: Text("EXPIRED".tr, style: ItemDescOutlineStyle(context))
-                                )
-                            ]
-                        )
+                      width: _imageHeight,
+                      height: _imageHeight,
+                      child: Stack(
+                        children: [
+                          // if (widget.animationController != null)
+                          //   ScaleTransition(
+                          //     scale: Tween(begin: 1.0, end: 1.2).animate(CurvedAnimation(
+                          //         parent: widget.animationController!,
+                          //         curve: Curves.linear)
+                          //     ),
+                          //     child: showImage(STR(widget.itemData['pic']), Size(_imageHeight, _imageHeight)),
+                          //   ),
+                          // if (widget.animationController == null)
+                          showImage(widget.itemData.pic, Size(_imageHeight, _imageHeight)),
+                          if (widget.itemData.status == 2)
+                            ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, 3, 3),
+                          if (widget.isExpired)
+                            Center(
+                                child: Text("EXPIRED".tr, style: ItemDescOutlineStyle(context))
+                            )
+                        ]
+                      )
                     ),
                     SizedBox(width: 10),
                     Expanded(
-                        child: Container(
-                            padding: EdgeInsets.only(top: 5),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Container(
+                        padding: EdgeInsets.only(top: 5),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
-                                Row(
+                                if (widget.isShowTheme)...[
+                                  Container(
+                                    width: 12,
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).primaryColor.withOpacity(0.5),
+                                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                                    ),
+                                  ),
+                                  SizedBox(width: 5),
+                                ],
+                                Expanded(
+                                  child: Row(
                                     children: [
-                                      if (widget.isShowTheme)...[
-                                        Container(
-                                          width: 12,
-                                          height: 12,
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).primaryColor.withOpacity(0.5),
-                                            borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                                          ),
-                                        ),
-                                        SizedBox(width: 5),
-                                      ],
-                                      Expanded(
-                                        child: Row(
-                                          children: [
-                                            Text(STR(widget.itemData.title), style: ItemTitleStyle(context), maxLines: 1),
-                                            if (widget.isPromotion)...[
-                                              SizedBox(width: 2),
-                                              Icon(Icons.star, size: 20, color: Theme.of(context).colorScheme.tertiary),
-                                            ]
-                                          ],
-                                        ),
-                                      ),
-                                      if (widget.isShowLike)...[
-                                        SizedBox(width: 5),
-                                        LikeSmallWidget(context, 'event', widget.itemData.toJson()),
-                                      ],
-                                    ]
+                                      Text(STR(widget.itemData.title), style: ItemTitleStyle(context), maxLines: 1),
+                                      if (widget.isPromotion)...[
+                                        SizedBox(width: 2),
+                                        Icon(Icons.star, size: 20, color: Theme.of(context).colorScheme.tertiary),
+                                      ]
+                                    ],
+                                  ),
                                 ),
-                                Expanded(child:
-                                Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Expanded(
-                                        child: Padding(
-                                          padding: EdgeInsets.only(bottom: 5),
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.end,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(timeData != null ? timeData.title : '', style: ItemDescExStyle(context)),
-                                              Text(timeData != null ? timeData.desc  : '', style: ItemDescExStyle(context), maxLines: 3),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      if (widget.isShowUser && _userListData.isNotEmpty)
-                                        UserIdCardWidget(_userListData),
-                                    ]
-                                  )
-                                )
-                              ],
+                                if (widget.isShowLike)...[
+                                  SizedBox(width: 5),
+                                  LikeSmallWidget(context, 'event', widget.itemData.toJson()),
+                                ],
+                            ]
+                          ),
+                          Expanded(child:
+                          Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(bottom: 5),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(timeData != null ? timeData.title : '', style: ItemDescExStyle(context)),
+                                        Text(timeData != null ? timeData.desc  : '', style: ItemDescExStyle(context), maxLines: 3),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                if (widget.isShowUser && _userListData.isNotEmpty)
+                                  UserIdCardWidget(_userListData),
+                              ]
                             )
-                        )
+                          )
+                        ],
+                      )
+                    )
+                  ),
+                  if (widget.isMyItem)
+                  DropdownButtonHideUnderline(
+                    child: DropdownButton2(
+                      customButton: Container(
+                        width: 40,
+                        height: 40,
+                        alignment: Alignment.centerRight,
+                        color: Colors.transparent,
+                        child: Icon(Icons.more_vert, color: Theme.of(context).hintColor.withOpacity(0.5)),
+                      ),
+                      // customItemsHeights: const [5],
+                      items: [
+                        if (widget.itemData.status == 1)
+                          ...DropdownItems.storyItems0.map(
+                                (item) => DropdownMenuItem<DropdownItem>(
+                              value: item,
+                              child: DropdownItems.buildItem(context, item),
+                            ),
+                          ),
+                        if (widget.itemData.status > 1)
+                          ...DropdownItems.storyItems1.map(
+                                (item) => DropdownMenuItem<DropdownItem>(
+                              value: item,
+                              child: DropdownItems.buildItem(context, item),
+                            ),
+                          ),
+                        // if (!widget.isMyItem)
+                        //   ...DropdownItems.storyItems2.map(
+                        //         (item) =>
+                        //         DropdownMenuItem<DropdownItem>(
+                        //           value: item,
+                        //           child: DropdownItems.buildItem(context, item),
+                        //         ),
+                        //   ),
+                      ],
+                      onChanged: (value) {
+                        var selected = value as DropdownItem;
+                        LOG("--> selected.index : ${selected.type}");
+                        switch (selected.type) {
+                          case DropdownItemType.enable:
+                          case DropdownItemType.disable:
+                            if (widget.isExpired) {
+                              showAlertDialog(context, 'Event'.tr, 'This event has expired'.tr, 'Please change the period\nin the \'Event edit\''.tr, 'OK'.tr);
+                              break;
+                            }
+                            setState(() {
+                              var status = selected.type == DropdownItemType.enable ? 1 : 2;
+                              api.setStoryItemStatus(widget.itemData.id, status);
+                              widget.itemData.status = status;
+                            });
+                            break;
+                          case DropdownItemType.edit:
+                          // EditStoryContent(context, widget.itemData,
+                          //     {}, false, (result) {
+                          //       if (result.isNotEmpty) {
+                          //         setState(() {
+                          //           widget.itemData = result;
+                          //           LOG('--> EditStoryContent result : $result');
+                          //         });
+                          //       }
+                          //     });
+                            break;
+                          case DropdownItemType.delete:
+                            break;
+                          case DropdownItemType.report:
+                          // ShowReportMenu(context, widget.itemData, 'story', menuList: [
+                          //   {'id':'report', 'title':'Report it'},
+                          // ]);
+                            break;
+                        }
+                      },
+                      itemHeight: 45,
+                      dropdownWidth: 190,
+                      buttonHeight: 22,
+                      buttonWidth: 22,
+                      itemPadding: const EdgeInsets.all(10),
+                      offset: const Offset(0, 5),
                     ),
-                  ],
-                ),
-              )
+                  ),
+                ],
+              ),
+            )
           ),
         )
+      )
     );
   }
 }

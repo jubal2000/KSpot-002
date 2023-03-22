@@ -18,6 +18,7 @@ import '../view_model/chat_view_model.dart';
 import '../view_model/event_view_model.dart';
 import '../view_model/message_view_model.dart';
 import '../view_model/story_view_model.dart';
+import '../view_model/user_view_model.dart';
 
 const SCROLL_SPEED = 250;
 const APP_VERSION = '0.0.1';
@@ -86,6 +87,7 @@ class AppData {
   static var isDevMode = true;
 
   static var appViewModel       = AppViewModel();
+  static var userViewModel      = UserViewModel();
   static var eventViewModel     = EventViewModel();
   static var storyViewModel     = StoryViewModel();
   static var chatViewModel      = ChatViewModel();

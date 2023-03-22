@@ -606,27 +606,34 @@ class StoryCardItemState extends State<StoryCardItem> {
                                             customButton: Container(
                                               width: 40,
                                               height: 40,
-                                              alignment: Alignment.topRight,
+                                              alignment: Alignment.centerRight,
                                               color: Colors.transparent,
                                               child: Icon(Icons.more_vert, color: Theme.of(context).hintColor.withOpacity(0.5)),
                                             ),
                                             // customItemsHeights: const [5],
                                             items: [
-                                              if (_isMyItem)
-                                                ...DropdownItems.storyItems0.map(
-                                                      (item) =>
-                                                      DropdownMenuItem<DropdownItem>(
-                                                        value: item,
-                                                        child: DropdownItems.buildItem(context, item),
-                                                      ),
-                                                ),
+                                              if (_isMyItem)...[
+                                                if (widget.itemData.status == 1)
+                                                  ...DropdownItems.storyItems0.map(
+                                                    (item) => DropdownMenuItem<DropdownItem>(
+                                                      value: item,
+                                                      child: DropdownItems.buildItem(context, item),
+                                                    ),
+                                                  ),
+                                                if (widget.itemData.status > 1)
+                                                  ...DropdownItems.storyItems1.map(
+                                                        (item) => DropdownMenuItem<DropdownItem>(
+                                                      value: item,
+                                                      child: DropdownItems.buildItem(context, item),
+                                                    ),
+                                                  ),
+                                              ],
                                               if (!_isMyItem)
                                                 ...DropdownItems.storyItems2.map(
-                                                      (item) =>
-                                                      DropdownMenuItem<DropdownItem>(
-                                                        value: item,
-                                                        child: DropdownItems.buildItem(context, item),
-                                                      ),
+                                                  (item) => DropdownMenuItem<DropdownItem>(
+                                                    value: item,
+                                                    child: DropdownItems.buildItem(context, item),
+                                                  ),
                                                 ),
                                             ],
                                             onChanged: (value) {
@@ -668,7 +675,8 @@ class StoryCardItemState extends State<StoryCardItem> {
                                             itemPadding: const EdgeInsets.all(10),
                                             offset: const Offset(0, 5),
                                           ),
-                                        ),                                ]
+                                        ),
+                                      ]
                                   ),
                                 ),
                                 Row(

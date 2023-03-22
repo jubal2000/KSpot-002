@@ -71,8 +71,17 @@ class ProfileTargetState extends State<ProfileTargetScreen> {
           toolbarHeight: 50,
           titleSpacing: 0,
         ),
-        body: ProfileTabScreen(ProfileMainTab.profile, '', userVewModel),
+        body: FutureBuilder(
+          future: userVewModel.getContentDataAll(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return ProfileTabScreen(ProfileMainTab.profile, '', userVewModel);
+            } else {
+              return showLoadingFullPage(context);
+            }
+          }
         )
+      )
     );
   }
 }

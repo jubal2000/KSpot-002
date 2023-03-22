@@ -25,24 +25,23 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final auth = Get.find<AuthService>();
-  final _viewModel = UserViewModel();
   final _setupViewModel = SetupViewModel();
   final GlobalKey<ScaffoldState> _key = GlobalKey();
 
   @override
   void initState() {
-    _viewModel.initUserModel(AppData.userInfo);
+    AppData.userViewModel.initUserModel(AppData.userInfo);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context);
+    AppData.userViewModel.init(context);
     _setupViewModel.init(context);
     return SafeArea(
       top: false,
       child: DefaultTabController(
-        length: _viewModel.tabList.length,
+        length: AppData.userViewModel.tabList.length,
         child: Scaffold(
           key: _key,
           appBar: AppBar(
@@ -65,7 +64,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
             bottom: TabBar(
               onTap: (index) {
-                _viewModel.currentTab = index;
+                AppData.userViewModel.currentTab = index;
               },
               padding: EdgeInsets.symmetric(horizontal: 20),
               labelColor: Theme.of(context).primaryColor,
@@ -73,16 +72,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               unselectedLabelColor: Theme.of(context).hintColor,
               unselectedLabelStyle: ItemTitleStyle(context),
               indicatorColor: Theme.of(context).primaryColor,
-              tabs: List<Widget>.from(_viewModel.tabList.map((item) => item.getTab()).toList()),
+              tabs: List<Widget>.from(AppData.userViewModel.tabList.map((item) => item.getTab()).toList()),
             ),
           ),
           body: FutureBuilder(
-            future: _viewModel.getContentDataAll(),
+            future: AppData.userViewModel.getContentDataAll(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return TabBarView(
                   physics: NeverScrollableScrollPhysics(),
-                  children: List<Widget>.from(_viewModel.tabList),
+                  children: List<Widget>.from(AppData.userViewModel.tabList),
                 );
               } else {
                 return showLoadingFullPage(context);
@@ -115,8 +114,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       ...viewModel.showSetupList((refresh) {
                         if (refresh) {
-                          _viewModel.initUserModel(AppData.userInfo);
-                          _viewModel.refresh();
+                          AppData.userViewModel.initUserModel(AppData.userInfo);
+                          AppData.userViewModel.refresh();
                         }
                       }),
                     ]

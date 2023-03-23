@@ -23,7 +23,7 @@ class EventCardItem extends StatefulWidget {
         this.placeData,
         this.animationController,
         this.itemPadding,
-        this.itemHeight = 80,
+        this.itemHeight = 90,
         this.isSelectable = false,
         this.isShowTheme = true,
         this.isShowHomeButton = true,

@@ -1134,7 +1134,7 @@ class ApiService extends GetxService {
   final LikeCollection = 'data_like';
 
   Future<JSON> getLikeFromUserId(String userId) async {
-    // LOG('--> getLikeFromTargetId [$targetType] : $targetId / $userId / ${AppData.USER_PLACE}');
+    LOG('--> getLikeFromTargetId : $userId}');
     JSON result = {};
     var ref = firestore!.collection(LikeCollection);
     try {
@@ -1144,9 +1144,8 @@ class ApiService extends GetxService {
           .where('userId', isEqualTo: userId)
           .get();
 
-      if (snapshot.docs.isNotEmpty) {
-        var item = snapshot.docs.first.data();
-        result[item['id']] = FROM_SERVER_DATA(item);
+      for (var item in snapshot.docs) {
+        result[item['id']] = FROM_SERVER_DATA(item.data());
       }
     } catch (e) {
       LOG('--> getLikeFromTargetId Error : $e');

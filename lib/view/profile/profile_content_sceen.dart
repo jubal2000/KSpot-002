@@ -35,20 +35,7 @@ class ProfileContentScreen extends StatelessWidget {
             if (parentViewModel.isMyProfile)...[
               IconButton(
                 onPressed: () {
-                  switch(type) {
-                    case ProfileContentType.event:
-                      Get.to(() => EventEditScreen())!.then((result) {
-                        if (result != null) {
-                          LOG('--> EventEditScreen result : ${result.toJson()}');
-                          parentViewModel.eventData[result.id] = result;
-                          cache.setEventItem(result);
-                          parentViewModel.refresh();
-                        }
-                      });
-                      break;
-                    case ProfileContentType.story:
-                      break;
-                  }
+                  parentViewModel.addNewContent(type);
                 },
                 icon: Icon(Icons.add)
               ),

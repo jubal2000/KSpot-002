@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/repository/user_repository.dart';
+import 'package:kspot_002/services/cache_service.dart';
 import 'package:kspot_002/view/event/event_detail_screen.dart';
 import 'package:kspot_002/view/profile/profile_target_screen.dart';
 
@@ -14,6 +16,7 @@ import '../../models/event_model.dart';
 import '../../models/user_model.dart';
 import '../../services/api_service.dart';
 import '../../utils/utils.dart';
+import '../../view_model/user_view_model.dart';
 import '../../widget/like_widget.dart';
 import '../story/story_detail_screen.dart';
 
@@ -38,12 +41,19 @@ class LikeScreen extends StatefulWidget {
 
 class LikeState extends State<LikeScreen> {
   // final _tabTextStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.black);
-  final _tabKeyList = List.generate(4, (index) => GlobalKey());
+  final userRepo = UserRepository();
+  final userView = UserViewModel();
+  final tabKeyList = List.generate(4, (index) => GlobalKey());
   List<LikeScreenTab>? _tabList;
+  Future<JSON>? _dataInit;
+
+  initData() {
+    _dataInit = userRepo.getLikeFromUserId(widget.userInfo.id);
+  }
 
   refreshData() {
     setState(() {
-      for (var item in _tabKeyList) {
+      for (var item in tabKeyList) {
         var state = item.currentState as LikeScreenTabState?;
         if (state != null && state.mounted) {
           state.refreshData();
@@ -54,20 +64,21 @@ class LikeState extends State<LikeScreen> {
 
   refreshTab() {
     _tabList = [
-      LikeScreenTab(0, Icon(Icons.event_available        , size: 16), "EVENT".tr , 'event', AppData.USER_ID, key: _tabKeyList[1]),
-      LikeScreenTab(1, Icon(Icons.photo_library_outlined , size: 16), "STORY".tr , 'story', AppData.USER_ID, key: _tabKeyList[2]),
-      LikeScreenTab(2, Icon(Icons.account_circle_outlined, size: 16), "USER".tr  , 'user' , AppData.USER_ID, key: _tabKeyList[3]),
+      LikeScreenTab(userView, 0, Icon(Icons.event_available        , size: 16), "EVENT".tr , 'event', AppData.USER_ID, key: tabKeyList[1]),
+      LikeScreenTab(userView, 1, Icon(Icons.photo_library_outlined , size: 16), "STORY".tr , 'story', AppData.USER_ID, key: tabKeyList[2]),
+      LikeScreenTab(userView, 2, Icon(Icons.account_circle_outlined, size: 16), "USER".tr  , 'user' , AppData.USER_ID, key: tabKeyList[3]),
     ];
   }
 
   @override
   void initState() {
-    refreshTab();
+    initData();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    userView.init(context);
     if (widget.isShowAppBar) {
       return SafeArea(
         top: false,
@@ -79,43 +90,41 @@ class LikeState extends State<LikeScreen> {
           },
           child: Scaffold(
             appBar: AppBar(
-              title: Text(widget.topTitle.isNotEmpty ? widget.topTitle : 'FOLLOW LIST'.tr, style: AppBarTitleStyle(context)),
+              title: Text(widget.topTitle.isNotEmpty ? widget.topTitle : 'LIKE LIST'.tr, style: AppBarTitleStyle(context)),
               titleSpacing: 0,
               toolbarHeight: 50,
-              // actions: [
-              //   if (widget.isShowMe)...[
-              //     GestureDetector(
-              //       child: Column(
-              //         children: [
-              //           Icon(Icons.account_circle_outlined),
-              //           SizedBox(height: 2),
-              //           Text('Can Select Me', style: ItemDescExStyle(context)),
-              //         ],
-              //       ),
-              //     )
-              //   ]
-              // ],
             ),
-            body: DefaultTabController(
-              length: _tabList!.length,
-              child: Scaffold(
-                appBar: AppBar(
-                  toolbarHeight: 0,
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  bottom: TabBar(
-                    padding: EdgeInsets.symmetric(horizontal: 30),
-                    labelColor: Theme.of(context).colorScheme.primary,
-                    indicatorColor: Theme.of(context).colorScheme.primary,
-                    unselectedLabelColor: Theme.of(context).colorScheme.secondary,
-                    tabs: _tabList!.map((item) => item.getTab()).toList(),
-                  ),
-                ),
-                body: TabBarView(
-                  physics: NeverScrollableScrollPhysics(),
-                  children: _tabList!,
-                )
-              ),
+            body: FutureBuilder(
+              future: _dataInit,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  userView.likeData = snapshot.data as JSON;
+                  refreshTab();
+                  return DefaultTabController(
+                    length: _tabList!.length,
+                    child: Scaffold(
+                      appBar: AppBar(
+                        toolbarHeight: 0,
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        bottom: TabBar(
+                          padding: EdgeInsets.symmetric(horizontal: 30),
+                          labelColor: Theme.of(context).colorScheme.primary,
+                          indicatorColor: Theme.of(context).colorScheme.primary,
+                          unselectedLabelColor: Theme.of(context).colorScheme.secondary,
+                          tabs: _tabList!.map((item) => item.getTab()).toList(),
+                        ),
+                      ),
+                      body: TabBarView(
+                        physics: NeverScrollableScrollPhysics(),
+                        children: _tabList!,
+                      )
+                    ),
+                  );
+                } else {
+                  return showLoadingFullPage(context);
+                }
+              }
             ),
           )
         )
@@ -130,36 +139,50 @@ class LikeState extends State<LikeScreen> {
           },
           child: Container(
             padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
-            child: DefaultTabController(
-              length: _tabList!.length,
-              child: Scaffold(
-                appBar: TabBar(
-                  labelStyle: TextStyle(fontSize: 10),
-                  padding: EdgeInsets.symmetric(horizontal: 30),
-                  labelColor: Theme.of(context).colorScheme.primary,
-                  indicatorColor: Theme.of(context).colorScheme.primary,
-                  unselectedLabelColor: Theme.of(context).colorScheme.secondary,
-                  tabs: _tabList!.map((item) => item.getTab()).toList(),
-                  onTap: (value) {
-                    // AppData.setSearchEnable(false);
-                  },
-                ),
-                body: TabBarView(
-                    physics: NeverScrollableScrollPhysics(),
-                    children: _tabList!
-                ),
-              ),
+            child: FutureBuilder(
+              future: _dataInit,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  userView.likeData = snapshot.data as JSON;
+                  refreshTab();
+                  return DefaultTabController(
+                    length: _tabList!.length,
+                    child: Scaffold(
+                      appBar: AppBar(
+                        toolbarHeight: 0,
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        bottom: TabBar(
+                          padding: EdgeInsets.symmetric(horizontal: 30),
+                          labelColor: Theme.of(context).colorScheme.primary,
+                          indicatorColor: Theme.of(context).colorScheme.primary,
+                          unselectedLabelColor: Theme.of(context).colorScheme.secondary,
+                          tabs: _tabList!.map((item) => item.getTab()).toList(),
+                        ),
+                      ),
+                      body: TabBarView(
+                        physics: NeverScrollableScrollPhysics(),
+                        children: _tabList!,
+                      )
+                    ),
+                  );
+                } else {
+                  return showLoadingFullPage(context);
+                }
+              }
             ),
-          )
-        )
+          ),
+        ),
       );
     }
   }
 }
 
 class LikeScreenTab extends StatefulWidget {
-  LikeScreenTab(this.tabIndex, this.icon, this.title, this.targetType, this.userId, { Key? key, this.isSelectable = false, this.isShowMe = false, this.selectMax = 999 }) : super(key: key);
+  LikeScreenTab(this.userView, this.tabIndex, this.icon, this.title, this.targetType, this.userId,
+    { Key? key, this.isSelectable = false, this.isShowMe = false, this.selectMax = 999 }) : super(key: key);
 
+  UserViewModel userView;
   int tabIndex;
   Icon icon;
   String title;
@@ -179,24 +202,31 @@ class LikeScreenTab extends StatefulWidget {
 
 class LikeScreenTabState extends State<LikeScreenTab> with AutomaticKeepAliveClientMixin<LikeScreenTab> {
   final api = Get.find<ApiService>();
-  final userRepo = UserRepository();
-
-  Future<JSON>? _dataInit;
-  var _itemHeight = 60.0;
-  var _listHeight = 0.0;
-  var _isDataWaiting = false;
+  final cache = Get.find<CacheService>();
+  List<Widget> showList = [];
 
   @override
   bool get wantKeepAlive => true;
 
   initData() {
-    _dataInit = userRepo.getLikeFromUserId(widget.userId);
-    _isDataWaiting = true;
+    showList.clear();
+    for (var item in widget.userView.likeData.entries) {
+      if (item.value['targetType'] == widget.targetType) {
+        showList.add(LikeItem(item.value, widget.targetType, onChanged: (action) {
+          if (action == 1) {
+            setState(() {
+              widget.userView.likeData.remove(item.key);
+              initData();
+            });
+          }
+        }));
+      }
+    }
+    LOG('--> showList : ${showList.length} / ${widget.userView.likeData.length}');
   }
 
   refreshData() {
     setState(() {
-      LOG('--> BookmarkTabState refreshData : ${widget.tabIndex}');
     });
   }
 
@@ -208,52 +238,12 @@ class LikeScreenTabState extends State<LikeScreenTab> with AutomaticKeepAliveCli
 
   @override
   Widget build(BuildContext context) {
-    // if (!AppData.isBookmarkKeepAlive[widget.selectedTab]) {
-    //   setState(() {
-    //     AppData.isBookmarkKeepAlive[widget.selectedTab] = true;
-    //     initData();
-    //     LOG('--> initData isBookmarkKeepAlive');
-    //   });
-    //   return Container();
-    // }
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15),
-      child: FutureBuilder(
-        future: _dataInit,
-        builder: (context, snapshot) {
-          if (snapshot.hasData || (!_isDataWaiting && AppData.likeData.isNotEmpty)) {
-            if (_isDataWaiting || AppData.likeData.isEmpty) {
-              AppData.likeData.addAll(snapshot.data as JSON);
-              LOG('--> likeData set : ${AppData.likeData.length}');
-            }
-            _isDataWaiting = false;
-            _listHeight = AppData.likeData.length * _itemHeight;
-            var _showList = [];
-            for (var item in AppData.likeData.entries) {
-              // LOG('--> BookmarkTabState tab check : ${widget.targetType} / ${STR(item.value['targetType'])}');
-              if (widget.targetType == STR(item.value['targetType'])) {
-                _showList.add(item.value);
-              }
-            }
-            LOG('--> likeData show : $_showList / ${AppData.likeData.length}');
-            return Column(
-              children: [
-                if (_showList.isNotEmpty)
-                  ListView.builder(
-                    shrinkWrap: true,
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    itemCount: _showList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      LOG('--> likeData item : $index');
-                      return LikeItem(_showList[index], widget.targetType);
-                    }
-                  ),
-              ]
-            );
-          } else {
-            return showLoadingFullPage(context);
-          }
-        }
+      child: ListView(
+        shrinkWrap: true,
+        padding: EdgeInsets.symmetric(vertical: 10),
+        children: showList.map((e) => e).toList()
       )
     );
   }
@@ -265,11 +255,12 @@ class LikeScreenTabState extends State<LikeScreenTab> with AutomaticKeepAliveCli
 }
 
 class LikeItem extends StatefulWidget {
-  LikeItem(this.itemInfo, this.targetType, {Key? key, this.itemHeight = 60}) : super(key: key);
+  LikeItem(this.itemInfo, this.targetType, {Key? key, this.itemHeight = 60, this.onChanged}) : super(key: key);
 
   JSON itemInfo;
   String targetType;
   double itemHeight;
+  Function(int)? onChanged;
 
   @override
   LikeItemState createState() => LikeItemState();
@@ -344,7 +335,10 @@ class LikeItemState extends State<LikeItem> {
             LikeSmallWidget(context, widget.targetType,
                 { 'id': STR(widget.itemInfo['targetId']),
                   'title': STR(widget.itemInfo['targetTitle']),
-                  'pic': STR(widget.itemInfo['targetPic']) }),
+                  'pic': STR(widget.itemInfo['targetPic']) },
+              onChangeCount: (value) {
+                if (widget.onChanged != null) widget.onChanged!(1);
+            }),
           ],
         ),
       )

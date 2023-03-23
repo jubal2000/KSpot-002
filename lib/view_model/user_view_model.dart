@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:kspot_002/models/story_model.dart';
 import 'package:kspot_002/view/story/story_detail_screen.dart';
+import 'package:kspot_002/view/story/story_edit_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/app_data.dart';
@@ -19,6 +20,7 @@ import '../utils/utils.dart';
 import '../models/user_model.dart';
 import '../repository/user_repository.dart';
 import '../view/event/event_detail_screen.dart';
+import '../view/event/event_edit_screen.dart';
 import '../view/event/event_item.dart';
 import '../view/profile/profile_content_sceen.dart';
 import '../view/profile/profile_tab_screen.dart';
@@ -60,6 +62,7 @@ class UserViewModel extends ChangeNotifier {
   Map<String, EventModel> eventData = {};
   Map<String, StoryModel> storyData = {};
   JSON snsData = {};
+  JSON likeData = {};
 
   init(context) {
     this.context = context;
@@ -281,39 +284,6 @@ class UserViewModel extends ChangeNotifier {
   //  My Event, Story list..
   //
 
-  // initListTab(selectedTab) {
-  //   this.selectedTab = selectedTab;
-  // }
-
-  // refreshContentShowList() {
-  //   switch(selectedTab) {
-  //     case ProfileContentType.event:
-  //       eventShowList.clear();
-  //       for (var i=0; i<listPageMax; i++) {
-  //         var itemIndex = listPageNow * listItemShowMax + i;
-  //         if (itemIndex >= eventData.length) break;
-  //         var key = eventData.keys.elementAt(itemIndex);
-  //         if (eventData.containsKey(key)) {
-  //           eventShowList.add(eventData[key]!);
-  //         }
-  //       }
-  //       listPageMax = (eventShowList.length / listItemShowMax).floor() + (eventShowList.length % listItemShowMax > 0 ? 1 : 0);
-  //     break;
-  //     case ProfileContentType.story:
-  //       storyShowList.clear();
-  //       for (var i=0; i<listPageMax; i++) {
-  //         var itemIndex = listPageNow * listItemShowMax + i;
-  //         if (itemIndex >= storyData.length) break;
-  //         var key = storyData.keys.elementAt(itemIndex);
-  //         if (storyData.containsKey(key)) {
-  //           storyShowList.add(storyData[key]!);
-  //         }
-  //       }
-  //       listPageMax = (storyShowList.length / listItemShowMax).floor() + (storyShowList.length % listItemShowMax > 0 ? 1 : 0);
-  //       break;
-  //   }
-  // }
-  
   contentItem(IconData icon, String title, String desc, int count, Function() onTap) {
     return InkWell(
       onTap: onTap,
@@ -448,21 +418,23 @@ class UserViewModel extends ChangeNotifier {
 
     return ListView(
       children: [
-        SubTitleBar(context!, '${'Activated event'.tr} ${showItemList[0].length}'),
-        SizedBox(height: 10.h),
-        ...showItemList[0],
-        SubTitleBar(context!, '${'Disabled event'.tr} ${showItemList[1].length + showItemList[2].length}',
-          icon: isDisableOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
-          isDisableOpen = !isDisableOpen;
-          notifyListeners();
-        }),
-        if (isDisableOpen)...[
+        if (showItemList[0].isNotEmpty)...[
+          SubTitleBar(context!, '${'Activated event'.tr} ${showItemList[0].length}'),
           SizedBox(height: 10.h),
-          ...showItemList[1],
-          ...showItemList[2],
+          ...showItemList[0],
         ],
-        // for (var item in showItemList)
-        //   ...item,
+        if (showItemList[0].isNotEmpty || showItemList[2].isNotEmpty)...[
+          SubTitleBar(context!, '${'Disabled event'.tr} ${showItemList[1].length + showItemList[2].length}',
+            icon: isDisableOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
+            isDisableOpen = !isDisableOpen;
+            notifyListeners();
+          }),
+          if (isDisableOpen)...[
+            SizedBox(height: 10.h),
+            ...showItemList[1],
+            ...showItemList[2],
+          ],
+        ],
       ]
     );
   }
@@ -496,60 +468,46 @@ class UserViewModel extends ChangeNotifier {
 
     return ListView(
       children: [
-        SubTitleBar(context!, '${'Activated story'.tr} ${showItemList[0].length}'),
-        SizedBox(height: 10.h),
-        MasonryGridView.count(
-          itemCount: showItemList[0].length,
-          crossAxisCount: 3,
-          mainAxisSpacing: space,
-          crossAxisSpacing: space,
-          padding: EdgeInsets.symmetric(vertical: UI_HORIZONTAL_SPACE.w),
-          itemBuilder: (BuildContext context, int index) {
-            var item = showItemList[0][index];
-            return item;
-          }
-        ),
-        SubTitleBar(context!, '${'Disabled story'.tr} ${showItemList[1].length + showItemList[2].length}',
-            icon: isDisableOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
-              isDisableOpen = !isDisableOpen;
-              notifyListeners();
-            }),
-        if (isDisableOpen)...[
-          SizedBox(height: 10.h),
+        if (showItemList[0].isNotEmpty)...[
+          SubTitleBar(context!, '${'Activated story'.tr} ${showItemList[0].length}'),
           MasonryGridView.count(
-            itemCount: showItemList[1].length,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: showItemList[0].length,
             crossAxisCount: 3,
             mainAxisSpacing: space,
             crossAxisSpacing: space,
             padding: EdgeInsets.symmetric(vertical: UI_HORIZONTAL_SPACE.w),
             itemBuilder: (BuildContext context, int index) {
-              var item = showItemList[1][index];
+              var item = showItemList[0][index];
               return item;
             }
           ),
         ],
+        if (showItemList[1].isNotEmpty)...[
+          SubTitleBar(context!, '${'Disabled story'.tr} ${showItemList[1].length}',
+            icon: isDisableOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
+              isDisableOpen = !isDisableOpen;
+              notifyListeners();
+            }),
+          if (isDisableOpen)...[
+            MasonryGridView.count(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: showItemList[1].length,
+              crossAxisCount: 3,
+              mainAxisSpacing: space,
+              crossAxisSpacing: space,
+              padding: EdgeInsets.symmetric(vertical: UI_HORIZONTAL_SPACE.w),
+              itemBuilder: (BuildContext context, int index) {
+                var item = showItemList[1][index];
+                return item;
+              }
+            ),
+          ],
+        ],
       ]
     );
-    //   ListView(
-    //   children: [
-    //     SizedBox(height: 10.h),
-    //     ...storyData.entries.map((item) => StoryCardItem(
-    //       item.value,
-    //       itemHeight: UI_CONTENT_ITEM_HEIGHT.w,
-    //       isShowHomeButton: false,
-    //       isShowPlaceButton: false,
-    //       isShowTheme: false,
-    //       isShowUser: false,
-    //       isShowLike: false,
-    //       itemPadding: EdgeInsets.only(bottom: 10),
-    //       onRefresh: (updateData) {
-    //         storyData[updateData['id']] = StoryModel.fromJson(updateData);
-    //         notifyListeners();
-    //       }
-    //     )).toList(),
-    //     SizedBox(height: 5.h),
-    //   ]
-    // );
   }
 
   showContentList(ProfileContentType type) {
@@ -558,6 +516,29 @@ class UserViewModel extends ChangeNotifier {
         return showEventList();
       case ProfileContentType.story:
         return showStoryList();
+    }
+  }
+
+  addNewContent(ProfileContentType type) {
+    switch(type) {
+      case ProfileContentType.event:
+        Get.to(() => EventEditScreen())!.then((result) {
+          if (result != null) {
+            LOG('--> EventEditScreen result : ${result.toJson()}');
+            eventData[result.id] = result;
+            notifyListeners();
+          }
+        });
+        break;
+      case ProfileContentType.story:
+        Get.to(() => StoryEditScreen())!.then((result) {
+          if (result != null) {
+            LOG('--> StoryEditScreen result : ${result.toJson()}');
+            storyData[result.id] = result;
+            notifyListeners();
+          }
+        });
+        break;
     }
   }
 }

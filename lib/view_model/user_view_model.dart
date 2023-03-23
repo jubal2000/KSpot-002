@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:kspot_002/models/story_model.dart';
+import 'package:kspot_002/view/story/story_detail_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/app_data.dart';
@@ -16,6 +18,7 @@ import '../repository/event_repository.dart';
 import '../utils/utils.dart';
 import '../models/user_model.dart';
 import '../repository/user_repository.dart';
+import '../view/event/event_detail_screen.dart';
 import '../view/event/event_item.dart';
 import '../view/profile/profile_content_sceen.dart';
 import '../view/profile/profile_tab_screen.dart';
@@ -43,8 +46,9 @@ class UserViewModel extends ChangeNotifier {
   BuildContext? context;
 
   var currentTab = 0;
-  var isMyProfile = false;
   var tabListHeight = 0.0;
+  var isMyProfile = false;
+  var isDisableOpen = false;
 
   // event, story list..
   final listItemShowMax = 5;
@@ -357,22 +361,56 @@ class UserViewModel extends ChangeNotifier {
       )
     );
   }
-  
+
+  get eventLength {
+    var result = 0;
+    for (var item in eventData.entries) {
+      if (item.value.status > 0) result++;
+    }
+    return result;
+  }
+
+  get storyLength {
+    var result = 0;
+    for (var item in storyData.entries) {
+      if (item.value.status > 0) result++;
+    }
+    return result;
+  }
+
   showUserContentList() {
     return ListView(
       shrinkWrap: true,
       padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w, vertical: 5.w),
       children: [
         // if (userInfo!.checkOption('event_on'))
-          contentItem(Icons.event_available, 'EVENT LIST'.tr, '', eventData.length, () {
-            Get.to(() => ProfileContentScreen(this, ProfileContentType.event, 'EVENT LIST'));
+          contentItem(Icons.event_available, 'EVENT LIST'.tr, '', eventLength, () {
+            Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.event, 'EVENT LIST'))).then((_) {
+            });
           }),
         // if (userInfo!.checkOption('story_on'))
-          contentItem(Icons.photo_library_outlined, 'STORY LIST'.tr, '', storyData.length, () {
-            Get.to(() => ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'.tr));
+          contentItem(Icons.photo_library_outlined, 'STORY LIST'.tr, '', storyLength, () {
+            Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'))).then((_) {
+            });
           }),
       ],
     );
+  }
+
+  showEventItemDetail(EventModel item) {
+    Navigator.of(context!).push(createAniRoute(EventDetailScreen(item, null))).then((result) {
+      if (result != null) {
+        notifyListeners();
+      }
+    });
+  }
+
+  showStoryItemDetail(StoryModel item) {
+    Navigator.of(context!).push(createAniRoute(StoryDetailScreen(item))).then((result) {
+      if (result != null) {
+        notifyListeners();
+      }
+    });
   }
 
   showEventList() {
@@ -382,61 +420,136 @@ class UserViewModel extends ChangeNotifier {
     for (var item in eventData.entries) {
       var isExpired = eventRepo.checkIsExpired(item.value);
       var eventItem = EventCardItem(
-          item.value,
-          isMyItem: isMyProfile,
-          isExpired: isExpired,
-          isShowTheme: false,
-          isShowUser: false,
-          isShowHomeButton: false,
-          isShowLike: false,
-          itemHeight: UI_CONTENT_ITEM_HEIGHT.w,
-          itemPadding: EdgeInsets.only(bottom: 10),
-          onRefresh: (updateData) {
-            eventData[updateData['id']] = EventModel.fromJson(updateData);
-            notifyListeners();
-          }
+        item.value,
+        isMyItem: isMyProfile,
+        isExpired: isExpired,
+        isShowTheme: false,
+        isShowUser: false,
+        isShowHomeButton: false,
+        isShowLike: false,
+        itemHeight: UI_CONTENT_ITEM_HEIGHT.w,
+        itemPadding: EdgeInsets.only(bottom: 10),
+        onRefresh: (updateData) {
+          eventData[updateData['id']] = EventModel.fromJson(updateData);
+          notifyListeners();
+        },
+        onShowDetail: (key, status) {
+          showEventItemDetail(item.value);
+        },
       );
       if (item.value.status == 1 && !isExpired) {
         showItemList[0].add(eventItem);
       } else if (item.value.status == 2 && !isExpired) {
         showItemList[1].add(eventItem);
-      } else {
+      } else if (item.value.status > 0) {
         showItemList[2].add(eventItem);
       }
     }
+
     return ListView(
-      shrinkWrap: true,
       children: [
+        SubTitleBar(context!, '${'Activated event'.tr} ${showItemList[0].length}'),
         SizedBox(height: 10.h),
-        for (var item in showItemList)
-          ...item,
-        SizedBox(height: 5.h),
+        ...showItemList[0],
+        SubTitleBar(context!, '${'Disabled event'.tr} ${showItemList[1].length + showItemList[2].length}',
+          icon: isDisableOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
+          isDisableOpen = !isDisableOpen;
+          notifyListeners();
+        }),
+        if (isDisableOpen)...[
+          SizedBox(height: 10.h),
+          ...showItemList[1],
+          ...showItemList[2],
+        ],
+        // for (var item in showItemList)
+        //   ...item,
       ]
     );
   }
 
   showStoryList() {
+    final space = 10.w;
+    List<List<Widget>> showItemList = List.generate(3, (index) => []);
+    for (var item in storyData.entries) {
+      var eventItem = ClipRRect(
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+          child: StoryVerCardItem(
+            item.value,
+            itemHeight: Get.width.w / 3 - space * 2,
+            isShowUser: false,
+            onRefresh: (updateData) {
+              LOG('--> onRefresh : ${updateData['id']} / ${updateData['status']}');
+              storyData[updateData['id']] = StoryModel.fromJson(updateData);
+              notifyListeners();
+            },
+            onShowDetail: (_) {
+              showStoryItemDetail(item.value);
+            },
+          )
+      );
+      if (item.value.status == 1) {
+        showItemList[0].add(eventItem);
+      } else if (item.value.status > 0) {
+        showItemList[1].add(eventItem);
+      }
+    }
+
     return ListView(
-      shrinkWrap: true,
       children: [
+        SubTitleBar(context!, '${'Activated story'.tr} ${showItemList[0].length}'),
         SizedBox(height: 10.h),
-        ...storyData.entries.map((item) => StoryCardItem(
-          item.value,
-          itemHeight: UI_CONTENT_ITEM_HEIGHT.w,
-          isShowHomeButton: false,
-          isShowPlaceButton: false,
-          isShowTheme: false,
-          isShowUser: false,
-          isShowLike: false,
-          itemPadding: EdgeInsets.only(bottom: 10),
-          onRefresh: (updateData) {
-            storyData[updateData['id']] = StoryModel.fromJson(updateData);
-            notifyListeners();
+        MasonryGridView.count(
+          itemCount: showItemList[0].length,
+          crossAxisCount: 3,
+          mainAxisSpacing: space,
+          crossAxisSpacing: space,
+          padding: EdgeInsets.symmetric(vertical: UI_HORIZONTAL_SPACE.w),
+          itemBuilder: (BuildContext context, int index) {
+            var item = showItemList[0][index];
+            return item;
           }
-        )).toList(),
-        SizedBox(height: 5.h),
+        ),
+        SubTitleBar(context!, '${'Disabled story'.tr} ${showItemList[1].length + showItemList[2].length}',
+            icon: isDisableOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
+              isDisableOpen = !isDisableOpen;
+              notifyListeners();
+            }),
+        if (isDisableOpen)...[
+          SizedBox(height: 10.h),
+          MasonryGridView.count(
+            itemCount: showItemList[1].length,
+            crossAxisCount: 3,
+            mainAxisSpacing: space,
+            crossAxisSpacing: space,
+            padding: EdgeInsets.symmetric(vertical: UI_HORIZONTAL_SPACE.w),
+            itemBuilder: (BuildContext context, int index) {
+              var item = showItemList[1][index];
+              return item;
+            }
+          ),
+        ],
       ]
     );
+    //   ListView(
+    //   children: [
+    //     SizedBox(height: 10.h),
+    //     ...storyData.entries.map((item) => StoryCardItem(
+    //       item.value,
+    //       itemHeight: UI_CONTENT_ITEM_HEIGHT.w,
+    //       isShowHomeButton: false,
+    //       isShowPlaceButton: false,
+    //       isShowTheme: false,
+    //       isShowUser: false,
+    //       isShowLike: false,
+    //       itemPadding: EdgeInsets.only(bottom: 10),
+    //       onRefresh: (updateData) {
+    //         storyData[updateData['id']] = StoryModel.fromJson(updateData);
+    //         notifyListeners();
+    //       }
+    //     )).toList(),
+    //     SizedBox(height: 5.h),
+    //   ]
+    // );
   }
 
   showContentList(ProfileContentType type) {

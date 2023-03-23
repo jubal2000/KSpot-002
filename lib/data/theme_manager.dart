@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../services/local_service.dart';
 import 'app_data.dart';
+import 'common_sizes.dart';
 
 class ThemeNotifier with ChangeNotifier {
 
@@ -584,7 +585,7 @@ ChatTitleStyle(BuildContext context) {
   return TextStyle(fontSize: 14, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600);
 }
 
-SubTitleBar(BuildContext context, String title, {double horizontalPadding = 20, double height = 30, IconData? icon, Function(String)? onActionSelect}) {
+SubTitleBar(BuildContext context, String title, {double horizontalPadding = 20, double height = UI_SUB_BAR_HEIGHT, IconData? icon, Function(String)? onActionSelect}) {
   Widget? child;
   if (icon != null) {
     child = Icon(icon, size: height * 0.8, color: Theme.of(context).primaryColor);
@@ -592,7 +593,7 @@ SubTitleBar(BuildContext context, String title, {double horizontalPadding = 20, 
   return SubTitleBarEx(context, title, horizontalPadding: horizontalPadding, height: height, child: child, onActionSelect:onActionSelect);
 }
 
-SubTitleBarEx(BuildContext context, String title, {double horizontalPadding = 20, double height = 30, Widget? child, Function(String)? onActionSelect}) {
+SubTitleBarEx(BuildContext context, String title, {double horizontalPadding = 20, double height = UI_SUB_BAR_HEIGHT, Widget? child, Function(String)? onActionSelect}) {
   return GestureDetector(
     onTap: () {
       if (onActionSelect != null) onActionSelect(title);
@@ -618,7 +619,7 @@ SubTitleBarEx(BuildContext context, String title, {double horizontalPadding = 20
   );
 }
 
-RoundSubTitleBarEx(BuildContext context, String title, {IconData? icon, double horizontalPadding = 10, double height = 30, Widget? child, Function(String)? onActionSelect}) {
+RoundSubTitleBarEx(BuildContext context, String title, {IconData? icon, double horizontalPadding = 10, double height = UI_SUB_BAR_HEIGHT, Widget? child, Function(String)? onActionSelect}) {
   return GestureDetector(
       onTap: () {
         if (onActionSelect != null) onActionSelect(title);

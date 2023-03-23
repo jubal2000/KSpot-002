@@ -991,6 +991,7 @@ class ApiService extends GetxService {
   }
 
   Future<bool> setStoryItemStatus(String targetId, int status) async {
+    LOG('--> setStoryItemStatus : $targetId');
     try {
       var ref = firestore!.collection(StoryCollection);
       await ref.doc(targetId).update({

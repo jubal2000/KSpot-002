@@ -36,12 +36,13 @@ class _StoryEditScreenState extends State<StoryEditScreen> {
 
   @override
   void initState () {
-    _viewModel.isEditMode = widget.eventInfo != null;
+    _viewModel.isEditMode = widget.storyInfo != null;
     if (_viewModel.isEditMode) {
       _viewModel.setEditItem(widget.storyInfo!, widget.eventInfo);
     } else {
       _viewModel.setEditItem(StoryModelEx.empty(''), null);
     }
+    _viewModel.stepIndex = _viewModel.isEditMode ? 2 : 0;
     super.initState ();
   }
 
@@ -100,132 +101,24 @@ class _StoryEditScreenState extends State<StoryEditScreen> {
                       if (!viewModel.isShowOnly)...[
                         SizedBox(height: UI_LIST_TEXT_SPACE_S),
                         BottomCenterAlign(
-                            child: GestureDetector(
-                                onTap: () {
-                                  // if (!viewModel.isNextEnable) return; // disabled for Dev..
-                                  viewModel.moveNextStep();
-                                },
-                                child: Container(
-                                  width: double.infinity,
-                                  height: UI_BOTTOM_HEIGHT,
-                                  color: viewModel.isNextEnable ? Theme.of(context).primaryColor : Colors.black45,
-                                  alignment: Alignment.center,
-                                  child: Text('Next'.tr, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.inversePrimary)),
-                                )
+                          child: GestureDetector(
+                            onTap: () {
+                              // if (!viewModel.isNextEnable) return; // disabled for Dev..
+                              viewModel.moveNextStep();
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              height: UI_BOTTOM_HEIGHT,
+                              color: viewModel.isNextEnable ? Theme.of(context).primaryColor : Colors.black45,
+                              alignment: Alignment.center,
+                              child: Text('Next'.tr, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.inversePrimary)),
                             )
+                          )
                         ),
                       ]
                     ],
                   )
                 )
-              // body: Material(
-              //   child: Stack(
-              //     children: [
-              //       Container(
-              //         height: double.infinity,
-              //         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              //         child: SingleChildScrollView(
-              //           child: Column(
-              //             crossAxisAlignment: CrossAxisAlignment.start,
-              //             children: [
-              //                 viewModel.showImageSelector(),
-              //                 viewModel.showDesc(),
-              //                 SizedBox(height: 70),
-              //               ],
-              //             )
-              //           )
-              //         ),
-              //         Positioned(
-              //           left: 0,
-              //           bottom: 0,
-              //           child: Container(
-              //             width: MediaQuery.of(context).size.width,
-              //             child: Row(
-              //               children: [
-              //                 if (widget.isCanDelete)...[
-              //                   Expanded(
-              //                     child: TextButton(
-              //                       child: Text('Delete'.tr),
-              //                       onPressed: () {
-              //                         showAlertYesNoDialog(context,
-              //                             'Delete'.tr,
-              //                             'Are you sure you want to delete it?'.tr, '',
-              //                             'Cancel'.tr, 'OK'.tr).then((value) {
-              //                           if (value == 1) {
-              //                             // TODO select..
-              //                           }
-              //                         });
-              //                       },
-              //                     ),
-              //                   ),
-              //                 ],
-              //                 Expanded(
-              //                   child: ElevatedButton(
-              //                     style: ElevatedButton.styleFrom(
-              //                         primary: Colors.purple,
-              //                         shadowColor: Colors.transparent,
-              //                         minimumSize: Size(double.infinity, 50),
-              //                         shape: RoundedRectangleBorder(
-              //                           borderRadius: BorderRadius.circular(0),
-              //                         )
-              //                     ),
-              //                     onPressed: () {
-              //                       if (_imageData.isEmpty) {
-              //                         showAlertDialog(context, 'Upload'.tr, 'Please select one or more images'.tr, '', 'OK'.tr);
-              //                         return;
-              //                       }
-              //                       showAlertYesNoDialog(context, 'Upload'.tr, 'Do you want to upload?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((value) {
-              //                         if (value == 0) return;
-              //                         int upCount = 0;
-              //                         showLoadingDialog(context, 'uploading now...'.tr);
-              //                         Future.delayed(Duration(milliseconds: 200), () async {
-              //                           for (var item in _imageData.entries) {
-              //                             String? result1;
-              //                             String? result2;
-              //                             if (item.value['type'] == 'video' && STR(item.value['video']).isNotEmpty) {
-              //                               result1 = await api.uploadImageFile(File(item.value['url']), 'placeStory_mov_p', item.key);
-              //                               result2 = await api.uploadVideoData(item.value, 'placeStory_mov');
-              //                             } else if (item.value['type'] == 'image' && STR(item.value['image']).isNotEmpty) {
-              //                               result1 = await api.uploadImageData(item.value, 'placeStory_img');
-              //                             }
-              //                             if (result1 != null) {
-              //                               _imageData[item.key]['url'] = result1;
-              //                               upCount++;
-              //                             }
-              //                             if (result2 != null) {
-              //                               _imageData[item.key]['videoUrl'] = result2;
-              //                             }
-              //                           }
-              //                           LOG('---> upload upCount : $upCount / $_imageData');
-              //                           widget.jsonData['desc'] = _descText;
-              //                           widget.jsonData['picData'] = [];
-              //                           for (var item in _imageData.entries) {
-              //                             if (item.value['url'] != null) {
-              //                               widget.jsonData['picData'].add({
-              //                                 'url' : STR(item.value['url']),
-              //                                 'videoUrl': STR(item.value['videoUrl'])
-              //                               });
-              //                             }
-              //                           }
-              //                           JSON upResult = await api.addStoryItem(TO_SERVER_DATA(widget.jsonData));
-              //                           LOG('---> addStoryItem upResult done : $upResult');
-              //                           Navigator.of(dialogContext!).pop();
-              //                           Future.delayed(Duration(milliseconds: 200), () async {
-              //                             Navigator.pop(context, upResult);
-              //                           });
-              //                         });
-              //                       });
-              //                     },
-              //                     child: Text('Upload'.tr, style: _titleWStyle),
-              //                   )
-              //                 )
-              //               ],
-              //             ),
-              //           ),
-              //         ),
-              //       ]
-              //     )
-              //   )
               )
             )
           );

@@ -96,6 +96,25 @@ class EventDetailViewModel extends ChangeNotifier {
     });
   }
 
+  deleteEvent() {
+    showAlertYesNoDialog(buildContext!, 'Delete'.tr,
+        'Are you sure you want to delete it?'.tr, 'Alert) Recovery is not possible'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
+      if (value == 1) {
+        // showTextInputDialog(buildContext!, 'Delete confirm'.tr,
+        //     'Typing \'delete now\''.tr, 'Alert) Recovery is not possible'.tr, 10, null).then((result) {
+        //   if (result.toLowerCase() == 'delete now') {
+            eventRepo.setEventStatus(eventInfo!.id, 0).then((result) {
+              if (result) {
+                eventInfo!.status = 0;
+                Get.back(result: eventInfo!);
+              }
+            });
+        //   }
+        // });
+      }
+    });
+  }
+
   onEventTopMenuAction(selected) {
     LOG("--> selected.index : ${selected.type}");
     switch (selected.type) {
@@ -107,22 +126,7 @@ class EventDetailViewModel extends ChangeNotifier {
         moveToEventEdit();
         break;
       case DropdownItemType.delete:
-        showAlertYesNoDialog(buildContext!, 'Delete'.tr,
-            'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((value) {
-          if (value == 1) {
-            showTextInputDialog(buildContext!, 'Delete confirm'.tr,
-                'Typing \'delete now\''.tr, 'Alert) Recovery is not possible'.tr, 10, null).then((result) {
-              if (result.toLowerCase() == 'delete now') {
-                eventRepo.setEventStatus(eventInfo!.id, 0).then((result) {
-                  if (result) {
-                    eventInfo!.status = 0;
-                    Get.back(result: eventInfo!);
-                  }
-                });
-              }
-            });
-          }
-        });
+        deleteEvent();
         break;
       case DropdownItemType.promotion:
         // Navigator.push(buildContext!, MaterialPageRoute(builder: (context) =>

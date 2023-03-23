@@ -66,7 +66,7 @@ class PlaceDetailViewModel extends ChangeNotifier {
         break;
       case DropdownItemType.delete:
         // showAlertYesNoDialog(buildContext!, 'Delete'.tr,
-        //     'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((value) {
+        //     'Are you sure you want to delete it?'.tr, 'Alert) Recovery is not possible'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
         //   if (value == 1) {
         //     if (!AppData.isDevMode) {
         //       showTextInputDialog(buildContext!, 'Delete confirm'.tr,

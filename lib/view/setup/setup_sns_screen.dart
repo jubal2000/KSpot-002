@@ -132,7 +132,7 @@ class SetupSNSState extends State<SetupSNSScreen> {
                           (type, key, action) {
                             if (action == 1) {
                               // delete SNS..
-                              showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result2) {
+                              showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, 'Alert) Recovery is not possible'.tr, 'Cancel'.tr, 'OK'.tr).then((result2) {
                                 if (result2 == 1) {
                                   setState(() {
                                     _snsLinkData.remove(key);

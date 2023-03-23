@@ -2207,228 +2207,228 @@ Future<JSON> showEditCommentDialog(BuildContext context, CommentType type, Strin
   initData();
 
   return await showDialog(
-      context: context,
-      builder: (BuildContext _context) {
-        return PointerInterceptor(
-          child: StatefulBuilder(
-              builder: (context, setState) {
-                return AlertDialog(
-                  scrollable: true,
-                  title: Text(title, style: DialogTitleStyle(context)),
-                  titlePadding: EdgeInsets.all(20),
-                  insetPadding: EdgeInsets.symmetric(horizontal: 10),
-                  contentPadding: EdgeInsets.zero,
-                  backgroundColor: DialogBackColor(context),
-                  content: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                      constraints: BoxConstraints(
-                        minWidth: MediaQuery.of(context).size.width,
+    context: context,
+    builder: (BuildContext _context) {
+      return PointerInterceptor(
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              scrollable: true,
+              title: Text(title, style: DialogTitleStyle(context)),
+              titlePadding: EdgeInsets.all(20),
+              insetPadding: EdgeInsets.symmetric(horizontal: 10),
+              contentPadding: EdgeInsets.zero,
+              backgroundColor: DialogBackColor(context),
+              content: Container(
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                constraints: BoxConstraints(
+                  minWidth: MediaQuery.of(context).size.width,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (jsonData['descOrg'] != null)...[
+                      TextFormField(
+                        controller: _editControllerEx,
+                        enableSuggestions: false,
+                        maxLines: null,
+                        readOnly: true,
+                        // style: _editText,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (jsonData['descOrg'] != null)...[
-                            TextFormField(
-                              controller: _editControllerEx,
-                              enableSuggestions: false,
-                              maxLines: null,
-                              readOnly: true,
-                              // style: _editText,
-                            ),
-                            SizedBox(height: 5),
-                          ],
-                          if (subTitle.isNotEmpty)...[
-                            Text(subTitle, style: ItemTitleStyle(context)),
-                          ],
-                          if (isSelectImage)
-                            ImageEditScrollViewer(
-                                _imageData,
-                                key: _imageGalleryKey,
-                                title: 'IMAGE SELECT *'.tr,
-                                isEditable: true,
-                                itemWidth: 80,
-                                itemHeight: 80,
-                                selectText: '',
-                                onActionCallback: (key, status) {
-                                  setState(() {
-                                    switch (status) {
-                                      case 1: {
-                                        picLocalImage();
-                                        break;
-                                      }
-                                      case 2: {
-                                        _imageData.remove(key);
-                                        refreshGallery();
-                                        break;
-                                      }
-                                    }
-                                  });
-                                }
-                            ),
-                          SizedBox(height: 5),
-                          if (type == CommentType.comment && isShowVote)...[
-                            Text('Vote'.tr),
-                            SizedBox(height: 5),
-                            VoteWidget(_voteNow, iconSize: 28, onChanged: (value) {
-                              setState(() {
-                                LOG('--> VoteWidget value : $value');
-                                _voteNow = value;
-                              });
-                            }),
-                            SizedBox(height: 10),
-                          ],
-                          if (isHidden)...[
-                            Row(
-                              children: [
-                                Checkbox(
-                                    value: BOL(jsonData['isHidden']),
-                                    onChanged: (status) {
-                                      setState(() {
-                                        jsonData['isHidden'] = status! ? '1' : '';
-                                      });
-                                    }
-                                ),
-                                Text('This is a secret...'.tr, style: DialogDescExStyle(context)),
-                              ],
-                            ),
-                            SizedBox(height: 10),
-                          ],
-                          // if (type == CommentType.story && STR(jsonData['descOrg']).isEmpty)...[
-                          //   SubTitle(context, 'TAG'.tr),
-                          //   TagTextField(List<String>.from(jsonData['tagData']), (value) {
-                          //     jsonData['tagData'] = value;
-                          //   }),
-                          //   SizedBox(height: 10),
-                          // ],
-                          TextFormField(
-                            controller: _editController,
-                            decoration: inputLabel(context, 'Description'.tr, ''),
-                            keyboardType: TextInputType.multiline,
-                            maxLines: 5,
-                            maxLength: COMMENT_LENGTH,
-                            style: DialogDescExStyle(context),
-                            onChanged: (value) {
-                              setState(() {
-                                _descText = value;
-                                _isChanged = true;
-                              });
-                            },
-                          ),
-                        ],
-                      )
-                  ),
-                  actions: [
-                    if (isCanDelete)...[
-                      TextButton(
-                        child: Text('Delete'.tr),
-                        onPressed: () {
-                          showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((value) {
-                            if (value == 1) {
-                              switch(type) {
-                                case CommentType.message:
-                                  api.setMessageStatus(jsonData['id'], 0).then((result) {
-                                    onDeleteResult(_context, result);
-                                  });
-                                  break;
-                                case CommentType.comment:
-                                  api.setCommentStatus(jsonData['id'], 0).then((result) {
-                                    onDeleteResult(_context, result);
-                                  });
-                                  break;
-                                case CommentType.qna:
-                                  api.setQnAStatus(jsonData['id'], 0).then((result) {
-                                    onDeleteResult(_context, result);
-                                  });
-                                  break;
-                                case CommentType.serviceQnA:
-                                  api.setServiceQnAStatus(jsonData['id'], 0).then((result) {
-                                    onDeleteResult(_context, result);
-                                  });
-                                  break;
-                                default:
+                      SizedBox(height: 5),
+                    ],
+                    if (subTitle.isNotEmpty)...[
+                      Text(subTitle, style: ItemTitleStyle(context)),
+                    ],
+                    if (isSelectImage)
+                      ImageEditScrollViewer(
+                        _imageData,
+                        key: _imageGalleryKey,
+                        title: 'IMAGE SELECT *'.tr,
+                        isEditable: true,
+                        itemWidth: 80,
+                        itemHeight: 80,
+                        selectText: '',
+                        onActionCallback: (key, status) {
+                          setState(() {
+                            switch (status) {
+                              case 1: {
+                                picLocalImage();
+                                break;
+                              }
+                              case 2: {
+                                _imageData.remove(key);
+                                refreshGallery();
+                                break;
                               }
                             }
                           });
+                        }
+                      ),
+                      SizedBox(height: 10),
+                      if (type == CommentType.comment && isShowVote)...[
+                        Text('Vote'.tr),
+                        SizedBox(height: 5),
+                        VoteWidget(_voteNow, iconSize: 28, onChanged: (value) {
+                          setState(() {
+                            LOG('--> VoteWidget value : $value');
+                            _voteNow = value;
+                          });
+                        }),
+                        SizedBox(height: 10),
+                      ],
+                      if (isHidden)...[
+                        Row(
+                          children: [
+                            Checkbox(
+                                value: BOL(jsonData['isHidden']),
+                                onChanged: (status) {
+                                  setState(() {
+                                    jsonData['isHidden'] = status! ? '1' : '';
+                                  });
+                                }
+                            ),
+                            Text('This is a secret...'.tr, style: DialogDescExStyle(context)),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                      // if (type == CommentType.story && STR(jsonData['descOrg']).isEmpty)...[
+                      //   SubTitle(context, 'TAG'.tr),
+                      //   TagTextField(List<String>.from(jsonData['tagData']), (value) {
+                      //     jsonData['tagData'] = value;
+                      //   }),
+                      //   SizedBox(height: 10),
+                      // ],
+                      TextFormField(
+                        controller: _editController,
+                        decoration: inputLabel(context, 'Description'.tr, ''),
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 5,
+                        maxLength: COMMENT_LENGTH,
+                        style: DialogDescExStyle(context),
+                        onChanged: (value) {
+                          setState(() {
+                            _descText = value;
+                            _isChanged = true;
+                          });
                         },
                       ),
-                      showVerticalDivider(Size(10, 20)),
                     ],
+                  )
+                ),
+                actions: [
+                  if (isCanDelete)...[
                     TextButton(
-                      child: Text('Cancel'.tr),
+                      child: Text('Delete'.tr),
                       onPressed: () {
-                        Navigator.pop(_context, {});
+                        showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, 'Alert) Recovery is not possible'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
+                          if (value == 1) {
+                            switch(type) {
+                              case CommentType.message:
+                                api.setMessageStatus(jsonData['id'], 0).then((result) {
+                                  onDeleteResult(_context, result);
+                                });
+                                break;
+                              case CommentType.comment:
+                                api.setCommentStatus(jsonData['id'], 0).then((result) {
+                                  onDeleteResult(_context, result);
+                                });
+                                break;
+                              case CommentType.qna:
+                                api.setQnAStatus(jsonData['id'], 0).then((result) {
+                                  onDeleteResult(_context, result);
+                                });
+                                break;
+                              case CommentType.serviceQnA:
+                                api.setServiceQnAStatus(jsonData['id'], 0).then((result) {
+                                  onDeleteResult(_context, result);
+                                });
+                                break;
+                              default:
+                            }
+                          }
+                        });
                       },
                     ),
-                    TextButton(
-                        child: Text('OK'.tr),
-                        onPressed: () {
-                          // if (type == CommentType.story && _imageData.isEmpty) {
-                          //   showAlertDialog(context, 'Story'.tr, 'Please select one or more images'.tr, '', 'OK'.tr);
-                          //   return;
-                          // }
-                          showAlertYesNoDialog(context,
-                              type == CommentType.message ? 'Message'.tr : 'Save'.tr,
-                              type == CommentType.message ? 'Would you like to send a message?'.tr : 'Would you like to save?'.tr,
-                              '', 'Cancel'.tr, 'OK'.tr).then((value) {
-                            if (value == 0) return;
-                            int upCount = 0;
-                            showLoadingDialog(context, 'uploading now...'.tr);
-                            Future.delayed(Duration(milliseconds: 200), () async {
-                              for (var item in _imageData.entries) {
-                                var result = await api.uploadImageData(item.value as JSON, 'comment_img');
-                                if (result != null) {
-                                  _imageData[item.key]['url'] = result;
-                                  upCount++;
-                                }
-                              }
-                              LOG('---> upload upCount : $upCount');
-                              if (type == CommentType.comment) jsonData['vote'] = _voteNow;
-                              jsonData['desc'] = _descText;
-                              jsonData['picData'] = [];
-                              for (var item in _imageData.entries) {
-                                if (item.value['url'] != null) jsonData['picData'].add(item.value['url']);
-                              }
-                              LOG('---> image upload done : ${jsonData['picData'].length} / ${targetUserInfo['id']}');
-                              jsonData = TO_SERVER_DATA(jsonData);
-                              LOG('---> jsonData : $jsonData');
-
-                              var targetUserId = STR(targetUserInfo['id']);
-                              LOG('---> add data : $targetUserId / $targetUserInfo');
-                              JSON? upResult;
-                              switch(type) {
-                                case CommentType.message:
-                                  upResult = await api.addMessageItem(jsonData, targetUserInfo);
-                                  AppData.messageData[targetUserId] = MessageModel.fromJson(FROM_SERVER_DATA(jsonData));
-                                  break;
-                                case CommentType.comment:
-                                  upResult = await api.addCommentItem(jsonData, targetUserInfo);
-                                  break;
-                                case CommentType.qna:
-                                  upResult = await api.addQnAItem(jsonData, targetUserInfo);
-                                  break;
-                                case CommentType.serviceQnA:
-                                  upResult = await api.addServiceQnAItem(jsonData);
-                                  AppData.serviceQnAData[jsonData['id']] = jsonData;
-                                  break;
-                                case CommentType.story:
-                                  upResult = await api.addStoryItem(jsonData);
-                                  break;
-                                default:
-                              }
-                              hideLoadingDialog();
-                              Future.delayed(Duration(milliseconds: 200), () async {
-                                Navigator.pop(_context, upResult);
-                              });
-                            });
-                          });
-                        }
-                    )
+                    showVerticalDivider(Size(10, 20)),
                   ],
-                );
-              }
-          ),
-        );
-      }
+                  TextButton(
+                    child: Text('Cancel'.tr),
+                    onPressed: () {
+                      Navigator.pop(_context, {});
+                    },
+                  ),
+                  TextButton(
+                    child: Text('OK'.tr),
+                    onPressed: () {
+                      // if (type == CommentType.story && _imageData.isEmpty) {
+                      //   showAlertDialog(context, 'Story'.tr, 'Please select one or more images'.tr, '', 'OK'.tr);
+                      //   return;
+                      // }
+                      showAlertYesNoDialog(context,
+                          type == CommentType.message ? 'Message'.tr : 'Save'.tr,
+                          type == CommentType.message ? 'Would you like to send a message?'.tr : 'Would you like to save?'.tr,
+                          '', 'Cancel'.tr, 'OK'.tr).then((value) {
+                        if (value == 0) return;
+                        int upCount = 0;
+                        showLoadingDialog(context, 'uploading now...'.tr);
+                        Future.delayed(Duration(milliseconds: 200), () async {
+                          for (var item in _imageData.entries) {
+                            var result = await api.uploadImageData(item.value as JSON, 'comment_img');
+                            if (result != null) {
+                              _imageData[item.key]['url'] = result;
+                              upCount++;
+                            }
+                          }
+                          LOG('---> upload upCount : $upCount');
+                          if (type == CommentType.comment) jsonData['vote'] = _voteNow;
+                          jsonData['desc'] = _descText;
+                          jsonData['picData'] = [];
+                          for (var item in _imageData.entries) {
+                            if (item.value['url'] != null) jsonData['picData'].add(item.value['url']);
+                          }
+                          LOG('---> image upload done : ${jsonData['picData'].length} / ${targetUserInfo['id']}');
+                          jsonData = TO_SERVER_DATA(jsonData);
+                          LOG('---> jsonData : $jsonData');
+
+                          var targetUserId = STR(targetUserInfo['id']);
+                          LOG('---> add data : $targetUserId / $targetUserInfo');
+                          JSON? upResult;
+                          switch(type) {
+                            case CommentType.message:
+                              upResult = await api.addMessageItem(jsonData, targetUserInfo);
+                              AppData.messageData[targetUserId] = MessageModel.fromJson(FROM_SERVER_DATA(jsonData));
+                              break;
+                            case CommentType.comment:
+                              upResult = await api.addCommentItem(jsonData, targetUserInfo);
+                              break;
+                            case CommentType.qna:
+                              upResult = await api.addQnAItem(jsonData, targetUserInfo);
+                              break;
+                            case CommentType.serviceQnA:
+                              upResult = await api.addServiceQnAItem(jsonData);
+                              AppData.serviceQnAData[jsonData['id']] = jsonData;
+                              break;
+                            case CommentType.story:
+                              upResult = await api.addStoryItem(jsonData);
+                              break;
+                            default:
+                          }
+                          hideLoadingDialog();
+                          Future.delayed(Duration(milliseconds: 200), () async {
+                            Navigator.pop(_context, upResult);
+                          });
+                        });
+                      });
+                    }
+                )
+              ],
+            );
+          }
+        ),
+      );
+    }
   );
 }
 
@@ -2601,7 +2601,7 @@ Future<JSON> showEditCommentMultiSendDialog(BuildContext context, CommentType ty
                       TextButton(
                         child: Text('Delete'.tr),
                         onPressed: () {
-                          showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((value) {
+                          showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, 'Alert) Recovery is not possible'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
                             if (value == 1) {
                               switch(type) {
                                 case CommentType.message:

@@ -12,8 +12,10 @@ import '../../models/place_model.dart';
 import '../../repository/event_repository.dart';
 import '../../services/api_service.dart';
 import '../../utils/utils.dart';
+import '../../view_model/event_detail_view_model.dart';
 import '../../widget/like_widget.dart';
 import '../../widget/user_item_widget.dart';
+import 'event_edit_screen.dart';
 
 class EventCardItem extends StatefulWidget {
   EventCardItem(this.itemData,
@@ -55,14 +57,68 @@ class EventCardItem extends StatefulWidget {
   AnimationController? animationController;
 
   @override
-  _EventCardItemState createState() => _EventCardItemState();
+  EventCardItemState createState() => EventCardItemState();
 }
 
-class _EventCardItemState extends State<EventCardItem> {
+class EventCardItemState extends State<EventCardItem> {
   final eventRepo = EventRepository();
   final api = Get.find<ApiService>();
   var _imageHeight = 0.0;
   List<JSON> _userListData = [];
+
+  toggleEventStatus(context) {
+    var title = widget.itemData.status == 1 ? 'Disable' : 'Enable';
+    showAlertYesNoDialog(context, title.tr, '$title spot?'.tr, 'In the disable state, other users cannot see it'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
+      if (value == 1) {
+        if (eventRepo.checkIsExpired(widget.itemData)) {
+          showAlertDialog(context, title.tr, 'Event period has ended'.tr, 'Event duration must be modified'.tr, 'OK'.tr);
+          return;
+        }
+        eventRepo.setEventStatus(widget.itemData.id, widget.itemData.status == 1 ? 2 : 1).then((result) {
+          if (result) {
+            setState(() {
+              widget.itemData.status = widget.itemData.status == 1 ? 2 : 1;
+              ShowToast(widget.itemData.status == 1 ? 'Enabled'.tr : 'Disabled'.tr, Theme.of(context).primaryColor);
+              if (widget.onRefresh != null) widget.onRefresh!(widget.itemData.toJson());
+            });
+          }
+        });
+      }
+    });
+  }
+
+  moveToEventEdit() {
+    Get.to(() => EventEditScreen(eventInfo: widget.itemData, placeInfo: widget.placeData))!.then((result) {
+      if (result != null) {
+        setState(() {
+          widget.itemData = result;
+          LOG('--> EventEditScreen result : ${widget.itemData.title}');
+          if (widget.onRefresh != null) widget.onRefresh!(widget.itemData.toJson());
+        });
+      }
+    });
+  }
+
+  deleteEvent(context) {
+    showAlertYesNoDialog(context, 'Delete'.tr,
+      'Are you sure you want to delete it?'.tr, 'Alert) Recovery is not possible'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
+      if (value == 1) {
+        // showTextInputDialog(context, 'Delete confirm'.tr,
+        //     'Typing \'delete now\''.tr, 'Alert) Recovery is not possible'.tr, 10, null).then((result) {
+        //   if (result.toLowerCase() == 'delete now') {
+            eventRepo.setEventStatus(widget.itemData.id, 0).then((result) {
+              if (result) {
+                setState(() {
+                  widget.itemData.status = 0;
+                  if (widget.onRefresh != null) widget.onRefresh!(widget.itemData.toJson());
+                });
+              }
+            });
+        //   }
+        // });
+      }
+    });
+  }
 
   @override
   Widget build(context) {
@@ -125,7 +181,7 @@ class _EventCardItemState extends State<EventCardItem> {
                           // if (widget.animationController == null)
                           showImage(widget.itemData.pic, Size(_imageHeight, _imageHeight)),
                           if (widget.itemData.status == 2)
-                            ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, 3, 3),
+                            ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
                           if (widget.isExpired)
                             Center(
                                 child: Text("EXPIRED".tr, style: ItemDescOutlineStyle(context))
@@ -238,33 +294,13 @@ class _EventCardItemState extends State<EventCardItem> {
                         switch (selected.type) {
                           case DropdownItemType.enable:
                           case DropdownItemType.disable:
-                            if (widget.isExpired) {
-                              showAlertDialog(context, 'Event'.tr, 'This event has expired'.tr, 'Please change the period\nin the \'Event edit\''.tr, 'OK'.tr);
-                              break;
-                            }
-                            setState(() {
-                              var status = selected.type == DropdownItemType.enable ? 1 : 2;
-                              api.setStoryItemStatus(widget.itemData.id, status);
-                              widget.itemData.status = status;
-                            });
+                            toggleEventStatus(context);
                             break;
                           case DropdownItemType.edit:
-                          // EditStoryContent(context, widget.itemData,
-                          //     {}, false, (result) {
-                          //       if (result.isNotEmpty) {
-                          //         setState(() {
-                          //           widget.itemData = result;
-                          //           LOG('--> EditStoryContent result : $result');
-                          //         });
-                          //       }
-                          //     });
+                            moveToEventEdit();
                             break;
                           case DropdownItemType.delete:
-                            break;
-                          case DropdownItemType.report:
-                          // ShowReportMenu(context, widget.itemData, 'story', menuList: [
-                          //   {'id':'report', 'title':'Report it'},
-                          // ]);
+                            deleteEvent(context);
                             break;
                         }
                       },
@@ -391,7 +427,7 @@ class PlaceEventVerCardItemState extends State<PlaceEventVerCardItem> {
                         children: [
                           showImage(STR(widget.itemData['pic']), Size(_imageSize, _imageSize)),
                           if (INT(widget.itemData['status']) == 2)
-                            ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, 3, 3),
+                            ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
                           if (_isExpired)
                             Center(
                                 child: Text("EXPIRED".tr, style: ItemDescOutlineStyle(context))

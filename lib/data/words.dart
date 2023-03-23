@@ -746,7 +746,7 @@ class Words extends Translations {
       'Deleted': '삭제 되었습니다',
       'Spot group select': '스팟 그룹 선택',
       'Group select': '그룹 선택',
-      'Typing \'delete now\'': '\'지금 삭제\'를 입력해 주세요',
+      'Typing \'delete now\'': '\'지금삭제\'를 입력해 주세요',
       'delete now': '지금 삭제',
       'Alert) Recovery is not possible': '주의) 삭제후에는 복구가 불가능합니다',
       'Are you sure you want to undo the modifications?': '수정된 내용을 취소 하시겠습니까?',
@@ -773,6 +773,10 @@ class Words extends Translations {
       'Go to market': '마켓으로 이동',
       'UPDATE': '수정하기',
       'Profile Update': '프로필 수정',
+      'Activated event': '활성화된 이벤트',
+      'Disabled event': '비활성화된 이벤트',
+      'Activated story': '활성화된 스토리',
+      'Disabled story': '비활성화된 스토리',
 
       // category group
       'Sports / Fitness': '스포츠 / 피트니스',

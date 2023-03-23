@@ -1882,39 +1882,43 @@ unFocusAll(BuildContext context) {
 }
 
 // ignore: non_constant_identifier_names
-ShadowIcon(IconData icon, double size, Color color, double x, double y) {
-  var shadowColor = Colors.black;
+ShadowIcon(IconData icon, double size, Color color, {var shadowColor = Colors.black54, double x = 0, double y = 0,}) {
   return Container(
       width: size + 2,
       height: size + 2,
       child: Stack(
-          children: [
-            Positioned(
-              top: x-1,
-              left: y-1,
-              child: Icon(icon, size: size, color: shadowColor),
-            ),
-            Positioned(
-              top: x-1,
-              left: y+1,
-              child: Icon(icon, size: size, color: shadowColor),
-            ),
-            Positioned(
-              top: x+1,
-              left: y-1,
-              child: Icon(icon, size: size, color: shadowColor),
-            ),
-            Positioned(
-              top: x+1,
-              left: y+1,
-              child: Icon(icon, size: size, color: shadowColor),
-            ),
-            Positioned(
-              top: x,
-              left: y,
-              child: Icon(icon, size: size, color: color),
-            ),
-          ]
+        children: [
+          Positioned(
+            left: x-1,
+            top: y-1,
+            child: Icon(icon, size: size, color: shadowColor),
+          ),
+          Positioned(
+            left: x-1,
+            top: y+1,
+            child: Icon(icon, size: size, color: shadowColor),
+          ),
+          Positioned(
+            left: x+1,
+            top: y-1,
+            child: Icon(icon, size: size, color: shadowColor),
+          ),
+          Positioned(
+            left: x+1,
+            top: y+1,
+            child: Icon(icon, size: size, color: shadowColor),
+          ),
+          Positioned(
+            left: x,
+            top: y+2,
+            child: Icon(icon, size: size, color: shadowColor),
+          ),
+          Positioned(
+            left: x,
+            top: y,
+            child: Icon(icon, size: size, color: color),
+          ),
+        ]
       )
   );
 }
@@ -2664,4 +2668,21 @@ getFileSavePath() async {
     }
   }
   return tempDir;
+}
+
+Route createAniRoute(Widget target) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => target,
+    transitionDuration: Duration(milliseconds: ROUTE_ANI_DURATION),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      var begin = Offset(1.0, 0.0);
+      var end   = Offset.zero;
+      var curve = Curves.easeInOut;
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
 }

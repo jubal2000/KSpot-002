@@ -547,7 +547,7 @@ class PlaceListItemState extends State<PlaceListItem> {
                                   children: [
                                     showSizedImage(widget.itemData['pic'], widget.itemHeight),
                                     if (INT(widget.itemData['status']) == 2)
-                                      ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, 3, 3),
+                                      ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
                                   ]
                               )
                           )
@@ -560,7 +560,7 @@ class PlaceListItemState extends State<PlaceListItem> {
                               children: [
                                 showSizedImage(widget.itemData['pic'], widget.itemHeight),
                                 if (INT(widget.itemData['status']) == 2)
-                                  ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, 3, 3),
+                                  ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
                               ]
                           )
                       ),
@@ -836,7 +836,7 @@ class PlaceListCardItemState extends State<PlaceListCardItem> {
                                                 children: [
                                                   showImage(STR(widget.itemData['pic']), Size(_imageHeight, _imageHeight)),
                                                   if (INT(widget.itemData['status']) == 2)
-                                                    ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, 3, 3),
+                                                    ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
                                                 ]
                                             )
                                         ),

@@ -51,7 +51,7 @@ class StoryDetailState extends State<StoryDetailScreen> {
                   color: Theme.of(context).colorScheme.secondaryContainer,
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 15),
-                    child: showCommentMenu(context, widget.itemInfo.toJson(), false, 30, (uploadData) {
+                    child: showCommentMenu(context, widget.itemInfo.toJson(), false, 20, (uploadData) {
                       var state = _itemKey.currentState as MainStoryItemState;
                       state.refreshData(uploadData);
                     },

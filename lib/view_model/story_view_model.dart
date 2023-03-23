@@ -108,7 +108,12 @@ class StoryViewModel extends ChangeNotifier {
             // _storyData.remove(item['id']);
             cache.storyData!.remove(key);
             notifyListeners();
-          }
+          },
+          onRefresh: (updateItem) {
+            cache.storyData![updateItem['id']] = StoryModel.fromJson(updateItem);
+            cache.storyListItemData.clear();
+            notifyListeners();
+          },
         );
         cache.storyListItemData[item.key] = addItem;
         showList.add(addItem);

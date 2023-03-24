@@ -113,9 +113,9 @@ Future<EventGroupModel?> EventGroupSelectDialog(
         if (isCurrentGroup) {
           _placeSelectList.add(addWidget);
         }
-        else if (AppData.USER_EVENT_GROUP_LIKE.contains(item.key)) {
-          _placeLikeList.add(addWidget);
-        }
+        // else if (AppData.USER_EVENT_GROUP_LIKE.contains(item.key)) {
+        //   _placeLikeList.add(addWidget);
+        // }
         else {
           _placeAllList.add(addWidget);
         }

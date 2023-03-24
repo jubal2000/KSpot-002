@@ -52,7 +52,9 @@ class StoryModel {
   String  id;
   int     status;         // 상태 (0:removed, 1:active, 2:disable, 3:ready)
   String  desc;
+  @JsonKey(defaultValue: '')
   String  groupId;        // 그룹 ID
+  @JsonKey(defaultValue: '')
   String  eventId;        // 이벤트 링크 ID
   @JsonKey(defaultValue: '')
   String  eventTitle;     // 이벤트 링크 Title

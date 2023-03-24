@@ -36,8 +36,18 @@ class UserModel {
   String    country;
   String    countryState;
 
+  @JsonKey(defaultValue: 0)
   int       followCount;
+  @JsonKey(defaultValue: 0)
   int       followerCount;
+  @JsonKey(defaultValue: 0)
+  int       likeCount;
+
+  @JsonKey(defaultValue: 0)
+  int       creditAmount;
+  @JsonKey(defaultValue: 0)
+  int       creditUsed;
+
   String    pushToken;
   String    deviceType;
   String    updateTime;
@@ -46,10 +56,6 @@ class UserModel {
   String?   emailNew;
   BankData? refundBank;
 
-  List<String>?       likeGroup;
-  List<String>?       likePlace;
-  List<String>?       likeEvent;
-  List<String>?       likeUser;
   List<DescData>?     snsData;
   List<OptionData>?   optionData;
   List<OptionData>?   optionPush;
@@ -76,16 +82,15 @@ class UserModel {
     required this.countryState,
     required this.followCount,
     required this.followerCount,
+    required this.likeCount,
     required this.pushToken,
     required this.deviceType,
     required this.updateTime,
     required this.createTime,
+    required this.creditAmount,
+    required this.creditUsed,
 
     this.emailNew,
-    this.likeGroup,
-    this.likePlace,
-    this.likeEvent,
-    this.likeUser,
     this.snsData,
     this.optionData,
     this.optionPush,
@@ -118,6 +123,9 @@ class UserModel {
       countryState: '',
       followCount: 0,
       followerCount: 0,
+      likeCount: 0,
+      creditAmount: 0,
+      creditUsed: 0,
       pushToken: '',
       deviceType: '',
       updateTime: '',

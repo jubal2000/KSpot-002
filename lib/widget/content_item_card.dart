@@ -18,6 +18,7 @@ import '../services/api_service.dart';
 import '../utils/utils.dart';
 import 'dart:developer';
 
+import 'bookmark_widget.dart';
 import 'edit/edit_text_input_widget.dart';
 import 'like_widget.dart';
 
@@ -64,6 +65,7 @@ class EventSquareItem extends GoodsItemCard {
         bool isEditable = false,
         showOutline = false,
         isShowExtra = true,
+        isShowBookmark = false,
         outlineWidth = 3.0,
         outlineColor = Colors.white,
         faceOutlineColor = Colors.black,
@@ -93,6 +95,7 @@ class EventSquareItem extends GoodsItemCard {
     isSelected: isSelected,
     isSelectable: isSelectable,
     isEditable: isEditable,
+    isShowBookmark: isShowBookmark,
     onChanged: onChanged,
     onSelected: onSelected,
     onShowDetail: onShowDetail,
@@ -360,7 +363,8 @@ class GoodsItemCard extends StatefulWidget {
     this.outlineColor = Colors.white,
     this.faceOutlineColor = Colors.black,
     this.isShowExtra = true,
-    this.isShowLink = false,
+    this.isShowLike = false,
+    this.isShowBookmark = false,
     this.isShowSelectIcon = false,
   }) : super(key: key);
 
@@ -399,7 +403,8 @@ class GoodsItemCard extends StatefulWidget {
   bool isSelectable;
   bool isEditable;
   bool isShowExtra;
-  bool isShowLink;
+  bool isShowLike;
+  bool isShowBookmark;
   bool isShowSelectIcon;
 
   double imageHeight;
@@ -549,11 +554,18 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                                     ),
                                     child: showImageWidget(_goodsItem['pic'], BoxFit.cover),
                                   ),
-                                  if (widget.isShowLink)
-                                  TopRightAlign(
-                                    child: LikeWidget(context, 'event', _goodsItem,
-                                        iconSize: 22, padding: EdgeInsets.all(5)),
-                                  )
+                                  if (widget.isShowLike)
+                                    TopRightAlign(
+                                      child: LikeWidget(context, 'event', _goodsItem,
+                                        iconSize: 22, padding: EdgeInsets.all(5), isShowOutline: true,
+                                        enableColor: Theme.of(context).colorScheme.tertiary, disableColor: Colors.white),
+                                    ),
+                                  if (widget.isShowBookmark)
+                                    TopRightAlign(
+                                      child: BookmarkWidget(context, 'event', _goodsItem,
+                                        iconSize: 22, padding: EdgeInsets.all(5), isShowOutline: true,
+                                        enableColor: Theme.of(context).colorScheme.tertiary, disableColor: Colors.white),
+                                    ),
                                 ]
                               ),
                               SizedBox(height: 5),

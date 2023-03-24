@@ -20,6 +20,7 @@ import '../services/cache_service.dart';
 import '../utils/utils.dart';
 import '../view/event/event_edit_screen.dart';
 import '../view/profile/profile_target_screen.dart';
+import '../widget/bookmark_widget.dart';
 import '../widget/comment_widget.dart';
 import '../widget/content_item_card.dart';
 import '../widget/custom_field_widget.dart';
@@ -166,6 +167,10 @@ class EventDetailViewModel extends ChangeNotifier {
     return Row(
         children: [
           ShareWidget(buildContext!, 'event', eventInfo!.toJson(), showTitle: true),
+          SizedBox(width: 10),
+          BookmarkWidget(buildContext!, 'event', eventInfo!.toJson(), title:'BOOKMARK'.tr, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
+
+          }),
           SizedBox(width: 10),
           LikeWidget(buildContext!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
             LOG('--> LikeWidget result : $count');

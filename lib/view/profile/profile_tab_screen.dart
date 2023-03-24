@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/models/event_model.dart';
 import 'package:kspot_002/models/story_model.dart';
+import 'package:kspot_002/view/bookmark/bookmark_screen.dart';
 import 'package:kspot_002/view/like/like_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,6 +17,7 @@ import '../../data/dialogs.dart';
 import '../../data/theme_manager.dart';
 import '../../utils/utils.dart';
 import '../../view_model/user_view_model.dart';
+import '../../widget/credit_widget.dart';
 import '../../widget/like_widget.dart';
 import '../../widget/page_widget.dart';
 import '../event/event_item.dart';
@@ -120,6 +122,10 @@ class ProfileTapState extends State<ProfileTabScreen> {
                                         showSendMessageWidget(context, viewModel.userInfo!, title: 'TALK'.tr),
                                         SizedBox(width: 2),
                                       ],
+                                      if (viewModel.isMyProfile)...[
+                                        CreditWidget(context, viewModel.userInfo!.toJson()),
+                                        SizedBox(width: 2),
+                                      ],
                                       LikeWidget(context, 'user', viewModel.userInfo!.toJson(), showCount: true, isEnabled: !viewModel.isMyProfile),
                                     ],
                                     // children: _shareLink,
@@ -180,10 +186,14 @@ class ProfileTapState extends State<ProfileTabScreen> {
       case ProfileMainTab.follow: {
         return FollowScreen(AppData.userInfo, isShowAppBar: false);
       }
+      case ProfileMainTab.bookmark: {
+        return BookmarkScreen(AppData.userInfo, isShowAppBar: false);
+      }
       case ProfileMainTab.like: {
         return LikeScreen(AppData.userInfo, isShowAppBar: false);
       }
     }
+    return Container();
   }
 
   @override

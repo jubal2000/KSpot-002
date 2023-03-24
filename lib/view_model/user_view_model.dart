@@ -29,7 +29,9 @@ import '../view/story/story_item.dart';
 enum ProfileMainTab {
   profile,
   follow,
+  bookmark,
   like,
+  max,
 }
 
 enum ProfileContentType {
@@ -63,6 +65,7 @@ class UserViewModel extends ChangeNotifier {
   Map<String, StoryModel> storyData = {};
   JSON snsData = {};
   JSON likeData = {};
+  JSON bookmarkData = {};
 
   init(context) {
     this.context = context;
@@ -72,11 +75,12 @@ class UserViewModel extends ChangeNotifier {
     userInfo    = user;
     isMyProfile = userInfo!.checkOwner(AppData.USER_ID);
     snsData     = userInfo!.snsDataMap;
-    tabKeyList  = List.generate(3, (index) => GlobalKey());
+    tabKeyList  = List.generate(ProfileMainTab.max.index, (index) => GlobalKey());
     tabList = [
-      ProfileTabScreen(ProfileMainTab.profile , 'PROFILE'.tr  , this, key: tabKeyList[0]),
-      ProfileTabScreen(ProfileMainTab.follow  , 'FOLLOW'.tr   , this, key: tabKeyList[1]),
-      ProfileTabScreen(ProfileMainTab.like    , 'LIKE'.tr     , this, key: tabKeyList[2]),
+      ProfileTabScreen(ProfileMainTab.profile   , 'PROFILE'.tr  , this, key: tabKeyList[0]),
+      ProfileTabScreen(ProfileMainTab.follow    , 'FOLLOW'.tr   , this, key: tabKeyList[1]),
+      ProfileTabScreen(ProfileMainTab.bookmark  , 'BOOKMARK'.tr , this, key: tabKeyList[2]),
+      // ProfileTabScreen(ProfileMainTab.like      , 'LIKE'.tr     , this, key: tabKeyList[3]),
     ];
     setUserMessage();
   }

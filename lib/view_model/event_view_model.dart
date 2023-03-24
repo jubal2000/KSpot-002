@@ -230,38 +230,30 @@ class EventViewModel extends ChangeNotifier {
       var addItem = cache.eventMapItemData[item['id']];
       LOG('--> showEventMap : ${item['id']} / ${item['title']} / ${addItem != null ? 'OK': 'none'}');
       addItem ??= Container(
-          width:  itemWidth,
-          height: itemHeight,
-          margin: EdgeInsets.symmetric(horizontal: 3),
-          child: EventSquareItem(
-            item,
-            backgroundColor: Theme.of(buildContext!).cardColor,
-            faceOutlineColor: Theme.of(buildContext!).colorScheme.secondary,
-            padding: EdgeInsets.zero,
-            imageHeight: itemWidth,
-            titleMaxLine: 2,
-            descMaxLine: 0,
-            titleStyle: CardTitleStyle(buildContext!),
-            descStyle: CardDescStyle(buildContext!),
-            onShowDetail: (key, status) {
-              showEventItemDetail(item);
-              // Get.to(() => EventDetailScreen(EventModel.fromJson(item), PlaceModel.fromJson(item['placeInfo'])))!.then((eventInfo) {
-              //   if (eventInfo != null) {
-              //     isMapUpdate = true;
-              //     showList.clear();
-              //     cache.setEventItem(eventInfo!);
-              //     notifyListeners();
-              //   }
-              // });
-            },
-          )
-        );
+        width:  itemWidth,
+        height: itemHeight,
+        margin: EdgeInsets.symmetric(horizontal: 3),
+        child: EventSquareItem(
+          item,
+          backgroundColor: Theme.of(buildContext!).cardColor,
+          faceOutlineColor: Theme.of(buildContext!).colorScheme.secondary,
+          padding: EdgeInsets.zero,
+          imageHeight: itemWidth,
+          titleMaxLine: 2,
+          descMaxLine: 0,
+          titleStyle: CardTitleStyle(buildContext!),
+          descStyle: CardDescStyle(buildContext!),
+          onShowDetail: (key, status) {
+            showEventItemDetail(item);
+          },
+        )
+      );
       cache.eventMapItemData[item['id']] = addItem;
       tmpList.add(addItem);
     }
     if (isMapUpdate) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Future.delayed(const Duration(milliseconds: 200), () async {
+        Future.delayed(const Duration(milliseconds: 500), () async {
           if (mapKey.currentState != null) {
             var state = mapKey.currentState as GoogleMapState;
             state.refreshMarker(showList);

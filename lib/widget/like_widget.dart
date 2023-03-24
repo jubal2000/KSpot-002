@@ -21,11 +21,13 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
       bool isShowOutline = false,
       double iconX = 0,
       double iconY = 0,
+      Color? enableColor,
+      Color? disableColor,
       EdgeInsets? padding,
       Function(int)? onChangeCount
     }) {
-  var _iconColor0 = Theme.of(context).colorScheme.error;
-  var _iconColor1 = Theme.of(context).colorScheme.error.withOpacity(0.85);
+  var iconColor0 = enableColor ?? Theme.of(context).colorScheme.error;
+  var iconColor1 = disableColor ?? Theme.of(context).colorScheme.error;
   var api = Get.find<ApiService>();
 
   return FutureBuilder(
@@ -52,13 +54,13 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (isShowOutline)
-                            ShadowIcon(_isLiked ? Icons.favorite : Icons.favorite_border, iconSize, _isLiked ? _iconColor0 : _iconColor1, x: iconX, y: iconY),
+                            ShadowIcon(_isLiked ? Icons.favorite : Icons.favorite_border, iconSize, _isLiked ? iconColor0 : iconColor1, x: iconX, y: iconY),
                           if (!isShowOutline)
-                            Icon(_isLiked ? Icons.favorite : Icons.favorite_border, size: iconSize, color: _isLiked ? _iconColor0 : _iconColor1),
+                            Icon(_isLiked ? Icons.favorite : Icons.favorite_border, size: iconSize, color: _isLiked ? iconColor0 : iconColor1),
                           if (showCount)
                             Text('${INT(targetInfo['likeCount'])}', style: ItemDescExStyle(context)),
                           if (title.isNotEmpty)...[
-                            Text(title, style: TextStyle(fontSize: 9, color: _isLiked ? _iconColor0 : _iconColor1))
+                            Text(title, style: ItemDescExStyle(context))
                           ],
                         ]
                     )

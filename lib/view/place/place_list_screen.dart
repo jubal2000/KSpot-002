@@ -79,10 +79,10 @@ class _PlaceListScreenState extends State<PlaceListScreen> with TickerProviderSt
     _placePromotionList = [];
     _aniController = [];
 
-    var likeList = {};
-    for (var item in AppData.USER_PLACE_LIKE) {
-      likeList[item] = item;
-    }
+    // var likeList = {};
+    // for (var item in AppData.USER_PLACE_LIKE) {
+    //   likeList[item] = item;
+    // }
 
     for (var item in _placeList.entries) {
       // if ((widget.isSelectable && CheckManager(item.value)) || (
@@ -134,8 +134,8 @@ class _PlaceListScreenState extends State<PlaceListScreen> with TickerProviderSt
         if (AppData.mainListType != HomeListType.map && checkPromotionDateRangeFromData(item.value.toJson())) {
           placeItem.setPromotionItem();
           _placePromotionList.add(placeItem);
-        } else if (likeList.containsKey(item.key)) {
-          _placeLikeList.add(placeItem);
+        // } else if (likeList.containsKey(item.key)) {
+        //   _placeLikeList.add(placeItem);
         } else {
           _placeAllList.add(placeItem);
         }

@@ -222,36 +222,6 @@ class AppData {
     AppData.userInfo.email = value;
   }
 
-  // user links..
-
-  // ignore: non_constant_identifier_names
-  static List<String> get USER_EVENT_GROUP_LIKE => AppData.userInfo.likeGroup ?? List<String>.from([]);
-  // ignore: non_constant_identifier_names
-  static set USER_EVENT_GROUP_LIKE(List<String> value) {
-    AppData.userInfo.likeGroup = value;
-  }
-
-  // ignore: non_constant_identifier_names
-  static List<String> get USER_PLACE_LIKE => AppData.userInfo.likePlace ?? List<String>.from([]);
-  // ignore: non_constant_identifier_names
-  static set USER_PLACE_LIKE(List<String> value) {
-    AppData.userInfo.likePlace = value;
-  }
-
-  // ignore: non_constant_identifier_names
-  static List<String> get USER_EVENT_LIKE => AppData.userInfo.likeEvent ?? List<String>.from([]);
-  // ignore: non_constant_identifier_names
-  static set USER_EVENT_LIKE(List<String> value) {
-    AppData.userInfo.likeEvent = value;
-  }
-
-  // ignore: non_constant_identifier_names
-  static List<String> get USER_USER_LIKE => AppData.userInfo.likeUser ?? List<String>.from([]);
-  // ignore: non_constant_identifier_names
-  static set USER_USER_LIKE(List<String> value) {
-    AppData.userInfo.likeUser = value;
-  }
-
   static initStartInfo(JSON info) {
     infoData = info;
     LOG('--> initData eventGroup : ${infoData['eventGroup']}');

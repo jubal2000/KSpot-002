@@ -106,7 +106,7 @@ class FollowScreenState extends State<FollowScreen> {
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
                           bottom: TabBar(
-                            padding: EdgeInsets.symmetric(horizontal: 30),
+                            padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
                             labelColor: Theme.of(context).colorScheme.primary,
                             indicatorColor: Theme.of(context).colorScheme.primary,
                             unselectedLabelColor: Theme.of(context).colorScheme.secondary,
@@ -270,7 +270,7 @@ class FollowTabState extends State<FollowTab> {
     refreshList();
     debugPrint('--> list show : ${_itemList.length} / ${widget.isShowMe}');
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
       child: Column(
         children: [
           SizedBox(height: 10),

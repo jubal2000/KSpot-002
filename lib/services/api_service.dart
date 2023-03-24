@@ -1127,10 +1127,9 @@ class ApiService extends GetxService {
   
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
-  //    LIKE & BOOK MARK Functions
+  //    LIKE Functions
   //
   
-  final ShareCollection = 'data_share';
   final LikeCollection = 'data_like';
 
   Future<JSON> getLikeFromUserId(String userId) async {
@@ -1275,8 +1274,89 @@ class ApiService extends GetxService {
     }
     return null;
   }
-  
-  
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  //    BOOKMARK Functions
+  //
+
+  final BookmarkCollection = 'data_bookmark';
+
+  Future<JSON> getBookmarkFromUserId(String userId) async {
+    LOG('--> getBookmarkFromUserId : $userId}');
+    JSON result = {};
+    var ref = firestore!.collection(BookmarkCollection);
+    try {
+      // get original info..
+      var snapshot = await ref
+          .where('status', isEqualTo: 1)
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      for (var item in snapshot.docs) {
+        result[item['id']] = FROM_SERVER_DATA(item.data());
+      }
+    } catch (e) {
+      LOG('--> getBookmarkFromUserId Error : $e');
+    }
+    return result;
+  }
+
+  Future<JSON?> getBookmarkFromTargetId(String userId, String targetType, String targetId) async {
+    // LOG('--> getBookmarkFromTargetId [$targetType] : $targetId / $userId / ${AppData.USER_PLACE}');
+    var ref = firestore!.collection(BookmarkCollection);
+    try {
+      // get original info..
+      var snapshot = await ref
+          .where('status', isEqualTo: 1)
+          .where('targetType', isEqualTo: targetType)
+          .where('targetId', isEqualTo: targetId)
+          .where('userId', isEqualTo: userId)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        return snapshot.docs.first.data();
+      }
+    } catch (e) {
+      LOG('--> getBookmarkFromTargetId Error : $e');
+    }
+    return null;
+  }
+
+  Future<JSON> getBookmarkJsonFromTargetId(String userId, String targetType, String targetId) async {
+    final result = await getBookmarkFromTargetId(userId, targetType, targetId);
+    return result ?? {};
+  }
+
+  Future<JSON?> addBookmarkItem(String userId, String targetType, String targetId, int status,
+      {String targetTitle = '', String targetPic = ''}) async {
+    var ref = firestore!.collection(BookmarkCollection);
+    var likeId = '';
+    LOG('--> addBookmarkItem : $targetType / $targetId / $targetPic / $status');
+    var bookmarkInfo = await getBookmarkFromTargetId(userId, targetType, targetId);
+    if (bookmarkInfo != null) {
+      likeId = STR(bookmarkInfo['id']);
+    }
+    JSON addData = {};
+    addData["id"]           = likeId;
+    addData["status"]       = status;
+    addData["userId"]       = userId;
+    addData["targetType"]   = targetType;
+    addData["targetId"]     = targetId;
+    addData["targetTitle"]  = targetTitle;
+    addData["targetPic"]    = targetPic;
+    addData["updateTime"]   = CURRENT_SERVER_TIME();
+
+    if (likeId.isEmpty) {
+      addData["id"] = ref.doc().id; // create new id..
+      addData["createTime"] = CURRENT_SERVER_TIME();
+    }
+    LOG('--> addBookmarkItem result : ${addData.toString()}');
+    await ref.doc(addData['id']).set(addData);
+    return addData;
+  }
+
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
   //    SEARCH Functions
@@ -1290,8 +1370,7 @@ class ApiService extends GetxService {
         .where('userId', isEqualTo:userId)
         .get();
     for (var item in snapshot.docs) {
-      var addItem = FROM_SERVER_DATA(item.data());
-      result[addItem['desc']] = FROM_SERVER_DATA(addItem);
+      result[item.data()['desc']] = FROM_SERVER_DATA(item.data());
     }
     LOG('------> getSearchHistory result : $result');
     return result;

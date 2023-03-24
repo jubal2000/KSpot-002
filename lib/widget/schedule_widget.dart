@@ -187,7 +187,7 @@ class _ScheduleState extends State<ScheduleWidget> {
 
 Appointment? setCalendarDaySource(String timeId, String eventId, String placeId, String date, JSON timeData, Color color) {
   try {
-    LOG('--> _setCalendarDaySource init : $date / ${timeData['startTime']} >> ${STR(timeData['endTime'])}');
+    // LOG('--> _setCalendarDaySource init : $date / ${timeData['startTime']} >> ${STR(timeData['endTime'])}');
     if (STR(timeData['startTime']) == '24:00') timeData['startTime'] = '00:00';
     if (STR(timeData['endTime'  ]) == '24:00') timeData['endTime'  ] = '23:59';
     var startTime = DateTime.parse('$date ${STR(timeData['startTime'], defaultValue: '00:00')}:00');

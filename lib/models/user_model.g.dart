@@ -26,24 +26,16 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       emailVerifyTime: json['emailVerifyTime'] as String,
       country: json['country'] as String,
       countryState: json['countryState'] as String,
-      followCount: json['followCount'] as int,
-      followerCount: json['followerCount'] as int,
+      followCount: json['followCount'] as int? ?? 0,
+      followerCount: json['followerCount'] as int? ?? 0,
+      likeCount: json['likeCount'] as int? ?? 0,
       pushToken: json['pushToken'] as String,
       deviceType: json['deviceType'] as String,
       updateTime: json['updateTime'] as String,
       createTime: json['createTime'] as String,
-      likeGroup: (json['likeGroup'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
-      likePlace: (json['likePlace'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
-      likeEvent: (json['likeEvent'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
-      likeUser: (json['likeUser'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+      creditAmount: json['creditAmount'] as int? ?? 0,
+      creditUsed: json['creditUsed'] as int? ?? 0,
+      emailNew: json['emailNew'] as String?,
       snsData: (json['snsData'] as List<dynamic>?)
           ?.map((e) => DescData.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -79,15 +71,15 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'countryState': instance.countryState,
       'followCount': instance.followCount,
       'followerCount': instance.followerCount,
+      'likeCount': instance.likeCount,
+      'creditAmount': instance.creditAmount,
+      'creditUsed': instance.creditUsed,
       'pushToken': instance.pushToken,
       'deviceType': instance.deviceType,
       'updateTime': instance.updateTime,
       'createTime': instance.createTime,
+      'emailNew': instance.emailNew,
       'refundBank': instance.refundBank?.toJson(),
-      'likeGroup': instance.likeGroup,
-      'likePlace': instance.likePlace,
-      'likeEvent': instance.likeEvent,
-      'likeUser': instance.likeUser,
       'snsData': instance.snsData?.map((e) => e.toJson()).toList(),
       'optionData': instance.optionData?.map((e) => e.toJson()).toList(),
       'optionPush': instance.optionPush?.map((e) => e.toJson()).toList(),

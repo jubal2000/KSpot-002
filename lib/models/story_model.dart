@@ -9,6 +9,7 @@ class StoryModelEx extends StoryModel {
       String id,
       {
         int    status = 0,
+        int    showStatus = 0,
         String desc = '',
         String pic = '',
         String groupId = '',
@@ -28,6 +29,7 @@ class StoryModelEx extends StoryModel {
       }) : super(
     id: id,
     status: status,
+    showStatus: showStatus,
     desc: desc,
     groupId: groupId,
     eventId: eventId,
@@ -51,6 +53,8 @@ class StoryModelEx extends StoryModel {
 class StoryModel {
   String  id;
   int     status;         // 상태 (0:removed, 1:active, 2:disable, 3:ready)
+  @JsonKey(defaultValue: 1)
+  int     showStatus;     // 보여주기 상태 (0: disable, 1: visible)
   String  desc;
   @JsonKey(defaultValue: '')
   String  groupId;        // 그룹 ID
@@ -78,6 +82,7 @@ class StoryModel {
   StoryModel({
     required this.id,
     required this.status,
+    required this.showStatus,
     required this.desc,
     required this.groupId,
     required this.eventId,

@@ -17,6 +17,7 @@ class EventModelEx extends EventModel {
     super(
       id: id,
       status: 1,
+      showStatus: 1,
       type: type,
       title: title,
       titleKr: '',
@@ -50,8 +51,10 @@ class EventModelEx extends EventModel {
 )
 class EventModel {
   String  id;
-  int     status;         // 상태 (0:removed, 1:active, 2:disable, 3:ready)
+  int     status;         // 상태 (0:removed, 1:active)
   @JsonKey(defaultValue: 0)
+  int     showStatus;     // 보여주기 상태 (0: disable, 1: enable)
+  @JsonKey(defaultValue: 1)
   int     type;           // 타입 (0:event, 1:class)
   String  title;
   String  titleKr;
@@ -84,6 +87,7 @@ class EventModel {
   EventModel({
     required this.id,
     required this.status,
+    required this.showStatus,
     required this.type,
     required this.title,
     required this.titleKr,

@@ -349,9 +349,9 @@ class CommentGroupTabState extends State<CommentGroupTab> {
                             !widget.isAuthor,
                             false).then((result) {
                           LOG('--> showEditCommentDialog comment result : $result');
-                          if (result.isNotEmpty && mounted) {
+                          if (JSON_NOT_EMPTY(result) && mounted) {
                             setState(() {
-                              var newId = result['id'];
+                              var newId = result!['id'];
                               listData[newId] = result;
                               refreshList();
                               if (widget.onChanged != null) widget.onChanged!(listData);

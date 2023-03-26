@@ -734,23 +734,36 @@ class ApiService extends GetxService {
     return null;
   }
   
-  Future<JSON?> getEventFromUserId(String userId, [bool addExpiredItem = false]) async {
-    // LOG('--> getPlaceEventFromUserId : userId');
+  Future<JSON> getEventFromUserId(String userId, {var isAuthor = false, DateTime? lastTime, DateTime? lastTime2, int limit = 0}) async {
+    LOG('--> getEventFromUserId : userId');
     JSON result = {};
-    var ref = firestore!.collection(EventCollection);
-    var snapshot1 = await ref.where('status', isGreaterThan: 0)
-        .where('userId', isEqualTo: userId)
-        .get();
-  
-    for (var doc in snapshot1.docs)  {
-      result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
+    try {
+      var ref = firestore!.collection(EventCollection);
+      var query = ref.where('status', isEqualTo: 1);
+      if (!isAuthor) {
+        query = query.where('showStatus', isEqualTo: 1);
+      }
+      if (lastTime != null) {
+        var startTime = Timestamp.fromDate(lastTime);
+        query = query.where('createTime', isLessThan: startTime);
+      }
+      if (limit > 0) {
+        query = query.limit(limit);
+      }
+      query = query.where('userId', isEqualTo: userId);
+      var snapshot = await query.orderBy('createTime', descending: true).get();
+      for (var doc in snapshot.docs) {
+        result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
+      }
+      result = await cleanEventExpire(result, isAuthor);
+      LOG('--> getEventFromUserId result : ${result.length}');
+    } catch (e) {
+      LOG('--> getEventFromUserId error : ${e.toString()}');
     }
-    result = await cleanEventExpire(result, addExpiredItem);
-    LOG('--> getEventFromUserId result : ${result.length}');
     return result;
   }
 
-  Future<JSON> getEventListFromManaged(String userId, [bool addExpiredItem = false]) async {
+  Future<JSON> getEventListFromManaged(String userId, [bool isAuthor = false]) async {
     // LOG('--> getPlaceEventListFromManaged : userId');
     JSON result = {};
     var ref = firestore!.collection(EventCollection);
@@ -760,7 +773,7 @@ class ApiService extends GetxService {
     for (var doc in snapshot.docs)  {
       result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
     }
-    result = await cleanEventExpire(result, addExpiredItem);
+    result = await cleanEventExpire(result, isAuthor);
     LOG('--> getEventListFromManaged result : $result');
     return result;
   }
@@ -835,7 +848,21 @@ class ApiService extends GetxService {
     }
     return false;
   }
-  
+
+  Future<bool> setEventShowStatus(String eventId, int status) async {
+    // LOG('------> setEventShowStatus : $eventId / $status');
+    try {
+      var ref = firestore!.collection(EventCollection);
+      await ref.doc(eventId).update({
+        'showStatus': status,
+      });
+      return true;
+    } catch (e) {
+      LOG('--> setEventShowStatus error : $e');
+    }
+    return false;
+  }
+
   Future<JSON?> addEventItem(JSON addItem) async {
     var ref = firestore!.collection(EventCollection);
     try {
@@ -914,20 +941,31 @@ class ApiService extends GetxService {
     return result;
   }
 
-  Future<JSON> getStoryFromUserId(String userId, [int status = 0]) async {
+  Future<JSON> getStoryFromUserId(String userId, {var isAuthor = false, DateTime? lastTime, DateTime? lastTime2, int limit = 0}) async {
+    LOG('--> getStoryFromUserId : $userId / $lastTime');
     JSON result = {};
-
-    var ref = firestore!.collection(StoryCollection);
-    var snapshot = await ref.where('userId', isEqualTo: userId)
-        .where('status', isGreaterThan: 0)
-        .get();
-
-    for (var doc in snapshot.docs) {
-      var item = FROM_SERVER_DATA(doc.data());
-      result[item['id']] = item;
+    try {
+      var ref = firestore!.collection(StoryCollection);
+      var query = ref.where('status', isEqualTo: 1);
+      if (!isAuthor) {
+        query = query.where('showStatus', isEqualTo: 1);
+      }
+      if (lastTime != null) {
+        var startTime = Timestamp.fromDate(lastTime);
+        query = query.where('createTime', isLessThan: startTime);
+      }
+      if (limit > 0) {
+        query = query.limit(limit);
+      }
+      query = query.where('userId', isEqualTo: userId);
+      var snapshot = await query.orderBy('createTime', descending: true).get();
+      for (var doc in snapshot.docs) {
+        result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
+      }
+      LOG('--> getStoryFromUserId result : ${result.length}');
+    } catch (e) {
+      LOG('--> getStoryFromUserId error : ${e.toString()}');
     }
-    result = JSON_CREATE_TIME_SORT_DESC(result);
-    LOG('--> getStoryFromUserId Result : ${result.length}');
     return result;
   }
 
@@ -1000,6 +1038,20 @@ class ApiService extends GetxService {
       return true;
     } catch (e) {
       LOG('--> setStoryItemStatus Error : $e');
+    }
+    return false;
+  }
+
+  Future<bool> setStoryItemShowStatus(String targetId, int status) async {
+    LOG('--> setStoryItemShowStatus : $targetId');
+    try {
+      var ref = firestore!.collection(StoryCollection);
+      await ref.doc(targetId).update({
+        'showStatus' : status,
+      });
+      return true;
+    } catch (e) {
+      LOG('--> setStoryItemShowStatus Error : $e');
     }
     return false;
   }

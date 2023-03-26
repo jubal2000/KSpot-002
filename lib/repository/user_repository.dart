@@ -232,14 +232,19 @@ class UserRepository {
     return null;
   }
 
-  Future<Map<String, EventModel>> getEventFromUserId(String userId, [bool addExpired = false]) async {
+  Future<Map<String, EventModel>> getEventFromUserId(String userId, {bool isAuthor = false, DateTime? lastTime, DateTime? lastTime2}) async {
     Map<String, EventModel> result = {};
-    final response = await api.getEventFromUserId(userId, addExpired);
-    if (response != null && response.isNotEmpty) {
-      for (var item in response.entries) {
-        result[item.key] = EventModel.fromJson(item.value);
+    try {
+      final response = await api.getEventFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, lastTime2: lastTime2, limit: PROFILE_CONTENT_MAX);
+      if (JSON_NOT_EMPTY(response)) {
+        for (var item in response.entries) {
+          result[item.key] = EventModel.fromJson(item.value);
+        }
       }
+    } catch (e) {
+      LOG('--> getEventFromUserId error : ${e.toString()}');
     }
+    LOG('--> getEventFromUserId result : ${result.length}');
     return result;
   }
 
@@ -251,20 +256,19 @@ class UserRepository {
     return null;
   }
 
-  Future<Map<String, StoryModel>> getStoryFromUserId(String userId) async {
+  Future<Map<String, StoryModel>> getStoryFromUserId(String userId, {bool isAuthor = false, DateTime? lastTime, DateTime? lastTime2}) async {
     Map<String, StoryModel> result = {};
     try {
-      final response = await api.getStoryFromUserId(userId);
+      final response = await api.getStoryFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, lastTime2: lastTime2, limit: PROFILE_CONTENT_MAX);
       if (JSON_NOT_EMPTY(response)) {
         for (var item in response.entries) {
-          LOG('--> response item : ${item.value.toString()}');
           result[item.key] = StoryModel.fromJson(item.value);
         }
       }
-      LOG('--> StoryModel result : ${result.length}');
     } catch (e) {
-      LOG('--> StoryModel error : ${e.toString()}');
+      LOG('--> getStoryFromUserId error : ${e.toString()}');
     }
+    LOG('--> getStoryFromUserId result : ${result.length}');
     return result;
   }
 

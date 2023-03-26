@@ -404,9 +404,9 @@ Widget showCommentMenu(BuildContext context, JSON itemInfo, bool showParent, dou
   };
   return GestureDetector(
     onTap: () {
-      showEditCommentDialog(context, CommentType.story, 'Comment'.tr, uploadData, const {}, false, false, false).then((result) {
-        if (result.isNotEmpty) {
-          onCommentAdded(result);
+      showEditCommentDialog(context, CommentType.comment, 'Comment'.tr, uploadData, const {}, false, false, false).then((result) {
+        if (JSON_NOT_EMPTY(result)) {
+          onCommentAdded(result!);
           itemInfo['comments'] = INT(result['comments']);
           if (onUpdate != null) onUpdate(itemInfo);
         }
@@ -754,6 +754,7 @@ class StoryVerCardItemState extends State<StoryVerCardItem> {
     _userListData.clear();
     _imageSize = widget.itemHeight;
     var _isMyStory = widget.itemData.userId == AppData.USER_ID;
+    LOG('--> story item : ${widget.itemData.showStatus}');
 
     return GestureDetector(
       onTap: () {
@@ -786,7 +787,15 @@ class StoryVerCardItemState extends State<StoryVerCardItem> {
           // });
         }
       },
-      child: Container(
+      child: ColorFiltered(
+        colorFilter: widget.itemData.showStatus > 0 ? ColorFilter.mode(
+          Colors.transparent,
+          BlendMode.multiply,
+        ) : ColorFilter.mode(
+          Colors.grey,
+          BlendMode.saturation,
+        ),
+        child: Container(
         height: _imageSize + 55.w,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
@@ -804,7 +813,7 @@ class StoryVerCardItemState extends State<StoryVerCardItem> {
                   alignment: Alignment.center,
                   children: [
                     showImage(widget.itemData.picData!.first.url, Size(_imageSize, _imageSize)),
-                    if (widget.itemData.status == 2)
+                    if (widget.itemData.showStatus == 0)
                       TopLeftAlign(
                         child: ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
                       ),
@@ -858,13 +867,18 @@ class StoryVerCardItemState extends State<StoryVerCardItem> {
                             switch (selected.type) {
                               case DropdownItemType.enable:
                               case DropdownItemType.disable:
-                                var status = selected.type == DropdownItemType.enable ? 1 : 2;
-                                api.setStoryItemStatus(widget.itemData.id, status).then((result) {
-                                  setState(() {
-                                    widget.itemData.status = status;
-                                    if (widget.onRefresh != null) widget.onRefresh!(widget.itemData.toJson());
+                              var title = widget.itemData.showStatus == 1 ? 'Disable' : 'Enable';
+                              showAlertYesNoDialog(context, title.tr, '$title spot?'.tr, 'In the disable state, other users cannot see it'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
+                                if (value == 1) {
+                                  var status = selected.type == DropdownItemType.enable ? 1 : 0;
+                                  api.setStoryItemShowStatus(widget.itemData.id, status).then((result) {
+                                    setState(() {
+                                      widget.itemData.showStatus = status;
+                                      if (widget.onRefresh != null) widget.onRefresh!(widget.itemData.toJson());
+                                    });
                                   });
-                                });
+                                }
+                              });
                                 break;
                               case DropdownItemType.edit:
                                 Get.to(() => StoryEditScreen(storyInfo: widget.itemData))!.then((result) {
@@ -949,6 +963,7 @@ class StoryVerCardItemState extends State<StoryVerCardItem> {
           )
         ),
       ),
+      )
     );
   }
 }

@@ -226,7 +226,7 @@ class FollowTabState extends State<FollowTab> {
         };
         showEditCommentDialog(context, CommentType.message, 'To. ${STR(targetUser['nickName'])}', uploadData, targetUser, false, true, false).then((result) {
           LOG('--> showEditCommentDialog comment result : $result');
-          if (result.isNotEmpty) {
+          if (JSON_NOT_EMPTY(result)) {
             setState(() {
 
             });

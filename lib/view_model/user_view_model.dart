@@ -43,6 +43,7 @@ class UserViewModel extends ChangeNotifier {
   final repo = UserRepository();
   final eventRepo = EventRepository();
   final msgTextController = TextEditingController();
+  final scrollController = ScrollController();
 
   UserModel? userInfo;
   List<ProfileTabScreen> tabList = [];
@@ -66,6 +67,10 @@ class UserViewModel extends ChangeNotifier {
   JSON snsData = {};
   JSON likeData = {};
   JSON bookmarkData = {};
+  DateTime? eventLastTime;
+  DateTime? eventLastTime2;
+  DateTime? storyLastTime;
+  DateTime? storyLastTime2;
 
   init(context) {
     this.context = context;
@@ -96,22 +101,55 @@ class UserViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  getEventData(bool addExpired) {
-    return repo.getEventFromUserId(userInfo!.id, addExpired);
+  getEventData() async {
+    if (JSON_NOT_EMPTY(eventData)) {
+      for (var item in eventData.entries) {
+        var checkTime = DateTime.parse(item.value.createTime);
+        if (item.value.status == 1 && (eventLastTime == null || checkTime.isBefore(eventLastTime!))) {
+          eventLastTime = checkTime;
+        }
+        if (item.value.status == 2 && (eventLastTime2 == null || checkTime.isBefore(eventLastTime2!))) {
+          eventLastTime2 = checkTime;
+        }
+      }
+    }
+    LOG('---> getEventData : ${eventData.length} - ${eventLastTime.toString()}');
+    var eventNewData = await repo.getEventFromUserId(userInfo!.id, isAuthor: isMyProfile,
+        lastTime: storyLastTime, lastTime2: storyLastTime2);
+    if (eventNewData.isNotEmpty) {
+      eventData.addAll(eventNewData);
+    } else {
+      ShowErrorToast('No more event'.tr);
+    }
+    return eventData;
   }
 
-  getStoryData() {
-    return repo.getStoryFromUserId(userInfo!.id);
+  getStoryData() async {
+    if (JSON_NOT_EMPTY(storyData)) {
+      for (var item in storyData.entries) {
+        var checkTime = DateTime.parse(item.value.createTime);
+        if (item.value.status == 1 && (storyLastTime == null || checkTime.isBefore(storyLastTime!))) {
+          storyLastTime = checkTime;
+        }
+        if (item.value.status == 2 && (storyLastTime2 == null || checkTime.isBefore(storyLastTime2!))) {
+          storyLastTime2 = checkTime;
+        }
+      }
+    }
+    LOG('---> getStoryData : ${storyData.length} - ${storyLastTime.toString()}');
+    var storyNewData = await repo.getStoryFromUserId(userInfo!.id,
+        isAuthor: isMyProfile, lastTime: storyLastTime, lastTime2: storyLastTime2);
+    if (storyNewData.isNotEmpty) {
+      storyData.addAll(storyNewData);
+    } else {
+      ShowErrorToast('No more story'.tr);
+    }
+    return storyData;
   }
 
-  getContentDataAll() async {
-    LOG('---> getContentDataAll : ${eventData.length} / ${storyData.length}');
-    if (eventData.isEmpty) {
-      eventData = await repo.getEventFromUserId(userInfo!.id, isMyProfile);
-    }
-    if (storyData.isEmpty) {
-      storyData = await repo.getStoryFromUserId(userInfo!.id);
-    }
+  getContentData() async {
+    await getEventData();
+    await getStoryData();
     return true;
   }
 
@@ -393,7 +431,7 @@ class UserViewModel extends ChangeNotifier {
     List<List<Widget>> showItemList = List.generate(3, (index) => []);
     for (var item in eventData.entries) {
       var isExpired = eventRepo.checkIsExpired(item.value);
-      var eventItem = EventCardItem(
+      var showItem = EventCardItem(
         item.value,
         isMyItem: isMyProfile,
         isExpired: isExpired,
@@ -412,22 +450,22 @@ class UserViewModel extends ChangeNotifier {
         },
       );
       if (item.value.status == 1 && !isExpired) {
-        showItemList[0].add(eventItem);
+        showItemList[0].add(showItem);
       } else if (item.value.status == 2 && !isExpired) {
-        showItemList[1].add(eventItem);
+        showItemList[1].add(showItem);
       } else if (item.value.status > 0) {
-        showItemList[2].add(eventItem);
+        showItemList[2].add(showItem);
       }
     }
 
-    return ListView(
+    return Column(
       children: [
         if (showItemList[0].isNotEmpty)...[
           SubTitleBar(context!, '${'Activated event'.tr} ${showItemList[0].length}'),
           SizedBox(height: 10.h),
           ...showItemList[0],
         ],
-        if (showItemList[0].isNotEmpty || showItemList[2].isNotEmpty)...[
+        if (isMyProfile && (showItemList[1].isNotEmpty || showItemList[2].isNotEmpty))...[
           SubTitleBar(context!, '${'Disabled event'.tr} ${showItemList[1].length + showItemList[2].length}',
             icon: isDisableOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
             isDisableOpen = !isDisableOpen;
@@ -445,9 +483,10 @@ class UserViewModel extends ChangeNotifier {
 
   showStoryList() {
     final space = 10.w;
-    List<List<Widget>> showItemList = List.generate(3, (index) => []);
+    // List<List<Widget>> showItemList = List.generate(3, (index) => []);
+    List<Widget> showItemList = [];
     for (var item in storyData.entries) {
-      var eventItem = ClipRRect(
+      var showItem = ClipRRect(
           borderRadius: BorderRadius.all(Radius.circular(8)),
           child: StoryVerCardItem(
             item.value,
@@ -463,64 +502,130 @@ class UserViewModel extends ChangeNotifier {
             },
           )
       );
-      if (item.value.status == 1) {
-        showItemList[0].add(eventItem);
-      } else if (item.value.status > 0) {
-        showItemList[1].add(eventItem);
+      if (item.value.status > 0) {
+        showItemList.add(showItem);
+        // if (item.value.showStatus == 1) {
+        //   showItemList[0].add(showItem);
+        // } else {
+        //   showItemList[1].add(showItem);
+        // }
       }
     }
 
-    return ListView(
-      children: [
-        if (showItemList[0].isNotEmpty)...[
-          SubTitleBar(context!, '${'Activated story'.tr} ${showItemList[0].length}'),
-          MasonryGridView.count(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: showItemList[0].length,
-            crossAxisCount: 3,
-            mainAxisSpacing: space,
-            crossAxisSpacing: space,
-            padding: EdgeInsets.symmetric(vertical: UI_HORIZONTAL_SPACE.w),
-            itemBuilder: (BuildContext context, int index) {
-              var item = showItemList[0][index];
-              return item;
-            }
-          ),
-        ],
-        if (showItemList[1].isNotEmpty)...[
-          SubTitleBar(context!, '${'Disabled story'.tr} ${showItemList[1].length}',
-            icon: isDisableOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
-              isDisableOpen = !isDisableOpen;
-              notifyListeners();
-            }),
-          if (isDisableOpen)...[
-            MasonryGridView.count(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: showItemList[1].length,
-              crossAxisCount: 3,
-              mainAxisSpacing: space,
-              crossAxisSpacing: space,
-              padding: EdgeInsets.symmetric(vertical: UI_HORIZONTAL_SPACE.w),
-              itemBuilder: (BuildContext context, int index) {
-                var item = showItemList[1][index];
-                return item;
-              }
-            ),
-          ],
-        ],
-      ]
+    return MasonryGridView.count(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: showItemList.length,
+      crossAxisCount: 3,
+      mainAxisSpacing: space,
+      crossAxisSpacing: space,
+      padding: EdgeInsets.symmetric(vertical: UI_HORIZONTAL_SPACE.w),
+      itemBuilder: (BuildContext context, int index) {
+        var item = showItemList[index];
+        return item;
+      }
     );
+
+    // return Column(
+    //   children: [
+    //     if (showItemList[0].isNotEmpty)...[
+    //       SubTitleBar(context!, '${'Activated story'.tr} ${showItemList[0].length}'),
+    //       MasonryGridView.count(
+    //         shrinkWrap: true,
+    //         physics: NeverScrollableScrollPhysics(),
+    //         itemCount: showItemList[0].length,
+    //         crossAxisCount: 3,
+    //         mainAxisSpacing: space,
+    //         crossAxisSpacing: space,
+    //         padding: EdgeInsets.symmetric(vertical: UI_HORIZONTAL_SPACE.w),
+    //         itemBuilder: (BuildContext context, int index) {
+    //           var item = showItemList[0][index];
+    //           return item;
+    //         }
+    //       ),
+    //     ],
+    //     if (showItemList[1].isNotEmpty)...[
+    //       SubTitleBar(context!, '${'Disabled story'.tr} ${showItemList[1].length}',
+    //         icon: isDisableOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
+    //           isDisableOpen = !isDisableOpen;
+    //           notifyListeners();
+    //         }),
+    //       if (isDisableOpen)...[
+    //         MasonryGridView.count(
+    //           shrinkWrap: true,
+    //           physics: NeverScrollableScrollPhysics(),
+    //           itemCount: showItemList[1].length,
+    //           crossAxisCount: 3,
+    //           mainAxisSpacing: space,
+    //           crossAxisSpacing: space,
+    //           padding: EdgeInsets.symmetric(vertical: UI_HORIZONTAL_SPACE.w),
+    //           itemBuilder: (BuildContext context, int index) {
+    //             var item = showItemList[1][index];
+    //             return item;
+    //           }
+    //         ),
+    //       ],
+    //     ],
+    //   ]
+    // );
+  }
+
+  reloadContentData(ProfileContentType type) async {
+    LOG('--> reloadContentData : $type / ${AppData.isMainActive}');
+    if (!AppData.isMainActive) return;
+    AppData.isMainActive = false;
+    await Future.delayed(Duration(seconds: 1));
+    switch(type) {
+      case ProfileContentType.event:
+        await getEventData();
+        break;
+      case ProfileContentType.story:
+        await getStoryData();
+        break;
+    }
+    AppData.isMainActive = true;
+    notifyListeners();
   }
 
   showContentList(ProfileContentType type) {
-    switch(type) {
-      case ProfileContentType.event:
-        return showEventList();
-      case ProfileContentType.story:
-        return showStoryList();
-    }
+    scrollController.addListener(() {
+      if (scrollController.position.pixels == scrollController.position.maxScrollExtent) {
+        reloadContentData(type);
+      }
+    });
+    return LayoutBuilder(
+      builder: (context, layout) {
+        return Container(
+          height: layout.maxHeight,
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: Container(
+              constraints: BoxConstraints(
+                minHeight: layout.maxHeight + 1,
+              ),
+              child: showStoryList(),
+            )
+          )
+        );
+      }
+    );
+    //   child: LayoutBuilder(
+    //   builder: (context, layout)
+    // {
+    //   return ListView(
+    //     controller: storyScrollController,
+    //     children: [
+    //       if (type == ProfileContentType.event)
+    //         showEventList(),
+    //       if (type == ProfileContentType.story)
+    //         Container(
+    //           height: layout.maxHeight,
+    //           child: showStoryList(),
+    //         ),
+    //     ],
+    //   );
+    // }
+    // )
   }
 
   addNewContent(ProfileContentType type) {
@@ -544,5 +649,11 @@ class UserViewModel extends ChangeNotifier {
         });
         break;
     }
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 }

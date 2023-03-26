@@ -76,7 +76,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           body: FutureBuilder(
-            future: AppData.userViewModel.getContentDataAll(),
+            future: AppData.userViewModel.getContentData(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return TabBarView(

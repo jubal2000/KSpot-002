@@ -95,6 +95,8 @@ class Words extends Translations {
       'Chat room create': '대화방 생성',
       'This event has expired': '기간이 종료된 이벤트입니다',
       'Please change the period\nin the \'Event edit\'': '\'이벤트 수정\'에서 기간을\n변경해 주세요',
+      'No more event': '마지막 이벤트입니다',
+      'No more story': '마지막 스토리입니다',
 
       // main_event
       'There are no events': '이벤트가 없습니다',

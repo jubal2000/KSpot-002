@@ -72,7 +72,7 @@ class ProfileTargetState extends State<ProfileTargetScreen> {
           titleSpacing: 0,
         ),
         body: FutureBuilder(
-          future: userVewModel.getContentDataAll(),
+          future: userVewModel.getContentData(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return ProfileTabScreen(ProfileMainTab.profile, '', userVewModel);

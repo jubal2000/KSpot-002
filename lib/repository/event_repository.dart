@@ -77,6 +77,10 @@ class EventRepository {
     return await api.setEventStatus(eventId, status);
   }
 
+  Future<bool> setEventShowStatus(String eventId, int status) async {
+    return await api.setEventShowStatus(eventId, status);
+  }
+
   /////////////////////////////////////////////////////////////////////////////////////////////
 
   Future<String?> uploadImageInfo(JSON imageInfo, [String path = 'event_img']) async {

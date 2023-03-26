@@ -142,7 +142,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
           if (icon != null) {
             LOG('--> getMarkerImage result : $icon / $markerSize');
             var address = item['address'];
-            if (address != null) {
+            if (address != null && mounted) {
               setState(() {
                 markers.add(Marker( //add distination location marker
                   markerId: MarkerId(STR(item['id'])),

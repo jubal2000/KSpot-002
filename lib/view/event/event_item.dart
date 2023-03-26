@@ -66,19 +66,19 @@ class EventCardItemState extends State<EventCardItem> {
   var _imageHeight = 0.0;
   List<JSON> _userListData = [];
 
-  toggleEventStatus(context) {
-    var title = widget.itemData.status == 1 ? 'Disable' : 'Enable';
+  toggleEventShowStatus(context) {
+    var title = widget.itemData.showStatus == 1 ? 'Disable' : 'Enable';
     showAlertYesNoDialog(context, title.tr, '$title spot?'.tr, 'In the disable state, other users cannot see it'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
       if (value == 1) {
         if (eventRepo.checkIsExpired(widget.itemData)) {
           showAlertDialog(context, title.tr, 'Event period has ended'.tr, 'Event duration must be modified'.tr, 'OK'.tr);
           return;
         }
-        eventRepo.setEventStatus(widget.itemData.id, widget.itemData.status == 1 ? 2 : 1).then((result) {
+        eventRepo.setEventShowStatus(widget.itemData.id, widget.itemData.showStatus == 1 ? 0 : 1).then((result) {
           if (result) {
             setState(() {
-              widget.itemData.status = widget.itemData.status == 1 ? 2 : 1;
-              ShowToast(widget.itemData.status == 1 ? 'Enabled'.tr : 'Disabled'.tr, Theme.of(context).primaryColor);
+              widget.itemData.showStatus = widget.itemData.showStatus == 1 ? 0 : 1;
+              ShowToast(widget.itemData.showStatus == 1 ? 'Enabled'.tr : 'Disabled'.tr, Theme.of(context).primaryColor);
               if (widget.onRefresh != null) widget.onRefresh!(widget.itemData.toJson());
             });
           }
@@ -180,7 +180,7 @@ class EventCardItemState extends State<EventCardItem> {
                           //   ),
                           // if (widget.animationController == null)
                           showImage(widget.itemData.pic, Size(_imageHeight, _imageHeight)),
-                          if (widget.itemData.status == 2)
+                          if (widget.itemData.showStatus == 0)
                             ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
                           if (widget.isExpired)
                             Center(
@@ -294,7 +294,7 @@ class EventCardItemState extends State<EventCardItem> {
                         switch (selected.type) {
                           case DropdownItemType.enable:
                           case DropdownItemType.disable:
-                            toggleEventStatus(context);
+                            toggleEventShowStatus(context);
                             break;
                           case DropdownItemType.edit:
                             moveToEventEdit();

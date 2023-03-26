@@ -9,6 +9,7 @@ part of 'story_model.dart';
 StoryModel _$StoryModelFromJson(Map<String, dynamic> json) => StoryModel(
       id: json['id'] as String,
       status: json['status'] as int,
+      showStatus: json['showStatus'] as int? ?? 1,
       desc: json['desc'] as String,
       groupId: json['groupId'] as String? ?? '',
       eventId: json['eventId'] as String? ?? '',
@@ -40,6 +41,7 @@ Map<String, dynamic> _$StoryModelToJson(StoryModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'status': instance.status,
+      'showStatus': instance.showStatus,
       'desc': instance.desc,
       'groupId': instance.groupId,
       'eventId': instance.eventId,

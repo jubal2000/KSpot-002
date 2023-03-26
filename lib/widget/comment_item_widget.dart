@@ -198,9 +198,9 @@ class CommentListItemState extends State<CommentListItem> {
                                   widget.targetUser,
                                   false, false, true).then((result) {
                                 log('--> showEditCommentDialog result : $result');
-                                if (result.isNotEmpty) {
+                                if (JSON_NOT_EMPTY(result)) {
                                   setState(() {
-                                    _addData = result;
+                                    _addData = result!;
                                     onChangeValue(_addData, 1);
                                   });
                                 }
@@ -229,9 +229,9 @@ class CommentListItemState extends State<CommentListItem> {
                                   !_isParent,
                                   true).then((result) {
                                 LOG('--> showEditCommentDialog result : $result');
-                                if (result.isNotEmpty && mounted) {
+                                if (JSON_NOT_EMPTY(result) && mounted) {
                                   setState(() {
-                                    if (result['delete'] != null) {
+                                    if (result!['delete'] != null) {
                                       onChangeValue(widget.commentData, 2);
                                     } else {
                                       widget.commentData = result;
@@ -449,9 +449,9 @@ class CommentListExItemState extends State<CommentListExItem> {
                                   false,
                                   widget.commentType != CommentType.story).then((result) {
                                 log('--> showEditCommentDialog result : $result');
-                                if (result.isNotEmpty) {
+                                if (JSON_NOT_EMPTY(result)) {
                                   setState(() {
-                                    _addData = result;
+                                    _addData = result!;
                                     onChangeValue(_addData, 1);
                                   });
                                 }
@@ -487,12 +487,12 @@ class CommentListExItemState extends State<CommentListExItem> {
                                   !_isParent,
                                   true).then((result) {
                                 log('--> showEditCommentDialog result : $result');
-                                if (result.isNotEmpty) {
+                                if (JSON_NOT_EMPTY(result)) {
                                   setState(() {
-                                    if (result['delete'] != null) {
+                                    if (result!['delete'] != null) {
                                       onChangeValue(widget.commentData, 2);
                                     } else {
-                                      widget.commentData = result;
+                                      widget.commentData = result!;
                                       refreshImage();
                                       log('--> widget.infoData[newId] : ${widget.commentData}');
                                       onChangeValue(widget.commentData, 0);

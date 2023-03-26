@@ -1023,11 +1023,11 @@ inputLabelSuffix(BuildContext context, String label, String hint,
   );
 }
 
-ShowToast(text, [Color backColor = Colors.black45, Color textColor = Colors.white]) {
+ShowToast(text, [Color backColor = Colors.black87, Color textColor = Colors.white]) {
   Fluttertoast.showToast(
       msg: text,
       toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
+      gravity: ToastGravity.BOTTOM,
       timeInSecForIosWeb: 1,
       backgroundColor: backColor,
       textColor: textColor,
@@ -1036,7 +1036,7 @@ ShowToast(text, [Color backColor = Colors.black45, Color textColor = Colors.whit
 }
 
 ShowErrorToast(text)  {
-  ShowToast(text, Colors.deepOrange.withOpacity(0.8), Colors.yellowAccent);
+  ShowToast(text, Colors.black87, Colors.redAccent);
 }
 
 enum DropdownItemType {

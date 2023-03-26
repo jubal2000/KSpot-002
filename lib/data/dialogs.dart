@@ -2143,7 +2143,7 @@ Future<JSON> showReserveEditDialog(BuildContext context, String title, String me
   );
 }
 
-Future<JSON> showEditCommentDialog(BuildContext context, CommentType type, String title,
+Future<JSON?> showEditCommentDialog(BuildContext context, CommentType type, String title,
     JSON jsonData, JSON targetUserInfo, bool isCanDelete, bool isShowVote, bool isHidden,
     {String subTitle = '', String targetId = '', var isSelectImage = true}) async {
 
@@ -2393,7 +2393,7 @@ Future<JSON> showEditCommentDialog(BuildContext context, CommentType type, Strin
                           LOG('---> jsonData : $jsonData');
 
                           var targetUserId = STR(targetUserInfo['id']);
-                          LOG('---> add data : $targetUserId / $targetUserInfo');
+                          LOG('---> add data : $type > $targetUserId / $targetUserInfo');
                           JSON? upResult;
                           switch(type) {
                             case CommentType.message:

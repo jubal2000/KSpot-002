@@ -754,7 +754,6 @@ class StoryVerCardItemState extends State<StoryVerCardItem> {
     _userListData.clear();
     _imageSize = widget.itemHeight;
     var _isMyStory = widget.itemData.userId == AppData.USER_ID;
-    LOG('--> story item : ${widget.itemData.showStatus}');
 
     return GestureDetector(
       onTap: () {
@@ -1008,7 +1007,6 @@ class StoryVerImageState extends State<StoryVerImageItem> {
   Widget build(context) {
     _userListData.clear();
     var isMyStory = widget.itemData.userId == AppData.USER_ID;
-    LOG('--> story item [$isMyStory] : ${widget.itemData.showStatus}');
 
     return GestureDetector(
       onTap: () {
@@ -1186,7 +1184,7 @@ class StoryVerImageState extends State<StoryVerImageItem> {
                               Text('${widget.itemData.commentCount}', style: ItemDescOutlineStyle(context)),
                             ]
                           ),
-                          Text(DATETIME_STR(TME(widget.itemData.createTime)), style: ItemDescOutlineStyle(context)),
+                          Text(DATETIME_STR(widget.itemData.createTime), style: ItemDescOutlineStyle(context)),
                         ],
                       ),
                     ),

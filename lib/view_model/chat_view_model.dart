@@ -253,8 +253,8 @@ class ChatViewModel extends ChangeNotifier {
     for (var a=0; a<showList.length-1; a++) {
       for (var b=a+1; b<showList.length; b++) {
         if (isMy) {
-          final aDate = DateTime.parse(showList[a].groupItem!.updateTime);
-          final bDate = DateTime.parse(showList[b].groupItem!.updateTime);
+          final aDate = showList[a].groupItem!.updateTime;
+          final bDate = showList[b].groupItem!.updateTime;
           if (aDate != bDate && aDate.isBefore(bDate)) {
             final tmp = showList[a];
             showList[a] = showList[b];

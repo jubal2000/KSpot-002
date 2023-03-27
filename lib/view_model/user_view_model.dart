@@ -37,13 +37,14 @@ enum ProfileMainTab {
 enum ProfileContentType {
   event,
   story,
+  max,
 }
 
 class UserViewModel extends ChangeNotifier {
   final repo = UserRepository();
   final eventRepo = EventRepository();
   final msgTextController = TextEditingController();
-  final scrollController = ScrollController();
+  final scrollController = List.generate(ProfileContentType.max.index, (index) => ScrollController());
 
   UserModel? userInfo;
   List<ProfileTabScreen> tabList = [];
@@ -54,6 +55,7 @@ class UserViewModel extends ChangeNotifier {
   var tabListHeight = 0.0;
   var isMyProfile = false;
   var isDisableOpen = false;
+  var isLastContent = false;
 
   // event, story list..
   final listItemShowMax = 5;
@@ -64,6 +66,8 @@ class UserViewModel extends ChangeNotifier {
   Future<JSON>? listDataInit;
   Map<String, EventModel> eventData = {};
   Map<String, StoryModel> storyData = {};
+  Map<String, Widget> eventWidgetData = {};
+  Map<String, Widget> storyWidgetData = {};
   JSON snsData = {};
   JSON likeData = {};
   JSON bookmarkData = {};
@@ -105,7 +109,7 @@ class UserViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  getEventData() async {
+  getEventData([bool isShowEmpty = false]) async {
     if (JSON_NOT_EMPTY(eventData)) {
       for (var item in eventData.entries) {
         var checkTime = item.value.createTime;
@@ -119,12 +123,15 @@ class UserViewModel extends ChangeNotifier {
     if (eventNewData.isNotEmpty) {
       eventData.addAll(eventNewData);
     } else {
-      ShowErrorToast('No more event'.tr);
+      isLastContent = true;
+      if (isShowEmpty) {
+        ShowErrorToast('No more event'.tr);
+      }
     }
     return eventData;
   }
 
-  getStoryData() async {
+  getStoryData([bool isShowEmpty = false]) async {
     if (JSON_NOT_EMPTY(storyData)) {
       for (var item in storyData.entries) {
         var checkTime = item.value.createTime;
@@ -138,15 +145,12 @@ class UserViewModel extends ChangeNotifier {
     if (storyNewData.isNotEmpty) {
       storyData.addAll(storyNewData);
     } else {
-      ShowErrorToast('No more story'.tr);
+      isLastContent = true;
+      if (isShowEmpty) {
+        ShowErrorToast('No more story'.tr);
+      }
     }
     return storyData;
-  }
-
-  getContentData() async {
-    await getEventData();
-    await getStoryData();
-    return true;
   }
 
   setMainTab(index) {
@@ -350,6 +354,7 @@ class UserViewModel extends ChangeNotifier {
                 ],
               )
             ),
+            if (count > 0)...[
             SizedBox(width: 10.w),
             Container(
               height: UI_MENU_ICON_SIZE_S.w,
@@ -363,6 +368,7 @@ class UserViewModel extends ChangeNotifier {
               ),
             ),
             SizedBox(width: UI_ITEM_SPACE.w),
+            ],
             Icon(Icons.keyboard_arrow_right_outlined, size: UI_MENU_ICON_SIZE.w),
           ],
         ),
@@ -392,13 +398,17 @@ class UserViewModel extends ChangeNotifier {
       padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w, vertical: 5.w),
       children: [
       // if (userInfo!.checkOption('event_on'))
-        contentItem(Icons.event_available, 'EVENT LIST'.tr, '', eventLength, () {
+        contentItem(Icons.event_available, 'EVENT LIST'.tr, '', 0, () {
+          var orgContext = context;
           Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.event, 'EVENT LIST'))).then((_) {
+            context = orgContext;
           });
         }),
       // if (userInfo!.checkOption('story_on'))
-        contentItem(Icons.photo_library_outlined, 'STORY LIST'.tr, '', storyLength, () {
+        contentItem(Icons.photo_library_outlined, 'STORY LIST'.tr, '', 0, () {
+          var orgContext = context;
           Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'))).then((_) {
+            context = orgContext;
           });
         }),
       ],
@@ -427,7 +437,8 @@ class UserViewModel extends ChangeNotifier {
     List<Widget> showItemList = [];
     for (var item in eventData.entries) {
       var isExpired = eventRepo.checkIsExpired(item.value);
-      var showItem = EventCardItem(
+      var showItem = eventWidgetData[item.key];
+      showItem ??= EventCardItem(
         item.value,
         isMyItem: isMyProfile,
         isExpired: isExpired,
@@ -458,7 +469,8 @@ class UserViewModel extends ChangeNotifier {
     final space = 10.w;
     List<Widget> showItemList = [];
     for (var item in storyData.entries) {
-      var showItem = ClipRRect(
+      var showItem = storyWidgetData[item.key];
+      showItem ??= ClipRRect(
           borderRadius: BorderRadius.all(Radius.circular(8)),
           child: StoryVerImageItem(
             item.value,
@@ -537,30 +549,47 @@ class UserViewModel extends ChangeNotifier {
     // );
   }
 
-  reloadContentData(ProfileContentType type) async {
-    LOG('--> reloadContentData : $type / ${AppData.isMainActive}');
-    if (!AppData.isMainActive) return;
+  getStartContentData(ProfileContentType type) async {
+    switch(type) {
+      case ProfileContentType.event:
+        if (eventData.isEmpty) {
+          return getEventData(false);
+        } else {
+          return eventData;
+        }
+      case ProfileContentType.story:
+        if (storyData.isEmpty) {
+          return getStoryData(false);
+        } else {
+          return storyData;
+        }
+    }
+  }
+
+  reloadContentData(ProfileContentType type, [bool isShowEmpty = true]) async {
+    LOG('--> reloadContentData : $type / $isLastContent / ${AppData.isMainActive}');
+    if (isLastContent || !AppData.isMainActive) return;
     AppData.isMainActive = false;
     showLoadingToast(context!);
     await Future.delayed(Duration(seconds: 1));
     switch(type) {
       case ProfileContentType.event:
-        await getEventData();
+        await getEventData(isShowEmpty);
         break;
       case ProfileContentType.story:
-        await getStoryData();
+        await getStoryData(isShowEmpty);
         break;
     }
     AppData.isMainActive = true;
-    scrollController.animateTo(scrollController.position.maxScrollExtent - 1,
+    scrollController[type.index].animateTo(scrollController[type.index].position.maxScrollExtent - 1,
       duration: Duration(milliseconds: 200), curve: Curves.fastOutSlowIn);
     hideLoadingDialog();
     notifyListeners();
   }
 
   showContentList(ProfileContentType type) {
-    scrollController.addListener(() {
-      if (scrollController.position.pixels == scrollController.position.maxScrollExtent) {
+    scrollController[type.index].addListener(() {
+      if (scrollController[type.index].position.pixels == scrollController[type.index].position.maxScrollExtent) {
         reloadContentData(type);
       }
     });
@@ -569,7 +598,7 @@ class UserViewModel extends ChangeNotifier {
         return Container(
           height: layout.maxHeight,
           child: SingleChildScrollView(
-            controller: scrollController,
+            controller: scrollController[type.index],
             child: Container(
               constraints: BoxConstraints(
                 minHeight: layout.maxHeight + 1,
@@ -607,7 +636,9 @@ class UserViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    scrollController.dispose();
+    for (var item in scrollController) {
+      item.dispose();
+    }
     super.dispose();
   }
 }

@@ -55,8 +55,8 @@ class ChatRoomModelEx extends ChatRoomModel {
     pic: '',
     lastMessage: '',
     userId: userId,
-    updateTime: '',
-    createTime: '',
+    updateTime: DateTime(0),
+    createTime: DateTime(0),
     memberList: [],
     memberData: [],
   );
@@ -75,8 +75,8 @@ class ChatRoomModel {
   String  pic;
   String  lastMessage;
   String  userId;
-  String  updateTime;     // 수신 시간
-  String  createTime;     // 수신 시간
+  DateTime updateTime;     // 수신 시간
+  DateTime createTime;     // 수신 시간
   List<String> memberList;      // 채팅 맴버 ID 목록 (for Search)
   List<MemberData> memberData;  // 채팅 맴버 목록
 

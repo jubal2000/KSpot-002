@@ -183,8 +183,8 @@ class UserRepository {
       if (AppData.userData.containsKey(userId)) return AppData.userData[userId];
       final response = await api.getUserInfoFromId(userId);
       if (response != null) {
+        LOG("--> getUserInfo result: ${response.toString()}");
         final userData = UserModel.fromJson(FROM_SERVER_DATA(response));
-        LOG("--> getUserInfo result: ${userData.toJson()}");
         AppData.userData[userData.id] = userData;
         return userData;
       }

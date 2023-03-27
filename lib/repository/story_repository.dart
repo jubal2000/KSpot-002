@@ -17,7 +17,7 @@ class StoryRepository {
     return api.getStoryStreamFromGroup(groupId, AppData.currentCountry, AppData.currentState);
   }
 
-  getStoryStreamFromGroupNext(String lastTime, String groupId) {
+  getStoryStreamFromGroupNext(DateTime lastTime, String groupId) {
     return api.getStoryStreamFromGroupNext(lastTime, groupId, AppData.currentCountry, AppData.currentState);
   }
 

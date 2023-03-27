@@ -75,18 +75,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               tabs: List<Widget>.from(AppData.userViewModel.tabList.map((item) => item.getTab()).toList()),
             ),
           ),
-          body: FutureBuilder(
-            future: AppData.userViewModel.getContentData(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return TabBarView(
-                  physics: NeverScrollableScrollPhysics(),
-                  children: List<Widget>.from(AppData.userViewModel.tabList),
-                );
-              } else {
-                return showLoadingFullPage(context);
-              }
-            }
+          body: TabBarView(
+            physics: NeverScrollableScrollPhysics(),
+            children: List<Widget>.from(AppData.userViewModel.tabList),
           ),
           endDrawer: ChangeNotifierProvider.value(
             value: _setupViewModel,

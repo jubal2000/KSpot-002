@@ -172,7 +172,7 @@ MemberData _$MemberDataFromJson(Map<String, dynamic> json) => MemberData(
       status: json['status'] as int,
       nickName: json['nickName'] as String,
       pic: json['pic'] as String,
-      createTime: json['createTime'] != null ? DateTime.parse(json['createTime'] as String) : DateTime(0),
+      createTime: DateTime.parse(json['createTime'] as String),
     );
 
 Map<String, dynamic> _$MemberDataToJson(MemberData instance) =>

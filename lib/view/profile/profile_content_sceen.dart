@@ -15,19 +15,17 @@ import '../event/event_edit_screen.dart';
 import '../story/story_item.dart';
 
 class ProfileContentScreen extends StatelessWidget {
-  ProfileContentScreen(this.parentInfo, this.type, this.title, {Key? key}) : super(key: key);
+  ProfileContentScreen(this.parentViewModel, this.type, this.title, {Key? key}) : super(key: key);
 
-  UserViewModel parentInfo;
+  UserViewModel parentViewModel;
   ProfileContentType type;
   String title;
 
   final cache = Get.find<CacheService>();
-  final _viewModel = UserViewModel();
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context);
-    _viewModel.copyUserModel(parentInfo);
+    parentViewModel.init(context);
     return SafeArea(
       top: false,
       child: Scaffold(
@@ -36,10 +34,10 @@ class ProfileContentScreen extends StatelessWidget {
           titleSpacing: 0,
           toolbarHeight: UI_EDIT_TOOL_HEIGHT,
           actions: [
-            if (_viewModel.isMyProfile)...[
+            if (parentViewModel.isMyProfile)...[
               IconButton(
                 onPressed: () {
-                  _viewModel.addNewContent(type);
+                  parentViewModel.addNewContent(type);
                 },
                 icon: Icon(Icons.add)
               ),
@@ -48,13 +46,22 @@ class ProfileContentScreen extends StatelessWidget {
           ],
         ),
         body: ChangeNotifierProvider.value(
-          value: _viewModel,
+          value: parentViewModel,
           child: Consumer<UserViewModel>(
             builder: (context, viewModel, _) {
               LOG('--> UserViewModel redraw');
-              return Container(
-                padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
-                child: viewModel.showContentList(type),
+              return FutureBuilder(
+                future: viewModel.getStartContentData(type),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Container(
+                      padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
+                      child: viewModel.showContentList(type),
+                    );
+                  } else {
+                    return showLoadingFullPage(context);
+                  }
+                }
               );
             }
           )

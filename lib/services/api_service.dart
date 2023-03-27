@@ -992,9 +992,9 @@ class ApiService extends GetxService {
     return query.orderBy('createTime', descending: true).limit(FREE_LOADING_STORY_MAX).snapshots();
   }
 
-  Stream getStoryStreamFromGroupNext(String lastTime, String groupId, String country, [String countryState = '']) {
-    LOG('------> getStoryStreamFromGroupNext : $lastTime / $groupId');
-    var startTime = Timestamp.fromDate(DateTime.parse(lastTime));
+  Stream getStoryStreamFromGroupNext(DateTime lastTime, String groupId, String country, [String countryState = '']) {
+    LOG('------> getStoryStreamFromGroupNext : ${lastTime.toString()} / $groupId');
+    var startTime = Timestamp.fromDate(lastTime);
     var ref = firestore!.collection(StoryCollection);
     var query = ref
         .where('status', isEqualTo: 1)

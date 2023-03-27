@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer';
 
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 class VoteWidget extends StatefulWidget {
   VoteWidget(this.now, {Key? key, this.min = 1, this.max = 5, this.iconSize = 18, this.onChanged}) : super (key: key);
 
@@ -42,7 +44,7 @@ class VoteWidgetState extends State<VoteWidget> {
         onTap: () {
           onChangeValue(i);
         },
-        child: Icon(isOn ? Icons.star : Icons.star_border, size: widget.iconSize, color: isOn ? Colors.red : Colors.grey),
+        child: Icon(isOn ? Icons.star : Icons.star_border, size: widget.iconSize.sp, color: isOn ? Colors.red : Colors.grey),
       ),
       );
     }

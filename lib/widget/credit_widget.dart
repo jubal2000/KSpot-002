@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/services/api_service.dart';
 
@@ -32,9 +33,9 @@ Widget CreditWidget(BuildContext context, JSON userInfo,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (isShowOutline)
-            OutlineIcon(Icons.star_border, iconSize, iconColor0, x: iconX, y: iconY),
+            OutlineIcon(Icons.thumb_up_alt_outlined, iconSize.sp, iconColor0, x: iconX, y: iconY),
           if (!isShowOutline)
-            Icon(Icons.star_border, size: iconSize, color: iconColor0),
+            Icon(Icons.thumb_up_alt_outlined, size: iconSize.sp, color: iconColor0),
           if (title.isEmpty)...[
             Text('${INT(userInfo['creditCount'])}', style: ItemDescExStyle(context))
           ],

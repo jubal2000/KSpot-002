@@ -37,6 +37,7 @@ enum ProfileMainTab {
 enum ProfileContentType {
   event,
   story,
+  thumb,
   max,
 }
 
@@ -398,16 +399,23 @@ class UserViewModel extends ChangeNotifier {
       padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w, vertical: 5.w),
       children: [
       // if (userInfo!.checkOption('event_on'))
-        contentItem(Icons.event_available, 'EVENT LIST'.tr, '', 0, () {
+        contentItem(Icons.event_available, isMyProfile ? 'MY EVENT LIST'.tr : 'EVENT LIST'.tr, '', 0, () {
           var orgContext = context;
           Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.event, 'EVENT LIST'))).then((_) {
             context = orgContext;
           });
         }),
       // if (userInfo!.checkOption('story_on'))
-        contentItem(Icons.photo_library_outlined, 'STORY LIST'.tr, '', 0, () {
+        contentItem(Icons.photo_library_outlined, isMyProfile ? 'MY STORY LIST'.tr : 'STORY LIST'.tr, '', 0, () {
           var orgContext = context;
           Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'))).then((_) {
+            context = orgContext;
+          });
+        }),
+        contentItem(Icons.thumb_up_alt_outlined, isMyProfile ? 'MY THUMB UP LIST'.tr : 'THUMB UP LIST'.tr, '',
+          isMyProfile ? userInfo!.creditAmount : 0, () {
+          var orgContext = context;
+          Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.thumb, 'THUMB UP LIST'))).then((_) {
             context = orgContext;
           });
         }),
@@ -556,6 +564,12 @@ class UserViewModel extends ChangeNotifier {
           return getEventData(false);
         } else {
           return eventData;
+        }
+      case ProfileContentType.story:
+        if (storyData.isEmpty) {
+          return getStoryData(false);
+        } else {
+          return storyData;
         }
       case ProfileContentType.story:
         if (storyData.isEmpty) {

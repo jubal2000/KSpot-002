@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/services/api_service.dart';
 
@@ -47,16 +48,16 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
               LOG('--> ShowLikeWidget isOn [$_title] : $_isLiked / ${targetInfo['likeCount']}');
               return GestureDetector(
                 child: Container(
-                    width:  iconSize + 15,
+                    width:  iconSize.sp + 15,
                     color: Colors.transparent,
                     padding: padding,
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (isShowOutline)
-                            OutlineIcon(_isLiked ? Icons.favorite : Icons.favorite_border, iconSize, _isLiked ? iconColor0 : iconColor1, x: iconX, y: iconY),
+                            OutlineIcon(_isLiked ? Icons.favorite : Icons.favorite_border, iconSize.sp, _isLiked ? iconColor0 : iconColor1, x: iconX, y: iconY),
                           if (!isShowOutline)
-                            Icon(_isLiked ? Icons.favorite : Icons.favorite_border, size: iconSize, color: _isLiked ? iconColor0 : iconColor1),
+                            Icon(_isLiked ? Icons.favorite : Icons.favorite_border, size: iconSize.sp, color: _isLiked ? iconColor0 : iconColor1),
                           if (showCount)
                             Text('${INT(targetInfo['likeCount'])}', style: ItemDescExStyle(context)),
                           if (title.isNotEmpty)...[

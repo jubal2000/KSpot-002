@@ -307,6 +307,12 @@ class Words extends Translations {
       'Congratulations on your membership': '회원가입을 축하합니다',
       'Select Done': '선택 완료',
       'CHECK': '코드확인',
+      'EVENT LIST': '이벤트 목록',
+      'MY EVENT LIST': '내 이벤트 목록',
+      'STORY LIST': '스토리 목록',
+      'MY STORY LIST': '내 스토리 목록',
+      'THUMB UP LIST': '추천 목록',
+      'MY THUMB UP LIST': '내 추천 목록',
 
       // slide_timepicker_screen
       'Select Time Range': '시간 범위 선택',

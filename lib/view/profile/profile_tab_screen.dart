@@ -122,10 +122,10 @@ class ProfileTapState extends State<ProfileTabScreen> {
                                         showSendMessageWidget(context, viewModel.userInfo!, title: 'TALK'.tr),
                                         SizedBox(width: 2),
                                       ],
-                                      if (viewModel.isMyProfile)...[
-                                        CreditWidget(context, viewModel.userInfo!.toJson()),
-                                        SizedBox(width: 2),
-                                      ],
+                                      // if (viewModel.isMyProfile)...[
+                                      //   CreditWidget(context, viewModel.userInfo!.toJson()),
+                                      //   SizedBox(width: 2),
+                                      // ],
                                       LikeWidget(context, 'user', viewModel.userInfo!.toJson(), showCount: true, isEnabled: !viewModel.isMyProfile),
                                     ],
                                     // children: _shareLink,

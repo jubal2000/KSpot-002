@@ -22,11 +22,13 @@ ReserveData _$ReserveDataFromJson(Map<String, dynamic> json) => ReserveData(
       userId: json['userId'] as String,
       userName: json['userName'] as String,
       userPic: json['userPic'] as String,
-      updateTime: json['updateTime'] as String,
-      createTime: json['createTime'] as String,
+      updateTime: DateTime.parse(json['updateTime'] as String),
+      createTime: DateTime.parse(json['createTime'] as String),
       confirmId: json['confirmId'] as String?,
       confirmDesc: json['confirmDesc'] as String?,
-      confirmTime: json['confirmTime'] as String?,
+      confirmTime: json['confirmTime'] == null
+          ? null
+          : DateTime.parse(json['confirmTime'] as String),
     );
 
 Map<String, dynamic> _$ReserveDataToJson(ReserveData instance) =>
@@ -46,9 +48,9 @@ Map<String, dynamic> _$ReserveDataToJson(ReserveData instance) =>
       'userId': instance.userId,
       'userName': instance.userName,
       'userPic': instance.userPic,
-      'updateTime': instance.updateTime,
-      'createTime': instance.createTime,
+      'updateTime': instance.updateTime.toIso8601String(),
+      'createTime': instance.createTime.toIso8601String(),
       'confirmId': instance.confirmId,
       'confirmDesc': instance.confirmDesc,
-      'confirmTime': instance.confirmTime,
+      'confirmTime': instance.confirmTime?.toIso8601String(),
     };

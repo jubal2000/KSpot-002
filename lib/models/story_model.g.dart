@@ -22,8 +22,8 @@ StoryModel _$StoryModelFromJson(Map<String, dynamic> json) => StoryModel(
       userPic: json['userPic'] as String,
       likeCount: json['likeCount'] as int,
       commentCount: json['commentCount'] as int,
-      updateTime: json['updateTime'] as String,
-      createTime: json['createTime'] as String,
+      updateTime: DateTime.parse(json['updateTime'] as String),
+      createTime: DateTime.parse(json['createTime'] as String),
       picData: (json['picData'] as List<dynamic>?)
           ?.map((e) => PicData.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -54,8 +54,8 @@ Map<String, dynamic> _$StoryModelToJson(StoryModel instance) =>
       'userPic': instance.userPic,
       'likeCount': instance.likeCount,
       'commentCount': instance.commentCount,
-      'updateTime': instance.updateTime,
-      'createTime': instance.createTime,
+      'updateTime': instance.updateTime.toIso8601String(),
+      'createTime': instance.createTime.toIso8601String(),
       'picData': instance.picData?.map((e) => e.toJson()).toList(),
       'optionData': instance.optionData?.map((e) => e.toJson()).toList(),
       'tagData': instance.tagData,

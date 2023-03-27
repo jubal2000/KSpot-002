@@ -215,8 +215,8 @@ class CacheService extends GetxService {
   Future sortStoryDataCreateTimeDesc() async {
     if (JSON_NOT_EMPTY(storyData) && storyData!.length > 1) {
       storyData = SplayTreeMap<String,StoryModel>.from(storyData!, (a, b) {
-        final aDate = DateTime.parse(storyData![a]!.createTime);
-        final bDate = DateTime.parse(storyData![b]!.createTime);
+        final aDate = storyData![a]!.createTime;
+        final bDate = storyData![b]!.createTime;
         return aDate != bDate && aDate.isBefore(bDate) ? -1 : 1;
       });
     }
@@ -226,8 +226,8 @@ class CacheService extends GetxService {
   Future sortMessageDataCreateTimeDesc() async {
     if (JSON_NOT_EMPTY(messageData) && messageData!.length > 1) {
       messageData = SplayTreeMap<String,MessageModel>.from(messageData!, (a, b) {
-        final aDate = DateTime.parse(messageData![a]!.createTime);
-        final bDate = DateTime.parse(messageData![b]!.createTime);
+        final aDate = messageData![a]!.createTime;
+        final bDate = messageData![b]!.createTime;
         return aDate != bDate && aDate.isBefore(bDate) ? -1 : 1;
       });
     }

@@ -507,7 +507,7 @@ ItemDescExInfoStyle(BuildContext context) {
 }
 
 ItemDescOutlineStyle(BuildContext context, [Color borderColor = Colors.black]) {
-  return TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w600,
+  return TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w400,
       shadows: outlinedText(strokeColor: borderColor));
 }
 

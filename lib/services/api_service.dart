@@ -71,7 +71,7 @@ SET_SERVER_TIME_ALL_ITEM(data) {
 
 // ignore: non_constant_identifier_names
 SET_SERVER_TIME(timestamp) {
-  if (timestamp is Timestamp) {
+  if (timestamp != null && timestamp is Timestamp) {
     // return DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000).toString(); // fix for jsonSerialize
     // LOG('--> timestamp : ${timestamp.toString()} => ${timestamp.toDate().toString()}');
     // final date = timestamp.toDate();
@@ -734,7 +734,7 @@ class ApiService extends GetxService {
     return null;
   }
   
-  Future<JSON> getEventFromUserId(String userId, {var isAuthor = false, DateTime? lastTime, DateTime? lastTime2, int limit = 0}) async {
+  Future<JSON> getEventFromUserId(String userId, {var isAuthor = false, DateTime? lastTime, int limit = 0}) async {
     LOG('--> getEventFromUserId : userId');
     JSON result = {};
     try {
@@ -941,8 +941,8 @@ class ApiService extends GetxService {
     return result;
   }
 
-  Future<JSON> getStoryFromUserId(String userId, {var isAuthor = false, DateTime? lastTime, DateTime? lastTime2, int limit = 0}) async {
-    LOG('--> getStoryFromUserId : $userId / $lastTime');
+  Future<JSON> getStoryFromUserId(String userId, {var isAuthor = false, DateTime? lastTime, int limit = 0}) async {
+    LOG('--> getStoryFromUserId : $userId / $lastTime / $isAuthor / $limit');
     JSON result = {};
     try {
       var ref = firestore!.collection(StoryCollection);

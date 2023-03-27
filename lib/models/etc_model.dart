@@ -51,23 +51,29 @@ class TimeData {
 @JsonSerializable()
 class PromotionData {
   String id;
-  int    status;            // 상태 (0:removed, 1:active, 2:disable, 3:ready)
-  String title;
-  String typeId;           // 프로모션 type ID
-  String startDate;        // 시작일
-  String endDate;          // 종료일
-  String startTime;        // 시작시간
-  String endTime;          // 종료시간
+  int    status;           // 상태 (0:removed, 1:active, 2:disable, 3:ready)
+  String title;            // 프로모션 title
+  String typeId;           // 프로모션 type id
+  String userId;           // 프로모션 유저 id
+  String userName;         // 프로모션 유저 이름
+  String userPic;          // 프로모션 유저 pic
+  DateTime startTime;      // 시작시간
+  DateTime endTime;        // 종료시간
+  DateTime updateTime;
+  DateTime createTime;
 
   PromotionData({
     required this.id,
     required this.status,
     required this.title,
     required this.typeId,
-    required this.startDate,
-    required this.endDate,
+    required this.userId,
+    required this.userName,
+    required this.userPic,
     required this.startTime,
     required this.endTime,
+    required this.updateTime,
+    required this.createTime,
   });
   factory PromotionData.fromJson(JSON json) => _$PromotionDataFromJson(json);
   JSON toJson() => _$PromotionDataToJson(this);
@@ -116,7 +122,7 @@ class CountryData {
   String    country;
   String    countryState;
   String    countryFlag;
-  String    createTime;
+  DateTime  createTime;
 
   CountryData({
     required this.country,
@@ -144,13 +150,12 @@ class OptionData {
 
 @JsonSerializable()
 class BankData {
-  String  id;
-  int     status;
-  String  title;
-  String  name;     // bank name..
-  String  account;  // bank account..
-  String  author;   // bank author..
-  String  createTime;
+  String    id;
+  int       status;
+  String    title;
+  String    name;     // bank name..
+  String    account;  // bank account..
+  String    author;   // bank author..
 
   BankData({
     required this.id,
@@ -159,11 +164,10 @@ class BankData {
     required this.name,
     required this.account,
     required this.author,
-    required this.createTime,
   });
 
   static get empty {
-    return BankData(id: Uuid().v4(), status: 1, title: '', name: '', account: '', author: '', createTime: '');
+    return BankData(id: Uuid().v4(), status: 1, title: '', name: '', account: '', author: '');
   }
 
   factory BankData.fromJson(JSON json) => _$BankDataFromJson(json);
@@ -193,18 +197,18 @@ class AddressData {
 
 @JsonSerializable()
 class MemberData {
-  String  id;            // user id
-  int     status;
-  String  nickName;
-  String  pic;
-  String? createTime;
+  String    id;            // user id
+  int       status;
+  String    nickName;
+  String    pic;
+  DateTime  createTime;
 
   MemberData({
     required this.id,
     required this.status,
     required this.nickName,
     required this.pic,
-    this.createTime,
+    required this.createTime,
   });
 
   factory MemberData.fromJson(JSON json) => _$MemberDataFromJson(json);
@@ -215,7 +219,7 @@ class MemberData {
     status      = 1;
     nickName    = user.nickName;
     pic         = user.pic;
-    createTime  = DateTime.now().toString();
+    createTime  = DateTime.now();
   }
 }
 
@@ -241,7 +245,7 @@ class NoticeModel {
   String  desc;
   String  userId;
   String  userName;
-  String  createTime;     // 생성 시간
+  DateTime createTime;     // 생성 시간
 
   List<UploadFileModel>? fileData;
 
@@ -274,7 +278,7 @@ class NoticeModel {
 class BanData {
   String id;
   String nickName;
-  String createTime;
+  DateTime createTime;
   BanData({
     required this.id,
     required this.nickName,

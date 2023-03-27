@@ -1036,7 +1036,7 @@ ShowToast(text, [Color backColor = Colors.black87, Color textColor = Colors.whit
 }
 
 ShowErrorToast(text)  {
-  ShowToast(text, Colors.black87, Colors.redAccent);
+  ShowToast(text, Colors.black87, Colors.yellow);
 }
 
 enum DropdownItemType {
@@ -1882,43 +1882,59 @@ unFocusAll(BuildContext context) {
 }
 
 // ignore: non_constant_identifier_names
-ShadowIcon(IconData icon, double size, Color color, {var shadowColor = Colors.black54, double x = 0, double y = 0,}) {
+OutlineIcon(IconData icon, double size, Color color, {var shadowColor = Colors.black54, double x = 1, double y = 1,}) {
   return Container(
       width: size + 2,
       height: size + 2,
       child: Stack(
-        children: [
-          Positioned(
-            left: x-1,
-            top: y-1,
-            child: Icon(icon, size: size, color: shadowColor),
-          ),
-          Positioned(
-            left: x-1,
-            top: y+1,
-            child: Icon(icon, size: size, color: shadowColor),
-          ),
-          Positioned(
-            left: x+1,
-            top: y-1,
-            child: Icon(icon, size: size, color: shadowColor),
-          ),
-          Positioned(
-            left: x+1,
-            top: y+1,
-            child: Icon(icon, size: size, color: shadowColor),
-          ),
-          Positioned(
-            left: x,
-            top: y+2,
-            child: Icon(icon, size: size, color: shadowColor),
-          ),
-          Positioned(
-            left: x,
-            top: y,
-            child: Icon(icon, size: size, color: color),
-          ),
-        ]
+        alignment: Alignment.center,
+          children: [
+            Positioned(
+              left: x-1,
+              top: y-1,
+              child: Icon(icon, size: size, color: shadowColor),
+            ),
+            Positioned(
+              left: x-1,
+              top: y+1,
+              child: Icon(icon, size: size, color: shadowColor),
+            ),
+            Positioned(
+              left: x+1,
+              top: y-1,
+              child: Icon(icon, size: size, color: shadowColor),
+            ),
+            Positioned(
+              left: x+1,
+              top: y+1,
+              child: Icon(icon, size: size, color: shadowColor),
+            ),
+            Positioned(
+              left: x-1,
+              top: y,
+              child: Icon(icon, size: size, color: shadowColor),
+            ),
+            Positioned(
+              left: x+1,
+              top: y,
+              child: Icon(icon, size: size, color: shadowColor),
+            ),
+            Positioned(
+              left: x,
+              top: y+1,
+              child: Icon(icon, size: size, color: shadowColor),
+            ),
+            Positioned(
+              left: x,
+              top: y-1,
+              child: Icon(icon, size: size, color: shadowColor),
+            ),
+            Positioned(
+              left: x,
+              top: y,
+              child: Icon(icon, size: size, color: color),
+            ),
+          ]
       )
   );
 }

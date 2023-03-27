@@ -54,7 +54,7 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (isShowOutline)
-                            ShadowIcon(_isLiked ? Icons.favorite : Icons.favorite_border, iconSize, _isLiked ? iconColor0 : iconColor1, x: iconX, y: iconY),
+                            OutlineIcon(_isLiked ? Icons.favorite : Icons.favorite_border, iconSize, _isLiked ? iconColor0 : iconColor1, x: iconX, y: iconY),
                           if (!isShowOutline)
                             Icon(_isLiked ? Icons.favorite : Icons.favorite_border, size: iconSize, color: _isLiked ? iconColor0 : iconColor1),
                           if (showCount)

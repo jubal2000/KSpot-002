@@ -18,8 +18,8 @@ class ChatModel {
   String  senderId;
   String  senderName;
   String  senderPic;
-  String  updateTime;     // 수정 시간
-  String  createTime;     // 생성 시간
+  DateTime updateTime;     // 수정 시간
+  DateTime createTime;     // 생성 시간
 
   List<String>? openList;
   List<String>? thumbList;

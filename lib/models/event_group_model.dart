@@ -17,8 +17,8 @@ class EventGroupModelEx extends EventGroupModel {
     descKr: '',
     pic: '',
     contentType: '',
-    updateTime: '',
-    createTime: '',
+    updateTime: DateTime(0),
+    createTime: DateTime(0),
 
     tagData: [],
     searchData: [],
@@ -28,16 +28,16 @@ class EventGroupModelEx extends EventGroupModel {
 
 @JsonSerializable()
 class EventGroupModel {
-  String      id;
-  int         status;
-  String      title;
-  String      titleKr;
-  String      desc;
-  String      descKr;
-  String      pic;            // title image
-  String      contentType;    // content type id
-  String      updateTime;     // update time
-  String      createTime;     // create time
+  String    id;
+  int       status;
+  String    title;
+  String    titleKr;
+  String    desc;
+  String    descKr;
+  String    pic;            // title image
+  String    contentType;    // content type id
+  DateTime  updateTime;     // update time
+  DateTime  createTime;     // create time
 
   List<String>? tagData;      // tag
   List<String>? searchData;   // 검색어 목록

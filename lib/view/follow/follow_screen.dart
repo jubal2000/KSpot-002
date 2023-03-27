@@ -448,7 +448,7 @@ class FollowListItemState extends State<FollowListItem> {
                         if (userInfo!.message.isNotEmpty) ...[
                           Text(DESC(userInfo!.message), maxLines: 1, style: ItemDescStyle(context)),
                         ],
-                        Text(DATE_STR(DateTime.parse(userInfo!.createTime)), style: ItemDescExStyle(context)),
+                        Text(DATE_STR(userInfo!.createTime), style: ItemDescExStyle(context)),
                       ],
                     ),
                   ),

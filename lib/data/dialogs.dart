@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -3727,3 +3728,18 @@ hideLoadingDialog() {
   dialogContext = null;
 }
 
+showLoadingToast(BuildContext context) {
+  dialogContext = context;
+  showCupertinoDialog(context: dialogContext!,
+    builder: (context) {
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: 60.w,
+          height: 60.w,
+          child: showLoadingCircleSquare(30.sp),
+        ),
+      );
+    }
+  );
+}

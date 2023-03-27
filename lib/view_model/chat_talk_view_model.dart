@@ -92,9 +92,7 @@ class ChatTalkViewModel extends ChangeNotifier {
       if (item.id == AppData.USER_ID) {
         memberCheck = true;
         isAdmin.value = item.status == 2;
-        if (item.createTime != null) {
-          startTime = DateTime.parse(item.createTime!);
-        }
+        startTime = item.createTime!;
       }
       if (item.status == 2) {
         adminCheck = true;

@@ -16,8 +16,8 @@ EventGroupModel _$EventGroupModelFromJson(Map<String, dynamic> json) =>
       descKr: json['descKr'] as String,
       pic: json['pic'] as String,
       contentType: json['contentType'] as String,
-      updateTime: json['updateTime'] as String,
-      createTime: json['createTime'] as String,
+      updateTime: DateTime.parse(json['updateTime'] as String),
+      createTime: DateTime.parse(json['createTime'] as String),
       tagData:
           (json['tagData'] as List<dynamic>?)?.map((e) => e as String).toList(),
       searchData: (json['searchData'] as List<dynamic>?)
@@ -35,8 +35,8 @@ Map<String, dynamic> _$EventGroupModelToJson(EventGroupModel instance) =>
       'descKr': instance.descKr,
       'pic': instance.pic,
       'contentType': instance.contentType,
-      'updateTime': instance.updateTime,
-      'createTime': instance.createTime,
+      'updateTime': instance.updateTime.toIso8601String(),
+      'createTime': instance.createTime.toIso8601String(),
       'tagData': instance.tagData,
       'searchData': instance.searchData,
     };

@@ -79,6 +79,7 @@ class StoryViewModel extends ChangeNotifier {
     // await cache.sortStoryDataCreateTimeDesc();
     List<Widget> showList = [];
     for (var item in cache.storyData!.entries) {
+      LOG('--> refreshShowList : ${item.value.toJson()}');
       if (JSON_EMPTY(cache.reportData['report']) || !cache.reportData['report'].containsKey(item.key)) {
         var addItem = cache.storyListItemData[item.key];
         addItem ??= MainStoryItem(
@@ -126,8 +127,8 @@ class StoryViewModel extends ChangeNotifier {
   sortDataCreateTimeDesc(showList) {
     for (var a=0; a<showList.length-1; a++) {
       for (var b=a+1; b<showList.length; b++) {
-        final aDate = DateTime.parse(showList[a].itemInfo.createTime);
-        final bDate = DateTime.parse(showList[b].itemInfo.createTime);
+        final aDate = showList[a].itemInfo.createTime;
+        final bDate = showList[b].itemInfo.createTime;
         // LOG("----> check : ${aDate.toString()} > ${bDate.toString()}");
         if (aDate != bDate && aDate.isBefore(bDate)) {
           LOG("--> changed : ${aDate.toString()} <-> ${bDate.toString()}");
@@ -152,15 +153,20 @@ class StoryViewModel extends ChangeNotifier {
         break;
       case ConnectionState.active:
         for (var item in snapshot.data.docs) {
-          var data = FROM_SERVER_DATA(item.data() as JSON);
-          cache.setStoryItem(StoryModel.fromJson(data));
-          LOG('--> cache.storyData add : ${data['id']} / ${cache.storyData!.length}');
+          try {
+            var data = FROM_SERVER_DATA(item.data() as JSON);
+            cache.setStoryItem(StoryModel.fromJson(data));
+            LOG('--> cache.storyData add : ${data['id']} / ${cache.storyData!.length}');
+          } catch (e) {
+            LOG('--> onSnapshotAction error : $e');
+          }
         }
         // await Future.delayed(Duration(milliseconds: 200));
         // LOG('--> refreshShowList start');
         // refreshShowList();
         return true;
       case ConnectionState.done:
+        return true;
     }
     return null;
   }

@@ -32,9 +32,9 @@ Widget CreditWidget(BuildContext context, JSON userInfo,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (isShowOutline)
-            ShadowIcon(Icons.recommend_outlined, iconSize, iconColor0, x: iconX, y: iconY),
+            OutlineIcon(Icons.star_border, iconSize, iconColor0, x: iconX, y: iconY),
           if (!isShowOutline)
-            Icon(Icons.recommend_outlined, size: iconSize, color: iconColor0),
+            Icon(Icons.star_border, size: iconSize, color: iconColor0),
           if (title.isEmpty)...[
             Text('${INT(userInfo['creditCount'])}', style: ItemDescExStyle(context))
           ],

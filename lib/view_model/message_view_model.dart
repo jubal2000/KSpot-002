@@ -49,12 +49,12 @@ class MessageViewModel extends ChangeNotifier {
       if (CheckOwner(item.value.senderId)) {
         targetId = item.value.targetId;
       } else {
-        if (LIST_EMPTY(item.value.openTime) || item.value.openTime!.contains(AppData.USER_ID)) {
+        if (LIST_EMPTY(item.value.openTimeData) || item.value.openTimeData!.contains(AppData.USER_ID)) {
           unOpenCount[targetId]++;
         }
       }
       var desc = descList[targetId];
-      if (desc == null || DateTime.parse(desc.updateTime).isBefore(DateTime.parse(item.value.updateTime))) {
+      if (desc == null || desc.updateTime.isBefore(item.value.updateTime)) {
         descList[targetId] = item.value;
       }
       var open = unOpenCount[targetId];
@@ -91,8 +91,8 @@ class MessageViewModel extends ChangeNotifier {
   sortDataCreateTimeDesc(showList) {
     for (var a=0; a<showList.length-1; a++) {
       for (var b=a+1; b<showList.length; b++) {
-        final aDate = DateTime.parse(showList[a].messageItem.updateTime);
-        final bDate = DateTime.parse(showList[b].messageItem.updateTime);
+        final aDate = showList[a].messageItem.updateTime;
+        final bDate = showList[b].messageItem.updateTime;
         // LOG("----> check : ${aDate.toString()} > ${bDate.toString()}");
         if (aDate != bDate && aDate.isBefore(bDate)) {
           LOG("--> changed : ${aDate.toString()} / ${showList[a].messageItem.desc} <-> ${bDate.toString()} / ${showList[b].messageItem.desc}");

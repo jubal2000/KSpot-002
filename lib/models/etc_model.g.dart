@@ -51,10 +51,13 @@ PromotionData _$PromotionDataFromJson(Map<String, dynamic> json) =>
       status: json['status'] as int,
       title: json['title'] as String,
       typeId: json['typeId'] as String,
-      startDate: json['startDate'] as String,
-      endDate: json['endDate'] as String,
-      startTime: json['startTime'] as String,
-      endTime: json['endTime'] as String,
+      userId: json['userId'] as String,
+      userName: json['userName'] as String,
+      userPic: json['userPic'] as String,
+      startTime: DateTime.parse(json['startTime'] as String),
+      endTime: DateTime.parse(json['endTime'] as String),
+      updateTime: DateTime.parse(json['updateTime'] as String),
+      createTime: DateTime.parse(json['createTime'] as String),
     );
 
 Map<String, dynamic> _$PromotionDataToJson(PromotionData instance) =>
@@ -63,10 +66,13 @@ Map<String, dynamic> _$PromotionDataToJson(PromotionData instance) =>
       'status': instance.status,
       'title': instance.title,
       'typeId': instance.typeId,
-      'startDate': instance.startDate,
-      'endDate': instance.endDate,
-      'startTime': instance.startTime,
-      'endTime': instance.endTime,
+      'userId': instance.userId,
+      'userName': instance.userName,
+      'userPic': instance.userPic,
+      'startTime': instance.startTime.toIso8601String(),
+      'endTime': instance.endTime.toIso8601String(),
+      'updateTime': instance.updateTime.toIso8601String(),
+      'createTime': instance.createTime.toIso8601String(),
     };
 
 CustomData _$CustomDataFromJson(Map<String, dynamic> json) => CustomData(
@@ -106,7 +112,7 @@ CountryData _$CountryDataFromJson(Map<String, dynamic> json) => CountryData(
       country: json['country'] as String,
       countryState: json['countryState'] as String,
       countryFlag: json['countryFlag'] as String,
-      createTime: json['createTime'] as String,
+      createTime: DateTime.parse(json['createTime'] as String),
     );
 
 Map<String, dynamic> _$CountryDataToJson(CountryData instance) =>
@@ -114,7 +120,7 @@ Map<String, dynamic> _$CountryDataToJson(CountryData instance) =>
       'country': instance.country,
       'countryState': instance.countryState,
       'countryFlag': instance.countryFlag,
-      'createTime': instance.createTime,
+      'createTime': instance.createTime.toIso8601String(),
     };
 
 OptionData _$OptionDataFromJson(Map<String, dynamic> json) => OptionData(
@@ -135,7 +141,6 @@ BankData _$BankDataFromJson(Map<String, dynamic> json) => BankData(
       name: json['name'] as String,
       account: json['account'] as String,
       author: json['author'] as String,
-      createTime: json['createTime'] as String,
     );
 
 Map<String, dynamic> _$BankDataToJson(BankData instance) => <String, dynamic>{
@@ -145,7 +150,6 @@ Map<String, dynamic> _$BankDataToJson(BankData instance) => <String, dynamic>{
       'name': instance.name,
       'account': instance.account,
       'author': instance.author,
-      'createTime': instance.createTime,
     };
 
 AddressData _$AddressDataFromJson(Map<String, dynamic> json) => AddressData(
@@ -168,7 +172,7 @@ MemberData _$MemberDataFromJson(Map<String, dynamic> json) => MemberData(
       status: json['status'] as int,
       nickName: json['nickName'] as String,
       pic: json['pic'] as String,
-      createTime: json['createTime'] as String?,
+      createTime: json['createTime'] != null ? DateTime.parse(json['createTime'] as String) : DateTime(0),
     );
 
 Map<String, dynamic> _$MemberDataToJson(MemberData instance) =>
@@ -177,7 +181,7 @@ Map<String, dynamic> _$MemberDataToJson(MemberData instance) =>
       'status': instance.status,
       'nickName': instance.nickName,
       'pic': instance.pic,
-      'createTime': instance.createTime,
+      'createTime': instance.createTime.toIso8601String(),
     };
 
 DescData _$DescDataFromJson(Map<String, dynamic> json) => DescData(
@@ -197,7 +201,7 @@ NoticeModel _$NoticeModelFromJson(Map<String, dynamic> json) => NoticeModel(
       desc: json['desc'] as String,
       userId: json['userId'] as String,
       userName: json['userName'] as String,
-      createTime: json['createTime'] as String,
+      createTime: DateTime.parse(json['createTime'] as String),
       fileData: (json['fileData'] as List<dynamic>?)
           ?.map((e) => UploadFileModel.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -211,18 +215,18 @@ Map<String, dynamic> _$NoticeModelToJson(NoticeModel instance) =>
       'desc': instance.desc,
       'userId': instance.userId,
       'userName': instance.userName,
-      'createTime': instance.createTime,
+      'createTime': instance.createTime.toIso8601String(),
       'fileData': instance.fileData?.map((e) => e.toJson()).toList(),
     };
 
 BanData _$BanDataFromJson(Map<String, dynamic> json) => BanData(
       id: json['id'] as String,
       nickName: json['nickName'] as String,
-      createTime: json['createTime'] as String,
+      createTime: DateTime.parse(json['createTime'] as String),
     );
 
 Map<String, dynamic> _$BanDataToJson(BanData instance) => <String, dynamic>{
       'id': instance.id,
       'nickName': instance.nickName,
-      'createTime': instance.createTime,
+      'createTime': instance.createTime.toIso8601String(),
     };

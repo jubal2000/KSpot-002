@@ -57,6 +57,7 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
         status: 1,
         nickName: AppData.userInfo.nickName,
         pic: AppData.userInfo.pic,
+        createTime: DateTime.now(),
       );
       _viewModel.editItem!.managerData = [addItem];
       _viewModel.managerData[addItem.id] = addItem.toJson();

@@ -15,7 +15,7 @@ FollowModel _$FollowModelFromJson(Map<String, dynamic> json) => FollowModel(
       userId: json['userId'] as String,
       userName: json['userName'] as String,
       userPic: json['userPic'] as String,
-      createTime: json['createTime'] as String,
+      createTime: DateTime.parse(json['createTime'] as String),
     );
 
 Map<String, dynamic> _$FollowModelToJson(FollowModel instance) =>
@@ -28,5 +28,5 @@ Map<String, dynamic> _$FollowModelToJson(FollowModel instance) =>
       'userId': instance.userId,
       'userName': instance.userName,
       'userPic': instance.userPic,
-      'createTime': instance.createTime,
+      'createTime': instance.createTime.toIso8601String(),
     };

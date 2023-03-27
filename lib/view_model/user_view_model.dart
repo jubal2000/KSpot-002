@@ -68,9 +68,7 @@ class UserViewModel extends ChangeNotifier {
   JSON likeData = {};
   JSON bookmarkData = {};
   DateTime? eventLastTime;
-  DateTime? eventLastTime2;
   DateTime? storyLastTime;
-  DateTime? storyLastTime2;
 
   init(context) {
     this.context = context;
@@ -97,6 +95,12 @@ class UserViewModel extends ChangeNotifier {
     }
   }
 
+  copyUserModel(UserViewModel source) {
+    initUserModel(source.userInfo!);
+    eventData = source.eventData;
+    storyData = source.storyData;
+  }
+
   refresh() {
     notifyListeners();
   }
@@ -104,18 +108,14 @@ class UserViewModel extends ChangeNotifier {
   getEventData() async {
     if (JSON_NOT_EMPTY(eventData)) {
       for (var item in eventData.entries) {
-        var checkTime = DateTime.parse(item.value.createTime);
-        if (item.value.status == 1 && (eventLastTime == null || checkTime.isBefore(eventLastTime!))) {
+        var checkTime = item.value.createTime;
+        if (eventLastTime == null || checkTime.isBefore(eventLastTime!)) {
           eventLastTime = checkTime;
-        }
-        if (item.value.status == 2 && (eventLastTime2 == null || checkTime.isBefore(eventLastTime2!))) {
-          eventLastTime2 = checkTime;
         }
       }
     }
     LOG('---> getEventData : ${eventData.length} - ${eventLastTime.toString()}');
-    var eventNewData = await repo.getEventFromUserId(userInfo!.id, isAuthor: isMyProfile,
-        lastTime: storyLastTime, lastTime2: storyLastTime2);
+    var eventNewData = await repo.getEventFromUserId(userInfo!.id, isAuthor: isMyProfile, lastTime: eventLastTime);
     if (eventNewData.isNotEmpty) {
       eventData.addAll(eventNewData);
     } else {
@@ -127,18 +127,14 @@ class UserViewModel extends ChangeNotifier {
   getStoryData() async {
     if (JSON_NOT_EMPTY(storyData)) {
       for (var item in storyData.entries) {
-        var checkTime = DateTime.parse(item.value.createTime);
-        if (item.value.status == 1 && (storyLastTime == null || checkTime.isBefore(storyLastTime!))) {
+        var checkTime = item.value.createTime;
+        if (storyLastTime == null || checkTime.isBefore(storyLastTime!)) {
           storyLastTime = checkTime;
-        }
-        if (item.value.status == 2 && (storyLastTime2 == null || checkTime.isBefore(storyLastTime2!))) {
-          storyLastTime2 = checkTime;
         }
       }
     }
     LOG('---> getStoryData : ${storyData.length} - ${storyLastTime.toString()}');
-    var storyNewData = await repo.getStoryFromUserId(userInfo!.id,
-        isAuthor: isMyProfile, lastTime: storyLastTime, lastTime2: storyLastTime2);
+    var storyNewData = await repo.getStoryFromUserId(userInfo!.id, isAuthor: isMyProfile, lastTime: storyLastTime);
     if (storyNewData.isNotEmpty) {
       storyData.addAll(storyNewData);
     } else {
@@ -395,16 +391,16 @@ class UserViewModel extends ChangeNotifier {
       shrinkWrap: true,
       padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w, vertical: 5.w),
       children: [
-        // if (userInfo!.checkOption('event_on'))
-          contentItem(Icons.event_available, 'EVENT LIST'.tr, '', eventLength, () {
-            Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.event, 'EVENT LIST'))).then((_) {
-            });
-          }),
-        // if (userInfo!.checkOption('story_on'))
-          contentItem(Icons.photo_library_outlined, 'STORY LIST'.tr, '', storyLength, () {
-            Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'))).then((_) {
-            });
-          }),
+      // if (userInfo!.checkOption('event_on'))
+        contentItem(Icons.event_available, 'EVENT LIST'.tr, '', eventLength, () {
+          Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.event, 'EVENT LIST'))).then((_) {
+          });
+        }),
+      // if (userInfo!.checkOption('story_on'))
+        contentItem(Icons.photo_library_outlined, 'STORY LIST'.tr, '', storyLength, () {
+          Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'))).then((_) {
+          });
+        }),
       ],
     );
   }
@@ -428,7 +424,7 @@ class UserViewModel extends ChangeNotifier {
   showEventList() {
     LOG('-->  eventData [$isMyProfile] : ${eventData.length}');
     // sort status..
-    List<List<Widget>> showItemList = List.generate(3, (index) => []);
+    List<Widget> showItemList = [];
     for (var item in eventData.entries) {
       var isExpired = eventRepo.checkIsExpired(item.value);
       var showItem = EventCardItem(
@@ -449,48 +445,24 @@ class UserViewModel extends ChangeNotifier {
           showEventItemDetail(item.value);
         },
       );
-      if (item.value.status == 1 && !isExpired) {
-        showItemList[0].add(showItem);
-      } else if (item.value.status == 2 && !isExpired) {
-        showItemList[1].add(showItem);
-      } else if (item.value.status > 0) {
-        showItemList[2].add(showItem);
+      if (item.value.status > 0) {
+        showItemList.add(showItem);
       }
     }
-
     return Column(
-      children: [
-        if (showItemList[0].isNotEmpty)...[
-          SubTitleBar(context!, '${'Activated event'.tr} ${showItemList[0].length}'),
-          SizedBox(height: 10.h),
-          ...showItemList[0],
-        ],
-        if (isMyProfile && (showItemList[1].isNotEmpty || showItemList[2].isNotEmpty))...[
-          SubTitleBar(context!, '${'Disabled event'.tr} ${showItemList[1].length + showItemList[2].length}',
-            icon: isDisableOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
-            isDisableOpen = !isDisableOpen;
-            notifyListeners();
-          }),
-          if (isDisableOpen)...[
-            SizedBox(height: 10.h),
-            ...showItemList[1],
-            ...showItemList[2],
-          ],
-        ],
-      ]
+      children: showItemList
     );
   }
 
   showStoryList() {
     final space = 10.w;
-    // List<List<Widget>> showItemList = List.generate(3, (index) => []);
     List<Widget> showItemList = [];
     for (var item in storyData.entries) {
       var showItem = ClipRRect(
           borderRadius: BorderRadius.all(Radius.circular(8)),
-          child: StoryVerCardItem(
+          child: StoryVerImageItem(
             item.value,
-            itemHeight: Get.width.w / 3 - space * 2,
+            // itemHeight: Get.width.w / 3 - space * 2,
             isShowUser: false,
             onRefresh: (updateData) {
               LOG('--> onRefresh : ${updateData['id']} / ${updateData['status']}');
@@ -504,11 +476,6 @@ class UserViewModel extends ChangeNotifier {
       );
       if (item.value.status > 0) {
         showItemList.add(showItem);
-        // if (item.value.showStatus == 1) {
-        //   showItemList[0].add(showItem);
-        // } else {
-        //   showItemList[1].add(showItem);
-        // }
       }
     }
 
@@ -574,6 +541,7 @@ class UserViewModel extends ChangeNotifier {
     LOG('--> reloadContentData : $type / ${AppData.isMainActive}');
     if (!AppData.isMainActive) return;
     AppData.isMainActive = false;
+    showLoadingToast(context!);
     await Future.delayed(Duration(seconds: 1));
     switch(type) {
       case ProfileContentType.event:
@@ -584,6 +552,9 @@ class UserViewModel extends ChangeNotifier {
         break;
     }
     AppData.isMainActive = true;
+    scrollController.animateTo(scrollController.position.maxScrollExtent - 1,
+      duration: Duration(milliseconds: 200), curve: Curves.fastOutSlowIn);
+    hideLoadingDialog();
     notifyListeners();
   }
 
@@ -603,29 +574,12 @@ class UserViewModel extends ChangeNotifier {
               constraints: BoxConstraints(
                 minHeight: layout.maxHeight + 1,
               ),
-              child: showStoryList(),
+              child: type == ProfileContentType.event ? showEventList() : showStoryList()
             )
           )
         );
       }
     );
-    //   child: LayoutBuilder(
-    //   builder: (context, layout)
-    // {
-    //   return ListView(
-    //     controller: storyScrollController,
-    //     children: [
-    //       if (type == ProfileContentType.event)
-    //         showEventList(),
-    //       if (type == ProfileContentType.story)
-    //         Container(
-    //           height: layout.maxHeight,
-    //           child: showStoryList(),
-    //         ),
-    //     ],
-    //   );
-    // }
-    // )
   }
 
   addNewContent(ProfileContentType type) {

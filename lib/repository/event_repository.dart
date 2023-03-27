@@ -33,7 +33,7 @@ class EventRepository {
     try {
       final response = await api.getEventListFromCountry(groupId, country, countryState);
       for (var item in response.entries) {
-        LOG('--> getEventListFromCountry item : ${item.value['id']}');
+        LOG('--> getEventListFromCountry item : ${item.value}');
         result[item.key] = EventModel.fromJson(item.value);
       }
     } catch (e) {
@@ -48,12 +48,12 @@ class EventRepository {
       final response = await api.getEventFromId(eventId);
       if (response != null) {
         final eventData = EventModel.fromJson(FROM_SERVER_DATA(response));
-        LOG("--> getUserInfo result: ${eventData.toJson()}");
+        LOG("--> getEventFromId result: ${eventData.toJson()}");
         AppData.eventData[eventData.id] = eventData;
         return eventData;
       }
     } catch (e) {
-      LOG('--> getEventListFromCountry error [$eventId] : $e');
+      LOG('--> getEventFromId error [$eventId] : $e');
     }
     return null;
   }
@@ -63,7 +63,7 @@ class EventRepository {
       final response = await api.addEventItem(addItem.toJson());
       if (response != null) {
         final eventData = EventModel.fromJson(FROM_SERVER_DATA(response));
-        LOG("--> getUserInfo result: ${eventData.toJson()}");
+        LOG("--> addEventItem result: ${eventData.toJson()}");
         AppData.eventData[eventData.id] = eventData;
         return eventData;
       }

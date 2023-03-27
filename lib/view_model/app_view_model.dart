@@ -172,7 +172,7 @@ class AppViewModel extends ChangeNotifier {
             country:      AppData.currentCountry,
             countryState: AppData.currentState,
             countryFlag:  AppData.currentCountryFlag,
-            createTime  : CURRENT_SERVER_TIME().toString(),
+            createTime  : DateTime.now(),
         ));
         if (AppData.countrySelectList.length > COUNTRY_LOG_MAX) {
           AppData.countrySelectList.removeLast();

@@ -13,12 +13,11 @@ class MessageModel {
   String  senderId;
   String  senderName;
   String  senderPic;
-  String  updateTime;     // 수정 시간
-  String  createTime;     // 생성 시간
-  @JsonKey(defaultValue: '')
-  String  openTime;       // 읽은 시간
+  DateTime  updateTime;     // 수정 시간
+  DateTime  createTime;     // 생성 시간
 
   List<String>? picData;
+  List<String>? openTimeData; // 읽은 시간
 
   MessageModel({
     required this.id,
@@ -32,9 +31,9 @@ class MessageModel {
     required this.senderPic,
     required this.updateTime,
     required this.createTime,
-    required this.openTime,
 
     this.picData,
+    this.openTimeData,
   });
   factory MessageModel.fromJson(JSON json) => _$MessageModelFromJson(json);
   JSON toJson() => _$MessageModelToJson(this);

@@ -254,6 +254,7 @@ class ChatEditViewModel extends ChangeNotifier {
         status: 2, // 1: normal 2: room manager..
         nickName: AppData.USER_NICKNAME,
         pic: AppData.USER_PIC,
+        createTime: DateTime.now()
       )
     );
     for (var item in memberData.entries) {

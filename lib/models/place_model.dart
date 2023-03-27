@@ -28,8 +28,8 @@ class PlaceModelEx extends PlaceModel {
       lng: 0.0,
     ),
     email: '',
-    updateTime: '',
-    createTime: '',
+    updateTime: DateTime.now(),
+    createTime: DateTime.now(),
 
     phoneData: [],
     picData: [],
@@ -54,8 +54,8 @@ class PlaceModel {
   String      countryState;   // 도시
   AddressData address;       // 주소 정보
   String      email;          // 이메일
-  String      updateTime;     // update time
-  String      createTime;     // create time
+  DateTime    updateTime;     // update time
+  DateTime    createTime;     // create time
 
   List<String>?        phoneData;      // 전화번호 목록
   List<PicData>?       picData;        // 메인 이미지 목록

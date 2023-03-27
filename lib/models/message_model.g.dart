@@ -16,11 +16,13 @@ MessageModel _$MessageModelFromJson(Map<String, dynamic> json) => MessageModel(
       senderId: json['senderId'] as String,
       senderName: json['senderName'] as String,
       senderPic: json['senderPic'] as String,
-      updateTime: json['updateTime'] as String,
-      createTime: json['createTime'] as String,
-      openTime: json['openTime'] as String? ?? '',
+      updateTime: DateTime.parse(json['updateTime'] as String),
+      createTime: DateTime.parse(json['createTime'] as String),
       picData:
           (json['picData'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      openTimeData: (json['openTimeData'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$MessageModelToJson(MessageModel instance) =>
@@ -34,10 +36,10 @@ Map<String, dynamic> _$MessageModelToJson(MessageModel instance) =>
       'senderId': instance.senderId,
       'senderName': instance.senderName,
       'senderPic': instance.senderPic,
-      'updateTime': instance.updateTime,
-      'createTime': instance.createTime,
-      'openTime': instance.openTime,
+      'updateTime': instance.updateTime.toIso8601String(),
+      'createTime': instance.createTime.toIso8601String(),
       'picData': instance.picData,
+      'openTimeData': instance.openTimeData,
     };
 
 MessageGroupModel _$MessageGroupModelFromJson(Map<String, dynamic> json) =>

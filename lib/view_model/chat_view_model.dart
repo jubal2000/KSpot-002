@@ -118,7 +118,6 @@ class ChatViewModel extends ChangeNotifier {
     // current show room type
     var roomType = currentTab == ChatType.private ? ChatRoomType.private :
       (currentTab == ChatType.public && isMy) ? ChatRoomType.publicMy : ChatRoomType.public;
-    var lastUpdateTime = '';
 
     if (cache.chatData.isNotEmpty) {
       for (var item in cache.chatData.entries) {
@@ -126,15 +125,15 @@ class ChatViewModel extends ChangeNotifier {
         // get last message..
         if (item.value.status > 0 && item.value.action == 0) {
           var desc = descList[roomId];
-          if (desc == null || DateTime.parse(desc.updateTime).isBefore(DateTime.parse(item.value.updateTime))) {
+          if (desc == null || desc.updateTime.isBefore(item.value.updateTime)) {
             descList[roomId] = item.value;
           }
           // get unread count..
           final isMyMsg = item.value.senderId == AppData.USER_ID;
           var isTimeCheck = false;
           MemberData? memberInfo = cache.getMemberFromRoom(roomId, AppData.USER_ID);
-          if (memberInfo != null && memberInfo.createTime != null) {
-            isTimeCheck = DateTime.parse(item.value.createTime).isAfter(DateTime.parse(memberInfo.createTime!));
+          if (memberInfo != null) {
+            isTimeCheck = item.value.createTime.isAfter(memberInfo.createTime);
           }
           if (!isMyMsg && isTimeCheck && (item.value.openList == null || !item.value.openList!.contains(AppData.USER_ID))) {
             var open = unOpenCount[roomId];
@@ -146,7 +145,6 @@ class ChatViewModel extends ChangeNotifier {
           }
           // LOG('--> unOpenCount [$roomId] : ${unOpenCount[roomId].toString()} / $isMyMsg, $isTimeCheck, ${item.value.openList}, ${AppData.USER_ID}');
         }
-        lastUpdateTime = item.value.updateTime;
       }
     }
     // create show group..
@@ -163,8 +161,8 @@ class ChatViewModel extends ChangeNotifier {
           ((item.value.type == ChatType.private && item.value.memberList.contains(AppData.USER_ID))))) {
         // set last message..
         if (descList[item.value.id] != null) {
-          item.value.lastMessage = descList[item.value.id].desc ?? '';
-          item.value.updateTime  = descList[item.value.id].updateTime ?? '';
+          item.value.lastMessage = descList[item.value.id].desc ?? DateTime(0);
+          item.value.updateTime  = descList[item.value.id].updateTime ?? DateTime(0);
         }
         // set unread count..
         var unOpen = 0;

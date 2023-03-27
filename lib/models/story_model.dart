@@ -24,8 +24,6 @@ class StoryModelEx extends StoryModel {
         int likeCount = 0,
         int voteCount = 0,
         int commentCount = 0,
-        String updateTime = '',
-        String createTime = '',
       }) : super(
     id: id,
     status: status,
@@ -42,8 +40,8 @@ class StoryModelEx extends StoryModel {
     userPic: userPic,
     likeCount: likeCount,
     commentCount: commentCount,
-    updateTime: updateTime,
-    createTime: createTime,
+    updateTime: DateTime.now(),
+    createTime: DateTime.now(),
   );
 }
 
@@ -52,7 +50,7 @@ class StoryModelEx extends StoryModel {
 )
 class StoryModel {
   String  id;
-  int     status;         // 상태 (0:removed, 1:active, 2:disable, 3:ready)
+  int     status;         // 상태 (0:removed, 1:active)
   @JsonKey(defaultValue: 1)
   int     showStatus;     // 보여주기 상태 (0: disable, 1: visible)
   String  desc;
@@ -71,8 +69,8 @@ class StoryModel {
   String  userPic;        // 소유 유저 pic
   int     likeCount;      // 종아요 횟수
   int     commentCount;   // 댓글 갯수
-  String  updateTime;     // 수정 시간
-  String  createTime;     // 생성 시간
+  DateTime updateTime;     // 수정 시간
+  DateTime createTime;     // 생성 시간
 
   List<PicData>?    picData;        // 메인 이지미 목록
   List<OptionData>? optionData;     // 옵션 정보

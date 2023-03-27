@@ -232,10 +232,10 @@ class UserRepository {
     return null;
   }
 
-  Future<Map<String, EventModel>> getEventFromUserId(String userId, {bool isAuthor = false, DateTime? lastTime, DateTime? lastTime2}) async {
+  Future<Map<String, EventModel>> getEventFromUserId(String userId, {bool isAuthor = false, DateTime? lastTime}) async {
     Map<String, EventModel> result = {};
     try {
-      final response = await api.getEventFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, lastTime2: lastTime2, limit: PROFILE_CONTENT_MAX);
+      final response = await api.getEventFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, limit: PROFILE_CONTENT_MAX);
       if (JSON_NOT_EMPTY(response)) {
         for (var item in response.entries) {
           result[item.key] = EventModel.fromJson(item.value);
@@ -244,7 +244,6 @@ class UserRepository {
     } catch (e) {
       LOG('--> getEventFromUserId error : ${e.toString()}');
     }
-    LOG('--> getEventFromUserId result : ${result.length}');
     return result;
   }
 
@@ -256,10 +255,10 @@ class UserRepository {
     return null;
   }
 
-  Future<Map<String, StoryModel>> getStoryFromUserId(String userId, {bool isAuthor = false, DateTime? lastTime, DateTime? lastTime2}) async {
+  Future<Map<String, StoryModel>> getStoryFromUserId(String userId, {bool isAuthor = false, DateTime? lastTime}) async {
     Map<String, StoryModel> result = {};
     try {
-      final response = await api.getStoryFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, lastTime2: lastTime2, limit: PROFILE_CONTENT_MAX);
+      final response = await api.getStoryFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, limit: PROFILE_CONTENT_MAX);
       if (JSON_NOT_EMPTY(response)) {
         for (var item in response.entries) {
           result[item.key] = StoryModel.fromJson(item.value);
@@ -268,7 +267,6 @@ class UserRepository {
     } catch (e) {
       LOG('--> getStoryFromUserId error : ${e.toString()}');
     }
-    LOG('--> getStoryFromUserId result : ${result.length}');
     return result;
   }
 

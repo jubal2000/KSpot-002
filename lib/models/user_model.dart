@@ -50,8 +50,9 @@ class UserModel {
 
   String    pushToken;
   String    deviceType;
-  String    updateTime;
-  String    createTime;
+
+  DateTime  updateTime;
+  DateTime  createTime;
 
   String?   emailNew;
   BankData? refundBank;
@@ -83,12 +84,12 @@ class UserModel {
     required this.followCount,
     required this.followerCount,
     required this.likeCount,
+    required this.creditAmount,
+    required this.creditUsed,
     required this.pushToken,
     required this.deviceType,
     required this.updateTime,
     required this.createTime,
-    required this.creditAmount,
-    required this.creditUsed,
 
     this.emailNew,
     this.snsData,
@@ -128,8 +129,8 @@ class UserModel {
       creditUsed: 0,
       pushToken: '',
       deviceType: '',
-      updateTime: '',
-      createTime: '',
+      updateTime: DateTime.now(),
+      createTime: DateTime.now(),
     );
   }
 

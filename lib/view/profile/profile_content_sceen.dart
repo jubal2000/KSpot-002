@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../data/theme_manager.dart';
 import '../../models/event_model.dart';
+import '../../models/user_model.dart';
 import '../../utils/utils.dart';
 import '../../view_model/event_view_model.dart';
 import '../../view_model/user_view_model.dart';
@@ -14,16 +15,19 @@ import '../event/event_edit_screen.dart';
 import '../story/story_item.dart';
 
 class ProfileContentScreen extends StatelessWidget {
-  ProfileContentScreen(this.parentViewModel, this.type, this.title, {Key? key}) : super(key: key);
+  ProfileContentScreen(this.parentInfo, this.type, this.title, {Key? key}) : super(key: key);
 
-  UserViewModel parentViewModel;
+  UserViewModel parentInfo;
   ProfileContentType type;
   String title;
 
   final cache = Get.find<CacheService>();
+  final _viewModel = UserViewModel();
 
   @override
   Widget build(BuildContext context) {
+    _viewModel.init(context);
+    _viewModel.copyUserModel(parentInfo);
     return SafeArea(
       top: false,
       child: Scaffold(
@@ -32,10 +36,10 @@ class ProfileContentScreen extends StatelessWidget {
           titleSpacing: 0,
           toolbarHeight: UI_EDIT_TOOL_HEIGHT,
           actions: [
-            if (parentViewModel.isMyProfile)...[
+            if (_viewModel.isMyProfile)...[
               IconButton(
                 onPressed: () {
-                  parentViewModel.addNewContent(type);
+                  _viewModel.addNewContent(type);
                 },
                 icon: Icon(Icons.add)
               ),
@@ -44,7 +48,7 @@ class ProfileContentScreen extends StatelessWidget {
           ],
         ),
         body: ChangeNotifierProvider.value(
-          value: parentViewModel,
+          value: _viewModel,
           child: Consumer<UserViewModel>(
             builder: (context, viewModel, _) {
               LOG('--> UserViewModel redraw');

@@ -849,7 +849,7 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                                             child: showImageFit(_goodsItem['pic']),
                                           ),
                                           if (_goodsItem['status'] == 2)...[
-                                            ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:5),
+                                            OutlineIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:5),
                                           ]
                                         ]
                                     ),
@@ -959,7 +959,7 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                                     child: showImageFit(_goodsItem['pic']),
                                   ),
                                   if (_goodsItem['status'] == 2)...[
-                                    ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:5),
+                                    OutlineIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:5),
                                   ]
                                 ]
                             ),

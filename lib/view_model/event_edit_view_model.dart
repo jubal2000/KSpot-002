@@ -514,7 +514,8 @@ class EventEditViewModel extends ChangeNotifier {
       editItem!.countryState  = AppData.currentState;
     }
     // set status..
-    editItem!.status = JSON_EMPTY(editItem!.getOptionDataMap) || editItem!.getOptionValue('open_now') ? 1 : 2;
+    editItem!.status = 1;
+    editItem!.showStatus = JSON_EMPTY(editItem!.getOptionDataMap) || editItem!.getOptionValue('open_now') ? 1 : 0;
     // set search data..
     editItem!.searchData = CreateSearchWordList(editItem!.toJson());
     editItem!.userId = AppData.USER_ID;
@@ -524,7 +525,7 @@ class EventEditViewModel extends ChangeNotifier {
       hideLoadingDialog();
       if (result != null) {
         showAlertDialog(buildContext!, 'Upload'.tr, 'Event Upload Complete'.tr, '', 'OK'.tr).then((_) {
-          Get.back(result: editItem);
+          Get.back(result: result);
         });
       } else {
         showAlertDialog(buildContext!, 'Upload'.tr, 'Event Upload Failed'.tr, '', 'OK'.tr);

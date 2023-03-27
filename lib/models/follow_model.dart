@@ -12,7 +12,7 @@ class FollowModel {
   String  userId;
   String  userName;
   String  userPic;
-  String  createTime;     // 생성 시간
+  DateTime  createTime;     // 생성 시간
 
   FollowModel({
     required this.id,

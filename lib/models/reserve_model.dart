@@ -21,11 +21,11 @@ class ReserveData {
   String userId;        // request user id
   String userName;
   String userPic;
-  String updateTime;
-  String createTime;
+  DateTime updateTime;
+  DateTime createTime;
   String? confirmId;     // confirm user id
   String? confirmDesc;
-  String? confirmTime;
+  DateTime? confirmTime;
   ReserveData({
     required this.id,
     required this.status,

@@ -79,7 +79,7 @@ class EventDetailViewModel extends ChangeNotifier {
         eventRepo.setEventStatus(eventInfo!.id, eventInfo!.status == 1 ? 2 : 1).then((result) {
           if (result) {
               eventInfo!.status = eventInfo!.status == 1 ? 2 : 1;
-              ShowToast(eventInfo!.status == 1 ? 'Enabled'.tr : 'Disabled'.tr, Theme.of(buildContext!).primaryColor);
+              ShowToast(eventInfo!.status == 1 ? 'Enabled'.tr : 'Disabled'.tr);
               updateEventInfo();
           }
         });

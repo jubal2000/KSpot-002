@@ -32,8 +32,8 @@ class EventModelEx extends EventModel {
       likeCount: 0,
       voteCount: 0,
       commentCount: 0,
-      updateTime: '',
-      createTime: '',
+      updateTime: DateTime(0),
+      createTime: DateTime(0),
 
       tagData: [],
       managerData: [],
@@ -52,7 +52,7 @@ class EventModelEx extends EventModel {
 class EventModel {
   String  id;
   int     status;         // 상태 (0:removed, 1:active)
-  @JsonKey(defaultValue: 0)
+  @JsonKey(defaultValue: 1)
   int     showStatus;     // 보여주기 상태 (0: disable, 1: enable)
   @JsonKey(defaultValue: 1)
   int     type;           // 타입 (0:event, 1:class)
@@ -69,8 +69,8 @@ class EventModel {
   int     likeCount;      // 종아요 횟수
   int     voteCount;      // 추천 횟수
   int     commentCount;   // 댓글 갯수
-  String  updateTime;     // 수정 시간
-  String  createTime;     // 생성 시간
+  DateTime  updateTime;     // 수정 시간
+  DateTime  createTime;     // 생성 시간
 
   List<String>?        tagData;        // tag
   List<String>?        searchData;     // 검색어 목록
@@ -102,7 +102,6 @@ class EventModel {
     required this.likeCount,
     required this.voteCount,
     required this.commentCount,
-
     required this.updateTime,
     required this.createTime,
 

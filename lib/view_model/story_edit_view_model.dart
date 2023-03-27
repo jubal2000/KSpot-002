@@ -269,13 +269,14 @@ class StoryEditViewModel extends ChangeNotifier {
       editItem!.countryState  = AppData.currentState;
     }
     // set status..
-    editItem!.status = JSON_EMPTY(editItem!.getOptionDataMap) || editItem!.getOptionValue('open_now') ? 1 : 2;
+    editItem!.status = 1;
+    editItem!.showStatus = JSON_EMPTY(editItem!.getOptionDataMap) || editItem!.getOptionValue('open_now') ? 1 : 0;
     // set search data..
     editItem!.searchData  = CreateSearchWordList(editItem!.toJson());
     editItem!.userId      = AppData.USER_ID;
     editItem!.userName    = AppData.USER_NICKNAME;
     editItem!.userPic     = AppData.USER_PIC;
-    LOG('---> addEventItem : ${editItem!.toJson()}');
+    LOG('---> addStoryItem : ${editItem!.toJson()}');
 
     storyRepo.addStoryItem(editItem!).then((result) {
       hideLoadingDialog();

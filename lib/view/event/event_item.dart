@@ -68,7 +68,7 @@ class EventCardItemState extends State<EventCardItem> {
 
   toggleEventShowStatus(context) {
     var title = widget.itemData.showStatus == 1 ? 'Disable' : 'Enable';
-    showAlertYesNoDialog(context, title.tr, '$title spot?'.tr, 'In the disable state, other users cannot see it'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
+    showAlertYesNoDialog(context, title.tr, '$title event?'.tr, 'In the disable state, other users cannot see it'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
       if (value == 1) {
         if (eventRepo.checkIsExpired(widget.itemData)) {
           showAlertDialog(context, title.tr, 'Event period has ended'.tr, 'Event duration must be modified'.tr, 'OK'.tr);
@@ -78,7 +78,7 @@ class EventCardItemState extends State<EventCardItem> {
           if (result) {
             setState(() {
               widget.itemData.showStatus = widget.itemData.showStatus == 1 ? 0 : 1;
-              ShowToast(widget.itemData.showStatus == 1 ? 'Enabled'.tr : 'Disabled'.tr, Theme.of(context).primaryColor);
+              ShowToast(widget.itemData.showStatus == 1 ? 'Enabled'.tr : 'Disabled'.tr);
               if (widget.onRefresh != null) widget.onRefresh!(widget.itemData.toJson());
             });
           }
@@ -145,7 +145,7 @@ class EventCardItemState extends State<EventCardItem> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: ColorFiltered(
-              colorFilter: !widget.isExpired ? ColorFilter.mode(
+              colorFilter: !widget.isExpired && widget.itemData.showStatus == 1 ? ColorFilter.mode(
                 Colors.transparent,
                 BlendMode.multiply,
               ) : ColorFilter.mode(
@@ -181,7 +181,7 @@ class EventCardItemState extends State<EventCardItem> {
                           // if (widget.animationController == null)
                           showImage(widget.itemData.pic, Size(_imageHeight, _imageHeight)),
                           if (widget.itemData.showStatus == 0)
-                            ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
+                            OutlineIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
                           if (widget.isExpired)
                             Center(
                                 child: Text("EXPIRED".tr, style: ItemDescOutlineStyle(context))
@@ -239,7 +239,7 @@ class EventCardItemState extends State<EventCardItem> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(timeData != null ? timeData.title : '', style: ItemDescExStyle(context)),
-                                        Text(timeData != null ? timeData.desc  : '', style: ItemDescExStyle(context), maxLines: 3),
+                                        Text('${timeData != null ? timeData.desc  : ''} ${DATETIME_STR(widget.itemData.createTime)}', style: ItemDescExStyle(context), maxLines: 3),
                                       ],
                                     ),
                                   ),
@@ -265,14 +265,14 @@ class EventCardItemState extends State<EventCardItem> {
                       ),
                       // customItemsHeights: const [5],
                       items: [
-                        if (widget.itemData.status == 1)
+                        if (widget.itemData.showStatus == 1)
                           ...DropdownItems.storyItems0.map(
                                 (item) => DropdownMenuItem<DropdownItem>(
                               value: item,
                               child: DropdownItems.buildItem(context, item),
                             ),
                           ),
-                        if (widget.itemData.status > 1)
+                        if (widget.itemData.showStatus == 0)
                           ...DropdownItems.storyItems1.map(
                                 (item) => DropdownMenuItem<DropdownItem>(
                               value: item,
@@ -427,7 +427,7 @@ class PlaceEventVerCardItemState extends State<PlaceEventVerCardItem> {
                         children: [
                           showImage(STR(widget.itemData['pic']), Size(_imageSize, _imageSize)),
                           if (INT(widget.itemData['status']) == 2)
-                            ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
+                            OutlineIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
                           if (_isExpired)
                             Center(
                                 child: Text("EXPIRED".tr, style: ItemDescOutlineStyle(context))

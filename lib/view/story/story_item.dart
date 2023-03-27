@@ -318,7 +318,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                           Positioned(
                             top: 10,
                             left: 10,
-                            child: ShadowIcon(Icons.visibility_off_outlined, 30, Colors.white, x:3, y:3),
+                            child: OutlineIcon(Icons.visibility_off_outlined, 30, Colors.white, x:3, y:3),
                           )
                       ]
                     )
@@ -561,7 +561,7 @@ class StoryCardItemState extends State<StoryCardItem> {
                                 Positioned(
                                   top: 5,
                                   left: 5,
-                                  child: ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
+                                  child: OutlineIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
                                 )
                             ]
                         )
@@ -815,7 +815,7 @@ class StoryVerCardItemState extends State<StoryVerCardItem> {
                     showImage(widget.itemData.picData!.first.url, Size(_imageSize, _imageSize)),
                     if (widget.itemData.showStatus == 0)
                       TopLeftAlign(
-                        child: ShadowIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
+                        child: OutlineIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
                       ),
                     if (widget.isSelectable)
                       TopLeftAlign(
@@ -839,7 +839,7 @@ class StoryVerCardItemState extends State<StoryVerCardItem> {
                             alignment: Alignment.topRight,
                             color: Colors.transparent,
                             padding: EdgeInsets.only(top: 5),
-                            child: ShadowIcon(Icons.more_vert, 20, Colors.white, x:3, y:3),
+                            child: OutlineIcon(Icons.more_vert, 20, Colors.white, x:3, y:3),
                           ),
                           // customItemsIndexes: const [1],
                           // customItemsHeight: 20,
@@ -964,6 +964,238 @@ class StoryVerCardItemState extends State<StoryVerCardItem> {
         ),
       ),
       )
+    );
+  }
+}
+
+class StoryVerImageItem extends StatefulWidget {
+  StoryVerImageItem(this.itemData,
+      {Key? key,
+        this.animationController,
+        this.itemPadding = const EdgeInsets.symmetric(vertical: 5),
+        this.isSelectable = false,
+        this.isShowTheme = true,
+        this.isShowHomeButton = true,
+        this.isShowPlaceButton = true,
+        this.isShowUser = true,
+        this.selectMax = 9,
+        this.onRefresh,
+        this.onShowDetail,
+      }) : super(key: key);
+
+  StoryModel itemData;
+  bool isSelectable;
+  bool isShowHomeButton;
+  bool isShowPlaceButton;
+  bool isShowTheme;
+  bool isShowUser;
+  AnimationController? animationController;
+  int selectMax;
+
+  EdgeInsets? itemPadding;
+  Function(JSON)? onRefresh;
+  Function(JSON)? onShowDetail;
+
+  @override
+  StoryVerImageState createState() => StoryVerImageState();
+}
+
+class StoryVerImageState extends State<StoryVerImageItem> {
+  final api = Get.find<ApiService>();
+  final List<JSON> _userListData = [];
+
+  @override
+  Widget build(context) {
+    _userListData.clear();
+    var isMyStory = widget.itemData.userId == AppData.USER_ID;
+    LOG('--> story item [$isMyStory] : ${widget.itemData.showStatus}');
+
+    return GestureDetector(
+      onTap: () {
+        if (widget.isSelectable) {
+          if (widget.selectMax == 1) {
+            AppData.listSelectData.clear();
+            AppData.listSelectData[widget.itemData.id] = widget.itemData;
+            Navigator.of(context).pop();
+          } else {
+            AppData.listSelectData[widget.itemData.id] = widget.itemData;
+          }
+        } else {
+          unFocusAll(context);
+          if (widget.onShowDetail != null) widget.onShowDetail!(widget.itemData.toJson());
+        }
+      },
+      child: ColorFiltered(
+        colorFilter: widget.itemData.showStatus > 0 ? ColorFilter.mode(
+          Colors.transparent,
+          BlendMode.multiply,
+        ) : ColorFilter.mode(
+          Colors.grey,
+          BlendMode.saturation,
+        ),
+        child: Container(
+          constraints: BoxConstraints(
+            minHeight: 100,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8.sp),
+            color: Theme.of(context).cardColor,
+          ),
+          child: ClipRect(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (widget.itemData.picData != null && widget.itemData.picData!.isNotEmpty)
+                  showImageFit(widget.itemData.picData!.first.url),
+                if (widget.itemData.showStatus == 0)
+                  Positioned(
+                    left: 2.w,
+                    top: 0,
+                    child: OutlineIcon(Icons.visibility_off_outlined, 20.sp, Colors.white),
+                  ),
+                if (widget.isSelectable)
+                  TopLeftAlign(
+                    child: Icon(Icons.arrow_forward_ios, color: AppData.listSelectData.containsKey(widget.itemData.id) ?
+                    Theme.of(context).primaryColor : Theme.of(context).primaryColor.withOpacity(0.5)),
+                  ),
+                if (!isMyStory)
+                  TopRightAlign(
+                    child: SizedBox(
+                      height: 24.w,
+                      child: LikeWidget(context, 'story', widget.itemData.toJson(), isShowOutline: true, iconX:3, iconY:3),
+                    ),
+                  ),
+                if (isMyStory)
+                  Positioned(
+                    right: 2.w,
+                    top: 0,
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton2(
+                        customButton: Container(
+                          width: 40.w,
+                          height: 40.w,
+                          alignment: Alignment.topRight,
+                          color: Colors.transparent,
+                          padding: EdgeInsets.only(top: 5),
+                          child: OutlineIcon(Icons.more_vert, 20, Colors.white),
+                        ),
+                        // customItemsIndexes: const [1],
+                        // customItemsHeight: 20,
+                        items: [
+                          if (widget.itemData.showStatus == 1)
+                            ...DropdownItems.storyItems0.map(
+                                  (item) =>
+                                  DropdownMenuItem<DropdownItem>(
+                                    value: item,
+                                    child: DropdownItems.buildItem(context, item),
+                                  ),
+                            ),
+                          if (widget.itemData.showStatus == 0)
+                            ...DropdownItems.storyItems1.map(
+                                  (item) =>
+                                  DropdownMenuItem<DropdownItem>(
+                                    value: item,
+                                    child: DropdownItems.buildItem(context, item),
+                                  ),
+                            ),
+                        ],
+                        onChanged: (value) {
+                          var selected = value as DropdownItem;
+                          LOG("--> selected.index : ${selected.type}");
+                          switch (selected.type) {
+                            case DropdownItemType.enable:
+                            case DropdownItemType.disable:
+                              var title = widget.itemData.showStatus == 1 ? 'Disable' : 'Enable';
+                              showAlertYesNoDialog(context, title.tr, '$title story?'.tr, 'In the disable state, other users cannot see it'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
+                                if (value == 1) {
+                                  var status = selected.type == DropdownItemType.enable ? 1 : 0;
+                                  api.setStoryItemShowStatus(widget.itemData.id, status).then((result) {
+                                    setState(() {
+                                      widget.itemData.showStatus = status;
+                                      if (widget.onRefresh != null) widget.onRefresh!(widget.itemData.toJson());
+                                    });
+                                  });
+                                }
+                              });
+                              break;
+                            case DropdownItemType.edit:
+                              Get.to(() => StoryEditScreen(storyInfo: widget.itemData))!.then((result) {
+                                if (result != null) {
+                                  setState(() {
+                                    widget.itemData = result;
+                                    if (widget.onRefresh != null) widget.onRefresh!(result.toJson());
+                                  });
+                                }
+                              });
+                              break;
+                            case DropdownItemType.delete:
+                              showAlertYesNoDialog(context, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, 'Alert) Recovery is not possible'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
+                                if (result == 1) {
+                                  api.deleteStoryItem(widget.itemData.id).then((result) {
+                                    if (result) {
+                                      widget.itemData.status = 0;
+                                      if (widget.onRefresh != null) widget.onRefresh!(widget.itemData.toJson());
+                                    }
+                                  });
+                                }
+                              });
+                              break;
+                          // case DropdownItemType.report:
+                          //   final reportInfo = cache.reportData['report'] != null ? cache.reportData['report'][widget.itemInfo.id] : null;
+                          //   if (reportInfo == null) {
+                          //     showReportDialog(context, ReportType.report,
+                          //         'Report'.tr, 'story', widget.itemInfo.toJson(), subTitle: 'Please write what you want to report'.tr).then((result) async {
+                          //       if (result.isNotEmpty) {
+                          //         cache.reportData['report'] ??= {};
+                          //         cache.reportData['report'][widget.itemInfo.id] = result;
+                          //         showAlertDialog(context, 'Report'.tr, 'Report has been completed'.tr, '', 'OK'.tr);
+                          //       }
+                          //     });
+                          //   } else {
+                          //     showAlertDialog(context, 'Report'.tr, 'Already reported'.tr, '', 'OK');
+                          //   }
+                          //   break;
+                          }
+                        },
+                        itemHeight: 45,
+                        dropdownWidth: 190,
+                        buttonHeight: 22,
+                        buttonWidth: 22,
+                        itemPadding: const EdgeInsets.all(10),
+                        offset: const Offset(0, 5),
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                    child: Container(
+                      padding: EdgeInsets.all(5.sp),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              OutlineIcon(Icons.favorite, 16, Theme.of(context).indicatorColor),
+                              SizedBox(width: 5),
+                              Text('${widget.itemData.likeCount}', style: ItemDescOutlineStyle(context)),
+                              SizedBox(width: 10),
+                              OutlineIcon(Icons.comment, 16, Theme.of(context).indicatorColor),
+                              SizedBox(width: 5),
+                              Text('${widget.itemData.commentCount}', style: ItemDescOutlineStyle(context)),
+                            ]
+                          ),
+                          Text(DATETIME_STR(TME(widget.itemData.createTime)), style: ItemDescOutlineStyle(context)),
+                        ],
+                      ),
+                    ),
+                  )
+                ]
+              )
+            ),
+          ),
+        )
     );
   }
 }

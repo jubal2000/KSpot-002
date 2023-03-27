@@ -53,7 +53,7 @@ Widget BookmarkWidget(BuildContext context, String type, JSON targetInfo,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (isShowOutline)
-                            ShadowIcon(isChecked ? Icons.bookmark : Icons.bookmark_border_outlined, iconSize, isChecked ? iconColor0 : iconColor1, x: iconX, y: iconY),
+                            OutlineIcon(isChecked ? Icons.bookmark : Icons.bookmark_border_outlined, iconSize, isChecked ? iconColor0 : iconColor1, x: iconX, y: iconY),
                           if (!isShowOutline)
                             Icon(isChecked ? Icons.bookmark : Icons.bookmark_border_outlined, size: iconSize, color: isChecked ? iconColor0 : iconColor1),
                           if (title.isNotEmpty)...[

@@ -7,8 +7,11 @@ import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:kspot_002/models/story_model.dart';
+import 'package:kspot_002/models/sponsor_model.dart';
+import 'package:kspot_002/view/event/event_list_screen.dart';
 import 'package:kspot_002/view/story/story_detail_screen.dart';
 import 'package:kspot_002/view/story/story_edit_screen.dart';
+import 'package:kspot_002/widget/sponsor_item.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/app_data.dart';
@@ -16,12 +19,13 @@ import '../data/common_sizes.dart';
 import '../data/dialogs.dart';
 import '../models/event_model.dart';
 import '../repository/event_repository.dart';
+import '../repository/sponsor_repository.dart';
 import '../utils/utils.dart';
 import '../models/user_model.dart';
 import '../repository/user_repository.dart';
 import '../view/event/event_detail_screen.dart';
 import '../view/event/event_edit_screen.dart';
-import '../view/event/event_item.dart';
+import '../widget/event_item.dart';
 import '../view/profile/profile_content_sceen.dart';
 import '../view/profile/profile_tab_screen.dart';
 import '../view/story/story_item.dart';
@@ -37,13 +41,14 @@ enum ProfileMainTab {
 enum ProfileContentType {
   event,
   story,
-  thumb,
+  sponsor,
   max,
 }
 
 class UserViewModel extends ChangeNotifier {
   final repo = UserRepository();
   final eventRepo = EventRepository();
+  final sponRepo  = SponsorRepository();
   final msgTextController = TextEditingController();
   final scrollController = List.generate(ProfileContentType.max.index, (index) => ScrollController());
 
@@ -65,15 +70,15 @@ class UserViewModel extends ChangeNotifier {
   var selectedTab = ProfileContentType.event;
 
   Future<JSON>? listDataInit;
+  List<Map<String, Widget>> showWidgetList = List.generate(ProfileContentType.max.index, (index) => {});
+  List<DateTime?> showLastTime = List.generate(ProfileContentType.max.index, (index) => null);
+
   Map<String, EventModel> eventData = {};
   Map<String, StoryModel> storyData = {};
-  Map<String, Widget> eventWidgetData = {};
-  Map<String, Widget> storyWidgetData = {};
+  Map<String, SponsorModel> sponsorData = {};
   JSON snsData = {};
   JSON likeData = {};
   JSON bookmarkData = {};
-  DateTime? eventLastTime;
-  DateTime? storyLastTime;
 
   init(context) {
     this.context = context;
@@ -114,19 +119,19 @@ class UserViewModel extends ChangeNotifier {
     if (JSON_NOT_EMPTY(eventData)) {
       for (var item in eventData.entries) {
         var checkTime = item.value.createTime;
-        if (eventLastTime == null || checkTime.isBefore(eventLastTime!)) {
-          eventLastTime = checkTime;
+        if (showLastTime[ProfileContentType.event.index] == null || checkTime.isBefore(showLastTime[ProfileContentType.event.index]!)) {
+          showLastTime[ProfileContentType.event.index] = checkTime;
         }
       }
     }
-    LOG('---> getEventData : ${eventData.length} - ${eventLastTime.toString()}');
-    var eventNewData = await repo.getEventFromUserId(userInfo!.id, isAuthor: isMyProfile, lastTime: eventLastTime);
+    LOG('---> getEventData : ${eventData.length} - ${showLastTime[ProfileContentType.event.index].toString()}');
+    var eventNewData = await repo.getEventFromUserId(userInfo!.id, isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.event.index]);
     if (eventNewData.isNotEmpty) {
       eventData.addAll(eventNewData);
     } else {
       isLastContent = true;
       if (isShowEmpty) {
-        ShowErrorToast('No more event'.tr);
+        ShowErrorToast('No more list'.tr);
       }
     }
     return eventData;
@@ -136,22 +141,44 @@ class UserViewModel extends ChangeNotifier {
     if (JSON_NOT_EMPTY(storyData)) {
       for (var item in storyData.entries) {
         var checkTime = item.value.createTime;
-        if (storyLastTime == null || checkTime.isBefore(storyLastTime!)) {
-          storyLastTime = checkTime;
+        if (showLastTime[ProfileContentType.story.index] == null || checkTime.isBefore(showLastTime[ProfileContentType.story.index]!)) {
+          showLastTime[ProfileContentType.story.index] = checkTime;
         }
       }
     }
-    LOG('---> getStoryData : ${storyData.length} - ${storyLastTime.toString()}');
-    var storyNewData = await repo.getStoryFromUserId(userInfo!.id, isAuthor: isMyProfile, lastTime: storyLastTime);
+    LOG('---> getStoryData : ${storyData.length} - ${showLastTime[ProfileContentType.story.index].toString()}');
+    var storyNewData = await repo.getStoryFromUserId(userInfo!.id, isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.story.index]);
     if (storyNewData.isNotEmpty) {
       storyData.addAll(storyNewData);
     } else {
       isLastContent = true;
       if (isShowEmpty) {
-        ShowErrorToast('No more story'.tr);
+        ShowErrorToast('No more list'.tr);
       }
     }
     return storyData;
+  }
+
+  getSponsorData([bool isShowEmpty = false]) async {
+    if (JSON_NOT_EMPTY(sponsorData)) {
+      for (var item in sponsorData.entries) {
+        var checkTime = item.value.createTime;
+        if (showLastTime[ProfileContentType.sponsor.index] == null || checkTime.isBefore(showLastTime[ProfileContentType.sponsor.index]!)) {
+          showLastTime[ProfileContentType.sponsor.index] = checkTime;
+        }
+      }
+    }
+    LOG('---> getSponsorData : ${sponsorData.length} - ${showLastTime[ProfileContentType.sponsor.index].toString()}');
+    var newData = await repo.getSponsorFromUserId(userInfo!.id, isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.sponsor.index]);
+    if (newData.isNotEmpty) {
+      sponsorData.addAll(newData);
+    } else {
+      isLastContent = true;
+      if (isShowEmpty) {
+        ShowErrorToast('No more list'.tr);
+      }
+    }
+    return sponsorData;
   }
 
   setMainTab(index) {
@@ -331,23 +358,19 @@ class UserViewModel extends ChangeNotifier {
     return InkWell(
       onTap: onTap,
       child: Container(
-        height: UI_ITEM_HEIGHT_L.w,
+        height: UI_ITEM_HEIGHT_SS.w,
         margin: EdgeInsets.symmetric(vertical: 5.w),
         padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w, vertical: 5.w),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(12.w)),
-          color: Theme.of(context!).primaryColor.withOpacity(0.2)
-        ),
         child: Row(
           children: [
-            Icon(icon, size: UI_MENU_ICON_SIZE.w, color: Theme.of(context!).hintColor.withOpacity(0.25)),
+            Icon(icon, size: UI_MENU_ICON_SIZE.w, color: Theme.of(context!).primaryColor.withOpacity(0.35)),
             SizedBox(width: UI_ITEM_SPACE.w),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: ItemTitleLargeStyle(context!)),
+                  Text(title, style: ItemTitleLargeHotStyle(context!)),
                   if (desc.isNotEmpty)...[
                     SizedBox(height: 5.w),
                     Text(desc, style: ItemTitleExStyle(context!)),
@@ -370,7 +393,7 @@ class UserViewModel extends ChangeNotifier {
             ),
             SizedBox(width: UI_ITEM_SPACE.w),
             ],
-            Icon(Icons.keyboard_arrow_right_outlined, size: UI_MENU_ICON_SIZE.w),
+            Icon(Icons.keyboard_arrow_right_outlined, size: UI_MENU_ICON_SIZE.w, color: Theme.of(context!).primaryColor),
           ],
         ),
       )
@@ -412,10 +435,10 @@ class UserViewModel extends ChangeNotifier {
             context = orgContext;
           });
         }),
-        contentItem(Icons.thumb_up_alt_outlined, isMyProfile ? 'MY THUMB UP LIST'.tr : 'THUMB UP LIST'.tr, '',
-          isMyProfile ? userInfo!.creditAmount : 0, () {
+        if (isMyProfile)
+        contentItem(Icons.workspace_premium_outlined, 'SPONSORED EVENT LIST'.tr, '', 0, () {
           var orgContext = context;
-          Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.thumb, 'THUMB UP LIST'))).then((_) {
+          Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.sponsor, 'SPONSORED EVENT LIST'))).then((_) {
             context = orgContext;
           });
         }),
@@ -445,12 +468,11 @@ class UserViewModel extends ChangeNotifier {
     List<Widget> showItemList = [];
     for (var item in eventData.entries) {
       var isExpired = eventRepo.checkIsExpired(item.value);
-      var showItem = eventWidgetData[item.key];
+      var showItem = showWidgetList[ProfileContentType.event.index][item.key];
       showItem ??= EventCardItem(
         item.value,
         isMyItem: isMyProfile,
         isExpired: isExpired,
-        isShowTheme: false,
         isShowUser: false,
         isShowHomeButton: false,
         isShowLike: false,
@@ -477,7 +499,7 @@ class UserViewModel extends ChangeNotifier {
     final space = 10.w;
     List<Widget> showItemList = [];
     for (var item in storyData.entries) {
-      var showItem = storyWidgetData[item.key];
+      var showItem = showWidgetList[ProfileContentType.story.index][item.key];
       showItem ??= ClipRRect(
           borderRadius: BorderRadius.all(Radius.circular(8)),
           child: StoryVerImageItem(
@@ -557,6 +579,51 @@ class UserViewModel extends ChangeNotifier {
     // );
   }
 
+  showSponsorList() {
+    List<Widget> showItemList = [];
+    for (var item in sponsorData.entries) {
+      var showItem = showWidgetList[ProfileContentType.story.index][item.key];
+      showItem ??= ClipRRect(
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+          child: SponsorCardItem(
+            item.value,
+            isShowUser: false,
+            onRefresh: (updateData) {
+              LOG('--> onRefresh : ${updateData['id']} / ${updateData['status']}');
+              sponsorData[updateData['id']] = SponsorModel.fromJson(updateData);
+              notifyListeners();
+            },
+            onShowDetail: (key, status) {
+
+            },
+          )
+      );
+      if (item.value.status > 0) {
+        showItemList.add(showItem);
+      }
+    }
+    return Column(
+        children: showItemList
+    );
+  }
+
+  showThumbList() {
+    LOG('-->  sponsorData [$isMyProfile] : ${sponsorData.length}');
+    // sort status..
+    List<Widget> showItemList = [];
+    for (var item in sponsorData.entries) {
+      var showItem = showWidgetList[ProfileContentType.sponsor.index][item.key];
+      showItem ??= Container(
+      );
+      if (item.value.status > 0) {
+        showItemList.add(showItem);
+      }
+    }
+    return Column(
+      children: showItemList
+    );
+  }
+
   getStartContentData(ProfileContentType type) async {
     switch(type) {
       case ProfileContentType.event:
@@ -571,11 +638,11 @@ class UserViewModel extends ChangeNotifier {
         } else {
           return storyData;
         }
-      case ProfileContentType.story:
-        if (storyData.isEmpty) {
-          return getStoryData(false);
+      case ProfileContentType.sponsor:
+        if (sponsorData.isEmpty) {
+          return getSponsorData(false);
         } else {
-          return storyData;
+          return sponsorData;
         }
     }
   }
@@ -592,6 +659,9 @@ class UserViewModel extends ChangeNotifier {
         break;
       case ProfileContentType.story:
         await getStoryData(isShowEmpty);
+        break;
+      case ProfileContentType.sponsor:
+        await getSponsorData(isShowEmpty);
         break;
     }
     AppData.isMainActive = true;
@@ -617,7 +687,7 @@ class UserViewModel extends ChangeNotifier {
               constraints: BoxConstraints(
                 minHeight: layout.maxHeight + 1,
               ),
-              child: type == ProfileContentType.event ? showEventList() : showStoryList()
+              child: type == ProfileContentType.event ? showEventList() : type == ProfileContentType.story ? showStoryList() : showSponsorList()
             )
           )
         );
@@ -642,6 +712,23 @@ class UserViewModel extends ChangeNotifier {
             LOG('--> StoryEditScreen result : ${result.toJson()}');
             storyData[result.id] = result;
             notifyListeners();
+          }
+        });
+        break;
+      case ProfileContentType.sponsor:
+        Get.to(() => EventListScreen(isSelectable: true, isSelectMy: true))!.then((result) {
+          if (result != null) {
+            LOG('--> EventListScreen result : ${result.toJson()}');
+            showEventSponsorDialog(context!, result, AppData.userInfo.creditCount).then((dResult) {
+              LOG('--> showEventSponsorDialog result : $dResult');
+              if (dResult != null) {
+                sponRepo.addSponsorItem(dResult).then((addItem) {
+                  sponsorData[addItem['id']] = SponsorModel.fromJson(addItem);
+                  LOG('--> sponsorData add : ${sponsorData.length} / ${addItem.toString()}');
+                  notifyListeners();
+                });
+              }
+            });
           }
         });
         break;

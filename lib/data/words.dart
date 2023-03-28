@@ -69,7 +69,10 @@ class Words extends Translations {
       'Disable spot?': '스팟을 비활성화 하시겠습니까?',
       'Enable story?': '스토리를 활성화 하시겠습니까?',
       'Disable story?': '스토리를 비활성화 하시겠습니까?',
+      'Show sponsored?': '후원을 공개 하시겠습니까?',
+      'Hide sponsored?': '후원을 비공개 하시겠습니까?',
       'In the disable state, other users cannot see it': '비활성화 시, 다른 유저에게 보이지 않습니다',
+      'In the hide state, other users cannot see it': '비공개 시, 다른 유저에게 보이지 않습니다',
       'Event period has ended': '이벤트 기간이 종료 되었습니다',
       'Event edited': '이벤트 수정완료',
       'Event duration must be modified': '이벤트 기간을 수정해야 합니다',
@@ -96,9 +99,18 @@ class Words extends Translations {
       'Chat room create complete': '대화방 생성 완료',
       'Chat room create': '대화방 생성',
       'This event has expired': '기간이 종료된 이벤트입니다',
+      'This sponsored event has expired': '기간이 종료된 후원입니다',
       'Please change the period\nin the \'Event edit\'': '\'이벤트 수정\'에서 기간을\n변경해 주세요',
-      'No more event': '마지막 이벤트입니다',
-      'No more story': '마지막 스토리입니다',
+      'No more list': '마지막 목록입니다',
+      'Event sponsor': '이벤트 후원',
+      'Target event': '대상 이벤트',
+      'Would you like to sponsor a target event?': '대상 이벤트를 후원하시겠습니까?',
+      'Show': '공개',
+      'Hide': '비공개',
+      'complete': '완료',
+      'Sponsorship has already started and cannot be deleted': '이미 후원이 시작되어 삭제할 수 없습니다',
+      'Show sponsorship': '공개 후원',
+      'Sponsor the target event\n(shown first in order of most sponsored)': '대상 이벤트를 후원합니다\n(후원을 많이 받은 순서대로 앞쪽에 표시됩니다)',
 
       // main_event
       'There are no events': '이벤트가 없습니다',
@@ -137,6 +149,7 @@ class Words extends Translations {
 
       // target_profile
       'Would you like to follow?': '팔로우 하시겠습니까?',
+      'Theme setting': '테마 설정',
 
       // main_place
       'No events for that day': '선택한 날짜에 이벤트가 없습니다',
@@ -311,8 +324,12 @@ class Words extends Translations {
       'MY EVENT LIST': '내 이벤트 목록',
       'STORY LIST': '스토리 목록',
       'MY STORY LIST': '내 스토리 목록',
-      'THUMB UP LIST': '추천 목록',
-      'MY THUMB UP LIST': '내 추천 목록',
+      'SPONSORED EVENT LIST': '후원 이벤트 목록',
+      'Holding credits:': '보유 크레딧:',
+      'Remaining after use:': '사용후 남은 크레딧:',
+      'Sponsored period': '후원기간',
+      'Use credits': '사용 크레딧',
+      '1day': '1일',
 
       // slide_timepicker_screen
       'Select Time Range': '시간 범위 선택',

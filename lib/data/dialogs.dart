@@ -21,15 +21,19 @@ import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:kspot_002/services/api_service.dart';
 import 'package:kspot_002/services/cache_service.dart';
+import 'package:kspot_002/widget/event_item.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
+import 'package:progressive_time_picker/progressive_time_picker.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as p;
 
 import '../models/chat_model.dart';
+import '../models/event_model.dart';
 import '../models/message_model.dart';
+import '../models/sponsor_model.dart';
 import '../models/upload_model.dart';
 import '../services/local_service.dart';
 import '../utils/address_utils.dart';
@@ -867,39 +871,41 @@ Future showDatePickerDialog(BuildContext context, String selectedDate) async {
     startDate = DateTime.now();
   }
 
-  void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
-    selectedDate = format.format(args.value);
-  }
+  return showDatetimePickerDialog(context, startDate);
+}
 
+Future<DateTime?> showDatetimePickerDialog(BuildContext context, DateTime startDate) async {
   return await showDialog(
       context: context,
       barrierColor: Colors.black87,
       builder: (BuildContext context) {
         return Container(
           child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SfDateRangePicker(
-                    enablePastDates: false,
-                    initialSelectedDate: startDate,
-                    backgroundColor: DialogBackColor(context),
-                    showActionButtons: true,
-                    showTodayButton: true,
-                    showNavigationArrow: true,
-                    cancelText: 'Cancel'.tr,
-                    confirmText: 'OK'.tr,
-                    onSubmit: (select) {
-                      Navigator.of(context).pop(selectedDate);
-                    },
-                    onCancel: () {
-                      Navigator.of(context).pop();
-                    },
-                    view: DateRangePickerView.month,
-                    selectionMode: DateRangePickerSelectionMode.single,
-                    onSelectionChanged: _onSelectionChanged
-                ),
-              ]
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SfDateRangePicker(
+                enablePastDates: false,
+                initialSelectedDate: startDate,
+                backgroundColor: DialogBackColor(context),
+                showActionButtons: true,
+                showTodayButton: true,
+                showNavigationArrow: true,
+                cancelText: 'Cancel'.tr,
+                confirmText: 'OK'.tr,
+                onSubmit: (select) {
+                  Navigator.of(context).pop(startDate);
+                },
+                onCancel: () {
+                  Navigator.of(context).pop();
+                },
+                view: DateRangePickerView.month,
+                selectionMode: DateRangePickerSelectionMode.single,
+                onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
+                  startDate = args.value;
+                }
+              ),
+            ]
           ),
         );
       }
@@ -1871,6 +1877,177 @@ Future<JSON>? showOptionItemAddDialog(BuildContext context, JSON optionItem, JSO
         );
       }
   ) ?? '';
+}
+
+Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel event, int max, [DateTime? startDate, int credit = 1])
+{
+  final startTextController = TextEditingController();
+  final endTextController   = TextEditingController();
+  final timeTextController  = TextEditingController();
+  var creditCount = credit;
+  startDate ??= DateTime.now();
+  var endDate = DateTime.now();
+  var showStatus = 1;
+
+  refreshDateTime() {
+    endDate = startDate!.add(Duration(days: creditCount));
+    startTextController.text = DATE_STR(startDate!);
+    endTextController.text   = DATE_STR(endDate);
+    timeTextController.text  = TIME_STR(startDate!);
+  }
+
+  setDateChange(setState) {
+    showDatetimePickerDialog(context, startDate!).then((result) {
+      LOG('----> showDatetimePickerDialog startDate result : $result');
+      if (result != null) {
+        setState(() {
+          startDate = result;
+          refreshDateTime();
+        });
+      }
+    });
+  }
+
+  setTimeChange(setState) {
+    showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(startDate!)).then((result) {
+      if (result != null) {
+        setState(() {
+          startDate = startDate!.applyTimeOfDay(hour: result.hour, minute: result.minute);
+          LOG('--> changed time : ${startDate.toString()}');
+          refreshDateTime();
+        });
+      }
+    });
+  }
+  refreshDateTime();
+
+  return showDialog(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return PointerInterceptor(
+        child: AlertDialog(
+          title: Text('Event sponsor'.tr, style: dialogTitleTextStyle(context)),
+          titlePadding: EdgeInsets.all(20),
+          insetPadding: EdgeInsets.all(20),
+          actionsPadding: EdgeInsets.all(10),
+          contentPadding: EdgeInsets.symmetric(horizontal: 20),
+          backgroundColor: DialogBackColor(context),
+          content: SingleChildScrollView(
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              constraints: BoxConstraints(
+                minHeight: 100
+              ),
+              child: Center(
+                child: StatefulBuilder(
+                  builder: (context, setState) {
+                    return ListBody(
+                      children: [
+                        Text('Sponsor the target event\n(shown first in order of most sponsored)'.tr, style: DialogDescExStyle(context)),
+                        SizedBox(height: 10),
+                        EventCardItem(event, itemHeight: 100.0, isShowLike: false),
+                        SizedBox(height: 10),
+                        SubTitle(context, 'Sponsored period'.tr, height: 40),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: startTextController,
+                                decoration: inputLabel(context, 'Start date'.tr, ''),
+                                maxLines: 1,
+                                readOnly: true,
+                                textAlign: TextAlign.center,
+                                onTap: () {
+                                  setDateChange(setState);
+                                },
+                              )
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Text(' ~ '),
+                            ),
+                            Expanded(
+                              child: TextFormField(
+                                controller: endTextController,
+                                decoration: inputLabel(context, 'End date'.tr, ''),
+                                maxLines: 1,
+                                readOnly: true,
+                                textAlign: TextAlign.center,
+                              )
+                            ),
+                          ]
+                        ),
+                        SubTitle(context, 'Sponsored period'.tr, height: 40),
+                        Container(
+                          width: Get.width * 0.4,
+                          child: TextFormField(
+                            controller: timeTextController,
+                            decoration: inputLabel(context, 'Start time'.tr, ''),
+                            maxLines: 1,
+                            readOnly: true,
+                            textAlign: TextAlign.center,
+                            onTap: () {
+                              setTimeChange(setState);
+                            },
+                          )
+                        ),
+                        SizedBox(height: 20),
+                        Text('${'Holding credits:'.tr} $max', style: DialogDescBoldStyle(context)),
+                        SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Text('Use credits'.tr, style: DialogDescBoldStyle(context)),
+                            SizedBox(width: 10),
+                            SizedBox(
+                              child: NumberInputWidget(creditCount, min: 1, max: max, onChanged: (value) {
+                                setState(() {
+                                  creditCount = value;
+                                  refreshDateTime();
+                                });
+                              }),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        TextCheckBox(context,
+                          'Show sponsorship'.tr,
+                          showStatus == 1,
+                          isExpanded: false,
+                          textColor: Theme.of(context).primaryColor,
+                          onChanged: (status) {
+                            setState(() {
+                              showStatus = status ? 1 : 0;
+                            });
+                        }),
+                        SizedBox(height: 10),
+                      ],
+                    );
+                  }
+                )
+              )
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel'.tr, style: ItemTitleExStyle(context)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('OK'.tr, style: ItemTitleStyle(context)),
+              onPressed: () {
+                var addItem = SponsorModel.createEvent(
+                  event, AppData.userInfo, showStatus, creditCount, startDate!, endDate);
+                Navigator.of(context).pop(addItem);
+              },
+            ),
+          ],
+        )
+      );
+    },
+  );
 }
 
 Future showImageDialog(BuildContext context, String imagePath) async {

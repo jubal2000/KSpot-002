@@ -33,9 +33,9 @@ Widget CreditWidget(BuildContext context, JSON userInfo,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (isShowOutline)
-            OutlineIcon(Icons.thumb_up_alt_outlined, iconSize.sp, iconColor0, x: iconX, y: iconY),
+            OutlineIcon(Icons.account_balance_wallet_outlined, iconSize.sp, iconColor0, x: iconX, y: iconY),
           if (!isShowOutline)
-            Icon(Icons.thumb_up_alt_outlined, size: iconSize.sp, color: iconColor0),
+            Icon(Icons.account_balance_wallet_outlined, size: iconSize.sp, color: iconColor0),
           if (title.isEmpty)...[
             Text('${INT(userInfo['creditCount'])}', style: ItemDescExStyle(context))
           ],
@@ -46,6 +46,7 @@ Widget CreditWidget(BuildContext context, JSON userInfo,
       )
     ),
     onTap: () {
+      // TODO: show in app store..
     }
   );
 }

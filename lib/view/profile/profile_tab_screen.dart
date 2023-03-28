@@ -20,7 +20,7 @@ import '../../view_model/user_view_model.dart';
 import '../../widget/credit_widget.dart';
 import '../../widget/like_widget.dart';
 import '../../widget/page_widget.dart';
-import '../event/event_item.dart';
+import '../../widget/event_item.dart';
 import '../follow/follow_screen.dart';
 import '../story/story_item.dart';
 
@@ -122,10 +122,10 @@ class ProfileTapState extends State<ProfileTabScreen> {
                                         showSendMessageWidget(context, viewModel.userInfo!, title: 'TALK'.tr),
                                         SizedBox(width: 2),
                                       ],
-                                      // if (viewModel.isMyProfile)...[
-                                      //   CreditWidget(context, viewModel.userInfo!.toJson()),
-                                      //   SizedBox(width: 2),
-                                      // ],
+                                      if (viewModel.isMyProfile)...[
+                                        CreditWidget(context, viewModel.userInfo!.toJson()),
+                                        SizedBox(width: 2),
+                                      ],
                                       LikeWidget(context, 'user', viewModel.userInfo!.toJson(), showCount: true, isEnabled: !viewModel.isMyProfile),
                                     ],
                                     // children: _shareLink,

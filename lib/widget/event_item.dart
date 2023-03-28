@@ -5,17 +5,17 @@ import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/data/dialogs.dart';
 
-import '../../data/app_data.dart';
-import '../../data/theme_manager.dart';
-import '../../models/event_model.dart';
-import '../../models/place_model.dart';
-import '../../repository/event_repository.dart';
-import '../../services/api_service.dart';
-import '../../utils/utils.dart';
-import '../../view_model/event_detail_view_model.dart';
-import '../../widget/like_widget.dart';
-import '../../widget/user_item_widget.dart';
-import 'event_edit_screen.dart';
+import '../data/app_data.dart';
+import '../data/theme_manager.dart';
+import '../models/event_model.dart';
+import '../models/place_model.dart';
+import '../repository/event_repository.dart';
+import '../services/api_service.dart';
+import '../utils/utils.dart';
+import '../view_model/event_detail_view_model.dart';
+import 'like_widget.dart';
+import 'user_item_widget.dart';
+import '../view/event/event_edit_screen.dart';
 
 class EventCardItem extends StatefulWidget {
   EventCardItem(this.itemData,
@@ -25,7 +25,7 @@ class EventCardItem extends StatefulWidget {
         this.itemPadding,
         this.itemHeight = 90,
         this.isSelectable = false,
-        this.isShowTheme = true,
+        // this.isShowTheme = true,
         this.isShowHomeButton = true,
         this.isShowPlaceButton = true,
         this.isShowUser = true,
@@ -42,7 +42,7 @@ class EventCardItem extends StatefulWidget {
   bool isSelectable;
   bool isShowHomeButton;
   bool isShowPlaceButton;
-  bool isShowTheme;
+  // bool isShowTheme;
   bool isShowUser;
   bool isShowLike;
   bool isPromotion;
@@ -199,17 +199,17 @@ class EventCardItemState extends State<EventCardItem> {
                           children: [
                             Row(
                               children: [
-                                if (widget.isShowTheme)...[
-                                  Container(
-                                    width: 12,
-                                    height: 12,
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).primaryColor.withOpacity(0.5),
-                                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                                    ),
-                                  ),
-                                  SizedBox(width: 5),
-                                ],
+                                // if (widget.isShowTheme)...[
+                                //   Container(
+                                //     width: 12,
+                                //     height: 12,
+                                //     decoration: BoxDecoration(
+                                //       color: Theme.of(context).primaryColor.withOpacity(0.5),
+                                //       borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                                //     ),
+                                //   ),
+                                //   SizedBox(width: 5),
+                                // ],
                                 Expanded(
                                   child: Row(
                                     children: [
@@ -239,7 +239,7 @@ class EventCardItemState extends State<EventCardItem> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(timeData != null ? timeData.title : '', style: ItemDescExStyle(context)),
-                                        Text('${timeData != null ? timeData.desc  : ''} ${DATETIME_STR(widget.itemData.createTime)}', style: ItemDescExStyle(context), maxLines: 3),
+                                        Text(timeData != null ? timeData.desc  : '', style: ItemDescExStyle(context), maxLines: 3),
                                       ],
                                     ),
                                   ),
@@ -379,7 +379,7 @@ class PlaceEventVerCardItemState extends State<PlaceEventVerCardItem> {
       _userListData.add(widget.itemData);
     }
     _imageSize = widget.itemWidth;
-    _isExpired = api.checkIsExpired(widget.itemData);
+    _isExpired = api.checkEventExpired(widget.itemData);
     return GestureDetector(
       onTap: () {
         if (widget.isSelectable) {

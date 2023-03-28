@@ -4,8 +4,6 @@ const double UI_TOP_MENU_HEIGHT = 55.0;
 const double UI_APPBAR_HEIGHT = UI_TOP_MENU_HEIGHT * 1.6;
 const double UI_APPBAR_TOOL_HEIGHT = 45.0;
 const double UI_EDIT_TOOL_HEIGHT = 55.0;
-const double UI_ITEM_HEIGHT = 60.0;
-const double UI_ITEM_HEIGHT_L = 70.0;
 const double UI_CONTENT_ITEM_HEIGHT = 90.0;
 const double UI_MENU_HEIGHT = 60.0;
 const double UI_MENU_BG_HEIGHT = 80.0;
@@ -24,6 +22,11 @@ const double UI_MAIN_LIST_BG_HEIGHT = 150.0;
 
 const double UI_FACE_SIZE = 100.0;
 const double UI_SNS_SIZE = 80.0;
+
+const double UI_ITEM_HEIGHT = 60.0;
+const double UI_ITEM_HEIGHT_L = 70.0;
+const double UI_ITEM_HEIGHT_S = 50.0;
+const double UI_ITEM_HEIGHT_SS = 40.0;
 
 const double UI_TOP_SPACE = 20.0;
 const double UI_APPBAR_TITLE_SPACE = 60.0;

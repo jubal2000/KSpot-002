@@ -1506,46 +1506,52 @@ TextCheckBox(BuildContext context, String title, bool value,
       var subTitle = '',
       var padding = EdgeInsets.zero,
       var height = 30.0,
+      var isExpanded = true,
+      Color? textColor,
       Function(bool)? onChanged
     }) {
   return Container(
-      padding: padding,
-      child: Column(
+    padding: padding,
+    child: Column(
+      children: [
+        Row(
           children: [
-            Container(
-                height: height,
-                padding: padding,
-                child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                            title,
-                            style: TextStyle(fontSize: 14, color: Theme.of(context).primaryColor.withOpacity(0.5), fontWeight: FontWeight.w800)),
-                      ),
-                      Switch(
-                        value: value,
-                        onChanged: onChanged,
-                      )
-                    ]
-                )
-            ),
-            if (subTitle.isNotEmpty)...[
-              SizedBox(height: 5),
-              Container(
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.1),
-                    // border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.all(Radius.circular(10))
-                ),
+            if (isExpanded)
+              Expanded(
                 child: Text(
-                    subTitle,
-                    style: TextStyle(fontSize: 10, color: Theme.of(context).hintColor, fontWeight: FontWeight.w600)
+                  title,
+                  style: TextStyle(fontSize: 14, color: textColor ?? Theme.of(context).primaryColor.withOpacity(0.5), fontWeight: FontWeight.w800)
                 ),
               ),
-            ]
+            if (!isExpanded)...[
+              Text(
+                title,
+                style: TextStyle(fontSize: 14, color: textColor ?? Theme.of(context).primaryColor.withOpacity(0.5), fontWeight: FontWeight.w800)
+              ),
+              SizedBox(width: 10),
+            ],
+            Switch(
+              value: value,
+              onChanged: onChanged,
+            )
           ]
-      )
+        ),
+        if (subTitle.isNotEmpty)...[
+          SizedBox(height: 5),
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.all(Radius.circular(10))
+            ),
+            child: Text(
+              subTitle,
+              style: TextStyle(fontSize: 10, color: Theme.of(context).hintColor, fontWeight: FontWeight.w600)
+            ),
+          ),
+        ]
+      ]
+    )
   );
 }
 
@@ -2437,6 +2443,10 @@ extension DateHelpers on DateTime {
 
   bool isSameDay(DateTime target) {
     return target.year == year && target.month == month && target.day == day;
+  }
+
+  DateTime applyTimeOfDay({required int hour, required int minute}) {
+    return DateTime(year, month, day, hour, minute);
   }
 }
 

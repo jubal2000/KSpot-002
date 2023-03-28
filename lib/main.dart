@@ -42,7 +42,7 @@ Future<void> main() async {
   }
 
   runApp(ChangeNotifierProvider<ThemeNotifier>(
-    create: (_) => ThemeNotifier(),
+    create: (_) => AppData.themeNotifier,
     child: FutureBuilder(
       future: getInfoData(),
       builder: (context, snapshot) {

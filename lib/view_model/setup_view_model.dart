@@ -25,6 +25,7 @@ import '../view/setup/setup_push_screen.dart';
 import '../view/setup/setup_service_screen.dart';
 import '../widget/dropdown_widget.dart';
 import '../widget/edit/edit_setup_widget.dart';
+import '../widget/theme_select_widget.dart';
 import '../widget/verify_phone_widget.dart';
 
 enum SetupTextType {
@@ -402,6 +403,20 @@ class SetupViewModel extends ChangeNotifier {
             initContentSetting();
           }
         });
+      }
+    );
+  }
+
+  showThemeSetting() {
+    return ThemeSelectWidget(
+      AppData.currentThemeMode,
+      AppData.currentThemeIndex,
+      'Theme setting'.tr,
+      (mode, index, color) {
+        LOG('--> ThemeSelectWidget onChanged : $mode, $index, $color');
+        AppData.currentThemeMode  = mode;
+        AppData.currentThemeIndex = index;
+        AppData.themeNotifier.setTheme(mode, index);
       }
     );
   }

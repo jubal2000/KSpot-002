@@ -44,9 +44,7 @@ class UserModel {
   int       likeCount;
 
   @JsonKey(defaultValue: 0)
-  int       creditAmount;
-  @JsonKey(defaultValue: 0)
-  int       creditUsed;
+  int       creditCount;
 
   String    pushToken;
   String    deviceType;
@@ -84,8 +82,7 @@ class UserModel {
     required this.followCount,
     required this.followerCount,
     required this.likeCount,
-    required this.creditAmount,
-    required this.creditUsed,
+    required this.creditCount,
     required this.pushToken,
     required this.deviceType,
     required this.updateTime,
@@ -125,8 +122,7 @@ class UserModel {
       followCount: 0,
       followerCount: 0,
       likeCount: 0,
-      creditAmount: 0,
-      creditUsed: 0,
+      creditCount: 0,
       pushToken: '',
       deviceType: '',
       updateTime: DateTime.now(),

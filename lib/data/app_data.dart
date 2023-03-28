@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:kspot_002/data/theme_manager.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import '../models/chat_model.dart';
 import '../models/etc_model.dart';
@@ -95,6 +96,8 @@ class AppData {
   static var chatViewModel      = ChatViewModel();
   static var messageViewModel   = MessageViewModel();
 
+  static var themeNotifier      = ThemeNotifier();
+
   static var defaultInfoID = 'info0001';
 
   static StartModel? startInfo;
@@ -108,7 +111,6 @@ class AppData {
 
   static var currentThemeMode = false;
   static var currentThemeIndex = 0;
-  static LatLng? currentLocation;
   static var defaultCountryFlag = '🇰🇷    Korea South';
   static var defaultCountry = 'Korea South';
   static var defaultState = '';
@@ -119,13 +121,15 @@ class AppData {
   static var currentState = '';
   static var currentCity = '';
   static var currentDate = DateTime.now();
+  static var currentContentType = '';
+  static var currentCurrency = '';
+  static var dynamicLinkPath = '';
+
   static List<CountryData> countrySelectList = [];
   static CalendarController? calenderController;
   static var calendarMode = CalendarView.month;
   static EventGroupModel? currentEventGroup;
-  static var currentContentType = '';
-  static var currentCurrency = '';
-  static var dynamicLinkPath = '';
+  static LatLng? currentLocation;
 
   static var isEventGroupGridMode = true;
   static var isMainActive = true;

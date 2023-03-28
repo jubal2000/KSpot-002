@@ -782,7 +782,7 @@ class ApiService extends GetxService {
     JSON result = {};
     try {
       for (var item in eventData.entries) {
-        var isExpired = checkIsExpired(item.value);
+        var isExpired = checkEventExpired(item.value);
         if (isExpired) {
           if (await setEventStatus(item.key, 2)) {
             LOG('-----------> cleanEventExpire isExpired ${item.key}');
@@ -798,7 +798,7 @@ class ApiService extends GetxService {
     return result;
   }
   
-  checkIsExpired(JSON item) {
+  checkEventExpired(JSON item) {
     var addCount = 0;
     var today = DateTime.parse(DATE_STR(DateTime.now()));
     if (JSON_NOT_EMPTY(item['timeData'])) {
@@ -1088,6 +1088,117 @@ class ApiService extends GetxService {
     return null;
   }
 
+  //----------------------------------------------------------------------------------------
+  //
+  //    SPONSOR function..
+  //
+
+  final SponsorCollection = 'data_sponsor';
+
+  Future<JSON?> getSponsorFromId(String sponsorId) async {
+    JSON result = {};
+    var snapshot = await firestore!.collection(SponsorCollection).doc(sponsorId).get();
+    if (snapshot.data() != null) {
+      result = FROM_SERVER_DATA(snapshot.data());
+      LOG('--> getSponsorFromId Result : $result');
+      return result;
+    }
+    return null;
+  }
+
+  Future<JSON> getSponsorFromTargetId(String eventId, {DateTime? lastTime, int limit = 0}) async {
+    JSON result = {};
+    var ref = firestore!.collection(SponsorCollection);
+    var query = ref
+        .where('status', isEqualTo: 1)
+        .where('eventId', isEqualTo: eventId);
+
+    if (lastTime != null) {
+      var startTime = Timestamp.fromDate(lastTime);
+      query = query.where('createTime', isLessThan: startTime);
+    }
+    if (limit > 0) {
+      query = query.limit(limit);
+    }
+    var snapshot = await query.orderBy('createTime', descending: true)
+        .get();
+
+    for (var doc in snapshot.docs) {
+      var item = FROM_SERVER_DATA(doc.data());
+      result[item['id']] = item;
+    }
+    result = JSON_CREATE_TIME_SORT_DESC(result);
+    LOG('--> getSponsorFromTargetId Result [$eventId] : ${result.length}');
+    return result;
+  }
+
+  Future<JSON> getSponsorFromUserId(String userId, {var isAuthor = false, DateTime? lastTime, int limit = 0}) async {
+    LOG('--> getSponsorFromUserId : $userId / $lastTime / $isAuthor / $limit');
+    JSON result = {};
+    try {
+      var ref = firestore!.collection(SponsorCollection);
+      var query = ref.where('status', isEqualTo: 1);
+      if (!isAuthor) {
+        query = query.where('showStatus', isEqualTo: 1);
+      }
+      if (lastTime != null) {
+        var startTime = Timestamp.fromDate(lastTime);
+        query = query.where('createTime', isLessThan: startTime);
+      }
+      if (limit > 0) {
+        query = query.limit(limit);
+      }
+      query = query.where('userId', isEqualTo: userId);
+      var snapshot = await query.orderBy('createTime', descending: true).get();
+      for (var doc in snapshot.docs) {
+        result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
+      }
+      LOG('--> getSponsorFromUserId result : ${result.length}');
+    } catch (e) {
+      LOG('--> getSponsorFromUserId error : ${e.toString()}');
+    }
+    return result;
+  }
+
+  Future<JSON> addSponsorItem(JSON addData) async {
+    var ref = firestore!.collection(SponsorCollection);
+    if (STR(addData["id"]).isEmpty) {
+      addData["id"] = ref.doc().id;
+      addData["createTime"] = CURRENT_SERVER_TIME();
+    }
+    addData["updateTime"] = CURRENT_SERVER_TIME();
+    await ref.doc(addData['id']).set(addData);
+    LOG('--> addSponsorItem : ${addData['id']}');
+    return FROM_SERVER_DATA(addData);
+  }
+
+  Future<bool> setSponsorStatus(String eventId, int status) async {
+    // LOG('------> setSponsorStatus : $eventId / $status');
+    try {
+      var ref = firestore!.collection(SponsorCollection);
+      await ref.doc(eventId).update({
+        'status': status,
+      });
+      return true;
+    } catch (e) {
+      LOG('--> setSponsorStatus error : $e');
+    }
+    return false;
+  }
+
+  Future<bool> setSponsorShowStatus(String eventId, int status) async {
+    // LOG('------> setEventShowStatus : $eventId / $status');
+    try {
+      var ref = firestore!.collection(SponsorCollection);
+      await ref.doc(eventId).update({
+        'showStatus': status,
+      });
+      return true;
+    } catch (e) {
+      LOG('--> setSponsorShowStatus error : $e');
+    }
+    return false;
+  }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //

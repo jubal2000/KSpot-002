@@ -28,7 +28,7 @@ Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
       Function(int)? onChangeCount
     }) {
   var iconColor0 = enableColor ?? Theme.of(context).colorScheme.error;
-  var iconColor1 = disableColor ?? Theme.of(context).colorScheme.error;
+  var iconColor1 = disableColor ?? Theme.of(context).primaryColor;
   var api = Get.find<ApiService>();
 
   return FutureBuilder(

@@ -35,6 +35,8 @@ class SetupContentScreen extends StatelessWidget {
                   shrinkWrap: true,
                   children: [
                     viewModel.showContentSetting(),
+                    // SizedBox(height: 20),
+                    // viewModel.showThemeSetting(),
                   ],
                 ),
               );

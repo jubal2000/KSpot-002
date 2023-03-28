@@ -125,18 +125,15 @@ class ThemeNotifier with ChangeNotifier {
 
   var _themeData = ThemeData();
   ThemeData getTheme() => _themeData;
-  int getThemeIndex() => _schemeIndex;
-  bool getMode() => _schemeMode;
+  int  getThemeIndex() => themeIndex;
+  bool getMode() => themeMode;
 
-  var _schemeIndex = 0;
-  var _schemeMode = true;
+  var themeIndex = FlexScheme.indigo.index;
+  var themeMode  = true;
 
   ThemeNotifier() {
-    AppData.currentThemeMode  = false;
-    AppData.currentThemeIndex = 0;
-    _schemeMode = false;
-    _themeData  = FlexThemeData.dark(
-      scheme: schemeList[_schemeIndex],
+    _themeData = FlexThemeData.light(
+      scheme: schemeList[themeIndex],
       surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
       blendLevel: 15,
       appBarStyle: FlexAppBarStyle.surface,
@@ -151,17 +148,15 @@ class ThemeNotifier with ChangeNotifier {
           .notoSans()
           .fontFamily,
     );
-    notifyListeners();
-    // StorageManager.readData('SchemeIndex').then((value1) {
-    //   StorageManager.readData('SchemeMode').then((value2) {
-    //     print('value read from storage: $value1 / $value2');
-    //     _schemeMode  = BOL(value2 ?? '1');
-    //     _schemeIndex = value1 ?? 0;
-    //     AppData.currentThemeMode  = _schemeMode;
-    //     AppData.currentThemeIndex = _schemeIndex;
-    //     if (--_schemeIndex < 0) _schemeIndex = schemeList.length - 1;
-    //     setFlexSchemeRotate();
-    //     // notifyListeners();
+    // notifyListeners();
+    // StorageManager.readData('themeIndex').then((value1) {
+    //   StorageManager.readData('themeMode').then((value2) {
+    //     LOG('--> local theme data : $value1 / $value2');
+    //     themeMode  = BOL(value2 ?? '1');
+    //     themeIndex = value1 ?? 0;
+    //     AppData.currentThemeMode  = themeMode;
+    //     AppData.currentThemeIndex = themeIndex;
+    //     notifyListeners();
     //   });
     // });
   }
@@ -189,14 +184,14 @@ class ThemeNotifier with ChangeNotifier {
   }
 
   String setFlexSchemeRotate() {
-    if (++_schemeIndex >= schemeList.length) _schemeIndex = 0;
-    return refreshFlexScheme(_schemeIndex);
+    if (++themeIndex >= schemeList.length) themeIndex = 0;
+    return refreshFlexScheme();
   }
 
-  refreshFlexScheme(index) {
-    if (_schemeMode) {
+  refreshFlexScheme() {
+    if (themeMode) {
       _themeData = FlexThemeData.light(
-        scheme: schemeList[index],
+        scheme: schemeList[themeIndex],
         surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
         blendLevel: 15,
         appBarStyle: FlexAppBarStyle.surface,
@@ -213,7 +208,7 @@ class ThemeNotifier with ChangeNotifier {
       );
     } else {
       _themeData = FlexThemeData.dark(
-        scheme: schemeList[index],
+        scheme: schemeList[themeIndex],
         surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
         blendLevel: 15,
         appBarStyle: FlexAppBarStyle.surface,
@@ -229,32 +224,50 @@ class ThemeNotifier with ChangeNotifier {
             .fontFamily,
       );
     }
-    AppData.currentThemeIndex = index;
-    var title = schemeTextList[index];
-    StorageManager.saveData('SchemeIndex', index);
     notifyListeners();
+    var title = schemeTextList[themeIndex];
     return title;
   }
 
   String toggleSchemeMode() {
-    _schemeMode = !_schemeMode;
-    if (--_schemeIndex < 0) _schemeIndex = schemeList.length-1;
-    StorageManager.saveData('SchemeMode', _schemeMode ? '1' : '0');
+    themeMode = !themeMode;
+    if (--themeIndex < 0) themeIndex = schemeList.length-1;
+    StorageManager.saveData('SchemeMode', themeMode ? '1' : '0');
     var theme = setFlexSchemeRotate();
-    AppData.currentThemeMode = _schemeMode;
+    AppData.currentThemeMode = themeMode;
     LOG('--> setModeRotate : ${AppData.currentThemeMode}');
-    return _schemeMode ? 'LIGHT MODE - $theme' : 'DARK MODE - $theme';
+    return themeMode ? 'LIGHT MODE - $theme' : 'DARK MODE - $theme';
+  }
+
+  void setMode(bool mode) {
+    themeMode = mode;
+    StorageManager.saveData('themeMode', mode ? '1' : '');
+    notifyListeners();
+  }
+
+  void setIndex(int index) {
+    themeIndex = index;
+    StorageManager.saveData('themeIndex', index);
+    notifyListeners();
+  }
+  
+  void setTheme(bool mode, int index) {
+    themeMode  = mode;
+    themeIndex = index;
+    StorageManager.saveData('themeMode', mode ? '1' : '');
+    StorageManager.saveData('themeIndex', index);
+    refreshFlexScheme();
   }
 
   void setDarkMode() async {
     _themeData = darkTheme;
-    StorageManager.saveData('themeMode', 'dark');
+    StorageManager.saveData('themeMode', '');
     notifyListeners();
   }
 
   void setLightMode() async {
     _themeData = lightTheme;
-    StorageManager.saveData('themeMode', 'light');
+    StorageManager.saveData('themeMode', '1');
     notifyListeners();
   }
 }
@@ -296,7 +309,7 @@ ItemReadyColor(BuildContext context) {
 }
 
 DialogBackColor(BuildContext context) {
-  return Theme.of(context).colorScheme.secondaryContainer;
+  return Colors.white;
 }
 
 ///////////////////////////////////////////////////////////
@@ -319,6 +332,10 @@ DialogTitleStyle(BuildContext context) {
 
 DialogDescStyle(BuildContext context) {
   return TextStyle(fontSize: 14, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600);
+}
+
+DialogDescBoldStyle(BuildContext context) {
+  return TextStyle(fontSize: 14, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w800);
 }
 
 DialogDescErrorStyle(BuildContext context) {

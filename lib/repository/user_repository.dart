@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/models/sponsor_model.dart';
 import 'package:kspot_002/services/api_service.dart';
 
 import '../data/app_data.dart';
@@ -77,7 +78,6 @@ class UserRepository {
       });
     }
   }
-
 
   addReportItem(context, String type, JSON targetItem, [Function(JSON)? onResult]) {
     if (!AppData.isMainActive) return;
@@ -270,10 +270,24 @@ class UserRepository {
     return result;
   }
 
+  Future<Map<String, SponsorModel>> getSponsorFromUserId(String userId, {bool isAuthor = false, DateTime? lastTime}) async {
+    Map<String, SponsorModel> result = {};
+    try {
+      final response = await api.getSponsorFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, limit: PROFILE_CONTENT_MAX);
+      if (JSON_NOT_EMPTY(response)) {
+        for (var item in response.entries) {
+          result[item.key] = SponsorModel.fromJson(item.value);
+        }
+      }
+    } catch (e) {
+      LOG('--> getSponsorFromUserId error : ${e.toString()}');
+    }
+    return result;
+  }
+
   Future<JSON?> addFollowTarget(JSON targetInfo) async {
     return await api.addFollowTarget(AppData.userInfo.toJson(), targetInfo);
   }
-
 
   Future<JSON> getReportData() async {
     return await api.getReportData(AppData.USER_ID);

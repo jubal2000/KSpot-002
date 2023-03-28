@@ -7,7 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/models/place_model.dart';
 import 'package:kspot_002/repository/event_repository.dart';
-import 'package:kspot_002/view/event/event_item.dart';
+import 'package:kspot_002/widget/event_item.dart';
 
 import '../data/app_data.dart';
 import '../data/common_sizes.dart';
@@ -272,7 +272,6 @@ class EventViewModel extends ChangeNotifier {
       addItem ??= EventCardItem(
         EventModel.fromJson(item),
         itemHeight: itemHeight,
-        isShowTheme: false,
         onShowDetail: (key, status) {
           showEventItemDetail(item);
         },

@@ -88,6 +88,6 @@ class EventRepository {
   }
 
   checkIsExpired(EventModel eventModel) {
-    return api.checkIsExpired(eventModel.toJson());
+    return api.checkEventExpired(eventModel.toJson());
   }
 }

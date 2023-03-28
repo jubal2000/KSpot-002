@@ -12,7 +12,7 @@ import '../../data/theme_manager.dart';
 import '../../models/event_model.dart';
 import '../../utils/utils.dart';
 import '../../widget/search_widget.dart';
-import 'event_item.dart';
+import '../../widget/event_item.dart';
 
 enum EventListType {
   events,
@@ -21,11 +21,12 @@ enum EventListType {
 }
 
 class EventListScreen extends StatefulWidget {
-  EventListScreen({Key? key, this.isPreview = false, this.isSelectable = false, this.selectMax = 1, this.listSelectData}) : super(key: key);
+  EventListScreen({Key? key, this.isPreview = false, this.isSelectable = false, this.isSelectMy = true, this.selectMax = 1, this.listSelectData}) : super(key: key);
 
   bool isPreview;
   bool isSelectable;
-  int selectMax;
+  bool isSelectMy;
+  int  selectMax;
   List<String>? listSelectData;
 
   @override
@@ -47,17 +48,15 @@ class EventListState extends State<EventListScreen> {
     ];
   }
 
-  onSelected(String itemId) {
-    LOG('--> onSelected : $itemId / ${selectList.length}');
-    if (!selectList.contains(itemId) && selectList.length < widget.selectMax) {
-      selectList.add(itemId);
+  onSelected(EventModel eventItem) {
+    LOG('--> onSelected : ${eventItem.id} / ${selectList.length}');
+    if (!selectList.contains(eventItem.id) && selectList.length < widget.selectMax) {
+      selectList.add(eventItem.id);
     }
     if (widget.selectMax == 1) {
-      LOG('--> Get.back : ${selectList.length}');
-      Get.back(result: selectList);
+      Get.back(result: eventItem);
     } else {
-      setState(() {
-      });
+      setState(() {});
     }
   }
 
@@ -86,24 +85,26 @@ class EventListState extends State<EventListScreen> {
                 title: Text(widget.isSelectable ? 'Event select'.tr : 'Event list'.tr, style: AppBarTitleStyle(context)),
                 titleSpacing: 0,
               ),
-              body: DefaultTabController(
-                    length: _tabList.length,
-                    child: Scaffold(
-                      appBar: TabBar(
-                        padding: EdgeInsets.symmetric(horizontal: 50),
-                        labelColor: Theme.of(context).primaryColor,
-                        labelStyle: ItemTitleStyle(context),
-                        unselectedLabelColor: Theme.of(context).hintColor,
-                        unselectedLabelStyle: ItemTitleStyle(context),
-                        indicatorColor: Theme.of(context).primaryColor,
-                        tabs: _tabList.map((item) => item.getTab()).toList(),
-                      ),
-                      body: TabBarView(
-                          physics: NeverScrollableScrollPhysics(),
-                          children: _tabList
-                      ),
-                    )
-                  )
+              body: EventListTab(0, 'EVENT'.tr,
+                isSelectable: widget.isSelectable, selectMax: widget.selectMax, isSelectMy: widget.isSelectMy, onSelected: onSelected),
+              // body: DefaultTabController(
+              //     length: _tabList.length,
+              //     child: Scaffold(
+              //       appBar: TabBar(
+              //         padding: EdgeInsets.symmetric(horizontal: 50),
+              //         labelColor: Theme.of(context).primaryColor,
+              //         labelStyle: ItemTitleStyle(context),
+              //         unselectedLabelColor: Theme.of(context).hintColor,
+              //         unselectedLabelStyle: ItemTitleStyle(context),
+              //         indicatorColor: Theme.of(context).primaryColor,
+              //         tabs: _tabList.map((item) => item.getTab()).toList(),
+              //       ),
+              //       body: TabBarView(
+              //         physics: NeverScrollableScrollPhysics(),
+              //         children: _tabList
+              //       ),
+              //     )
+              //   )
               )
             )
           );
@@ -115,15 +116,16 @@ class EventListState extends State<EventListScreen> {
 
 class EventListTab extends StatefulWidget {
   EventListTab(this.eventTab, this.tabTitle,
-      {Key? key, this.topHeight = 40, this.isSelectable = false, this.selectMax = 9, this.onSelected}) : super(key: key);
+      {Key? key, this.topHeight = 40, this.isSelectable = false, this.isSelectMy = true, this.selectMax = 9, this.onSelected}) : super(key: key);
 
   int eventTab;
   String tabTitle;
   double topHeight;
   bool isSelectable;
-  int selectMax;
+  bool isSelectMy;
+  int  selectMax;
 
-  Function(String)? onSelected;
+  Function(EventModel)? onSelected;
 
   Widget getTab() {
     return Tab(text: tabTitle, height: topHeight);
@@ -161,7 +163,7 @@ class EventListTabState extends State<EventListTab> {
     // add normal event..
     if (cache.eventData != null) {
       for (var item in cache.eventData!.entries) {
-        if (item.value.type == widget.eventTab && checkSearch(item.value)) {
+        if (item.value.type == widget.eventTab && (!widget.isSelectMy || item.value.userId == AppData.USER_ID) && checkSearch(item.value)) {
           if (!showData.containsKey(item.key)) {
             showData[item.key] = item.value;
           }
@@ -259,10 +261,10 @@ class EventListTabState extends State<EventListTab> {
                     );
                   } else {
                     return EventCardItem(showData[itemKey]!,
-                      isShowHomeButton: false, isShowPlaceButton: true, isShowTheme: false,
+                      isShowHomeButton: false, isShowPlaceButton: true,
                       isSelectable: widget.isSelectable, selectMax: widget.selectMax, onShowDetail: (key, status) {
                           LOG('--> EventCardItem onShowDetail : $itemKey');
-                        if (widget.onSelected != null) widget.onSelected!(key);
+                        if (widget.onSelected != null) widget.onSelected!(showData[itemKey]!);
                         // setState(() {
                         //   showData[itemKey] = updateData;
                         // });

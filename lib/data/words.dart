@@ -110,7 +110,7 @@ class Words extends Translations {
       'complete': '완료',
       'Sponsorship has already started and cannot be deleted': '이미 후원이 시작되어 삭제할 수 없습니다',
       'Show sponsorship': '공개 후원',
-      'Sponsor the target event\n(shown first in order of most sponsored)': '대상 이벤트를 후원합니다\n(후원을 많이 받은 순서대로 앞쪽에 표시됩니다)',
+      'Sponsor the target event\n(If event is sponsored, it may appear first)': '대상 이벤트를 후원합니다\n(이벤트가 후원을 받으면 먼저 표시될 수 있습니다)',
 
       // main_event
       'There are no events': '이벤트가 없습니다',

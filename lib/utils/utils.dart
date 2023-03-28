@@ -1506,6 +1506,7 @@ TextCheckBox(BuildContext context, String title, bool value,
       var subTitle = '',
       var padding = EdgeInsets.zero,
       var height = 30.0,
+      var textSpace = 10.0,
       var isExpanded = true,
       Color? textColor,
       Function(bool)? onChanged
@@ -1528,7 +1529,7 @@ TextCheckBox(BuildContext context, String title, bool value,
                 title,
                 style: TextStyle(fontSize: 14, color: textColor ?? Theme.of(context).primaryColor.withOpacity(0.5), fontWeight: FontWeight.w800)
               ),
-              SizedBox(width: 10),
+              SizedBox(width: textSpace),
             ],
             Switch(
               value: value,

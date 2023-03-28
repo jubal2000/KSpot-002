@@ -61,7 +61,6 @@ class UserViewModel extends ChangeNotifier {
   var tabListHeight = 0.0;
   var isMyProfile = false;
   var isDisableOpen = false;
-  var isLastContent = false;
 
   // event, story list..
   final listItemShowMax = 5;
@@ -72,6 +71,7 @@ class UserViewModel extends ChangeNotifier {
   Future<JSON>? listDataInit;
   List<Map<String, Widget>> showWidgetList = List.generate(ProfileContentType.max.index, (index) => {});
   List<DateTime?> showLastTime = List.generate(ProfileContentType.max.index, (index) => null);
+  List<bool> isLastContent = List.generate(ProfileContentType.max.index, (index) => false);
 
   Map<String, EventModel> eventData = {};
   Map<String, StoryModel> storyData = {};
@@ -129,7 +129,7 @@ class UserViewModel extends ChangeNotifier {
     if (eventNewData.isNotEmpty) {
       eventData.addAll(eventNewData);
     } else {
-      isLastContent = true;
+      isLastContent[ProfileContentType.event.index] = true;
       if (isShowEmpty) {
         ShowErrorToast('No more list'.tr);
       }
@@ -151,7 +151,7 @@ class UserViewModel extends ChangeNotifier {
     if (storyNewData.isNotEmpty) {
       storyData.addAll(storyNewData);
     } else {
-      isLastContent = true;
+      isLastContent[ProfileContentType.story.index] = true;
       if (isShowEmpty) {
         ShowErrorToast('No more list'.tr);
       }
@@ -173,7 +173,7 @@ class UserViewModel extends ChangeNotifier {
     if (newData.isNotEmpty) {
       sponsorData.addAll(newData);
     } else {
-      isLastContent = true;
+      isLastContent[ProfileContentType.sponsor.index] = true;
       if (isShowEmpty) {
         ShowErrorToast('No more list'.tr);
       }
@@ -649,7 +649,7 @@ class UserViewModel extends ChangeNotifier {
 
   reloadContentData(ProfileContentType type, [bool isShowEmpty = true]) async {
     LOG('--> reloadContentData : $type / $isLastContent / ${AppData.isMainActive}');
-    if (isLastContent || !AppData.isMainActive) return;
+    if (isLastContent[type.index] || !AppData.isMainActive) return;
     AppData.isMainActive = false;
     showLoadingToast(context!);
     await Future.delayed(Duration(seconds: 1));

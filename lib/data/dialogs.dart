@@ -1928,7 +1928,7 @@ Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel ev
       return PointerInterceptor(
         child: AlertDialog(
           title: Text('Event sponsor'.tr, style: dialogTitleTextStyle(context)),
-          titlePadding: EdgeInsets.all(20),
+          titlePadding: EdgeInsets.fromLTRB(20, 20, 0, 10),
           insetPadding: EdgeInsets.all(20),
           actionsPadding: EdgeInsets.all(10),
           contentPadding: EdgeInsets.symmetric(horizontal: 20),
@@ -1944,9 +1944,9 @@ Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel ev
                   builder: (context, setState) {
                     return ListBody(
                       children: [
-                        Text('Sponsor the target event\n(shown first in order of most sponsored)'.tr, style: DialogDescExStyle(context)),
+                        Text('Sponsor the target event\n(If event is sponsored, it may appear first)'.tr, style: DialogDescExStyle(context)),
                         SizedBox(height: 10),
-                        EventCardItem(event, itemHeight: 100.0, isShowLike: false),
+                        EventCardItem(event, itemHeight: 105.0, isShowLike: false),
                         SizedBox(height: 10),
                         SubTitle(context, 'Sponsored period'.tr, height: 40),
                         Row(
@@ -1978,21 +1978,31 @@ Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel ev
                             ),
                           ]
                         ),
-                        SubTitle(context, 'Sponsored period'.tr, height: 40),
-                        Container(
-                          width: Get.width * 0.4,
-                          child: TextFormField(
-                            controller: timeTextController,
-                            decoration: inputLabel(context, 'Start time'.tr, ''),
-                            maxLines: 1,
-                            readOnly: true,
-                            textAlign: TextAlign.center,
-                            onTap: () {
-                              setTimeChange(setState);
-                            },
-                          )
-                        ),
                         SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: timeTextController,
+                                decoration: inputLabel(context, 'Start time'.tr, ''),
+                                maxLines: 1,
+                                readOnly: true,
+                                textAlign: TextAlign.center,
+                                onTap: () {
+                                  setTimeChange(setState);
+                                },
+                              )
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Text('   '),
+                            ),
+                            Expanded(
+                              child: Container()
+                            ),
+                          ]
+                        ),
+                        SizedBox(height: 30),
                         Text('${'Holding credits:'.tr} $max', style: DialogDescBoldStyle(context)),
                         SizedBox(height: 20),
                         Row(
@@ -2007,6 +2017,8 @@ Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel ev
                                 });
                               }),
                             ),
+                            SizedBox(width: 10),
+                            Text('x ${'1day'.tr}', style: DialogDescBoldStyle(context)),
                           ],
                         ),
                         SizedBox(height: 10),
@@ -2014,13 +2026,13 @@ Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel ev
                           'Show sponsorship'.tr,
                           showStatus == 1,
                           isExpanded: false,
+                          textSpace: 20.0,
                           textColor: Theme.of(context).primaryColor,
                           onChanged: (status) {
                             setState(() {
                               showStatus = status ? 1 : 0;
                             });
                         }),
-                        SizedBox(height: 10),
                       ],
                     );
                   }

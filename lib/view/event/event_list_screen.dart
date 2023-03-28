@@ -43,8 +43,8 @@ class EventListState extends State<EventListScreen> {
 
   refreshTabData() {
     _tabList = [
-      EventListTab(0, 'EVENT'.tr, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
-      EventListTab(1, 'CLASS'.tr, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
+      EventListTab(0, 'BOOKMARK'.tr, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
+      EventListTab(1, 'ALL'.tr     , isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
     ];
   }
 
@@ -85,26 +85,26 @@ class EventListState extends State<EventListScreen> {
                 title: Text(widget.isSelectable ? 'Event select'.tr : 'Event list'.tr, style: AppBarTitleStyle(context)),
                 titleSpacing: 0,
               ),
-              body: EventListTab(0, 'EVENT'.tr,
-                isSelectable: widget.isSelectable, selectMax: widget.selectMax, isSelectMy: widget.isSelectMy, onSelected: onSelected),
-              // body: DefaultTabController(
-              //     length: _tabList.length,
-              //     child: Scaffold(
-              //       appBar: TabBar(
-              //         padding: EdgeInsets.symmetric(horizontal: 50),
-              //         labelColor: Theme.of(context).primaryColor,
-              //         labelStyle: ItemTitleStyle(context),
-              //         unselectedLabelColor: Theme.of(context).hintColor,
-              //         unselectedLabelStyle: ItemTitleStyle(context),
-              //         indicatorColor: Theme.of(context).primaryColor,
-              //         tabs: _tabList.map((item) => item.getTab()).toList(),
-              //       ),
-              //       body: TabBarView(
-              //         physics: NeverScrollableScrollPhysics(),
-              //         children: _tabList
-              //       ),
-              //     )
-              //   )
+              // body: EventListTab(0, 'EVENT'.tr,
+              //   isSelectable: widget.isSelectable, selectMax: widget.selectMax, isSelectMy: widget.isSelectMy, onSelected: onSelected),
+              body: DefaultTabController(
+                  length: _tabList.length,
+                  child: Scaffold(
+                    appBar: TabBar(
+                      padding: EdgeInsets.symmetric(horizontal: 50),
+                      labelColor: Theme.of(context).primaryColor,
+                      labelStyle: ItemTitleStyle(context),
+                      unselectedLabelColor: Theme.of(context).hintColor,
+                      unselectedLabelStyle: ItemTitleStyle(context),
+                      indicatorColor: Theme.of(context).primaryColor,
+                      tabs: _tabList.map((item) => item.getTab()).toList(),
+                    ),
+                    body: TabBarView(
+                      physics: NeverScrollableScrollPhysics(),
+                      children: _tabList
+                    ),
+                  )
+                )
               )
             )
           );

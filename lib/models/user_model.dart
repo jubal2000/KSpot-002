@@ -59,6 +59,9 @@ class UserModel {
   List<OptionData>?   optionData;
   List<OptionData>?   optionPush;
 
+  @JsonKey(ignore: true)
+  DateTime? cacheTime;    // for local cache refresh time..
+
   UserModel({
     required this.id,
     required this.status,

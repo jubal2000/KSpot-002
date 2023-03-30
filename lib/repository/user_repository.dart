@@ -14,6 +14,7 @@ import '../utils/utils.dart';
 import '../models/user_model.dart';
 
 class UserRepository {
+  final cache = Get.find<CacheService>();
   final api = Get.find<ApiService>();
 
   //----------------------------------------------------------------------------
@@ -180,13 +181,14 @@ class UserRepository {
 
   Future<UserModel?> getUserInfo(String userId) async {
     try {
-      if (AppData.userData.containsKey(userId)) return AppData.userData[userId];
+      var cacheItem = cache.getUserItem(userId);
+      if (cacheItem != null) return cacheItem;
       final response = await api.getUserInfoFromId(userId);
       if (response != null) {
         LOG("--> getUserInfo result: ${response.toString()}");
-        final userData = UserModel.fromJson(FROM_SERVER_DATA(response));
-        AppData.userData[userData.id] = userData;
-        return userData;
+        final addItem = UserModel.fromJson(FROM_SERVER_DATA(response));
+        cache.setUserItem(addItem);
+        return addItem;
       }
     } catch (e) {
       LOG("--> getUserInfo error: $e");

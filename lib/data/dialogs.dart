@@ -2546,7 +2546,7 @@ Future<JSON?> showEditCommentDialog(BuildContext context, CommentType type, Stri
                   TextButton(
                     child: Text('Cancel'.tr),
                     onPressed: () {
-                      Navigator.pop(_context, {});
+                      Navigator.pop(_context);
                     },
                   ),
                   TextButton(

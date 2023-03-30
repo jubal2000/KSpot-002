@@ -84,6 +84,12 @@ class EventModel {
   @JsonKey(ignore: true)
   int sortIndex = 0;
 
+  @JsonKey(ignore: true)
+  bool bookmarked = false;
+
+  @JsonKey(ignore: true)
+  DateTime? cacheTime;    // for local cache refresh time..
+
   EventModel({
     required this.id,
     required this.status,

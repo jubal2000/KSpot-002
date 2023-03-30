@@ -1,3 +1,4 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -29,9 +30,9 @@ import 'data/words.dart';
 
 Future<void> main() async {
   await GetStorage.init();
+  final cache = await Get.putAsync(() => CacheService().init());
   final api   = await Get.putAsync(() => ApiService().init());
   final fire  = await Get.putAsync(() => FirebaseService().init());
-  final cache = await Get.putAsync(() => CacheService().init());
   final auth  = await Get.putAsync(() => AuthService().init());
   final local = await Get.putAsync(() => LocalService().init());
 
@@ -89,9 +90,12 @@ class MyApp extends StatelessWidget {
               Locale('ko', 'KR'),
               Locale('en', 'US'),
             ],
-            theme: theme.getTheme(),
-            // darkTheme: darkTheme,
-            // themeMode: ThemeMode.system,
+            // theme: theme.getTheme(),
+            theme: FlexThemeData.light(scheme: FlexScheme.redWine),
+            // The Mandy red, dark theme.
+            darkTheme: FlexThemeData.dark(scheme: FlexScheme.redWine),
+            // Use dark or light theme based on system setting.
+            themeMode: ThemeMode.system,
             // builder: (context, _) {
             //   var child = _!;
             //   final navigatorKey = GlobalKey<NavigatorState>();

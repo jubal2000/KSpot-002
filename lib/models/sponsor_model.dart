@@ -26,6 +26,9 @@ class SponsorModel {
   DateTime updateTime;    // 수정 시간
   DateTime createTime;    // 생성 시간
 
+  @JsonKey(ignore: true)
+  DateTime? cacheTime;    // for local cache refresh time..
+
   SponsorModel({
     required this.id,
     required this.status,

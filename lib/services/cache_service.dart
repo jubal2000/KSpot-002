@@ -5,26 +5,41 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../models/chat_model.dart';
+import '../models/event_group_model.dart';
 import '../models/event_model.dart';
 import '../models/message_model.dart';
+import '../models/place_model.dart';
+import '../models/sponsor_model.dart';
 import '../models/story_model.dart';
+import '../models/user_model.dart';
 import '../utils/utils.dart';
 import '../view/message/message_group_item.dart';
 import 'local_service.dart';
 
 class CacheService extends GetxService {
-  Map<String, EventModel>? eventData;
+  Map<String, UserModel> userData = {};
+  Map<String, Widget> userListItemData = {};
+
+  Map<String, PlaceModel> placeData = {};
+  Map<String, Widget> placeListItemData = {};
+
+  Map<String, EventModel> eventData = {};
   Map<String, Widget> eventListItemData = {};
   Map<String, Widget> eventMapItemData = {};
 
-  Map<String, StoryModel>? storyData;
+  Map<String, EventGroupModel> eventGroupData = {};
+
+  Map<String, StoryModel> storyData = {};
   Map<String, Widget> storyListItemData = {};
 
-  Map<String, MessageModel>? messageData;
-  Map<String, MessageGroupModel>? messageGroupData;
+  Map<String, MessageModel> messageData = {};
+  Map<String, MessageGroupModel> messageGroupData = {};
 
   Map<String, ChatModel> chatData = {};
   Map<String, ChatRoomModel> chatRoomData = {};
+
+  Map<String, SponsorModel> sponsorData = {};
+  Map<String, Widget> sponsorListItemData = {};
 
   JSON reportData = {};
   JSON blockData = {};
@@ -37,39 +52,229 @@ class CacheService extends GetxService {
   Map<String, JSON> chatRoomFlagData = {};
 
   Future<CacheService> init() async {
+    userData = {};
+    userListItemData = {};
+    placeData = {};
+    placeListItemData = {};
+    eventData = {};
     eventListItemData = {};
-    eventMapItemData  = {};
+    eventMapItemData = {};
+    eventGroupData = {};
+    storyData = {};
     storyListItemData = {};
-    chatRoomData      = {};
+    messageData = {};
+    messageGroupData = {};
+    chatData = {};
+    chatRoomData = {};
+    sponsorData = {};
+    sponsorListItemData = {};
+    reportData = {};
+    blockData = {};
+    chatItemData = {};
+
     await loadChatRoomFlag(); // from local..
     return this;
   }
 
-  setEventItem(EventModel addItem) {
-    eventData ??= {};
-    eventData![addItem.id] = addItem;
-    eventListItemData.remove(addItem.id);
-    eventMapItemData.remove(addItem.id);
-    LOG('--> setEventItem [${addItem.id}] : ${eventData![addItem.id]!.title} / ${eventData!.length}');
+  setUserItem(UserModel addItem, [var isRemoveItem = true]) {
+    addItem.cacheTime = DateTime.now();
+    userData[addItem.id] = addItem;
+    if (isRemoveItem) {
+      userListItemData.remove(addItem.id);
+    }
+    // LOG('--> setUserItem [${addItem.id}] : ${eventData![addItem.id]!.title} / ${eventData!.length}');
   }
 
-  setStoryItem(StoryModel addItem) {
-    storyData ??= {};
-    storyData![addItem.id] = addItem;
-    storyListItemData.remove(addItem.id);
-    LOG('--> setStoryItem [${addItem.id}] : ${storyData![addItem.id]!.desc} / ${storyData!.length}');
+  setUserData(JSON addData) {
+    for (var item in addData.entries) {
+      setUserItem(item.value);
+    }
+  }
+
+  setPlaceItem(PlaceModel addItem, [var isRemoveItem = true]) {
+    addItem.cacheTime = DateTime.now();
+    placeData[addItem.id] = addItem;
+    if (isRemoveItem) {
+      placeListItemData.remove(addItem.id);
+    }
+    // LOG('--> setPlaceItem [${addItem.id}] : ${eventData![addItem.id]!.title} / ${eventData!.length}');
+  }
+
+  setPlaceData(JSON addData) {
+    for (var item in addData.entries) {
+      setPlaceItem(item.value);
+    }
+  }
+
+  setEventItem(EventModel addItem, [var isRemoveItem = true]) {
+    addItem.cacheTime = DateTime.now();
+    eventData[addItem.id] = addItem;
+    if (isRemoveItem) {
+      eventListItemData.remove(addItem.id);
+      eventMapItemData.remove(addItem.id);
+    }
+    // LOG('--> setEventItem [${addItem.id}] : ${eventData![addItem.id]!.title} / ${eventData!.length}');
+  }
+
+  setEventData(JSON addData) {
+    for (var item in addData.entries) {
+      setEventItem(item.value);
+    }
+  }
+
+  setEventGroupItem(EventGroupModel addItem, [var isRemoveItem = true]) {
+    addItem.cacheTime = DateTime.now();
+    eventGroupData[addItem.id] = addItem;
+    // LOG('--> setEventItem [${addItem.id}] : ${eventData![addItem.id]!.title} / ${eventData!.length}');
+  }
+
+  setEventGroupData(JSON addData) {
+    for (var item in addData.entries) {
+      setEventGroupItem(item.value);
+    }
+  }
+
+  setStoryItem(StoryModel addItem, [var isRemoveItem = true]) {
+    addItem.cacheTime = DateTime.now();
+    storyData[addItem.id] = addItem;
+    if (isRemoveItem) {
+      storyListItemData.remove(addItem.id);
+    }
+    // LOG('--> setStoryItem [${addItem.id}] : ${storyData![addItem.id]!.desc} / ${storyData!.length}');
+  }
+
+  setStoryData(JSON addData) {
+    for (var item in addData.entries) {
+      setStoryItem(item.value);
+    }
   }
 
   setMessageItem(MessageModel addItem) {
-    messageData ??= {};
-    messageData![addItem.id] = addItem;
-    storyListItemData.remove(addItem.id);
+    addItem.cacheTime = DateTime.now();
+    messageData[addItem.id] = addItem;
     // LOG('--> setMessageItem [${addItem.id}] : ${messageData![addItem.id]!.desc} / ${messageData!.length}');
   }
 
+  setMessageData(JSON addData) {
+    for (var item in addData.entries) {
+      setMessageItem(item.value);
+    }
+  }
+  setMessageGroupItem(MessageGroupModel addItem) {
+    addItem.cacheTime = DateTime.now();
+    messageGroupData[addItem.id] = addItem;
+    // LOG('--> setMessageGroupItem [${addItem.id}] : ${messageGroupData![addItem.id]!.desc} / ${messageGroupData!.length}');
+  }
+
+  setMessageGroupData(JSON addData) {
+    for (var item in addData.entries) {
+      setMessageGroupItem(item.value);
+    }
+  }
+
   setChatItem(ChatModel addItem) {
+    addItem.cacheTime = DateTime.now();
     chatData[addItem.id] = addItem;
-    // LOG('--> setChatItem [${addItem.id}] : ${chatData![addItem.id]!.desc} / ${chatData!.length}');
+    // LOG('--> setMessageGroupItem [${addItem.id}] : ${messageGroupData![addItem.id]!.desc} / ${messageGroupData!.length}');
+  }
+
+  setChatData(JSON addData) {
+    for (var item in addData.entries) {
+      setChatItem(item.value);
+    }
+  }
+
+  setChatRoomItem(ChatRoomModel addItem, [bool isClearItem = false]) {
+    chatRoomData[addItem.id] = addItem;
+    if (isClearItem) {
+      chatItemData.clear();
+    }
+    LOG('--> setChatRoomItem [${addItem.id}] :  ${chatRoomData.length}');
+  }
+
+  setSponsorItem(SponsorModel addItem, [var isRemoveItem = true]) {
+    addItem.cacheTime = DateTime.now();
+    sponsorData[addItem.id] = addItem;
+    if (isRemoveItem) {
+      sponsorListItemData.remove(addItem.id);
+    }
+    // LOG('--> setSponsorItem [${addItem.id}] : ${messageData![addItem.id]!.desc} / ${messageData!.length}');
+  }
+
+  setSponsorData(JSON addData) {
+    for (var item in addData.entries) {
+      setSponsorItem(item.value);
+    }
+  }
+
+  getUserItem(String key) {
+    var cacheItem = userData[key];
+    if (cacheItem != null && cacheItem.cacheTime != null) {
+      if (cacheItem.cacheTime!.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
+        return null;
+      }
+    }
+    return cacheItem;
+  }
+
+  getPlaceItem(String key) {
+    var cacheItem = placeData[key];
+    if (cacheItem != null && cacheItem.cacheTime != null) {
+      if (cacheItem.cacheTime!.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
+        return null;
+      }
+    }
+    return cacheItem;
+  }
+
+  getEventItem(String key) {
+    var cacheItem = eventData[key];
+    if (cacheItem != null && cacheItem.cacheTime != null) {
+      if (cacheItem.cacheTime!.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
+        return null;
+      }
+    }
+    return cacheItem;
+  }
+
+  getEventGroupItem(String key) {
+    var cacheItem = eventGroupData[key];
+    if (cacheItem != null && cacheItem.cacheTime != null) {
+      if (cacheItem.cacheTime!.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
+        return null;
+      }
+    }
+    return cacheItem;
+  }
+
+  getStoryItem(String key) {
+    var cacheItem = storyData[key];
+    if (cacheItem != null && cacheItem.cacheTime != null) {
+      if (cacheItem.cacheTime!.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
+        return null;
+      }
+    }
+    return cacheItem;
+  }
+
+  getMessageItem(String key) {
+    var cacheItem = messageData[key];
+    if (cacheItem != null && cacheItem.cacheTime != null) {
+      if (cacheItem.cacheTime!.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
+        return null;
+      }
+    }
+    return cacheItem;
+  }
+
+  getSponsorItem(String key) {
+    var cacheItem = sponsorData[key];
+    if (cacheItem != null && cacheItem.cacheTime != null) {
+      if (cacheItem.cacheTime!.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
+        return null;
+      }
+    }
+    return cacheItem;
   }
 
   setChatItemData(JSON addData) {
@@ -91,14 +296,6 @@ class CacheService extends GetxService {
       setChatItem(ChatModel.fromJson(item));
     }
     // LOG('--> setChatItem : ${addData.length} / ${chatData!.length}');
-  }
-
-  setChatRoomItem(ChatRoomModel addItem, [bool isClearItem = false]) {
-    chatRoomData[addItem.id] = addItem;
-    if (isClearItem) {
-      chatItemData.clear();
-    }
-    LOG('--> setChatRoomItem [${addItem.id}] :  ${chatRoomData.length}');
   }
 
   setChatRoomFlag(String roomId, {var isNoticeShow = true}) {
@@ -213,10 +410,10 @@ class CacheService extends GetxService {
   }
 
   Future sortStoryDataCreateTimeDesc() async {
-    if (JSON_NOT_EMPTY(storyData) && storyData!.length > 1) {
-      storyData = SplayTreeMap<String,StoryModel>.from(storyData!, (a, b) {
-        final aDate = storyData![a]!.createTime;
-        final bDate = storyData![b]!.createTime;
+    if (storyData.length > 1) {
+      storyData = SplayTreeMap<String,StoryModel>.from(storyData, (a, b) {
+        final aDate = storyData[a]!.createTime;
+        final bDate = storyData[b]!.createTime;
         return aDate != bDate && aDate.isBefore(bDate) ? -1 : 1;
       });
     }
@@ -224,10 +421,10 @@ class CacheService extends GetxService {
   }
 
   Future sortMessageDataCreateTimeDesc() async {
-    if (JSON_NOT_EMPTY(messageData) && messageData!.length > 1) {
-      messageData = SplayTreeMap<String,MessageModel>.from(messageData!, (a, b) {
-        final aDate = messageData![a]!.createTime;
-        final bDate = messageData![b]!.createTime;
+    if (messageData.length > 1) {
+      messageData = SplayTreeMap<String,MessageModel>.from(messageData, (a, b) {
+        final aDate = messageData[a]!.createTime;
+        final bDate = messageData[b]!.createTime;
         return aDate != bDate && aDate.isBefore(bDate) ? -1 : 1;
       });
     }

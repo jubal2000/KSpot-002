@@ -77,6 +77,9 @@ class StoryModel {
   List<String>?     tagData;        // tag
   List<String>?     searchData;     // 검색어 목록
 
+  @JsonKey(ignore: true)
+  DateTime? cacheTime;    // for local cache refresh time..
+
   StoryModel({
     required this.id,
     required this.status,

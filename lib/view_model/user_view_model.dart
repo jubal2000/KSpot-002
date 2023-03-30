@@ -46,9 +46,10 @@ enum ProfileContentType {
 }
 
 class UserViewModel extends ChangeNotifier {
-  final repo = UserRepository();
+  final repo      = UserRepository();
   final eventRepo = EventRepository();
   final sponRepo  = SponsorRepository();
+
   final msgTextController = TextEditingController();
   final scrollController = List.generate(ProfileContentType.max.index, (index) => ScrollController());
 
@@ -716,7 +717,7 @@ class UserViewModel extends ChangeNotifier {
         });
         break;
       case ProfileContentType.sponsor:
-        Get.to(() => EventListScreen(isSelectable: true, isSelectMy: true))!.then((result) {
+        Get.to(() => EventListScreen(isMyProfile, isSelectable: true, isSelectMy: true))!.then((result) {
           if (result != null) {
             LOG('--> EventListScreen result : ${result.toJson()}');
             showEventSponsorDialog(context!, result, AppData.userInfo.creditCount).then((dResult) {

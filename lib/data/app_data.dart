@@ -147,9 +147,9 @@ class AppData {
 
   static List<String> refreshChatList = [];
 
-  static Map<String, PlaceModel>    placeData = {};
-  static Map<String, EventModel>    eventData = {};
-  static Map<String, UserModel>     userData = {};
+  // static Map<String, PlaceModel>    placeData = {};
+  // static Map<String, EventModel>    eventData = {};
+  // static Map<String, UserModel>     userData = {};
   static Map<String, UserModel>     blockUserData = {}; // 차단된 유저 목록
   static Map<String, MessageModel>  messageData = {};
   static Map<String, FollowModel>   followData = {};

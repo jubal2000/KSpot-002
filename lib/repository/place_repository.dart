@@ -4,10 +4,12 @@ import 'package:kspot_002/services/api_service.dart';
 
 import '../data/app_data.dart';
 import '../models/event_group_model.dart';
+import '../services/cache_service.dart';
 import '../utils/utils.dart';
 
 class PlaceRepository {
   final api = Get.find<ApiService>();
+  final cache = Get.find<CacheService>();
 
   Future<Map<String, PlaceModel>> getPlaceListWithCountry(String groupId, String country, [String countryState = '']) async {
     Map<String, PlaceModel> result = {};
@@ -40,13 +42,14 @@ class PlaceRepository {
 
   Future<PlaceModel?> getPlaceFromId(String placeId) async {
     try {
-      if (AppData.placeData.containsKey(placeId)) return AppData.placeData[placeId];
+      var cacheItem = cache.getPlaceItem(placeId);
+      if (cacheItem != null) return cacheItem;
       final response = await api.getPlaceFromId(placeId);
       if (response != null) {
         LOG('--> getPlaceFromId response : $response');
-        final placeData = PlaceModel.fromJson(FROM_SERVER_DATA(response));
-        AppData.placeData[placeData.id] = placeData;
-        return placeData;
+        final addItem = PlaceModel.fromJson(FROM_SERVER_DATA(response));
+        cache.setPlaceItem(addItem);
+        return addItem;
       }
     } catch (e) {
       LOG('--> getPlaceFromId error : $e');
@@ -58,9 +61,9 @@ class PlaceRepository {
     try {
       final response = await api.addPlaceItem(addItem.toJson());
       if (response != null) {
-        final placeData = PlaceModel.fromJson(FROM_SERVER_DATA(response));
-        AppData.placeData[placeData.id] = placeData;
-        return placeData;
+        final addItem = PlaceModel.fromJson(FROM_SERVER_DATA(response));
+        cache.setPlaceItem(addItem);
+        return addItem;
       }
     } catch (e) {
       LOG('--> addPlaceItem error : $e');

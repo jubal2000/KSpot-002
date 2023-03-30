@@ -9,7 +9,7 @@ import '../data/app_data.dart';
 import '../data/common_sizes.dart';
 import '../data/theme_manager.dart';
 import '../models/event_group_model.dart';
-import '../repository/event_group_repository.dart';
+import '../repository/event_repository.dart';
 import '../utils/local_utils.dart';
 import '../utils/utils.dart';
 import 'content_item_card.dart';
@@ -27,7 +27,7 @@ Future<EventGroupModel?> EventGroupSelectDialog(
       var isSelectable = false,
       Function(List<String>)? onOrderChanged,
     }) async {
-  final repo = EventGroupRepository();
+  final repo = EventRepository();
   final _gridController = List.generate(2, (index) => ScrollController());
   const _padding = 3.0;
   var _dialogHeight = 100.0;

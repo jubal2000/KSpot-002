@@ -54,7 +54,7 @@ class StoryEditEventScreen extends StatelessWidget {
                   if (_viewModel.eventInfo != null) {
                     list.add(_viewModel.eventInfo!.id);
                   }
-                  Get.to(() => EventListScreen(isSelectable: true, listSelectData: list))!.then((result) {
+                  Get.to(() => EventListScreen(true, isSelectable: true, listSelectData: list))!.then((result) {
                     LOG('--> EventListScreen result : ${result.toJson()}');
                     _viewModel.setEventInfo(result);
                   });

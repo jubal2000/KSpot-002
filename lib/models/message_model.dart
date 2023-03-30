@@ -19,6 +19,9 @@ class MessageModel {
   List<String>? picData;
   List<String>? openTimeData; // 읽은 시간
 
+  @JsonKey(ignore: true)
+  DateTime? cacheTime;    // for local cache refresh time..
+
   MessageModel({
     required this.id,
     required this.status,
@@ -47,6 +50,9 @@ class MessageGroupModel {
   String  userName;
   String  userPic;
   String  updateTime;     // 수신 시간
+
+  @JsonKey(ignore: true)
+  DateTime? cacheTime;    // for local cache refresh time..
 
   MessageGroupModel({
     required this.id,

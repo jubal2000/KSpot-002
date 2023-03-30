@@ -25,6 +25,9 @@ class ChatModel {
   List<String>? thumbList;
   List<UploadFileModel>? fileData;
 
+  @JsonKey(ignore: true)
+  DateTime? cacheTime;    // for local cache refresh time..
+
   ChatModel({
     required this.id,
     required this.status,
@@ -85,6 +88,9 @@ class ChatRoomModel {
   String? countryState;
   List<NoticeModel>? noticeData;  // 채팅 맴버 목록
   List<BanData>? banData;          // 밴 맴버 목록
+
+  @JsonKey(ignore: true)
+  DateTime? cacheTime;    // for local cache refresh time..
 
   ChatRoomModel({
     required this.id,

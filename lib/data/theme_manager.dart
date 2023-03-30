@@ -281,11 +281,11 @@ SubTitleColor(BuildContext context) {
 }
 
 DescColor(BuildContext context) {
-  return Theme.of(context).primaryColor.withOpacity(0.65);
+  return Theme.of(context).textTheme.bodySmall!.color;
 }
 
 DescInfoColor(BuildContext context) {
-  return Theme.of(context).primaryColor.withOpacity(0.35);
+  return Theme.of(context).textTheme.bodySmall!.color!.withOpacity(0.5);
 }
 
 OutLineColor(BuildContext context) {
@@ -297,11 +297,11 @@ LineColor(BuildContext context) {
 }
 
 ItemCancelColor(BuildContext context) {
-  return Theme.of(context).hintColor.withOpacity(0.25);
+  return Theme.of(context).textTheme.bodySmall!.color!.withOpacity(0.25);
 }
 
 ItemConfirmColor(BuildContext context) {
-  return Theme.of(context).primaryColor.withOpacity(0.55);
+  return Theme.of(context).textTheme.bodySmall!.color;
 }
 
 ItemReadyColor(BuildContext context) {
@@ -309,7 +309,7 @@ ItemReadyColor(BuildContext context) {
 }
 
 DialogBackColor(BuildContext context) {
-  return Colors.white;
+  return Theme.of(context).dialogBackgroundColor;
 }
 
 ///////////////////////////////////////////////////////////

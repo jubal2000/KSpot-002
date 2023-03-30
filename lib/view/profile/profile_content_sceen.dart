@@ -30,7 +30,7 @@ class ProfileContentScreen extends StatelessWidget {
       top: false,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(title, style: AppBarTitleStyle(context)),
+          title: Text(title.tr, style: AppBarTitleStyle(context)),
           titleSpacing: 0,
           toolbarHeight: UI_EDIT_TOOL_HEIGHT,
           actions: [

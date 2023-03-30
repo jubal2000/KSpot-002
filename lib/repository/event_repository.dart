@@ -6,6 +6,7 @@ import 'package:kspot_002/services/api_service.dart';
 import 'package:kspot_002/services/cache_service.dart';
 
 import '../data/app_data.dart';
+import '../models/event_group_model.dart';
 import '../models/event_model.dart';
 import '../models/story_model.dart';
 import '../utils/utils.dart';
@@ -34,7 +35,9 @@ class EventRepository {
       final response = await api.getEventListFromCountry(groupId, country, countryState);
       for (var item in response.entries) {
         LOG('--> getEventListFromCountry item : ${item.value}');
-        result[item.key] = EventModel.fromJson(item.value);
+        var addItem = EventModel.fromJson(item.value);
+        result[item.key] = addItem;
+        cache.setEventItem(addItem);
       }
     } catch (e) {
       LOG('--> getEventListFromCountry error [$groupId] : $e');
@@ -44,12 +47,13 @@ class EventRepository {
 
   Future<EventModel?> getEventFromId(String eventId) async {
     try {
-      if (JSON_NOT_EMPTY(cache.eventData!) && cache.eventData!.containsKey(eventId)) return cache.eventData![eventId];
+      var cacheItem = cache.getEventItem(eventId);
+      if (cacheItem != null) return cacheItem;
       final response = await api.getEventFromId(eventId);
       if (response != null) {
         final eventData = EventModel.fromJson(FROM_SERVER_DATA(response));
         LOG("--> getEventFromId result: ${eventData.toJson()}");
-        AppData.eventData[eventData.id] = eventData;
+        cache.setEventItem(eventData);
         return eventData;
       }
     } catch (e) {
@@ -64,7 +68,7 @@ class EventRepository {
       if (response != null) {
         final eventData = EventModel.fromJson(FROM_SERVER_DATA(response));
         LOG("--> addEventItem result: ${eventData.toJson()}");
-        AppData.eventData[eventData.id] = eventData;
+        cache.setEventItem(eventData);
         return eventData;
       }
     } catch (e) {
@@ -74,11 +78,72 @@ class EventRepository {
   }
 
   Future<bool> setEventStatus(String eventId, int status) async {
-    return await api.setEventStatus(eventId, status);
+    var result =  await api.setEventStatus(eventId, status);
+    if (result) {
+      var cacheItem = cache.getEventItem(eventId);
+      if (cacheItem != null) {
+        cacheItem.status = status;
+        cache.setEventItem(cacheItem);
+      }
+    }
+    return result;
   }
 
   Future<bool> setEventShowStatus(String eventId, int status) async {
-    return await api.setEventShowStatus(eventId, status);
+    var result =  await api.setEventShowStatus(eventId, status);
+    if (result) {
+      var cacheItem = cache.getEventItem(eventId);
+      if (cacheItem != null) {
+        cacheItem.showStatus = status;
+        cache.setEventItem(cacheItem);
+      }
+    }
+    return result;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+
+  Future<Map<String, EventGroupModel>> getEventGroupList() async {
+    Map<String, EventGroupModel> result = {};
+    try {
+      final response = await api.getEventGroupList();
+      for (var item in response.entries) {
+        var addItem = EventGroupModel.fromJson(FROM_SERVER_DATA(item.value));
+        result[item.key] = addItem;
+        cache.setEventGroupItem(addItem);
+      }
+      LOG("--> getEventGroupList result: $result");
+      return result;
+    } catch (e) {
+      LOG("--> getEventGroupList error: $e");
+      throw e.toString();
+    }
+  }
+
+  Future<EventGroupModel?> getEventGroupFromId(String groupId) async {
+    try {
+      final cacheItem = cache.getEventGroupItem(groupId);
+      if (cacheItem != null) return cacheItem;
+      final response = await api.getEventGroupFromId(groupId);
+      return EventGroupModel.fromJson(FROM_SERVER_DATA(response));
+    } catch (e) {
+      LOG('--> getPlaceGroupFromId error [$groupId] : $e');
+      throw e.toString();
+    }
+  }
+
+  Future<EventGroupModel?> addEventGroupItem(EventGroupModel addItem) async {
+    try {
+      final response = await api.addEventGroupItem(addItem.toJson());
+      if (response != null) {
+        var result = EventGroupModel.fromJson(FROM_SERVER_DATA(response));
+        cache.setEventGroupItem(result);
+      }
+    } catch (e) {
+      LOG('--> addEventGroupItem error : $e');
+      throw e.toString();
+    }
+    return null;
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////

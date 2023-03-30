@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/data/dialogs.dart';
+import 'package:kspot_002/widget/bookmark_widget.dart';
 
 import '../data/app_data.dart';
 import '../data/theme_manager.dart';
@@ -29,10 +30,11 @@ class EventCardItem extends StatefulWidget {
         this.isShowHomeButton = true,
         this.isShowPlaceButton = true,
         this.isShowUser = true,
-        this.isShowLike = true,
+        this.isShowLike = false,
         this.isPromotion = false,
         this.isMyItem = false,
         this.isExpired = false,
+        this.isShowBookmark = true,
         this.selectMax = 9,
         this.onShowDetail,
         this.onRefresh}) : super(key: key);
@@ -48,6 +50,7 @@ class EventCardItem extends StatefulWidget {
   bool isPromotion;
   bool isMyItem;
   bool isExpired;
+  bool isShowBookmark;
   int selectMax;
 
   double itemHeight;
@@ -221,9 +224,13 @@ class EventCardItemState extends State<EventCardItem> {
                                     ],
                                   ),
                                 ),
-                                if (widget.isShowLike)...[
+                                if (!widget.isSelectable && widget.isShowLike)...[
                                   SizedBox(width: 5),
                                   LikeSmallWidget(context, 'event', widget.itemData.toJson()),
+                                ],
+                                if (widget.isShowBookmark)...[
+                                  SizedBox(width: 5),
+                                  BookmarkWidget(context, 'event', widget.itemData.toJson()),
                                 ],
                             ]
                           ),

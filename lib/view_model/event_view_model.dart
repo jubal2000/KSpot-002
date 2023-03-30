@@ -14,6 +14,7 @@ import '../data/common_sizes.dart';
 import '../data/theme_manager.dart';
 import '../models/event_model.dart';
 import '../repository/place_repository.dart';
+import '../repository/user_repository.dart';
 import '../services/cache_service.dart';
 import '../utils/utils.dart';
 import '../view/home/home_top_menu.dart';
@@ -36,6 +37,7 @@ class EventViewModel extends ChangeNotifier {
   final cache     = Get.find<CacheService>();
   final eventRepo = EventRepository();
   final placeRepo = PlaceRepository();
+  final userRepo  = UserRepository();
   final dateController = DatePickerController();
   GlobalKey mapKey = GlobalKey();
 
@@ -44,6 +46,9 @@ class EventViewModel extends ChangeNotifier {
   var eventListType = EventListType.map;
   var isMapUpdate = true;
   var isManagerMode = false; // 유저의 이벤트목록 일 경우 메니저이면, 기간이 지난 이벤트들도 표시..
+
+  JSON eventData = {};
+  JSON bookmarkData = {};
 
   DatePicker? datePicker;
 
@@ -60,16 +65,22 @@ class EventViewModel extends ChangeNotifier {
     showList.clear();
   }
 
-  Future getEventList() async {
+  Future getEventData() async {
     mapBounds = null;
     showList.clear();
-    // mapItemData.clear();
-    // listItemData.clear();
-    cache.eventData = null; // need make null..
-    var result = await eventRepo.getEventListFromCountry(AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
-    LOG('--> getEventList result : ${result.length}');
-    cache.eventData = result;
-    return result;
+    cache.eventData.clear();
+    eventData = await eventRepo.getEventListFromCountry(AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
+    LOG('--> eventData result : ${eventData.length}');
+    cache.setEventData(eventData);
+    return eventData;
+  }
+
+  Future getBookmarkData(String userId) async {
+    if (userId.isNotEmpty) {
+      bookmarkData = await userRepo.getBookmarkFromUserId(userId);
+      LOG('--> bookmarkData result : ${bookmarkData.length}');
+    }
+    return bookmarkData;
   }
 
   showGoogleWidget(layout) {

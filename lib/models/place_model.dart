@@ -60,6 +60,9 @@ class PlaceModel {
   List<String>?        phoneData;      // 전화번호 목록
   List<PicData>?       picData;        // 메인 이미지 목록
 
+  @JsonKey(ignore: true)
+  DateTime? cacheTime;    // for local cache refresh time..
+
   PlaceModel({
     required this.id,
     required this.status,

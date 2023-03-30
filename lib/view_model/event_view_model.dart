@@ -48,7 +48,6 @@ class EventViewModel extends ChangeNotifier {
   var isManagerMode = false; // 유저의 이벤트목록 일 경우 메니저이면, 기간이 지난 이벤트들도 표시..
 
   JSON eventData = {};
-  JSON bookmarkData = {};
 
   DatePicker? datePicker;
 
@@ -77,10 +76,10 @@ class EventViewModel extends ChangeNotifier {
 
   Future getBookmarkData(String userId) async {
     if (userId.isNotEmpty) {
-      bookmarkData = await userRepo.getBookmarkFromUserId(userId);
-      LOG('--> bookmarkData result : ${bookmarkData.length}');
+      cache.bookmarkData = await userRepo.getBookmarkFromUserId(userId);
+      LOG('--> bookmarkData result : ${cache.bookmarkData.length}');
     }
-    return bookmarkData;
+    return cache.bookmarkData;
   }
 
   showGoogleWidget(layout) {

@@ -41,6 +41,7 @@ class CacheService extends GetxService {
   Map<String, SponsorModel> sponsorData = {};
   Map<String, Widget> sponsorListItemData = {};
 
+  JSON bookmarkData = {};
   JSON reportData = {};
   JSON blockData = {};
   JSON chatItemData = {};

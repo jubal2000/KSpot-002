@@ -1457,7 +1457,7 @@ class ApiService extends GetxService {
           .get();
 
       for (var item in snapshot.docs) {
-        result[item['id']] = FROM_SERVER_DATA(item.data());
+        result[item['targetId']] = FROM_SERVER_DATA(item.data());
       }
     } catch (e) {
       LOG('--> getBookmarkFromUserId Error : $e');

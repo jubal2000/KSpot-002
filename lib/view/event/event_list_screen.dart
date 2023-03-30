@@ -167,19 +167,23 @@ class EventListTabState extends State<EventListTab> {
     //     }
     //   }
     // }
+    for (var item in cache.bookmarkData.entries) {
+      LOG('--> bookmark data : ${item.key}');
+    }
+
     // add normal event..
     if (cache.eventData.isNotEmpty) {
       for (var item in cache.eventData.entries) {
         if (item.value.type == widget.eventTab &&
           (!widget.isSelectMy || item.value.userId == AppData.USER_ID) && checkSearch(item.value)) {
-          var bookmarkItem = widget.viewModel.bookmarkData[item.key];
+          var bookmarkItem = cache.bookmarkData[item.key];
           item.value.bookmarked = bookmarkItem != null;
           if (item.value.bookmarked) {
             showList.add(item.value);
           } else {
             tmpList.add(item.value);
           }
-          LOG('--> bookmarked check [${item.key}] : ${showList.length} / ${tmpList.length} / ${widget.viewModel.bookmarkData.length}');
+          LOG('--> bookmarked check [${item.key}] : ${showList.length} / ${tmpList.length} / ${cache.bookmarkData.length}');
         }
       }
     }
@@ -209,7 +213,7 @@ class EventListTabState extends State<EventListTab> {
     }
     if (isAdd >= 0) {
       item.sortIndex = isAdd;
-      showList.add(item);
+      // showList.add(item);
     }
     LOG('--> checkSearch result : ${showList.length} / $isAdd');
     return isAdd >= 0;

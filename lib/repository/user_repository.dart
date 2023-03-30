@@ -307,6 +307,10 @@ class UserRepository {
     return api.getLikeFromUserId(userId);
   }
 
+  getBookmarkData() async {
+    return await api.getBookmarkFromUserId(AppData.USER_ID);
+  }
+
   getBookmarkFromUserId(String userId) {
     return api.getBookmarkFromUserId(userId);
   }

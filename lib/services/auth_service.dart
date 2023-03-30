@@ -53,12 +53,7 @@ class AuthService extends GetxService {
             AppData.userInfo = result;
             LOG('--> getStartUserInfo done! : ${AppData.userInfo.id}');
             // get user ex data..
-            cache.reportData    = await userRepo.getReportData();
-            cache.blockData     = await userRepo.getBlockData();
-            cache.readRoomIndexData();
-            // cache.messageData   = await msgRepo.getMessageData();
-            // cache.chatRoomData  = await chatRepo.getChatRoomData();
-            LOG('--> cache.chatRoomData : ${cache.reportData.toString()}');
+            await getStartData();
             Get.offAllNamed(Routes.HOME);
           } else {
             LOG('--> getStartUserInfo failed! : ${AppData.loginInfo.loginId} / ${AppData.loginInfo.loginType}');
@@ -69,6 +64,13 @@ class AuthService extends GetxService {
       }
       isLoginCheckDone = true;
     });
+  }
+
+  getStartData() async {
+    cache.bookmarkData  = await userRepo.getBookmarkData();
+    cache.reportData    = await userRepo.getReportData();
+    cache.blockData     = await userRepo.getBlockData();
+    cache.readRoomIndexData();
   }
 
   signOut() {

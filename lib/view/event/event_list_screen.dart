@@ -82,37 +82,37 @@ class EventListState extends State<EventListScreen> {
             title: Text(widget.isSelectable ? 'Event select'.tr : 'Event list'.tr, style: AppBarTitleStyle(context)),
             titleSpacing: 0,
           ),
-          // body: EventListTab(0, 'EVENT'.tr,
-          //   isSelectable: widget.isSelectable, selectMax: widget.selectMax, isSelectMy: widget.isSelectMy, onSelected: onSelected),
+          body: EventListTab(0, 'EVENT'.tr, _viewModel,
+            isSelectable: widget.isSelectable, selectMax: widget.selectMax, isSelectMy: widget.isSelectMy, onSelected: onSelected),
           // body: widget.isMyList && !widget.isSelectable ? EventListTab(1, 'ALL'.tr, _viewModel,
           // isSelectable: widget.isSelectable, selectMax: widget.selectMax, isSelectMy: widget.isSelectMy, onSelected: onSelected) :
-          body: DefaultTabController(
-            length: _tabList.length,
-            child: Scaffold(
-              appBar: TabBar(
-                padding: EdgeInsets.symmetric(horizontal: 50),
-                labelColor: Theme.of(context).primaryColor,
-                labelStyle: ItemTitleStyle(context),
-                unselectedLabelColor: Theme.of(context).hintColor,
-                unselectedLabelStyle: ItemTitleStyle(context),
-                indicatorColor: Theme.of(context).primaryColor,
-                tabs: _tabList.map((item) => item.getTab()).toList(),
-              ),
-              body: FutureBuilder(
-                future: _viewModel.getBookmarkData(AppData.USER_ID),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return TabBarView(
-                        physics: NeverScrollableScrollPhysics(),
-                        children: _tabList
-                    );
-                  } else {
-                    return showLoadingFullPage(context);
-                  }
-                }
-              )
-            )
-          )
+          // body: DefaultTabController(
+          //   length: _tabList.length,
+          //   child: Scaffold(
+          //     appBar: TabBar(
+          //       padding: EdgeInsets.symmetric(horizontal: 50),
+          //       labelColor: Theme.of(context).primaryColor,
+          //       labelStyle: ItemTitleStyle(context),
+          //       unselectedLabelColor: Theme.of(context).hintColor,
+          //       unselectedLabelStyle: ItemTitleStyle(context),
+          //       indicatorColor: Theme.of(context).primaryColor,
+          //       tabs: _tabList.map((item) => item.getTab()).toList(),
+          //     ),
+          //     body: FutureBuilder(
+          //       future: _viewModel.getBookmarkData(AppData.USER_ID),
+          //       builder: (context, snapshot) {
+          //         if (snapshot.hasData) {
+          //           return TabBarView(
+          //               physics: NeverScrollableScrollPhysics(),
+          //               children: _tabList
+          //           );
+          //         } else {
+          //           return showLoadingFullPage(context);
+          //         }
+          //       }
+          //     )
+          //   )
+          // )
         )
       )
     );
@@ -146,7 +146,7 @@ class EventListTabState extends State<EventListTab> {
   final repo  = EventRepository();
   final cache = Get.find<CacheService>();
 
-  Map<String, EventModel> showData = {};
+  List<EventModel> showList = [];
   JSON selectEvent = {};
 
   var searchText = '';
@@ -155,7 +155,8 @@ class EventListTabState extends State<EventListTab> {
   var showEmptyText = 'There are no events'.tr;
 
   refreshShowData() {
-    showData.clear();
+    showList.clear();
+    List<EventModel> tmpList = [];
     // add promotion event..
     // for (var item in cache.eventData!.entries) {
     //   if (_selectEvent.containsKey(item.key)) {
@@ -169,18 +170,21 @@ class EventListTabState extends State<EventListTab> {
     // add normal event..
     if (cache.eventData.isNotEmpty) {
       for (var item in cache.eventData.entries) {
-        if (item.value.type == widget.eventTab && (!widget.isSelectMy || item.value.userId == AppData.USER_ID) && checkSearch(item.value)) {
-          if (!showData.containsKey(item.key)) {
-            var bookmarkItem = widget.viewModel.bookmarkData[item.key];
-            item.value.bookmarked = bookmarkItem != null;
-            showData[item.key] = item.value;
-            LOG('--> bookmarked check [${item.key}] : ${item.value.title} / ${item.value.bookmarked}');
+        if (item.value.type == widget.eventTab &&
+          (!widget.isSelectMy || item.value.userId == AppData.USER_ID) && checkSearch(item.value)) {
+          var bookmarkItem = widget.viewModel.bookmarkData[item.key];
+          item.value.bookmarked = bookmarkItem != null;
+          if (item.value.bookmarked) {
+            showList.add(item.value);
+          } else {
+            tmpList.add(item.value);
           }
+          LOG('--> bookmarked check [${item.key}] : ${showList.length} / ${tmpList.length} / ${widget.viewModel.bookmarkData.length}');
         }
       }
     }
-    LOG('--> refreshShowData result : ${showData.length} / ${cache.eventData!.entries.length}');
-    showData = repo.INDEX_SORT_ASC(showData);
+    LOG('--> refreshShowData result : ${showList.length} / ${tmpList.length} / ${cache.eventData.length}');
+    showList.addAll(tmpList);
   }
 
   checkSearch(EventModel item) {
@@ -205,21 +209,21 @@ class EventListTabState extends State<EventListTab> {
     }
     if (isAdd >= 0) {
       item.sortIndex = isAdd;
-      showData[item.id] = item;
+      showList.add(item);
     }
-    LOG('--> checkSearch result : ${showData.length} / $isAdd');
+    LOG('--> checkSearch result : ${showList.length} / $isAdd');
     return isAdd >= 0;
   }
 
   @override
   void initState() {
-    refreshShowData();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    LOG('--> showData : ${showData.length}');
+    LOG('--> showData : ${showList.length}');
+    refreshShowData();
     return SafeArea(
       child: ChangeNotifierProvider<EventViewModel>.value(
         value: widget.viewModel,
@@ -254,16 +258,16 @@ class EventListTabState extends State<EventListTab> {
                   ),
                   Container(
                     width: Get.width,
-                    height: showData.isEmpty ? 0 : Get.height,
+                    height: showList.isEmpty ? 0 : Get.height,
                     padding: isHorizontalStyle ? EdgeInsets.all(UI_HORIZONTAL_SPACE) : EdgeInsets.zero,
                     child: ListView.builder(
                       controller: _scrollController,
                       scrollDirection: isHorizontalStyle ? Axis.horizontal : Axis.vertical,
-                      itemCount: showData.length,
+                      itemCount: showList.length,
                       itemBuilder: (context, index) {
-                        var itemKey = showData.keys.elementAt(index);
+                        var showItem = showList[index];
                         if (isHorizontalStyle) {
-                          return PlaceEventVerCardItem(showData[itemKey]!.toJson(), itemHeight: Get.height, itemWidth: Get.height * 0.5,
+                          return PlaceEventVerCardItem(showItem.toJson(), itemHeight: Get.height, itemWidth: Get.height * 0.5,
                             isShowHomeButton: false,
                             isShowPlaceButton: true,
                             isShowTheme: false,
@@ -275,12 +279,12 @@ class EventListTabState extends State<EventListTab> {
                             }
                           );
                         } else {
-                          return EventCardItem(showData[itemKey]!,
+                          return EventCardItem(showItem,
                             isShowHomeButton: false,
                             isShowPlaceButton: true,
                             isSelectable: widget.isSelectable, selectMax: widget.selectMax, onShowDetail: (key, status) {
-                                LOG('--> EventCardItem onShowDetail : $itemKey');
-                              if (widget.onSelected != null) widget.onSelected!(showData[itemKey]!);
+                                LOG('--> EventCardItem onShowDetail : ${showItem.id}');
+                              if (widget.onSelected != null) widget.onSelected!(showItem);
                               // setState(() {
                               //   showData[itemKey] = updateData;
                               // });
@@ -290,7 +294,7 @@ class EventListTabState extends State<EventListTab> {
                       }
                     )
                   ),
-                  if (showData.isEmpty)
+                  if (showList.isEmpty)
                     Container(
                       width: Get.width,
                       height: Get.height - 300,

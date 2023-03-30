@@ -294,7 +294,7 @@ class ApiService extends GetxService {
   }
 
   Future<JSON?> getUserInfoFromId(String userId) async {
-    LOG('--> getUserInfoFromId : $userId');
+    // LOG('--> getUserInfoFromId : $userId');
     try {
       // if (AppData.userInfoList.containsKey(userId)) {
       //   var cacheTime = TME(AppData.userInfoList[userId]['cacheTime']);

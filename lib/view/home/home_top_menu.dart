@@ -45,7 +45,7 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
 
   @override
   Widget build(BuildContext context) {
-    LOG('--> AppTopMenuBar : ${widget.menuMode}');
+    LOG('--> AppTopMenuBar : ${widget.menuMode} / ${AppData.appViewModel.appbarMenuMode}');
     final iconColor = Theme.of(context).indicatorColor;
     return Container(
       height: widget.height,
@@ -85,7 +85,7 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                           ),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
-                            color: Theme.of(context).canvasColor.withOpacity(0.55),
+                            color: Colors.black26,
                           ),
                           child: Row(
                             children: [
@@ -114,7 +114,7 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                             ),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
-                              color: Theme.of(context).canvasColor.withOpacity(0.55),
+                              color: Colors.black26,
                             ),
                             child: widget.isDateOpen ? Icon(Icons.close, size: 24) : showDatePickerText(context, AppData.currentDate),
                           ),
@@ -139,9 +139,9 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                         ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
-                          color: Theme.of(context).canvasColor.withOpacity(0.55),
+                          color: Colors.black26,
                         ),
-                        child: AppData.appViewModel.showAddMenu(iconColor, iconSize),
+                        child: AppData.appViewModel.showAddMenu(iconSize),
                       ),
                       SizedBox(width: 5),
                       if (AppData.appViewModel.appbarMenuMode == MainMenuID.event)
@@ -154,7 +154,7 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                           ),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
-                            color: Theme.of(context).canvasColor.withOpacity(0.55),
+                            color: Colors.black26,
                           ),
                           child: AppData.eventViewModel.showEventListType(),
                         ),
@@ -173,42 +173,42 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                       //     child: AppData.storyViewModel.showStoryListType(),
                       //   ),
                     ],
-                    if (AppData.appViewModel.appbarMenuMode == MainMenuID.my)...[
-                      Container(
-                        // color: Colors.red,
-                        height: iconSize,
-                        width: iconSize,
-                        child: IconButton(
-                          icon: Icon(Icons.mail_outline_outlined, color: iconColor),
-                          onPressed: () {
-                            Get.to(() => MessageScreen());
-                          },
-                        )
-                      ),
-                      SizedBox(width: 5),
-                      if (APP_STORE_OPEN)...[
-                        Container(
-                          height: iconSize,
-                          width: iconSize,
-                          child: IconButton(
-                            icon: Icon(Icons.store_outlined, color: iconColor),
-                            onPressed: () {
-                            },
-                          )
-                        ),
-                        SizedBox(width: 5),
-                      ],
-                      Container(
-                        // color: Colors.red,
-                        height: iconSize,
-                        width: iconSize,
-                        child: IconButton(
-                          icon: Icon(Icons.settings, color: iconColor),
-                          onPressed: () {
-                          },
-                        )
-                      ),
-                    ],
+                    // if (AppData.appViewModel.appbarMenuMode == MainMenuID.my)...[
+                    //   Container(
+                    //     // color: Colors.red,
+                    //     height: iconSize,
+                    //     width: iconSize,
+                    //     child: IconButton(
+                    //       icon: Icon(Icons.mail_outline_outlined, color: iconColor),
+                    //       onPressed: () {
+                    //         Get.to(() => MessageScreen());
+                    //       },
+                    //     )
+                    //   ),
+                    //   SizedBox(width: 5),
+                    //   if (APP_STORE_OPEN)...[
+                    //     Container(
+                    //       height: iconSize,
+                    //       width: iconSize,
+                    //       child: IconButton(
+                    //         icon: Icon(Icons.store_outlined, color: iconColor),
+                    //         onPressed: () {
+                    //         },
+                    //       )
+                    //     ),
+                    //     SizedBox(width: 5),
+                    //   ],
+                    //   Container(
+                    //     // color: Colors.red,
+                    //     height: iconSize,
+                    //     width: iconSize,
+                    //     child: IconButton(
+                    //       icon: Icon(Icons.settings, color: iconColor),
+                    //       onPressed: () {
+                    //       },
+                    //     )
+                    //   ),
+                    // ],
                   ],
                 )
             ]

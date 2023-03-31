@@ -19,6 +19,7 @@ import '../models/place_model.dart';
 import '../repository/event_repository.dart';
 import '../utils/utils.dart';
 import '../view/follow/follow_screen.dart';
+import '../view/profile/profile_screen.dart';
 import '../widget/event_time_edit_widget.dart';
 import '../view/profile/profile_target_screen.dart';
 import '../widget/card_scroll_viewer.dart';

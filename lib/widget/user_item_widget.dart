@@ -8,6 +8,7 @@ import '../data/dialogs.dart';
 import '../data/theme_manager.dart';
 import '../models/user_model.dart';
 import '../utils/utils.dart';
+import '../view/profile/profile_screen.dart';
 import '../view/profile/profile_target_screen.dart';
 
 class UserCardWidget extends StatefulWidget {

@@ -65,6 +65,7 @@ class EventViewModel extends ChangeNotifier {
   }
 
   Future getEventData() async {
+    LOG('--> getEventData : ${AppData.currentEventGroup!.id} / ${AppData.currentCountry} / ${AppData.currentState}');
     mapBounds = null;
     showList.clear();
     cache.eventData.clear();

@@ -19,6 +19,7 @@ import '../repository/user_repository.dart';
 import '../services/cache_service.dart';
 import '../utils/utils.dart';
 import '../view/follow/follow_screen.dart';
+import '../view/profile/profile_screen.dart';
 import '../view/profile/profile_target_screen.dart';
 import '../widget/card_scroll_viewer.dart';
 import '../widget/edit/edit_component_widget.dart';

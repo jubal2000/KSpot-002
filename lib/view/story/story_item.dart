@@ -28,6 +28,7 @@ import '../../widget/share_widget.dart';
 import '../../widget/user_item_widget.dart';
 import '../event/event_detail_screen.dart';
 import '../place/place_detail_screen.dart';
+import '../profile/profile_screen.dart';
 import '../profile/profile_target_screen.dart';
 
 class MainStoryItem extends StatefulWidget {

@@ -14,14 +14,38 @@ import 'package:provider/provider.dart';
 
 import '../../data/app_data.dart';
 import '../../data/theme_manager.dart';
+import '../../models/user_model.dart';
 import '../../utils/utils.dart';
 import '../../view_model/setup_view_model.dart';
 import '../../widget/credit_widget.dart';
 import '../../widget/like_widget.dart';
 
-class ProfileScreen extends StatefulWidget {
-  ProfileScreen({ Key? key, this.isShowBack = false }) : super(key: key);
+class MyProfileScreen extends StatelessWidget {
+  MyProfileScreen({ Key? key }) : super(key: key);
 
+  @override
+  Widget build(BuildContext context) {
+    return ProfileScreen(AppData.userViewModel);
+  }
+}
+
+class ProfileTargetScreen extends StatelessWidget {
+  ProfileTargetScreen(this.userInfo, { Key? key }) : super(key: key);
+
+  UserModel userInfo;
+
+  @override
+  Widget build(BuildContext context) {
+    final userViewModel = UserViewModel();
+    userViewModel.initUserModel(userInfo);
+    return ProfileScreen(userViewModel);
+  }
+}
+
+class ProfileScreen extends StatefulWidget {
+  ProfileScreen(this.userViewModel, { Key? key, this.isShowBack = false }) : super(key: key);
+
+  UserViewModel userViewModel;
   bool isShowBack;
 
   @override
@@ -35,7 +59,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void initState() {
-    AppData.userViewModel.initUserModel(AppData.userInfo);
     super.initState();
   }
 
@@ -46,7 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return SafeArea(
       top: false,
       child: ChangeNotifierProvider.value(
-        value: AppData.userViewModel,
+        value: widget.userViewModel,
         child: Consumer<UserViewModel>(
           builder: (context, userViewModel, _) {
             userViewModel.init(context);

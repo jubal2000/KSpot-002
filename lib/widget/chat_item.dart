@@ -18,6 +18,7 @@ import '../repository/chat_repository.dart';
 import '../services/api_service.dart';
 import '../services/cache_service.dart';
 import '../utils/utils.dart';
+import '../view/profile/profile_screen.dart';
 import 'card_scroll_viewer.dart';
 
 class ChatItem extends StatefulWidget {

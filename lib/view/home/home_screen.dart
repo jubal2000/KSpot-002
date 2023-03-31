@@ -32,7 +32,7 @@ class HomeScreen extends StatelessWidget {
     EventScreen(),
     StoryScreen(),
     ChattingScreen(),
-    ProfileScreen(),
+    MyProfileScreen(),
   ];
 
   NavigatorButton(context, viewModel, index, icon, label) {
@@ -82,17 +82,6 @@ class HomeScreen extends StatelessWidget {
                 body: Stack(
                   children: [
                     pages[viewModel.menuIndex],
-                    // IndexedStack(
-                    //   key: ValueKey(viewModel.menuIndex),
-                    //   index: viewModel.menuIndex,
-                    //   children: pages,
-                    // ),
-                    // TopCenterAlign(
-                    //   child: SizedBox(
-                    //     height: UI_TOP_MENU_HEIGHT * 1.7,
-                    //     child: AppTopMenuBar(MainMenuID.event, height: UI_TOP_MENU_HEIGHT),
-                    //   )
-                    // ),
                     BottomCenterAlign(
                       child: Container(
                         height: UI_MENU_BG_HEIGHT,
@@ -180,56 +169,6 @@ class HomeScreen extends StatelessWidget {
                         )
                       )
                     ),
-                //     BottomLeftAlign(
-                //       heightFactor: 19.0,
-                //       child: Row(
-                //       mainAxisAlignment: MainAxisAlignment.end,
-                //       children: [
-                //         SizedBox(width: 30.w),
-                //         GestureDetector(
-                //             onTap: () {
-                //               var mode = theme.toggleSchemeMode();
-                //               Fluttertoast.showToast(
-                //                   msg: mode,
-                //                   toastLength: Toast.LENGTH_SHORT,
-                //                   gravity: ToastGravity.CENTER,
-                //                   timeInSecForIosWeb: 1,
-                //                   backgroundColor: theme.getMode() ? Colors.white : Colors.black,
-                //                   textColor: theme.getMode() ? Colors.black : Colors.white,
-                //                   fontSize: 16.0.sp
-                //               );
-                //             },
-                //             child: SizedBox(
-                //               height: _height,
-                //               width: _height,
-                //               child: Icon(Icons.visibility_outlined, color: Colors.black),
-                //             )
-                //         ),
-                //         GestureDetector(
-                //             onTap: () {
-                //               showThemeSelectorDialog(context, '', theme.getMode(), theme.getThemeIndex()).then((result) {
-                //                 LOG('--> showThemeSelectorDialog : $result');
-                //                 var mode = theme.refreshFlexScheme(INT(result['index']));
-                //                 Fluttertoast.showToast(
-                //                     msg: mode,
-                //                     toastLength: Toast.LENGTH_SHORT,
-                //                     gravity: ToastGravity.CENTER,
-                //                     timeInSecForIosWeb: 1,
-                //                     backgroundColor: theme.getMode() ? Colors.white : Colors.black,
-                //                     textColor: theme.getMode() ? Colors.black : Colors.white,
-                //                     fontSize: 16.0.sp
-                //                 );
-                //               });
-                //             },
-                //             child: SizedBox(
-                //               height: _height,
-                //               width: _height,
-                //               child: Icon(Icons.color_lens_outlined, color: Colors.black),
-                //             )
-                //         ),
-                //       ],
-                //     ),
-                //     )
                   ]
                 ),
               )

@@ -13,8 +13,8 @@ import '../../view_model/user_view_model.dart';
 import '../../widget/user_item_widget.dart';
 
 // ignore: must_be_immutable
-class ProfileTargetScreen extends StatefulWidget {
-  ProfileTargetScreen(this.userInfo, {Key? key}) : super(key: key);
+class _ProfileTargetScreen extends StatefulWidget {
+  _ProfileTargetScreen(this.userInfo, {Key? key}) : super(key: key);
 
   UserModel userInfo;
 
@@ -22,7 +22,7 @@ class ProfileTargetScreen extends StatefulWidget {
   ProfileTargetState createState() => ProfileTargetState();
 }
 
-class ProfileTargetState extends State<ProfileTargetScreen> {
+class ProfileTargetState extends State<_ProfileTargetScreen> {
   final repo = UserRepository();
   final userVewModel = UserViewModel();
   var _followType = 0;

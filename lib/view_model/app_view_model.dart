@@ -177,6 +177,7 @@ class AppViewModel extends ChangeNotifier {
         if (AppData.countrySelectList.length > COUNTRY_LOG_MAX) {
           AppData.countrySelectList.removeLast();
         }
+        Get.find<CacheService>().initData();
         LOG('--> AppData.countrySelectList : ${AppData.countrySelectList.length}');
         writeCountryLog();
         notifyListeners();
@@ -185,11 +186,11 @@ class AppViewModel extends ChangeNotifier {
     );
   }
 
-  showAddMenu(iconColor, iconSize) {
+  showAddMenu(iconSize) {
     return DropdownButtonHideUnderline(
       child: DropdownButton2(
         customButton: Center(
-          child: Icon(Icons.add, color: iconColor),
+          child: Icon(Icons.add),
         ),
         items: [
           if (appbarMenuMode == MainMenuID.event)

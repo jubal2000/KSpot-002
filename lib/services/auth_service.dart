@@ -51,6 +51,7 @@ class AuthService extends GetxService {
           final result = await userRepo.getStartUserInfo(AppData.loginInfo.loginId);
           if (result != null) {
             AppData.userInfo = result;
+            AppData.userViewModel.initUserModel(AppData.userInfo);
             LOG('--> getStartUserInfo done! : ${AppData.userInfo.id}');
             // get user ex data..
             await getStartData();

@@ -53,6 +53,12 @@ class CacheService extends GetxService {
   Map<String, JSON> chatRoomFlagData = {};
 
   Future<CacheService> init() async {
+    initData();
+    await loadChatRoomFlag(); // from local..
+    return this;
+  }
+
+  initData() {
     userData = {};
     userListItemData = {};
     placeData = {};
@@ -72,9 +78,6 @@ class CacheService extends GetxService {
     reportData = {};
     blockData = {};
     chatItemData = {};
-
-    await loadChatRoomFlag(); // from local..
-    return this;
   }
 
   setUserItem(UserModel addItem, [var isRemoveItem = true]) {

@@ -14,6 +14,7 @@ import '../../models/user_model.dart';
 import '../../services/api_service.dart';
 import '../../utils/utils.dart';
 import '../../view_model/follow_view_model.dart';
+import '../profile/profile_screen.dart';
 import '../profile/profile_target_screen.dart';
 
 class FollowScreen extends StatefulWidget {

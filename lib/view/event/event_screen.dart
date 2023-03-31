@@ -53,7 +53,7 @@ class EventScreen extends StatelessWidget {
                         }
                       }
                     ),
-                    if (AppData.eventViewModel.showList.isNotEmpty)
+                    if (cache.eventData.isNotEmpty)
                       ChangeNotifierProvider<EventViewModel>.value(
                         value: AppData.eventViewModel,
                         child: Consumer<EventViewModel>(builder: (context, viewModel, _) {

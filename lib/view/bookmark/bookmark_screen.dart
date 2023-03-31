@@ -19,6 +19,7 @@ import '../../utils/utils.dart';
 import '../../view_model/user_view_model.dart';
 import '../../widget/bookmark_widget.dart';
 import '../../widget/like_widget.dart';
+import '../profile/profile_screen.dart';
 import '../story/story_detail_screen.dart';
 
 class BookmarkScreen extends StatefulWidget {

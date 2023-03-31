@@ -19,6 +19,7 @@ import '../repository/user_repository.dart';
 import '../services/cache_service.dart';
 import '../utils/utils.dart';
 import '../view/event/event_edit_screen.dart';
+import '../view/profile/profile_screen.dart';
 import '../view/profile/profile_target_screen.dart';
 import '../widget/bookmark_widget.dart';
 import '../widget/comment_widget.dart';

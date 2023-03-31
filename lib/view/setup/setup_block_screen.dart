@@ -13,6 +13,7 @@ import '../../data/dialogs.dart';
 import '../../data/theme_manager.dart';
 import '../../models/user_model.dart';
 import '../../services/api_service.dart';
+import '../profile/profile_screen.dart';
 import '../profile/profile_target_screen.dart';
 
 class SetupBlockScreen extends StatefulWidget {

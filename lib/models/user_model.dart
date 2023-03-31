@@ -18,6 +18,7 @@ class UserModel {
   @JsonKey(defaultValue: '')
   String    realName;
   String    pic;
+  String?   backPic;
   String    message;
   int       birthYear;
   String    gender;
@@ -91,6 +92,7 @@ class UserModel {
     required this.updateTime,
     required this.createTime,
 
+    this.backPic,
     this.emailNew,
     this.snsData,
     this.optionData,

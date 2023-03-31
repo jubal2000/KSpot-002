@@ -51,6 +51,8 @@ const FACE_CIRCLE_SIZE_SE = 20.0;
 
 const GOOGLE_MAP_KEY = 'AIzaSyD4ESmTaou10BumFoJ7DQ7jkTI7emh4Hvo';
 
+const APP_STORE_OPEN = true;
+
 class HomeListType {
   static int get list     => 0;
   static int get map      => 1;

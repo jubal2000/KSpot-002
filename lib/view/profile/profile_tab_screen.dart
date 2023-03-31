@@ -80,7 +80,7 @@ class ProfileTapState extends State<ProfileTabScreen> {
                   children: [
                     Container(
                       padding: EdgeInsets.symmetric(vertical: UI_TOP_SPACE.w),
-                      color: Theme.of(context).primaryColor.withOpacity(0.2),
+                      color: ProfileBackColor(context),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [

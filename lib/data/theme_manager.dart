@@ -312,6 +312,10 @@ DialogBackColor(BuildContext context) {
   return Theme.of(context).dialogBackgroundColor;
 }
 
+ProfileBackColor(BuildContext context) {
+  return Theme.of(context).secondaryHeaderColor;
+}
+
 ///////////////////////////////////////////////////////////
 
 ButtonTitleStyle(BuildContext context) {
@@ -362,6 +366,16 @@ AppBarTitleExStyle(BuildContext context) {
   return TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.tertiary, fontWeight: FontWeight.w600);
 }
 
+AppBarTitleOutlineStyle(BuildContext context, Color borderColor, {Color? color}) {
+  return TextStyle(fontSize: 18, color: color ?? Theme.of(context).textTheme.bodyMedium!.color, fontWeight: FontWeight.w600,
+      shadows: outlinedText(strokeColor: borderColor), height: 1.1);
+}
+
+AppBarTitleShadowStyle(BuildContext context, Color borderColor, {Color? color}) {
+  return TextStyle(fontSize: 18, color: color ?? Theme.of(context).textTheme.bodyMedium!.color, fontWeight: FontWeight.w600,
+      shadows: shadowText(strokeColor: borderColor), height: 1.1);
+}
+
 SubTitleStyle(BuildContext context) {
   return TextStyle(fontSize: 14, color: Theme.of(context).primaryColor.withOpacity(0.8), fontWeight: FontWeight.w800);
 }
@@ -383,7 +397,7 @@ ItemButtonStyle(BuildContext context, {Color? color, double? fontSize, FontWeigh
 }
 
 ItemTitleLargeStyle(BuildContext context) {
-  return TextStyle(fontSize: 16, color: Theme.of(context).indicatorColor, fontWeight: FontWeight.w800);
+  return TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyMedium!.color, fontWeight: FontWeight.w800);
 }
 
 ItemTitleLargeHotStyle(BuildContext context) {
@@ -523,8 +537,8 @@ ItemDescExInfoStyle(BuildContext context) {
   return TextStyle(fontSize: 10, color: Theme.of(context).primaryColor.withOpacity(0.5));
 }
 
-ItemDescOutlineStyle(BuildContext context, [Color borderColor = Colors.black]) {
-  return TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w400,
+ItemDescOutlineStyle(BuildContext context, [Color borderColor = Colors.white24]) {
+  return TextStyle(fontSize: 11, color: Colors.black, fontWeight: FontWeight.w400,
       shadows: outlinedText(strokeColor: borderColor));
 }
 
@@ -534,7 +548,7 @@ ItemDescOutlineExStyle(BuildContext context, {Color borderColor = Colors.black})
 }
 
 CardTitleStyle(BuildContext context) {
-  return TextStyle(fontSize: 12, color: Theme.of(context).indicatorColor, fontWeight: FontWeight.w600, height: 1.1);
+  return TextStyle(fontSize: 12, color: Theme.of(context).hintColor, fontWeight: FontWeight.w600, height: 1.1);
 }
 
 CardDescStyle(BuildContext context) {

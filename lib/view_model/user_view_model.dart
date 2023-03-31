@@ -41,6 +41,8 @@ enum ProfileMainTab {
 enum ProfileContentType {
   event,
   story,
+  follower,
+  bookmark,
   sponsor,
   max,
 }
@@ -54,12 +56,9 @@ class UserViewModel extends ChangeNotifier {
   final scrollController = List.generate(ProfileContentType.max.index, (index) => ScrollController());
 
   UserModel? userInfo;
-  List<ProfileTabScreen> tabList = [];
-  List<GlobalKey> tabKeyList = [];
   BuildContext? context;
 
   var currentTab = 0;
-  var tabListHeight = 0.0;
   var isMyProfile = false;
   var isDisableOpen = false;
 
@@ -89,13 +88,6 @@ class UserViewModel extends ChangeNotifier {
     userInfo    = user;
     isMyProfile = userInfo!.checkOwner(AppData.USER_ID);
     snsData     = userInfo!.snsDataMap;
-    tabKeyList  = List.generate(ProfileMainTab.max.index, (index) => GlobalKey());
-    tabList = [
-      ProfileTabScreen(ProfileMainTab.profile   , 'PROFILE'.tr  , this, key: tabKeyList[0]),
-      ProfileTabScreen(ProfileMainTab.follow    , 'FOLLOW'.tr   , this, key: tabKeyList[1]),
-      ProfileTabScreen(ProfileMainTab.bookmark  , 'BOOKMARK'.tr , this, key: tabKeyList[2]),
-      // ProfileTabScreen(ProfileMainTab.like      , 'LIKE'.tr     , this, key: tabKeyList[3]),
-    ];
     setUserMessage();
   }
 
@@ -214,6 +206,10 @@ class UserViewModel extends ChangeNotifier {
     }
   }
 
+  showProfile() {
+    return ProfileTabScreen(ProfileMainTab.profile, 'PROFILE'.tr, this);
+  }
+
   showUserPic() {
     return Container(
       width: UI_FACE_SIZE.w,
@@ -228,20 +224,20 @@ class UserViewModel extends ChangeNotifier {
               borderRadius: BorderRadius.all(Radius.circular(UI_FACE_SIZE.w)),
               border: Border.all(
                 color: Theme.of(context!).colorScheme.secondary,
-                width: 4.0,
+                width: 2.0,
               ),
             ),
             child: getCircleImage(userInfo!.pic, UI_FACE_SIZE.w),
           ),
           if (isMyProfile)
             Positioned(
-              right: 2,
-              bottom: 2,
+              right: 0,
+              bottom: 0,
               child: IconButton(
                 icon: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Icon(Icons.edit, color: Colors.black.withOpacity(0.5), size: 26),
+                    Icon(Icons.edit, color: Colors.black, size: UI_MENU_ICON_SIZE.w),
                     Icon(Icons.edit, color: Colors.white, size: UI_MENU_ICON_SIZE.w),
                   ]
                 ),
@@ -359,19 +355,19 @@ class UserViewModel extends ChangeNotifier {
     return InkWell(
       onTap: onTap,
       child: Container(
-        height: UI_ITEM_HEIGHT_SS.w,
+        height: UI_ITEM_HEIGHT_S.w,
         margin: EdgeInsets.symmetric(vertical: 5.w),
         padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w, vertical: 5.w),
         child: Row(
           children: [
-            Icon(icon, size: UI_MENU_ICON_SIZE.w, color: Theme.of(context!).primaryColor.withOpacity(0.35)),
+            Icon(icon, size: UI_MENU_ICON_SIZE.w, color: Theme.of(context!).primaryColor.withOpacity(0.5)),
             SizedBox(width: UI_ITEM_SPACE.w),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: ItemTitleLargeHotStyle(context!)),
+                  Text(title, style: ItemTitleLargeStyle(context!)),
                   if (desc.isNotEmpty)...[
                     SizedBox(height: 5.w),
                     Text(desc, style: ItemTitleExStyle(context!)),
@@ -417,11 +413,21 @@ class UserViewModel extends ChangeNotifier {
     return result;
   }
 
+  showProfileUserBackground() {
+    if (userInfo!.backPic != null) {
+      return showImageFit(userInfo!.backPic);
+    }
+    return Image.asset('assets/samples/profile_back_00.png');
+  }
+
+  showProfileUserFace() {
+    return showUserPic();
+  }
+
   showUserContentList() {
-    return ListView(
-      shrinkWrap: true,
-      padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w, vertical: 5.w),
+    return Column(
       children: [
+        showHorizontalDivider(Size(double.infinity, 30.w)),
       // if (userInfo!.checkOption('event_on'))
         contentItem(Icons.event_available, isMyProfile ? 'MY EVENT LIST'.tr : 'EVENT LIST'.tr, '', 0, () {
           var orgContext = context;
@@ -436,13 +442,28 @@ class UserViewModel extends ChangeNotifier {
             context = orgContext;
           });
         }),
-        if (isMyProfile)
-        contentItem(Icons.workspace_premium_outlined, 'SPONSORED EVENT LIST'.tr, '', 0, () {
+        // if (userInfo!.checkOption('follow_on'))
+        contentItem(Icons.face, isMyProfile ? 'MY FOLLOW LIST'.tr : 'FOLLOW LIST'.tr, '', 0, () {
           var orgContext = context;
-          Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.sponsor, 'SPONSORED EVENT LIST'))).then((_) {
+          Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'))).then((_) {
             context = orgContext;
           });
         }),
+        // if (userInfo!.checkOption('bookmark_on'))
+        contentItem(Icons.bookmark_border, isMyProfile ? 'MY BOOKMARK LIST'.tr : 'BOOKMARK LIST'.tr, '', 0, () {
+          var orgContext = context;
+          Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'))).then((_) {
+            context = orgContext;
+          });
+        }),
+        if (isMyProfile && APP_STORE_OPEN)...[
+          contentItem(Icons.workspace_premium_outlined, 'SPONSORED EVENT LIST'.tr, '', 0, () {
+            var orgContext = context;
+            Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.sponsor, 'SPONSORED EVENT LIST'))).then((_) {
+              context = orgContext;
+            });
+          }),
+        ],
       ],
     );
   }
@@ -688,7 +709,16 @@ class UserViewModel extends ChangeNotifier {
               constraints: BoxConstraints(
                 minHeight: layout.maxHeight + 1,
               ),
-              child: type == ProfileContentType.event ? showEventList() : type == ProfileContentType.story ? showStoryList() : showSponsorList()
+              child: Column(
+                children: [
+                  if (type == ProfileContentType.event)
+                    showEventList(),
+                  if (type == ProfileContentType.story)
+                    showStoryList(),
+                  if (type == ProfileContentType.sponsor)
+                    showSponsorList(),
+                ],
+              )
             )
           )
         );

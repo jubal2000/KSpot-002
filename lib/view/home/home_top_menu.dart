@@ -176,16 +176,28 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                     if (AppData.appViewModel.appbarMenuMode == MainMenuID.my)...[
                       Container(
                         // color: Colors.red,
+                        height: iconSize,
+                        width: iconSize,
+                        child: IconButton(
+                          icon: Icon(Icons.mail_outline_outlined, color: iconColor),
+                          onPressed: () {
+                            Get.to(() => MessageScreen());
+                          },
+                        )
+                      ),
+                      SizedBox(width: 5),
+                      if (APP_STORE_OPEN)...[
+                        Container(
                           height: iconSize,
                           width: iconSize,
                           child: IconButton(
-                            icon: Icon(Icons.mail_outline_outlined, color: iconColor),
+                            icon: Icon(Icons.store_outlined, color: iconColor),
                             onPressed: () {
-                              Get.to(() => MessageScreen());
                             },
                           )
-                      ),
-                      SizedBox(width: 5),
+                        ),
+                        SizedBox(width: 5),
+                      ],
                       Container(
                         // color: Colors.red,
                         height: iconSize,
@@ -197,62 +209,6 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                         )
                       ),
                     ],
-                    // Container(
-                    //   child: Row(
-                    //      mainAxisAlignment: MainAxisAlignment.end,
-                    //      crossAxisAlignment: CrossAxisAlignment.center,
-                    //      children: [
-                    //        AppData.appViewModel.showAddMenu(iconColor, iconSize),
-                    //        SizedBox(width: 8),
-                    //        Badge(
-                    //          position: BadgePosition(top:1, end:5),
-                    //          badgeContent: Text('3', style: TextStyle(fontSize:10, fontWeight: FontWeight.bold, color: Colors.white)),
-                    //          showBadge: true,
-                    //          child: IconButton(
-                    //            icon: Icon(Icons.message_outlined, color: iconColor),
-                    //            onPressed: () {
-                    //            },
-                    //          )
-                    //        ),
-                    //        SizedBox(width: 8),
-                    //        UserCardWidget(AppData.userInfo.toJson(),
-                    //         isShowName: false,
-                    //         faceSize: UI_MENU_CIRCLE_SIZE,
-                    //         circleColor: Theme.of(context).canvasColor,
-                    //         backgroundColor: Theme.of(context).canvasColor,
-                    //         onSelected: (_) {
-                    //           Get.to(() => ProfileScreen());
-                    //         }),
-                    //     ]
-                    //   )
-                    // ),
-                    // Container(
-                    //   child: Row(
-                    //     mainAxisAlignment: MainAxisAlignment.center,
-                    //     children: [
-                    //       AppData.appViewModel.showAddMenu(iconColor, iconSize),
-                    //       SizedBox(width: 8),
-                    //       SizedBox(
-                    //         width: 35,
-                    //         child: IconButton(
-                    //           icon: Icon(Icons.message_outlined, color: iconColor),
-                    //           onPressed: () {
-                    //           },
-                    //         )
-                    //       ),
-                    //       Badge(
-                    //         position: BadgePosition(top:0, end:0),
-                    //         badgeContent: Text('3', style: TextStyle(fontSize:10, fontWeight: FontWeight.bold, color: Colors.white)),
-                    //         showBadge: true,
-                    //         child: IconButton(
-                    //           icon: Icon(Icons.event_available, color: iconColor),
-                    //           onPressed: () {
-                    //           },
-                    //         )
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
                   ],
                 )
             ]

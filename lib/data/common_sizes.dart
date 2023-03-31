@@ -21,7 +21,11 @@ const double UI_ROUND_RADIUS = 12.0;
 const double UI_MAIN_LIST_BG_HEIGHT = 150.0;
 
 const double UI_FACE_SIZE = 100.0;
+const double UI_FACE_NAME_SIZE = 50.0;
 const double UI_SNS_SIZE = 80.0;
+const double UI_PROFILE_BACK_SIZE = 280.0;
+const double UI_PROFILE_TEXT_SIZE = 30.0;
+const double UI_PROFILE_INFO_SIZE = 60.0;
 
 const double UI_ITEM_HEIGHT = 60.0;
 const double UI_ITEM_HEIGHT_L = 70.0;

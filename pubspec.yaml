@@ -170,6 +170,7 @@ flutter:
     - assets/data/
     - assets/map_style/
     - assets/file_icons/
+    - assets/samples/
 
 
   # To add custom fonts to your application, add a fonts section here,

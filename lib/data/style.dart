@@ -131,6 +131,19 @@ List<Shadow> outlinedText({double strokeWidth = 1, Color strokeColor = Colors.bl
   return result.toList();
 }
 
+/// Shadows a text using shadows.
+List<Shadow> shadowText({double strokeWidth = 1, Color strokeColor = Colors.black, int precision = 4}) {
+  Set<Shadow> result = HashSet();
+  for (double x = 1; x < strokeWidth + precision; x++) {
+    for(double y = 1; y < strokeWidth + precision; y++) {
+      double offsetX = x.toDouble();
+      double offsetY = y.toDouble();
+      result.add(Shadow(offset: Offset(strokeWidth / offsetX, strokeWidth / offsetY), color: strokeColor));
+    }
+  }
+  return result.toList();
+}
+
 // content..
 TextStyle titleStyle = TextStyle(
     fontSize: common_title_font_size, fontWeight: FontWeight.w700);

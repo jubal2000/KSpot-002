@@ -93,9 +93,9 @@ class MyApp extends StatelessWidget {
             // theme: theme.getTheme(),
             theme: FlexThemeData.light(scheme: FlexScheme.redWine),
             // The Mandy red, dark theme.
-            darkTheme: FlexThemeData.dark(scheme: FlexScheme.redWine),
+            // darkTheme: FlexThemeData.dark(scheme: FlexScheme.redWine),
             // Use dark or light theme based on system setting.
-            themeMode: ThemeMode.system,
+            themeMode: ThemeMode.light,
             // builder: (context, _) {
             //   var child = _!;
             //   final navigatorKey = GlobalKey<NavigatorState>();

@@ -5,6 +5,8 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -938,7 +940,7 @@ class showVerticalDivider extends StatelessWidget {
 
 class showHorizontalDivider extends StatelessWidget {
   showHorizontalDivider(this.size,
-      {Key ? key, this.color = Colors.grey, this.thickness = 1})
+      {Key ? key, this.color, this.thickness = 1})
       : super (key: key);
 
   Size size;
@@ -948,15 +950,15 @@ class showHorizontalDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        width: size.width,
-        height: size.height,
-        child: Center(
-            child: Divider(
-              color: color,
-              thickness: thickness,
-              height: size.height,
-            )
+      width: size.width,
+      height: size.height,
+      child: Center(
+        child: Divider(
+          color: color ?? Colors.grey.withOpacity(0.35),
+          thickness: thickness,
+          height: size.height,
         )
+      )
     );
   }
 }

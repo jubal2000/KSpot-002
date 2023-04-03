@@ -38,7 +38,7 @@ class ProfileTargetScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final userViewModel = UserViewModel();
     userViewModel.initUserModel(userInfo);
-    return ProfileScreen(userViewModel);
+    return ProfileScreen(userViewModel, isShowBack: true);
   }
 }
 
@@ -84,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       stretch: true,
                       automaticallyImplyLeading: false,
                       expandedHeight: expandHeight.w,
-                      toolbarHeight: 45.w,
+                      toolbarHeight: 65.w,
                       forceElevated: innerBoxIsScrolled,
                       backgroundColor: Theme.of(context).backgroundColor,
                       systemOverlayStyle: SystemUiOverlayStyle(
@@ -92,15 +92,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
                         statusBarBrightness: Brightness.light, // For iOS (dark icons)
                       ),
+                      leading: widget.isShowBack ? InkWell(
+                          onTap: () {
+                            Get.back();
+                          },
+                          child: Row(
+                            children: [
+                              SizedBox(width: UI_HORIZONTAL_SPACE),
+                              OutlineIcon(Icons.arrow_back, 24, Colors.white, shadowColor: Colors.black87)
+                            ],
+                          )
+                      ) : null,
                       actions: [
-                        Container()
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              children: [
+                                if (APP_STORE_OPEN)...[
+                                  InkWell(
+                                      onTap: () {
+                                      },
+                                      child: OutlineIcon(Icons.store_outlined, 24, Colors.white, shadowColor: Colors.black87)
+                                  ),
+                                  SizedBox(width: 15.w),
+                                ],
+                                InkWell(
+                                    onTap: () {
+                                      Get.to(() => MessageScreen());
+                                    },
+                                    child: OutlineIcon(Icons.mail_outline, 24, Colors.white, shadowColor: Colors.black87)
+                                ),
+                                SizedBox(width: 15.w),
+                                InkWell(
+                                    onTap: () {
+                                      _key.currentState!.openEndDrawer();
+                                    },
+                                    child: OutlineIcon(Icons.menu, 24, Colors.white, shadowColor: Colors.black87)
+                                ),
+                                SizedBox(width: UI_HORIZONTAL_SPACE),
+                              ],
+                            )
+                          ],
+                        )
                       ],
                       flexibleSpace: FlexibleSpaceBar(
                         expandedTitleScale: 1.0,
                         titlePadding: EdgeInsets.zero,
                         title: Stack(
                           children: [
-                            TopCenterAlign(
+                            Positioned(
+                              bottom: UI_PROFILE_BACK_SIZE.w - UI_FACE_SIZE.w,
                               child: Container(
                                 width: Get.width,
                                 height: UI_PROFILE_BACK_SIZE.w - UI_FACE_SIZE.w,
@@ -110,35 +152,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 )
                               )
                             ),
-                            Positioned(
-                              top: 40.w,
-                              right: UI_HORIZONTAL_SPACE.w,
-                              child: Row(
-                                children: [
-                                  if (APP_STORE_OPEN)...[
-                                    InkWell(
-                                      onTap: () {
-                                      },
-                                      child: OutlineIcon(Icons.store_outlined, 24, Colors.white, shadowColor: Colors.black87)
-                                    ),
-                                    SizedBox(width: 15.w),
-                                  ],
-                                  InkWell(
-                                    onTap: () {
-                                      Get.to(() => MessageScreen());
-                                    },
-                                    child: OutlineIcon(Icons.mail_outline, 24, Colors.white, shadowColor: Colors.black87)
-                                  ),
-                                  SizedBox(width: 15.w),
-                                  InkWell(
-                                    onTap: () {
-                                      _key.currentState!.openEndDrawer();
-                                    },
-                                    child: OutlineIcon(Icons.menu, 24, Colors.white, shadowColor: Colors.black87)
-                                  ),
-                                ],
-                              ),
-                            ),
+                            // Positioned(
+                            //   top: 40.w,
+                            //   right: UI_HORIZONTAL_SPACE.w,
+                            //   child: Row(
+                            //     children: [
+                            //       if (APP_STORE_OPEN)...[
+                            //         InkWell(
+                            //           onTap: () {
+                            //           },
+                            //           child: OutlineIcon(Icons.store_outlined, 24, Colors.white, shadowColor: Colors.black87)
+                            //         ),
+                            //         SizedBox(width: 15.w),
+                            //       ],
+                            //       InkWell(
+                            //         onTap: () {
+                            //           Get.to(() => MessageScreen());
+                            //         },
+                            //         child: OutlineIcon(Icons.mail_outline, 24, Colors.white, shadowColor: Colors.black87)
+                            //       ),
+                            //       SizedBox(width: 15.w),
+                            //       InkWell(
+                            //         onTap: () {
+                            //           _key.currentState!.openEndDrawer();
+                            //         },
+                            //         child: OutlineIcon(Icons.menu, 24, Colors.white, shadowColor: Colors.black87)
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
                           ]
                         ),
                       ),

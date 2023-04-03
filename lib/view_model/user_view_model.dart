@@ -8,9 +8,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:kspot_002/models/story_model.dart';
 import 'package:kspot_002/models/sponsor_model.dart';
+import 'package:kspot_002/view/bookmark/bookmark_screen.dart';
 import 'package:kspot_002/view/event/event_list_screen.dart';
+import 'package:kspot_002/view/follow/follow_screen.dart';
 import 'package:kspot_002/view/story/story_detail_screen.dart';
 import 'package:kspot_002/view/story/story_edit_screen.dart';
+import 'package:kspot_002/widget/bookmark_widget.dart';
 import 'package:kspot_002/widget/sponsor_item.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -41,7 +44,7 @@ enum ProfileMainTab {
 enum ProfileContentType {
   event,
   story,
-  follower,
+  follow,
   bookmark,
   sponsor,
   max,
@@ -100,8 +103,10 @@ class UserViewModel extends ChangeNotifier {
 
   copyUserModel(UserViewModel source) {
     initUserModel(source.userInfo!);
-    eventData = source.eventData;
-    storyData = source.storyData;
+    eventData     = source.eventData;
+    storyData     = source.storyData;
+    sponsorData   = source.sponsorData;
+    bookmarkData  = source.bookmarkData;
   }
 
   refresh() {
@@ -445,14 +450,14 @@ class UserViewModel extends ChangeNotifier {
         // if (userInfo!.checkOption('follow_on'))
         contentItem(Icons.face, isMyProfile ? 'MY FOLLOW LIST'.tr : 'FOLLOW LIST'.tr, '', 0, () {
           var orgContext = context;
-          Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'))).then((_) {
+          Navigator.of(context!).push(createAniRoute(FollowScreen(userInfo!))).then((_) {
             context = orgContext;
           });
         }),
         // if (userInfo!.checkOption('bookmark_on'))
         contentItem(Icons.bookmark_border, isMyProfile ? 'MY BOOKMARK LIST'.tr : 'BOOKMARK LIST'.tr, '', 0, () {
           var orgContext = context;
-          Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'))).then((_) {
+          Navigator.of(context!).push(createAniRoute(BookmarkScreen(userInfo!))).then((_) {
             context = orgContext;
           });
         }),
@@ -499,7 +504,7 @@ class UserViewModel extends ChangeNotifier {
         isShowHomeButton: false,
         isShowLike: false,
         itemHeight: UI_CONTENT_ITEM_HEIGHT.w,
-        itemPadding: EdgeInsets.only(bottom: 10),
+        itemPadding: EdgeInsets.only(top: 10),
         onRefresh: (updateData) {
           eventData[updateData['id']] = EventModel.fromJson(updateData);
           notifyListeners();

@@ -77,6 +77,7 @@ class FollowScreenState extends State<FollowScreen> {
         return false;
       },
       child: SafeArea(
+        top: false,
         child: Scaffold(
           appBar: widget.isShowAppBar ? AppBar(
             title: Text(widget.topTitle.isNotEmpty ? widget.topTitle : 'FOLLOW LIST'.tr, style: AppBarTitleStyle(context)),
@@ -394,7 +395,11 @@ class FollowListItemState extends State<FollowListItem> {
             AppData.listSelectData[userInfo!.id] = userInfo;
           }
         } else {
-          Get.to(() => ProfileTargetScreen(userInfo!));
+          // Get.to(() => ProfileTargetScreen(userInfo!));
+          final orgContext = context;
+          Navigator.of(context).push(createAniRoute(ProfileTargetScreen(userInfo!))).then((_) {
+            context = orgContext;
+          });
         }
       },
       child: Container(

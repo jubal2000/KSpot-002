@@ -161,13 +161,13 @@ class BookmarkTabState extends State<BookmarkTab> with AutomaticKeepAliveClientM
 
   refreshData() {
     showList.clear();
-    List<JSON> tmpList = LIST_CREATE_TIME_SORT_DESC(widget.userView.bookmarkData.entries.map((e) => JSON.from(e.value)).toList());
-    for (var item in tmpList) {
-      if (item['targetType'] == widget.targetType) {
-        showList.add(BookmarkItem(item, widget.targetType, onChanged: (action) {
+    JSON tmpList = JSON_CREATE_TIME_SORT_DESC(widget.userView.bookmarkData);
+    for (var item in tmpList.entries) {
+      if (item.value['targetType'] == widget.targetType) {
+        showList.add(BookmarkItem(item.value, widget.targetType, onChanged: (action) {
           if (action == 1) {
             setState(() {
-              widget.userView.bookmarkData.remove(item['id']);
+              widget.userView.bookmarkData.remove(item.key);
               refreshData();
             });
           }
@@ -202,7 +202,7 @@ class BookmarkTabState extends State<BookmarkTab> with AutomaticKeepAliveClientM
 }
 
 class BookmarkItem extends StatefulWidget {
-  BookmarkItem(this.itemInfo, this.targetType, {Key? key, this.itemHeight = 60, this.onChanged}) : super(key: key);
+  BookmarkItem(this.itemInfo, this.targetType, {Key? key, this.itemHeight = 70, this.onChanged}) : super(key: key);
 
   JSON itemInfo;
   String targetType;
@@ -271,7 +271,7 @@ class BookmarkItemState extends State<BookmarkItem> {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(STR(widget.itemInfo['targetTitle']), style: ItemTitleStyle(context)),
                   SizedBox(height: 5),

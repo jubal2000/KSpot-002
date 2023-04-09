@@ -152,7 +152,7 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
           margin: EdgeInsets.symmetric(vertical: widget.isFullScreen ? 0 : 15),
           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: Theme.of(context).canvasColor,
+            color: Theme.of(context).cardColor,
             boxShadow: [
               if (!widget.isFullScreen)
                 BoxShadow(

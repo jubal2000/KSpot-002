@@ -361,7 +361,6 @@ class UserViewModel extends ChangeNotifier {
       onTap: onTap,
       child: Container(
         height: UI_ITEM_HEIGHT_S.w,
-        margin: EdgeInsets.symmetric(vertical: 5.w),
         padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w, vertical: 5.w),
         child: Row(
           children: [

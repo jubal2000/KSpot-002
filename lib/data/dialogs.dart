@@ -2008,8 +2008,7 @@ Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel ev
                         Row(
                           children: [
                             Text('Use credits'.tr, style: DialogDescBoldStyle(context)),
-                            SizedBox(width: 10),
-                            SizedBox(
+                            SizedBox(width: 10),                            SizedBox(
                               child: NumberInputWidget(creditCount, min: 1, max: max, onChanged: (value) {
                                 setState(() {
                                   creditCount = value;

@@ -105,6 +105,12 @@ class ChattingScreen extends StatelessWidget {
                 //   },
                 //   child: Icon(Icons.add, size: 24),
                 // ),
+                floatingActionButton: FloatingActionButton(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  onPressed: () {
+                  },
+                  child: Icon(Icons.add_comment_outlined, size: 30, color: Colors.white),
+                ),
               )
             ),
           ),
@@ -112,9 +118,10 @@ class ChattingScreen extends StatelessWidget {
             child: SizedBox(
               height: UI_APPBAR_HEIGHT,
                 child: HomeTopMenuBar(
-                  MainMenuID.event,
+                  MainMenuID.chat,
                   isShowDatePick: false,
                   onCountryChanged: () {
+
                   },
                   onDateChange: (state) {
                   }

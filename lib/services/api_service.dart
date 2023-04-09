@@ -2845,7 +2845,7 @@ class ApiService extends GetxService {
   final ServiceQnACollection  = 'data_serviceQnA';
   
   Stream getServiceQnAData() {
-    return getServiceQnAData();
+    return getServiceQnADataNext();
   }
   
   Stream getServiceQnADataNext([DateTime? lastTime]) {

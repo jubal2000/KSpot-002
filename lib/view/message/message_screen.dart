@@ -53,7 +53,13 @@ class MessageScreen extends StatelessWidget {
               }
             )
           )
-        )
+        ),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Theme.of(context).primaryColor,
+          onPressed: () {
+          },
+          child: Icon(Icons.add_comment_outlined, size: 30, color: Colors.white),
+        ),
       )
     );
   }

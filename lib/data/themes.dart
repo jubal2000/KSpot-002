@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:kspot_002/widget/rounded_button.dart';
 import '../data/common_colors.dart';
 import '../data/common_sizes.dart';
 
@@ -7,8 +8,11 @@ const double common_m_radius = 8.0;
 const String APP_ICON_XL = 'assets/ui/app_icon_00.png';
 const String APP_LOGO_XL = 'assets/ui/logo_01_00.png';
 
+const Color THEME_MAIN_BG_COLOR = Color(0xFFE8E7EB);
+const Color THEME_CARD_BG_COLOR = Color(0xFF58575B);
+
 final ThemeData lightTheme = ThemeData(
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: THEME_MAIN_BG_COLOR,
     primarySwatch: NAVY,
     primaryColorBrightness: Brightness.light,
     appBarTheme: AppBarTheme(

@@ -34,7 +34,7 @@ class SetupFaqState extends State<SetupFaqScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(DESC(item.value['title']), style: ItemTitleStyle(context)),
+              Text(STR(item.value['title']), style: ItemTitleStyle(context)),
               SizedBox(height: 5),
               Text(DESC(item.value['desc']), style: ItemTitle2Style(context)),
               // SizedBox(height: 5),

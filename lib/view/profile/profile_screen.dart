@@ -76,139 +76,185 @@ class _ProfileScreenState extends State<ProfileScreen> {
             LOG('--> UserViewModel redraw');
             return Scaffold(
               key: _key,
-              body: NestedScrollView(
-                headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                  return <Widget>[
-                    SliverAppBar(
-                      pinned: true,
-                      stretch: true,
-                      automaticallyImplyLeading: false,
-                      expandedHeight: expandHeight.w,
-                      toolbarHeight: 65.w,
-                      forceElevated: innerBoxIsScrolled,
-                      backgroundColor: Theme.of(context).backgroundColor,
-                      systemOverlayStyle: SystemUiOverlayStyle(
-                        statusBarColor: Colors.transparent,
-                        statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
-                        statusBarBrightness: Brightness.light, // For iOS (dark icons)
-                      ),
-                      leading: widget.isShowBack ? InkWell(
-                          onTap: () {
-                            Get.back();
-                          },
-                          child: Row(
-                            children: [
-                              SizedBox(width: UI_HORIZONTAL_SPACE),
-                              OutlineIcon(Icons.arrow_back, 24, Colors.white, shadowColor: Colors.black87)
-                            ],
-                          )
-                      ) : null,
-                      actions: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                if (APP_STORE_OPEN)...[
-                                  InkWell(
-                                      onTap: () {
-                                      },
-                                      child: OutlineIcon(Icons.store_outlined, 24, Colors.white, shadowColor: Colors.black87)
-                                  ),
-                                  SizedBox(width: 15.w),
-                                ],
-                                InkWell(
-                                    onTap: () {
-                                      Get.to(() => MessageScreen());
-                                    },
-                                    child: OutlineIcon(Icons.mail_outline, 24, Colors.white, shadowColor: Colors.black87)
-                                ),
-                                SizedBox(width: 15.w),
-                                InkWell(
-                                    onTap: () {
-                                      _key.currentState!.openEndDrawer();
-                                    },
-                                    child: OutlineIcon(Icons.menu, 24, Colors.white, shadowColor: Colors.black87)
-                                ),
-                                SizedBox(width: UI_HORIZONTAL_SPACE),
-                              ],
-                            )
-                          ],
-                        )
+              appBar: AppBar(
+                leading: widget.isShowBack ? InkWell(
+                    onTap: () {
+                      Get.back();
+                    },
+                    child: Row(
+                      children: [
+                        SizedBox(width: UI_HORIZONTAL_SPACE),
+                        Icon(Icons.arrow_back, size: 24.sp)
                       ],
-                      flexibleSpace: FlexibleSpaceBar(
-                        expandedTitleScale: 1.0,
-                        titlePadding: EdgeInsets.zero,
-                        title: Stack(
-                          children: [
-                            Positioned(
-                              bottom: UI_PROFILE_BACK_SIZE.w - UI_FACE_SIZE.w,
-                              child: Container(
-                                width: Get.width,
-                                height: UI_PROFILE_BACK_SIZE.w - UI_FACE_SIZE.w,
-                                  child: FittedBox(
-                                  fit: BoxFit.fitWidth,
-                                  child: userViewModel.showProfileUserBackground(),
-                                )
-                              )
+                    )
+                ) : null,
+                actions: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          if (APP_STORE_OPEN)...[
+                            InkWell(
+                                onTap: () {
+                                },
+                                child: Icon(Icons.store_outlined, size: 24.sp)
                             ),
-                            // Positioned(
-                            //   top: 40.w,
-                            //   right: UI_HORIZONTAL_SPACE.w,
-                            //   child: Row(
-                            //     children: [
-                            //       if (APP_STORE_OPEN)...[
-                            //         InkWell(
-                            //           onTap: () {
-                            //           },
-                            //           child: OutlineIcon(Icons.store_outlined, 24, Colors.white, shadowColor: Colors.black87)
-                            //         ),
-                            //         SizedBox(width: 15.w),
-                            //       ],
-                            //       InkWell(
-                            //         onTap: () {
-                            //           Get.to(() => MessageScreen());
-                            //         },
-                            //         child: OutlineIcon(Icons.mail_outline, 24, Colors.white, shadowColor: Colors.black87)
-                            //       ),
-                            //       SizedBox(width: 15.w),
-                            //       InkWell(
-                            //         onTap: () {
-                            //           _key.currentState!.openEndDrawer();
-                            //         },
-                            //         child: OutlineIcon(Icons.menu, 24, Colors.white, shadowColor: Colors.black87)
-                            //       ),
-                            //     ],
-                            //   ),
-                            // ),
-                          ]
-                        ),
-                      ),
-                      bottom: PreferredSize(
-                        preferredSize: Size.fromHeight(UI_FACE_SIZE.w),
-                        child: Container(
-                          width: Get.width,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              userViewModel.showProfileUserFace(),
-                              SizedBox(height: 10.w),
-                              Container(
-                                height: UI_PROFILE_TEXT_SIZE.w,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(userViewModel.userInfo!.nickName, style: AppBarTitleOutlineStyle(context, color: Colors.black, Colors.white30)),
-                                  ],
-                                )
-                              )
-                            ]
-                          )
-                        ),
-                      ),
-                    ),
-                  ];
-                },
+                            SizedBox(width: 14.w),
+                          ],
+                          InkWell(
+                              onTap: () {
+                                Get.to(() => MessageScreen());
+                              },
+                              child: Icon(Icons.mail_outline, size: 24.sp)
+                          ),
+                          SizedBox(width: 14.w),
+                          InkWell(
+                              onTap: () {
+                                _key.currentState!.openEndDrawer();
+                              },
+                              child: Icon(Icons.menu, size: 24.sp)
+                          ),
+                          SizedBox(width: UI_HORIZONTAL_SPACE),
+                        ],
+                      )
+                    ],
+                  )
+                ],
+              ),
+              // body: NestedScrollView(
+              //   headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              //     return <Widget>[
+              //       SliverAppBar(
+              //         pinned: true,
+              //         stretch: true,
+              //         automaticallyImplyLeading: false,
+              //         expandedHeight: expandHeight.w,
+              //         toolbarHeight: 65.w,
+              //         forceElevated: innerBoxIsScrolled,
+              //         backgroundColor: Theme.of(context).backgroundColor,
+              //         systemOverlayStyle: SystemUiOverlayStyle(
+              //           statusBarColor: Colors.transparent,
+              //           statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
+              //           statusBarBrightness: Brightness.light, // For iOS (dark icons)
+              //         ),
+              //         leading: widget.isShowBack ? InkWell(
+              //             onTap: () {
+              //               Get.back();
+              //             },
+              //             child: Row(
+              //               children: [
+              //                 SizedBox(width: UI_HORIZONTAL_SPACE),
+              //                 OutlineIcon(Icons.arrow_back, 24.sp, Colors.white, shadowColor: Colors.black87)
+              //               ],
+              //             )
+              //         ) : null,
+              //         actions: [
+              //           Column(
+              //             mainAxisAlignment: MainAxisAlignment.center,
+              //             children: [
+              //               Row(
+              //                 children: [
+              //                   if (APP_STORE_OPEN)...[
+              //                     InkWell(
+              //                         onTap: () {
+              //                         },
+              //                         child: OutlineIcon(Icons.store_outlined, 24.sp, Colors.white, shadowColor: Colors.black87)
+              //                     ),
+              //                     SizedBox(width: 14.w),
+              //                   ],
+              //                   InkWell(
+              //                       onTap: () {
+              //                         Get.to(() => MessageScreen());
+              //                       },
+              //                       child: OutlineIcon(Icons.mail_outline, 24.sp, Colors.white, shadowColor: Colors.black87)
+              //                   ),
+              //                   SizedBox(width: 14.w),
+              //                   InkWell(
+              //                       onTap: () {
+              //                         _key.currentState!.openEndDrawer();
+              //                       },
+              //                       child: OutlineIcon(Icons.menu, 24.sp, Colors.white, shadowColor: Colors.black87)
+              //                   ),
+              //                   SizedBox(width: UI_HORIZONTAL_SPACE),
+              //                 ],
+              //               )
+              //             ],
+              //           )
+              //         ],
+              //         flexibleSpace: FlexibleSpaceBar(
+              //           expandedTitleScale: 1.0,
+              //           titlePadding: EdgeInsets.zero,
+              //           title: Stack(
+              //             children: [
+              //               Positioned(
+              //                 bottom: UI_PROFILE_BACK_SIZE.w - UI_FACE_SIZE.w,
+              //                 child: Container(
+              //                   width: Get.width,
+              //                   height: UI_PROFILE_BACK_SIZE.w - UI_FACE_SIZE.w,
+              //                     child: FittedBox(
+              //                     fit: BoxFit.fitWidth,
+              //                     child: userViewModel.showProfileUserBackground(),
+              //                   )
+              //                 )
+              //               ),
+              //               // Positioned(
+              //               //   top: 40.w,
+              //               //   right: UI_HORIZONTAL_SPACE.w,
+              //               //   child: Row(
+              //               //     children: [
+              //               //       if (APP_STORE_OPEN)...[
+              //               //         InkWell(
+              //               //           onTap: () {
+              //               //           },
+              //               //           child: OutlineIcon(Icons.store_outlined, 24, Colors.white, shadowColor: Colors.black87)
+              //               //         ),
+              //               //         SizedBox(width: 15.w),
+              //               //       ],
+              //               //       InkWell(
+              //               //         onTap: () {
+              //               //           Get.to(() => MessageScreen());
+              //               //         },
+              //               //         child: OutlineIcon(Icons.mail_outline, 24, Colors.white, shadowColor: Colors.black87)
+              //               //       ),
+              //               //       SizedBox(width: 15.w),
+              //               //       InkWell(
+              //               //         onTap: () {
+              //               //           _key.currentState!.openEndDrawer();
+              //               //         },
+              //               //         child: OutlineIcon(Icons.menu, 24, Colors.white, shadowColor: Colors.black87)
+              //               //       ),
+              //               //     ],
+              //               //   ),
+              //               // ),
+              //             ]
+              //           ),
+              //         ),
+              //         // bottom: PreferredSize(
+              //         //   preferredSize: Size.fromHeight(UI_FACE_SIZE.w),
+              //         //   child: Container(
+              //         //     width: Get.width,
+              //         //     child: Column(
+              //         //       mainAxisAlignment: MainAxisAlignment.center,
+              //         //       children: [
+              //         //         userViewModel.showProfileUserFace(),
+              //         //         SizedBox(height: 10.w),
+              //         //         Container(
+              //         //           height: UI_PROFILE_TEXT_SIZE.w,
+              //         //           child: Column(
+              //         //             mainAxisAlignment: MainAxisAlignment.center,
+              //         //             children: [
+              //         //               Text(userViewModel.userInfo!.nickName, style: AppBarTitleOutlineStyle(context, color: Colors.black, Colors.white30)),
+              //         //             ],
+              //         //           )
+              //         //         )
+              //         //       ]
+              //         //     )
+              //         //   ),
+              //         // ),
+              //       ),
+              //     ];
+              //   },
                 body: Container(
                   padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w, vertical: 5.w),
                   child: ListView(
@@ -219,6 +265,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
+                          SizedBox(height: 20.w),
+                          userViewModel.showProfileUserFace(),
+                          SizedBox(height: 10.w),
+                          Container(
+                              height: UI_PROFILE_TEXT_SIZE.w,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(userViewModel.userInfo!.nickName, style: AppBarTitleOutlineStyle(context, color: Colors.black, Colors.white30)),
+                                ],
+                              )
+                          ),
                           Text(DESC(userViewModel.userInfo!.message), style: ItemDescOutlineStyle(context), maxLines: 1),
                           SizedBox(height: 10.w),
                           Row(
@@ -244,7 +302,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       userViewModel.showUserContentList(),
                     ],
                   )
-                ) // show profile main..
+                // ) // show profile main..
               ),
               endDrawer: ChangeNotifierProvider.value(
                 value: _setupViewModel,

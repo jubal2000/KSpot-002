@@ -81,6 +81,12 @@ class HomeScreen extends StatelessWidget {
               builder: (context, theme, _) => Scaffold(
                 body: Stack(
                   children: [
+                    // Expanded(
+                    //   child: Container(
+                    //     padding: EdgeInsets.only(bottom: UI_MENU_BG_HEIGHT),
+                    //     child: pages[viewModel.menuIndex],
+                    //   )
+                    // ),
                     pages[viewModel.menuIndex],
                     BottomCenterAlign(
                       child: Container(

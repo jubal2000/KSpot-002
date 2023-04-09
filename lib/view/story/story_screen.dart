@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../data/app_data.dart';
 import '../../data/common_sizes.dart';
+import '../../data/themes.dart';
 import '../../services/cache_service.dart';
 import '../../view_model/app_view_model.dart';
 import '../../view_model/event_view_model.dart';
@@ -48,6 +49,12 @@ class StoryScreen extends StatelessWidget {
               );
             }
           )
+        ),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Theme.of(context).primaryColor,
+          onPressed: () {
+          },
+          child: Icon(Icons.add_comment_outlined, size: 30, color: Colors.white),
         ),
       )
     );

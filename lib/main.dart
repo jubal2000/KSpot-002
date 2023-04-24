@@ -90,8 +90,8 @@ class MyApp extends StatelessWidget {
               Locale('ko', 'KR'),
               Locale('en', 'US'),
             ],
-            // theme: theme.getTheme(),
-            theme: lightTheme,
+            theme: theme.getTheme(),
+            // theme: lightTheme,
             // The Mandy red, dark theme.
             // darkTheme: FlexThemeData.dark(scheme: FlexScheme.mandyRed),
             // Use dark or light theme based on system setting.

@@ -285,16 +285,18 @@ class ChatViewModel extends ChangeNotifier {
     return Column(
       children: [
         SubTitleBar(buildContext!, '${isMy ? 'MY CHAT'.tr : 'OTHER CHAT'.tr} ${showResultList.length}',
-          height: 35,
+          height: 40,
           icon: isTabOpen[isMy ? 0 : 1] ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
           onActionSelect: (select) {
             isTabOpen[isMy ? 0 : 1] = !isTabOpen[isMy ? 0 : 1];
             notifyListeners();
           }
         ),
+        SizedBox(height: 2),
         if (isTabOpen[isMy ? 0 : 1])...[
-          SizedBox(height: 5),
+          SizedBox(height: 3),
           ...showResultList,
+          SizedBox(height: 5),
         ],
       ],
     );
@@ -345,7 +347,6 @@ class ChatViewModel extends ChangeNotifier {
               children: [
                 refreshShowList(true),
                 if (currentTab == 0)...[
-                  SizedBox(height: 5),
                   refreshShowList(false),
                 ],
                 SizedBox(height: UI_BOTTOM_HEIGHT + 20),

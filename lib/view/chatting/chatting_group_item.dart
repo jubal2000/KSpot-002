@@ -39,7 +39,7 @@ class ChatGroupItem extends StatelessWidget {
 
   final cache = Get.find<CacheService>();
   final showMemberMax = 4;
-  var itemHeight = 65.0;
+  var itemHeight = 70.0;
   var isEnter = false;
   var fixIndex = -1;
   var isAdmin = false;

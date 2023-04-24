@@ -129,25 +129,40 @@ class ThemeNotifier with ChangeNotifier {
   bool getMode() => themeMode;
 
   var themeIndex = FlexScheme.indigo.index;
-  var themeMode  = true;
+  var themeMode  = false;
 
   ThemeNotifier() {
-    _themeData = FlexThemeData.light(
-      scheme: schemeList[themeIndex],
-      surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
-      blendLevel: 15,
-      appBarStyle: FlexAppBarStyle.surface,
-      appBarOpacity: 0.90,
-      subThemesData: const FlexSubThemesData(
-        blendOnLevel: 30,
-      ),
-      keyColors: const FlexKeyColors(),
-      visualDensity: FlexColorScheme.comfortablePlatformDensity,
-      useMaterial3: true,
-      fontFamily: GoogleFonts
-          .notoSans()
-          .fontFamily,
-    );
+    if (themeMode) {
+      _themeData = FlexThemeData.light(
+        scheme: schemeList[themeIndex],
+        surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+        blendLevel: 15,
+        subThemesData: const FlexSubThemesData(
+          blendOnLevel: 30,
+        ),
+        keyColors: const FlexKeyColors(),
+        visualDensity: FlexColorScheme.comfortablePlatformDensity,
+        useMaterial3: true,
+        fontFamily: GoogleFonts
+            .notoSans()
+            .fontFamily,
+      );
+    } else {
+      _themeData = FlexThemeData.dark(
+        scheme: schemeList[themeIndex],
+        surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+        blendLevel: 15,
+        subThemesData: const FlexSubThemesData(
+          blendOnLevel: 30,
+        ),
+        keyColors: const FlexKeyColors(),
+        visualDensity: FlexColorScheme.comfortablePlatformDensity,
+        useMaterial3: true,
+        fontFamily: GoogleFonts
+            .notoSans()
+            .fontFamily,
+      );
+    }
     // notifyListeners();
     // StorageManager.readData('themeIndex').then((value1) {
     //   StorageManager.readData('themeMode').then((value2) {

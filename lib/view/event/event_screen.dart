@@ -26,6 +26,10 @@ class EventScreen extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Scaffold(
+        appBar: AppBar(
+          toolbarHeight: 0,
+          systemOverlayStyle: AppData.getStatusBarDark(),
+        ),
         body: ChangeNotifierProvider<AppViewModel>.value(
           value: AppData.appViewModel,
           child: Consumer<AppViewModel>(

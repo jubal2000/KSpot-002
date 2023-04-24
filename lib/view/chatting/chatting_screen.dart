@@ -51,17 +51,18 @@ class ChattingScreen extends StatelessWidget {
                         .of(context)
                         .primaryColor,
                     tabs: [
-                      Tab(text: AppData.chatViewModel.tabList[0], height: 40),
-                      Tab(text: AppData.chatViewModel.tabList[1], height: 40),
+                      Tab(text: AppData.chatViewModel.tabList[0], height: 50),
+                      Tab(text: AppData.chatViewModel.tabList[1], height: 50),
                     ],
                   ),
                 ),
-                body: ChangeNotifierProvider<AppViewModel>.value(
-                  value: AppData.appViewModel,
-                  child: Consumer<AppViewModel>(
-                    builder: (context, appViewModel, _) {
-                      LOG('--> AppViewModel');
-                      return ChangeNotifierProvider<ChatViewModel>.value(
+                body: Container(
+                  child: ChangeNotifierProvider<AppViewModel>.value(
+                    value: AppData.appViewModel,
+                    child: Consumer<AppViewModel>(
+                      builder: (context, appViewModel, _) {
+                        LOG('--> AppViewModel');
+                        return ChangeNotifierProvider<ChatViewModel>.value(
                           value: AppData.chatViewModel,
                           child: Consumer<ChatViewModel>(builder: (context, viewModel, _) {
                             LOG('--> ChatViewModel refresh');
@@ -87,11 +88,11 @@ class ChattingScreen extends StatelessWidget {
                               }
                             );
                           }
-                        )
-                      );
-                    }
-                  )
-                ),
+                        ));
+                      }
+                    )
+                  ),
+                )
                 // floatingActionButton: FloatingActionButton.small(
                 //   onPressed: () {
                 //     showChattingMenu(context).then((result) {
@@ -105,12 +106,12 @@ class ChattingScreen extends StatelessWidget {
                 //   },
                 //   child: Icon(Icons.add, size: 24),
                 // ),
-                floatingActionButton: FloatingActionButton(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  onPressed: () {
-                  },
-                  child: Icon(Icons.add_comment_outlined, size: 30, color: Colors.white),
-                ),
+                // floatingActionButton: FloatingActionButton(
+                //   backgroundColor: Theme.of(context).primaryColor,
+                //   onPressed: () {
+                //   },
+                //   child: Icon(Icons.add_comment_outlined, size: 30, color: Colors.white),
+                // ),
               )
             ),
           ),

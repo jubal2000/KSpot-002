@@ -242,11 +242,25 @@ class AppData {
     }
   }
 
-  static setStatusBarColor([bool isDark = false]) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+  static getStatusBarDark() {
+    getStatusBarColor(true);
+  }
+
+  static getStatusBarLight() {
+    getStatusBarColor();
+  }
+
+  static getStatusBarColor([bool isDark = false]) {
+    LOG('--> getStatusBarColor: $isDark');
+    return SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       statusBarIconBrightness: isDark ? Brightness.dark : Brightness.light,
-    ));
+      statusBarBrightness: isDark ? Brightness.light : Brightness.dark,
+    );
+  }
+
+  static setStatusBarColor([bool isDark = false]) {
+    LOG('--> setStatusBarColor: $isDark');
+    SystemChrome.setSystemUIOverlayStyle(getStatusBarColor(isDark));
   }
 }

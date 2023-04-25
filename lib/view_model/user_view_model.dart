@@ -22,6 +22,7 @@ import '../data/common_sizes.dart';
 import '../data/dialogs.dart';
 import '../models/event_model.dart';
 import '../repository/event_repository.dart';
+import '../repository/place_repository.dart';
 import '../repository/sponsor_repository.dart';
 import '../utils/utils.dart';
 import '../models/user_model.dart';
@@ -54,6 +55,7 @@ class UserViewModel extends ChangeNotifier {
   final repo      = UserRepository();
   final eventRepo = EventRepository();
   final sponRepo  = SponsorRepository();
+  final placeRepo = PlaceRepository();
 
   final msgTextController = TextEditingController();
   final scrollController = List.generate(ProfileContentType.max.index, (index) => ScrollController());
@@ -125,7 +127,13 @@ class UserViewModel extends ChangeNotifier {
     LOG('---> getEventData : ${eventData.length} - ${showLastTime[ProfileContentType.event.index].toString()}');
     var eventNewData = await repo.getEventFromUserId(userInfo!.id, isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.event.index]);
     if (eventNewData.isNotEmpty) {
-      eventData.addAll(eventNewData);
+      for (var item in eventNewData.entries) {
+        var placeInfo = await placeRepo.getPlaceFromId(item.value.placeId);
+        if (placeInfo != null) {
+          item.value.placeInfo = placeInfo;
+        }
+        eventData[item.key] = item.value;
+      }
     } else {
       isLastContent[ProfileContentType.event.index] = true;
       if (isShowEmpty) {
@@ -473,7 +481,7 @@ class UserViewModel extends ChangeNotifier {
   }
 
   showEventItemDetail(EventModel item) {
-    Navigator.of(context!).push(createAniRoute(EventDetailScreen(item, null))).then((result) {
+    Navigator.of(context!).push(createAniRoute(EventDetailScreen(item, item.placeInfo))).then((result) {
       if (result != null) {
         notifyListeners();
       }
@@ -495,6 +503,7 @@ class UserViewModel extends ChangeNotifier {
     for (var item in eventData.entries) {
       var isExpired = eventRepo.checkIsExpired(item.value);
       var showItem = showWidgetList[ProfileContentType.event.index][item.key];
+      // LOG('-->  eventData [${showItem == null ? 'null' : '-'}] : ${item.value.toJson()}');
       showItem ??= EventCardItem(
         item.value,
         isMyItem: isMyProfile,
@@ -502,6 +511,7 @@ class UserViewModel extends ChangeNotifier {
         isShowUser: false,
         isShowHomeButton: false,
         isShowLike: false,
+        isShowBookmark: !isMyProfile,
         itemHeight: UI_CONTENT_ITEM_HEIGHT.w,
         itemPadding: EdgeInsets.only(top: 10),
         onRefresh: (updateData) {
@@ -751,7 +761,7 @@ class UserViewModel extends ChangeNotifier {
         });
         break;
       case ProfileContentType.sponsor:
-        Get.to(() => EventListScreen(isMyProfile, isSelectable: true, isSelectMy: true))!.then((result) {
+        Get.to(() => EventListScreen(isMyProfile, isSelectable: true))!.then((result) {
           if (result != null) {
             LOG('--> EventListScreen result : ${result.toJson()}');
             showEventSponsorDialog(context!, result, AppData.userInfo.creditCount).then((dResult) {

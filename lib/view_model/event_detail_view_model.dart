@@ -65,7 +65,7 @@ class EventDetailViewModel extends ChangeNotifier {
     eventInfo = eventModel;
     placeInfo = placeModel;
     isManager = CheckManager(eventInfo!.toJson());
-    LOG('--> setEventData : $isManager / ${eventInfo!.toJson()}');
+    LOG('--> setEventData : $isManager / ${placeInfo!.toJson()}');
   }
 
   toggleStatus() {

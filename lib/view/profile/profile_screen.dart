@@ -100,7 +100,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 },
                                 child: Icon(Icons.store_outlined, size: 24.sp)
                             ),
-                            SizedBox(width: 14.w),
+                            SizedBox(width: 20.w),
                           ],
                           InkWell(
                               onTap: () {
@@ -108,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               },
                               child: Icon(Icons.mail_outline, size: 24.sp)
                           ),
-                          SizedBox(width: 14.w),
+                          SizedBox(width: 20.w),
                           InkWell(
                               onTap: () {
                                 _key.currentState!.openEndDrawer();

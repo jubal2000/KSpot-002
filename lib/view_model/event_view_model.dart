@@ -1,7 +1,8 @@
 
-import 'package:date_picker_timeline/date_picker_widget.dart';
+import 'package:date_picker_timeline_fixed/date_picker_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:helpers/helpers.dart';
@@ -43,9 +44,10 @@ class EventViewModel extends ChangeNotifier {
 
   var cameraPos = CameraPosition(target: LatLng(0,0));
   var isDateOpen = false;
-  var eventListType = EventListType.map;
+  var eventListType = EventListType.list;
   var isMapUpdate = true;
   var isManagerMode = false; // 유저의 이벤트목록 일 경우 메니저이면, 기간이 지난 이벤트들도 표시..
+  var isRefreshMap = false;
 
   JSON eventData = {};
 
@@ -62,6 +64,10 @@ class EventViewModel extends ChangeNotifier {
     cache.eventMapItemData.clear();
     cache.eventListItemData.clear();
     showList.clear();
+  }
+
+  refreshView() {
+    notifyListeners();
   }
 
   Future getEventData() async {
@@ -85,7 +91,7 @@ class EventViewModel extends ChangeNotifier {
 
   showGoogleWidget(layout) {
     LOG('--> showGoogleWidget : ${googleWidget == null ? 'none' : 'ready'} / ${showList.length}');
-    final isRefresh = googleWidget == null;
+    isRefreshMap = googleWidget == null;
     googleWidget ??= GoogleMapWidget(
       showList,
       key: mapKey,
@@ -98,7 +104,6 @@ class EventViewModel extends ChangeNotifier {
         onMapRegionChanged(region);
       },
     );
-    googleWidget!.isRefresh = isRefresh;
     return googleWidget;
   }
 
@@ -108,45 +113,46 @@ class EventViewModel extends ChangeNotifier {
         eventListType = eventListType == EventListType.map ? EventListType.list : EventListType.map;
         notifyListeners();
       },
-      child: Icon(eventListType == EventListType.map ? Icons.map_outlined : Icons.view_list_sharp),
+      child: Icon(eventListType == EventListType.map ? Icons.view_list_sharp : Icons.map_outlined),
     );
   }
 
   Future<List<JSON>> setShowList() async {
     List<JSON> result = [];
     if (JSON_NOT_EMPTY(cache.eventData)) {
-      for (var item in cache.eventData!.entries) {
+      for (var item in cache.eventData.entries) {
         final isExpired = eventRepo.checkIsExpired(item.value);
         if (isManagerMode || (!isExpired && item.value.status == 1)) {
           final showItem = item.value.toJson();
           var placeInfo = showItem['placeInfo'];
           placeInfo ??= await placeRepo.getPlaceFromId(item.value.placeId);
           if (placeInfo != null) {
+            // LOG('--> showList set Place [${placeInfo.id}] : ${placeInfo.toJson()}');
             showItem['placeInfo'] = placeInfo.toJson();
             showItem['address'  ] = placeInfo.address.toJson();
             final pos = LatLng(DBL(showItem['address']['lat']), DBL(showItem['address']['lng']));
             // if (mapBounds !=  null) LOG('--> eventShowList add : ${mapBounds!.toJson()} / $pos');
-            if (eventListType == EventListType.map) {
+            // if (eventListType == EventListType.map) {
               final timeData = item.value.getDateTimeData(AppData.currentDate, item.value.title);
               if (timeData != null && (mapBounds == null || mapBounds!.contains(pos))) {
                 showItem['timeRange'] = '${timeData.startTime} ~ ${timeData.endTime}';
                 // LOG('--> eventShowList add : ${showItem['id']} / ${showItem['timeRange']}');
                 result.add(showItem);
               }
-            } else {
-              // LOG('--> eventShowList add : ${showItem['id']}');
-              result.add(showItem);
-            }
+            // } else {
+            //   // LOG('--> eventShowList add : ${showItem['id']}');
+            //   result.add(showItem);
+            // }
           }
         }
       }
     }
-    LOG('--> eventShowList : ${result.length} / ${cache.eventData!.length} / ${AppData.currentDate.toString()}');
+    LOG('--> eventShowList : ${result.length} / ${cache.eventData.length} / ${AppData.currentDate.toString()}');
     return result;
   }
 
   initDatePicker() {
-    datePicker ??= DatePicker(
+    return DatePicker(
       DateTime.now().subtract(Duration(days: 30)),
       width:  60.0,
       height: 60.0,
@@ -171,16 +177,41 @@ class EventViewModel extends ChangeNotifier {
   }
 
   showDatePicker() {
-    initDatePicker();
-    return Row(
-      children: [
-        Container(
-          width: isDateOpen ? Get.width : 0,
-          height: UI_DATE_PICKER_HEIGHT,
-          color: Theme.of(buildContext!).canvasColor.withOpacity(0.5),
-          child: datePicker,
+    return Align(
+      widthFactor: 1.25,
+      heightFactor: 3.0,
+      child: Row(
+        children: [
+          Container(
+            width: isDateOpen ? Get.width : 0,
+            height: UI_DATE_PICKER_HEIGHT.h,
+            color: Theme.of(buildContext!).canvasColor.withOpacity(0.5),
+            child: datePicker ?? initDatePicker(),
+          ),
+        ]
+      ),
+    );
+  }
+
+  showTopMenuBar() {
+    return TopCenterAlign(
+      child: SizedBox(
+        height: UI_APPBAR_HEIGHT,
+        child: HomeTopMenuBar(
+          MainMenuID.event,
+          isDateOpen: isDateOpen,
+          onCountryChanged: () {
+            refreshModel();
+            refreshView();
+          },
+          onDateChange: (state) {
+            isDateOpen = state;
+            refreshView();
+            dateController.setDateAndAnimate(AppData.currentDate);
+            // viewModel.dateController.animateToSelection(duration: Duration(milliseconds: 10));
+          }
         ),
-      ]
+      )
     );
   }
 
@@ -313,11 +344,6 @@ class EventViewModel extends ChangeNotifier {
         children: [
           if (eventListType == EventListType.map)...[
             showGoogleWidget(layout),
-            Align(
-              widthFactor: 1.25,
-              heightFactor: 3.0,
-              child: showDatePicker(),
-            ),
             BottomLeftAlign(
               child: Container(
                 height: itemHeight,
@@ -343,17 +369,29 @@ class EventViewModel extends ChangeNotifier {
           ],
           if (eventListType == EventListType.list)...[
             Container(
-              height: layout.maxHeight,
               padding: EdgeInsets.fromLTRB(0, UI_LIST_TOP_HEIGHT, 0, UI_MENU_HEIGHT),
               child: FutureBuilder(
                 future: setShowList(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     showList = snapshot.data as List<JSON>;
-                    return ListView(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                      children: showEventList(itemWidth)
+                    return Column(
+                      children: [
+                        if (isDateOpen)
+                          SizedBox(height: UI_DATE_PICKER_HEIGHT.h + 5.h),
+                        Expanded(
+                          child: ListView(
+                            shrinkWrap: true,
+                            padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                            children: [
+                              if (isDateOpen)
+                              SizedBox(height: 10.h),
+                              ...showEventList(itemWidth),
+                              SizedBox(height: 10.h),
+                            ]
+                          ),
+                        )
+                      ],
                     );
                   } else {
                     return Container();
@@ -362,25 +400,6 @@ class EventViewModel extends ChangeNotifier {
               ),
             ),
           ],
-          TopCenterAlign(
-            child: SizedBox(
-              height: UI_APPBAR_HEIGHT,
-              child: HomeTopMenuBar(
-                MainMenuID.event,
-                isShowDatePick: eventListType == EventListType.map,
-                isDateOpen: isDateOpen,
-                onCountryChanged: () {
-                  refreshModel();
-                  notifyListeners();
-                },
-                onDateChange: (state) {
-                  isDateOpen = state;
-                  notifyListeners();
-                  dateController.animateToSelection(duration: Duration(milliseconds: 10));
-                }
-              ),
-            )
-          ),
         ],
       )
     );

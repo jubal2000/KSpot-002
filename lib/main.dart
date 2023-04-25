@@ -68,7 +68,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Make Fullscreen Mode..
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: []);
-    AppData.setStatusBarColor(true);
 
     return ScreenUtilInit(
       designSize: const Size(375, 812),

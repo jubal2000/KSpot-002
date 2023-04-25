@@ -530,16 +530,17 @@ class ApiService extends GetxService {
     return result;
   }
   
-  Future<JSON?> getPlaceFromId(String placeId) async {
+  Future<JSON?> getPlaceFromId(String placeId, [var status = 0]) async {
     LOG('--> getPlaceFromId : $placeId');
     var ref = firestore!.collection(PlaceCollection);
-    var snapshot = await ref.where('status', isGreaterThan: 0)
+    var snapshot = await ref.where('status', isGreaterThan: status)
         .where('id', isEqualTo: placeId)
         .limit(1)
         .get();
 
     if (snapshot.docs.isNotEmpty) {
       JSON result = FROM_SERVER_DATA(snapshot.docs.first.data());
+      // LOG('--> getPlaceFromId success : $result');
       return result;
     }
     return null;
@@ -653,6 +654,7 @@ class ApiService extends GetxService {
     }
   
     var snapshot = await query.get();
+
     for (var doc in snapshot.docs)  {
       result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
       LOG('--> add event : ${doc.data()['id']}');
@@ -735,7 +737,7 @@ class ApiService extends GetxService {
   }
   
   Future<JSON> getEventFromUserId(String userId, {var isAuthor = false, DateTime? lastTime, int limit = 0}) async {
-    LOG('--> getEventFromUserId : userId');
+    LOG('--> getEventFromUserId : $userId');
     JSON result = {};
     try {
       var ref = firestore!.collection(EventCollection);

@@ -103,14 +103,42 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
   }
 
   refreshMarker(List<JSON> list, [bool isBoundsFresh = true]) {
+    LOG('--> GoogleDirectionListWidget refreshMarker : ${list.length} / $isBoundsFresh');
+    var checkRefresh = list.length != widget.showLocation.length;
+    if (!checkRefresh) {
+      var sameCount = 0;
+      for (var a in widget.showLocation) {
+        for (var b in list) {
+          if (a.toString().compareTo(b.toString()) == 0) {
+            sameCount++;
+            break;
+          }
+        }
+      }
+      checkRefresh = sameCount != list.length;
+    }
+    if (!checkRefresh) return;
+    // widget.showLocation.clear();
+    // for (var item in list) {
+    //   var isAdd = true;
+    //   for (var mark in widget.showLocation) {
+    //     if (mark['address'] == item['address']) {
+    //       isAdd = false;
+    //       break;
+    //     }
+    //   }
+    //   if (isAdd) {
+    //     widget.showLocation.add(item);
+    //   }
+    // }
     widget.showLocation = list;
-    markers.clear();
     initMarker(isBoundsFresh);
   }
 
   initMarker([bool isBoundsFresh = true]) {
     setState(() {
       LOG('--> GoogleDirectionListWidget initMarker : ${widget.showLocation.length} / $isBoundsFresh');
+      markers.clear();
       LatLng? targetLoc;
       // add normal marker..
       for (var item in widget.showLocation) {
@@ -118,7 +146,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
         if (address != null) {
           var loc = LatLng(DBL(address['lat']), DBL(address['lng']));
           targetLoc ??= loc;
-          markers.add(Marker( //add distination location marker
+          markers.add(Marker( //add destination location marker
             markerId: MarkerId(STR(item['id'])),
             position: loc, //position of marker
             icon: BitmapDescriptor.defaultMarker,
@@ -137,10 +165,8 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
       }
       // replace image marker..
       for (var item in widget.showLocation) {
-        LOG('--> add Image Marker : ${STR(item['pic'])}');
         getMarkerImage(STR(item['pic']), markerSize).then((icon) {
           if (icon != null) {
-            LOG('--> getMarkerImage result : $icon / $markerSize');
             var address = item['address'];
             if (address != null && mounted) {
               setState(() {
@@ -189,6 +215,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
 
       }
     });
+    LOG('--> initMarker result : ${markers.length}');
   }
 
   getMarkerImage(String imagePath, double size) async {

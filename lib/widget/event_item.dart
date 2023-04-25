@@ -8,6 +8,7 @@ import 'package:kspot_002/widget/bookmark_widget.dart';
 
 import '../data/app_data.dart';
 import '../data/theme_manager.dart';
+import '../models/etc_model.dart';
 import '../models/event_model.dart';
 import '../models/place_model.dart';
 import '../repository/event_repository.dart';
@@ -125,7 +126,7 @@ class EventCardItemState extends State<EventCardItem> {
 
   @override
   Widget build(context) {
-    widget.itemPadding ??= EdgeInsets.symmetric(vertical: 5);
+    widget.itemPadding ??= EdgeInsets.fromLTRB(0, 5, 5, 5);
     _imageHeight = widget.itemHeight - widget.itemPadding!.top - widget.itemPadding!.bottom;
     _userListData.clear();
     if (JSON_NOT_EMPTY(widget.itemData.managerData)) {
@@ -136,7 +137,10 @@ class EventCardItemState extends State<EventCardItem> {
     } else if (STR(widget.itemData.userId).isNotEmpty) {
       _userListData.add(widget.itemData.toJson());
     }
-    final timeData = widget.itemData.getDateTimeData(AppData.currentDate);
+    var timeData = widget.itemData.getDateTimeData(AppData.currentDate);
+    if (timeData == null && widget.itemData.timeData != null) {
+      timeData = widget.itemData.timeData!.first;
+    }
     return GestureDetector(
         onTap: () {
           unFocusAll(context);
@@ -521,7 +525,6 @@ class PlaceEventVerCardItemState extends State<PlaceEventVerCardItem> {
                               children: [
                                 if (widget.isShowUser && _userListData.isNotEmpty)
                                   UserIdCardWidget(_userListData, isCanExtend: false),
-
                               ],
                             ),
                           ],

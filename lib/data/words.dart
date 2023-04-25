@@ -195,8 +195,8 @@ class Words extends Translations {
       'Fri':'금',
       'Sat':'토',
       'Sun':'일',
-      'SELECT DAYS': '날짜 선택',
-      'SELECT PERIOD': '기간 선택',
+      'SELECT DAYS *': '날짜 선택 *',
+      'SELECT PERIOD *': '기간 선택 *',
       'Are you sure you want to delete that date?': '해당 날짜를 삭제 하시겠습니까?',
       'Are you sure you want to delete that field?': '해당 필드를 삭제 하시겠습니까?',
       'ADD TIME': '시간 추가',
@@ -206,7 +206,7 @@ class Words extends Translations {
       'Start time': '시작시간',
       'End time': '종료시간',
       '(You can choose only one type)': '(한가지 타입만 선택 가능)',
-      'TIME SELECT': '시간 선택',
+      'TIME SELECT *': '시간 선택 *',
 
       // place_event_edit_screen
       'INFO': '기본 정보',

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kspot_002/view/follow/follow_screen.dart';
 import 'package:kspot_002/view/story/story_edit_screen.dart';
 import 'package:kspot_002/view_model/user_view_model.dart';
@@ -26,6 +27,7 @@ import '../view/event/event_edit_screen.dart';
 import '../view/message/message_talk_screen.dart';
 import '../widget/event_group_dialog.dart';
 import 'chat_view_model.dart';
+import 'event_view_model.dart';
 
 class MainMenuID {
   static int get hide     => 0;
@@ -73,8 +75,10 @@ class AppViewModel extends ChangeNotifier {
 
   setMainIndex(index) {
     menuIndex = index;
+    var statusColorDark = false;
     switch(index) {
       case 0:
+        statusColorDark = true;
         appbarMenuMode = MainMenuID.event;
         break;
       case 1:
@@ -87,7 +91,15 @@ class AppViewModel extends ChangeNotifier {
         appbarMenuMode = MainMenuID.my;
     }
     LOG('--> setMainIndex : $index');
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent, // Change this to your desired color
+      statusBarBrightness: statusColorDark ? Brightness.dark : Brightness.light, // Set the text color to be dark
+    ));
     notifyListeners();
+  }
+
+  setStatusBarColor() {
+    AppData.setStatusBarColor(appbarMenuMode == MainMenuID.event && AppData.eventViewModel.eventListType == EventListType.map);
   }
 
   showGroupSelect() {

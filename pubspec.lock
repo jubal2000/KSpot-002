@@ -305,14 +305,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  date_picker_timeline:
+  date_picker_timeline_fixed:
     dependency: "direct main"
     description:
-      name: date_picker_timeline
-      sha256: d92956ddd6eb3070f5637b1514201342e739b6ed1ad830c365d64f9349f4f682
+      name: date_picker_timeline_fixed
+      sha256: d24eef4a53a0ced92bc9ce9d3325087ef441444abd9144dae7444a5642e77960
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.3"
+    version: "2.0.0"
   dbus:
     dependency: transitive
     description:

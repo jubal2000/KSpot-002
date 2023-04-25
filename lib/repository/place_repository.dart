@@ -41,15 +41,20 @@ class PlaceRepository {
   }
 
   Future<PlaceModel?> getPlaceFromId(String placeId) async {
+    LOG('--> getPlaceFromId : $placeId');
     try {
       var cacheItem = cache.getPlaceItem(placeId);
+      // LOG('--> getPlaceFromId cacheItem : ${cacheItem != null ? cacheItem.toJson() : 'null'}');
       if (cacheItem != null) return cacheItem;
       final response = await api.getPlaceFromId(placeId);
+      // LOG('--> getPlaceFromId response : ${response.toString()}');
       if (response != null) {
-        LOG('--> getPlaceFromId response : $response');
-        final addItem = PlaceModel.fromJson(FROM_SERVER_DATA(response));
+        final addItem = PlaceModel.fromJson(response);
         cache.setPlaceItem(addItem);
+        // LOG('--> getPlaceFromId result : ${addItem.toJson()}');
         return addItem;
+      } else {
+        // TODO: place 가 삭제됬거나 없을경우 처리..
       }
     } catch (e) {
       LOG('--> getPlaceFromId error : $e');

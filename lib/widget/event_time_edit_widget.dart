@@ -40,7 +40,7 @@ final dayWeekText  = ['Every', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 class _EventTimeSelectState extends State<EventTimeSelectWidget> {
   final _textController  = List<TextEditingController>.generate(TextType.values.length, (index) => TextEditingController());
-  final _tabText        = ['SELECT DAYS'.tr, 'SELECT PERIOD'.tr];
+  final _tabText        = ['SELECT DAYS *'.tr, 'SELECT PERIOD *'.tr];
   final _selectColor    = Colors.purple;
   final _bottomHeight   = 50.0;
   final _lineSpace      = 30.0;
@@ -504,7 +504,7 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                           EditListWidget(_timeData['dayMap'], EditListType.day, onItemAdd, onItemSelected),
                         ],
                         SizedBox(height: UI_LIST_TEXT_SPACE),
-                        SubTitle(context, 'TIME SELECT'.tr, height: 60.0),
+                        SubTitle(context, 'TIME SELECT *'.tr, height: 60.0),
                         Row(
                           children: [
                             Expanded(
@@ -521,8 +521,8 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                                   showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(start.datetime)).then((result) {
                                     if (result != null) {
                                       setState(() {
-                                        _timeData['startTime'] = '${result.hour}:${result.minute}';
-                                        _textController[TextType.startTime.index].text = TME2(_timeData['startTime']);
+                                        _timeData['startTime'] = TME2('${result.hour}:${result.minute}');
+                                        _textController[TextType.startTime.index].text = _timeData['startTime'];
                                       });
                                     }
                                   });
@@ -547,8 +547,8 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                                   showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(start.datetime)).then((result) {
                                     if (result != null) {
                                       setState(() {
-                                        _timeData['endTime'] = '${result.hour}:${result.minute}';
-                                        _textController[TextType.endTime.index].text = TME2(_timeData['endTime']);
+                                        _timeData['endTime'] = TME2('${result.hour}:${result.minute}');
+                                        _textController[TextType.endTime.index].text = _timeData['endTime'];
                                       });
                                     }
                                   });

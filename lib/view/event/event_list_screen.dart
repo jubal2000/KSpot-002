@@ -14,19 +14,18 @@ import '../../utils/utils.dart';
 import '../../widget/search_widget.dart';
 import '../../widget/event_item.dart';
 
-enum EventListType {
+enum EventShowListType {
   events,
   classes,
   none,
 }
 
 class EventListScreen extends StatefulWidget {
-  EventListScreen(this.isMyList, {Key? key, this.isPreview = false, this.isSelectable = false, this.isSelectMy = true, this.selectMax = 1, this.listSelectData}) : super(key: key);
+  EventListScreen(this.isMyList, {Key? key, this.isPreview = false, this.isSelectable = false, this.selectMax = 1, this.listSelectData}) : super(key: key);
 
   bool isMyList;
   bool isPreview;
   bool isSelectable;
-  bool isSelectMy;
   int  selectMax;
   List<String>? listSelectData;
 
@@ -83,7 +82,7 @@ class EventListState extends State<EventListScreen> {
             titleSpacing: 0,
           ),
           body: EventListTab(0, 'EVENT'.tr, _viewModel,
-            isSelectable: widget.isSelectable, selectMax: widget.selectMax, isSelectMy: widget.isSelectMy, onSelected: onSelected),
+            isSelectable: widget.isSelectable, selectMax: widget.selectMax, isMyList: widget.isMyList, onSelected: onSelected),
           // body: widget.isMyList && !widget.isSelectable ? EventListTab(1, 'ALL'.tr, _viewModel,
           // isSelectable: widget.isSelectable, selectMax: widget.selectMax, isSelectMy: widget.isSelectMy, onSelected: onSelected) :
           // body: DefaultTabController(
@@ -121,13 +120,13 @@ class EventListState extends State<EventListScreen> {
 
 class EventListTab extends StatefulWidget {
   EventListTab(this.eventTab, this.tabTitle, this.viewModel,
-      {Key? key, this.topHeight = 40, this.isSelectable = false, this.isSelectMy = true, this.selectMax = 9, this.onSelected}) : super(key: key);
+      {Key? key, this.topHeight = 40, this.isSelectable = false, this.isMyList = false, this.selectMax = 9, this.onSelected}) : super(key: key);
 
   int eventTab;
   String tabTitle;
   double topHeight;
   bool isSelectable;
-  bool isSelectMy;
+  bool isMyList;
   int  selectMax;
   EventViewModel viewModel;
 
@@ -175,7 +174,7 @@ class EventListTabState extends State<EventListTab> {
     if (cache.eventData.isNotEmpty) {
       for (var item in cache.eventData.entries) {
         if (item.value.type == widget.eventTab &&
-          (!widget.isSelectMy || item.value.userId == AppData.USER_ID) && checkSearch(item.value)) {
+          (!widget.isMyList || item.value.userId == AppData.USER_ID) && checkSearch(item.value)) {
           var bookmarkItem = cache.bookmarkData[item.key];
           item.value.bookmarked = bookmarkItem != null;
           if (item.value.bookmarked) {
@@ -286,6 +285,7 @@ class EventListTabState extends State<EventListTab> {
                           return EventCardItem(showItem,
                             isShowHomeButton: false,
                             isShowPlaceButton: true,
+                            isShowBookmark: !widget.isMyList,
                             isSelectable: widget.isSelectable, selectMax: widget.selectMax, onShowDetail: (key, status) {
                                 LOG('--> EventCardItem onShowDetail : ${showItem.id}');
                               if (widget.onSelected != null) widget.onSelected!(showItem);

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:kspot_002/models/place_model.dart';
 import '../utils/utils.dart';
 import '../widget/event_time_edit_widget.dart';
 import 'etc_model.dart';
@@ -81,14 +82,17 @@ class EventModel {
   List<PromotionData>? promotionData;  // 광고 정보
   List<MemberData>?    managerData;    // 관리자 목록
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false)
   int sortIndex = 0;
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false)
   bool bookmarked = false;
 
-  @JsonKey(ignore: true)
-  DateTime? cacheTime;    // for local cache refresh time..
+  @JsonKey(includeFromJson: false)
+  DateTime? cacheTime;
+
+  @JsonKey(includeFromJson: false)
+  PlaceModel? placeInfo;
 
   EventModel({
     required this.id,

@@ -24,6 +24,7 @@ import '../../utils/utils.dart';
 import '../../services/api_service.dart';
 import '../../view_model/app_view_model.dart';
 import '../../view_model/event_view_model.dart';
+import '../../widget/title_text_widget.dart';
 import '../../widget/user_item_widget.dart';
 import '../event/event_edit_screen.dart';
 
@@ -46,7 +47,10 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
   @override
   Widget build(BuildContext context) {
     LOG('--> AppTopMenuBar : ${widget.menuMode} / ${AppData.appViewModel.appbarMenuMode}');
-    final iconColor = Theme.of(context).indicatorColor;
+
+    AppData.appViewModel.setStatusBarColor();
+    final isLongState = AppData.currentState.length > 12;
+
     return Container(
       height: widget.height,
       padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE, 30, UI_HORIZONTAL_SPACE, 0),
@@ -78,10 +82,11 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                       GestureDetector(
                         child: Container(
                           alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 12 : 0),
+                          padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10.w : 0),
                           constraints: BoxConstraints(
                             maxHeight: widget.height * 0.8,
                             minWidth: widget.height * 0.8,
+                            maxWidth: isLongState ? Get.width * 0.35 : double.infinity,
                           ),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
@@ -92,8 +97,11 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                               Text(STR_FLAG_ONLY(AppData.currentCountryFlag), style: TextStyle(fontSize: 26)),
                               if (AppData.currentState.isNotEmpty)...[
                                 SizedBox(width: 5),
-                                Text(AppData.currentState, style: ItemTitleBoldStyle(context), maxLines: 2),
-                              ],
+                                if (isLongState)
+                                  Expanded(child:
+                                    Text(AppData.currentState, style: ItemDescStyle(context), maxLines: 3)),
+                                if (!isLongState)
+                                Text(AppData.currentState, style: ItemTitleBoldStyle(context), maxLines: 3),                                                              ],
                             ]
                           )
                         ),
@@ -102,11 +110,31 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                           AppData.appViewModel.showCountrySelect(context, widget.onCountryChanged);
                         },
                       ),
-                      SizedBox(width: 5),
+                      if (widget.isShowDatePick && widget.isDateOpen)
+                        GestureDetector(
+                          child: Container(
+                            alignment: Alignment.center,
+                            height: widget.height * 0.8,
+                            margin: EdgeInsets.only(left: 5),
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
+                              color: AppData.currentDate.isToday() ? Theme.of(context).primaryColor : Colors.black26,
+                            ),
+                            child: Text('TODAY', style: ItemDescStyle(context)),
+                          ),
+                          onTap: () {
+                            setState(() {
+                              AppData.currentDate = DateTime.now();
+                              if (widget.onDateChange != null) widget.onDateChange!(widget.isDateOpen);
+                            });
+                          },
+                        ),
                       if (widget.isShowDatePick)
                         GestureDetector(
                           child: Container(
                             alignment: Alignment.center,
+                            margin: EdgeInsets.only(left: 5),
                             padding: EdgeInsets.symmetric(horizontal: 12),
                             constraints: BoxConstraints(
                               maxHeight: widget.height * 0.8,
@@ -126,9 +154,9 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                           },
                         ),
                       Expanded(
-                          child: Container(
-                            color: Colors.transparent,
-                          )
+                        child: Container(
+                          color: Colors.transparent,
+                        )
                       ),
                       Container(
                         alignment: Alignment.center,

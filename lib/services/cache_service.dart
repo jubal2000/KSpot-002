@@ -211,7 +211,7 @@ class CacheService extends GetxService {
     }
   }
 
-  getUserItem(String key) {
+  UserModel? getUserItem(String key) {
     var cacheItem = userData[key];
     if (cacheItem != null && cacheItem.cacheTime != null) {
       if (cacheItem.cacheTime!.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
@@ -221,7 +221,7 @@ class CacheService extends GetxService {
     return cacheItem;
   }
 
-  getPlaceItem(String key) {
+  PlaceModel? getPlaceItem(String key) {
     var cacheItem = placeData[key];
     if (cacheItem != null && cacheItem.cacheTime != null) {
       if (cacheItem.cacheTime!.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
@@ -231,7 +231,7 @@ class CacheService extends GetxService {
     return cacheItem;
   }
 
-  getEventItem(String key) {
+  EventModel? getEventItem(String key) {
     var cacheItem = eventData[key];
     if (cacheItem != null && cacheItem.cacheTime != null) {
       if (cacheItem.cacheTime!.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
@@ -241,7 +241,7 @@ class CacheService extends GetxService {
     return cacheItem;
   }
 
-  getEventGroupItem(String key) {
+  EventGroupModel? getEventGroupItem(String key) {
     var cacheItem = eventGroupData[key];
     if (cacheItem != null && cacheItem.cacheTime != null) {
       if (cacheItem.cacheTime!.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
@@ -251,7 +251,7 @@ class CacheService extends GetxService {
     return cacheItem;
   }
 
-  getStoryItem(String key) {
+  StoryModel? getStoryItem(String key) {
     var cacheItem = storyData[key];
     if (cacheItem != null && cacheItem.cacheTime != null) {
       if (cacheItem.cacheTime!.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {

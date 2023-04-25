@@ -443,6 +443,11 @@ class EventEditViewModel extends ChangeNotifier {
     if (!isEditMode && stepIndex + 1 < stepMax) {
       stepIndex++;
       notifyListeners();
+      Future.delayed(Duration(milliseconds: 200)).then((_) {
+        if (stepIndex == 2) {
+          onItemAdd(EditListType.timeRange, {});
+        }
+      });
     } else {
       if (checkEditDone(true)) {
         uploadStart();

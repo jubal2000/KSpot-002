@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
@@ -13,6 +14,7 @@ import '../../services/cache_service.dart';
 import '../../view_model/app_view_model.dart';
 import '../../view_model/event_view_model.dart';
 import '../../widget/title_text_widget.dart';
+import '../home/home_top_menu.dart';
 import 'event_edit_screen.dart';
 
 class EventScreen extends StatelessWidget {
@@ -26,21 +28,14 @@ class EventScreen extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 0,
-          systemOverlayStyle: AppData.getStatusBarDark(),
-        ),
         body: ChangeNotifierProvider<AppViewModel>.value(
           value: AppData.appViewModel,
           child: Consumer<AppViewModel>(
             builder: (context, appViewModel, _) {
-            LOG('--> AppViewModel');
-            // AppData.eventViewModel.googleWidget = null;
-            return LayoutBuilder(
-              builder: (context, layout) {
-                return Stack(
-                  children: [
-                    if (cache.eventData.isEmpty)
+              LOG('--> AppViewModel');
+              // AppData.eventViewModel.googleWidget = null;
+              return Stack(
+                    children: [
                       FutureBuilder(
                         future: AppData.eventViewModel.getEventData(),
                         builder: (context, snapshot) {
@@ -49,26 +44,26 @@ class EventScreen extends StatelessWidget {
                             return ChangeNotifierProvider<EventViewModel>.value(
                               value: AppData.eventViewModel,
                               child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-                                return viewModel.showMainList(layout);
-                            })
-                          );
-                        } else {
-                          return showLoadingFullPage(context);
+                                return Stack(
+                                  children: [
+                                    LayoutBuilder(
+                                      builder: (context, layout) {
+                                        return viewModel.showMainList(layout);
+                                      }
+                                    ),
+                                    viewModel.showDatePicker(),
+                                    viewModel.showTopMenuBar(),
+                                  ]
+                                );
+                              })
+                            );
+                          } else {
+                            return showLoadingFullPage(context);
+                          }
                         }
-                      }
-                    ),
-                    if (cache.eventData.isNotEmpty)
-                      ChangeNotifierProvider<EventViewModel>.value(
-                        value: AppData.eventViewModel,
-                        child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-                          LOG('--> EventViewModel 2');
-                          return viewModel.showMainList(layout);
-                        })
-                      )
+                      ),
                     ]
                   );
-                }
-              );
             }
           )
         )

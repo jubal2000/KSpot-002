@@ -34,6 +34,7 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       deviceType: json['deviceType'] as String,
       updateTime: DateTime.parse(json['updateTime'] as String),
       createTime: DateTime.parse(json['createTime'] as String),
+      backPic: json['backPic'] as String?,
       emailNew: json['emailNew'] as String?,
       snsData: (json['snsData'] as List<dynamic>?)
           ?.map((e) => DescData.fromJson(e as Map<String, dynamic>))
@@ -56,6 +57,7 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'nickName': instance.nickName,
       'realName': instance.realName,
       'pic': instance.pic,
+      'backPic': instance.backPic,
       'message': instance.message,
       'birthYear': instance.birthYear,
       'gender': instance.gender,

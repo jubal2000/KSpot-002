@@ -453,11 +453,11 @@ ItemTitle2Style(BuildContext context) {
 }
 
 ItemTitleBoldStyle(BuildContext context) {
-  return TextStyle(fontSize: 14, color: Theme.of(context).hintColor, fontWeight: FontWeight.w800);
+  return TextStyle(fontSize: 14, color: Theme.of(context).textTheme.titleSmall!.color, fontWeight: FontWeight.w800);
 }
 
 ItemTitleNormalStyle(BuildContext context) {
-  return TextStyle(fontSize: 14, color: Theme.of(context).hintColor);
+  return TextStyle(fontSize: 14, color: Theme.of(context).textTheme.titleSmall!.color);
 }
 
 ItemTitleDisableStyle(BuildContext context) {
@@ -477,7 +477,7 @@ ItemTitleExStyle(BuildContext context) {
 }
 
 ItemDescStyle(BuildContext context) {
-  return TextStyle(fontSize: 12, color: Theme.of(context).hintColor.withOpacity(0.8), height: 1.1);
+  return TextStyle(fontSize: 12, color: Theme.of(context).textTheme.titleSmall!.color, height: 1.1);
 }
 
 ItemDescColorStyle(BuildContext context, [var color = Colors.yellowAccent]) {

@@ -184,6 +184,29 @@ Map<String, dynamic> _$MemberDataToJson(MemberData instance) =>
       'createTime': instance.createTime.toIso8601String(),
     };
 
+SponsorData _$SponsorDataFromJson(Map<String, dynamic> json) => SponsorData(
+      id: json['id'] as String,
+      creditQty: json['creditQty'] as int,
+      userId: json['userId'] as String,
+      userPic: json['userPic'] as String,
+      userName: json['userName'] as String,
+      createTime: DateTime.parse(json['createTime'] as String),
+      startTime: DateTime.parse(json['startTime'] as String),
+      endTime: DateTime.parse(json['endTime'] as String),
+    );
+
+Map<String, dynamic> _$SponsorDataToJson(SponsorData instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'creditQty': instance.creditQty,
+      'userId': instance.userId,
+      'userPic': instance.userPic,
+      'userName': instance.userName,
+      'createTime': instance.createTime.toIso8601String(),
+      'startTime': instance.startTime.toIso8601String(),
+      'endTime': instance.endTime.toIso8601String(),
+    };
+
 DescData _$DescDataFromJson(Map<String, dynamic> json) => DescData(
       id: json['id'] as String,
       desc: json['desc'] as String,

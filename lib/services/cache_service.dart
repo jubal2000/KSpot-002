@@ -39,7 +39,6 @@ class CacheService extends GetxService {
   Map<String, ChatRoomModel> chatRoomData = {};
 
   Map<String, SponsorModel> sponsorData = {};
-  Map<String, Widget> sponsorListItemData = {};
 
   JSON bookmarkData = {};
   JSON reportData = {};
@@ -74,7 +73,6 @@ class CacheService extends GetxService {
     chatData = {};
     chatRoomData = {};
     sponsorData = {};
-    sponsorListItemData = {};
     reportData = {};
     blockData = {};
     chatItemData = {};
@@ -196,12 +194,9 @@ class CacheService extends GetxService {
     LOG('--> setChatRoomItem [${addItem.id}] :  ${chatRoomData.length}');
   }
 
-  setSponsorItem(SponsorModel addItem, [var isRemoveItem = true]) {
+  setSponsorItem(SponsorModel addItem) {
     addItem.cacheTime = DateTime.now();
     sponsorData[addItem.id] = addItem;
-    if (isRemoveItem) {
-      sponsorListItemData.remove(addItem.id);
-    }
     // LOG('--> setSponsorItem [${addItem.id}] : ${messageData![addItem.id]!.desc} / ${messageData!.length}');
   }
 
@@ -209,6 +204,7 @@ class CacheService extends GetxService {
     for (var item in addData.entries) {
       setSponsorItem(item.value);
     }
+    return sponsorData;
   }
 
   UserModel? getUserItem(String key) {

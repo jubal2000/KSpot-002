@@ -119,13 +119,15 @@ class UserViewModel extends ChangeNotifier {
     if (JSON_NOT_EMPTY(eventData)) {
       for (var item in eventData.entries) {
         var checkTime = item.value.createTime;
-        if (showLastTime[ProfileContentType.event.index] == null || checkTime.isBefore(showLastTime[ProfileContentType.event.index]!)) {
+        if (showLastTime[ProfileContentType.event.index] == null ||
+            checkTime.isBefore(showLastTime[ProfileContentType.event.index]!)) {
           showLastTime[ProfileContentType.event.index] = checkTime;
         }
       }
     }
     LOG('---> getEventData : ${eventData.length} - ${showLastTime[ProfileContentType.event.index].toString()}');
-    var eventNewData = await repo.getEventFromUserId(userInfo!.id, isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.event.index]);
+    var eventNewData = await repo.getEventFromUserId(userInfo!.id,
+        isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.event.index]);
     if (eventNewData.isNotEmpty) {
       for (var item in eventNewData.entries) {
         var placeInfo = await placeRepo.getPlaceFromId(item.value.placeId);
@@ -147,13 +149,15 @@ class UserViewModel extends ChangeNotifier {
     if (JSON_NOT_EMPTY(storyData)) {
       for (var item in storyData.entries) {
         var checkTime = item.value.createTime;
-        if (showLastTime[ProfileContentType.story.index] == null || checkTime.isBefore(showLastTime[ProfileContentType.story.index]!)) {
+        if (showLastTime[ProfileContentType.story.index] == null ||
+            checkTime.isBefore(showLastTime[ProfileContentType.story.index]!)) {
           showLastTime[ProfileContentType.story.index] = checkTime;
         }
       }
     }
     LOG('---> getStoryData : ${storyData.length} - ${showLastTime[ProfileContentType.story.index].toString()}');
-    var storyNewData = await repo.getStoryFromUserId(userInfo!.id, isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.story.index]);
+    var storyNewData = await repo.getStoryFromUserId(userInfo!.id,
+        isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.story.index]);
     if (storyNewData.isNotEmpty) {
       storyData.addAll(storyNewData);
     } else {
@@ -166,16 +170,28 @@ class UserViewModel extends ChangeNotifier {
   }
 
   getSponsorData([bool isShowEmpty = false]) async {
+    // sponsorData.clear();
+    // if (JSON_NOT_EMPTY(AppData.DATA_SPONSOR)) {
+    //   for (var item in AppData.DATA_SPONSOR.entries) {
+    //     var sponsorItem = SponsorModel.fromJson(item.value);
+    //     if (sponsorItem.userId == AppData.userInfo.id) {
+    //       sponsorData[item.key] = sponsorItem;
+    //     }
+    //   }
+    // }
+    // LOG('--> getSponsorData : ${sponsorData.length}');
     if (JSON_NOT_EMPTY(sponsorData)) {
       for (var item in sponsorData.entries) {
         var checkTime = item.value.createTime;
-        if (showLastTime[ProfileContentType.sponsor.index] == null || checkTime.isBefore(showLastTime[ProfileContentType.sponsor.index]!)) {
+        if (showLastTime[ProfileContentType.sponsor.index] == null ||
+            checkTime.isBefore(showLastTime[ProfileContentType.sponsor.index]!)) {
           showLastTime[ProfileContentType.sponsor.index] = checkTime;
         }
       }
     }
     LOG('---> getSponsorData : ${sponsorData.length} - ${showLastTime[ProfileContentType.sponsor.index].toString()}');
-    var newData = await repo.getSponsorFromUserId(userInfo!.id, isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.sponsor.index]);
+    var newData = await repo.getSponsorFromUserId(userInfo!.id,
+        isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.sponsor.index]);
     if (newData.isNotEmpty) {
       sponsorData.addAll(newData);
     } else {
@@ -695,9 +711,6 @@ class UserViewModel extends ChangeNotifier {
         break;
       case ProfileContentType.story:
         await getStoryData(isShowEmpty);
-        break;
-      case ProfileContentType.sponsor:
-        await getSponsorData(isShowEmpty);
         break;
     }
     AppData.isMainActive = true;

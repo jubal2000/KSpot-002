@@ -79,8 +79,10 @@ class EventModel {
   List<TimeData>?      timeData;       // 시간 정보 목록
   List<OptionData>?    optionData;     // 옵션 정보
   List<CustomData>?    customData;     // 사용자 설정 정보
-  List<PromotionData>? promotionData;  // 광고 정보
   List<MemberData>?    managerData;    // 관리자 목록
+
+  List<PromotionData>? promotionData;  // 광고 정보
+  List<SponsorData>?   sponsorData;    // 스폰서 정보
 
   @JsonKey(includeFromJson: false)
   int sortIndex = 0;

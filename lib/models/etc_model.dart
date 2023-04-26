@@ -1,5 +1,6 @@
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:kspot_002/models/sponsor_model.dart';
 import 'package:kspot_002/models/upload_model.dart';
 import 'package:kspot_002/models/user_model.dart';
 import 'package:uuid/uuid.dart';
@@ -220,6 +221,43 @@ class MemberData {
     nickName    = user.nickName;
     pic         = user.pic;
     createTime  = DateTime.now();
+  }
+}
+
+@JsonSerializable()
+class SponsorData {
+  String    id;            // user id
+  int       creditQty;
+  String    userId;
+  String    userPic;
+  String    userName;
+  DateTime  createTime;
+  DateTime  startTime;
+  DateTime  endTime;
+
+  SponsorData({
+    required this.id,
+    required this.creditQty,
+    required this.userId,
+    required this.userPic,
+    required this.userName,
+    required this.createTime,
+    required this.startTime,
+    required this.endTime,
+  });
+
+  factory SponsorData.fromJson(JSON json) => _$SponsorDataFromJson(json);
+  JSON toJson() => _$SponsorDataToJson(this);
+
+  setFromSponsorModel(SponsorModel sponsor) {
+    id          = sponsor.id;
+    creditQty   = sponsor.creditQty;
+    userId      = sponsor.userId;
+    userName    = sponsor.userName;
+    userPic     = sponsor.userPic;
+    createTime  = DateTime.now();
+    startTime   = DateTime.now();
+    endTime     = DateTime.now();
   }
 }
 

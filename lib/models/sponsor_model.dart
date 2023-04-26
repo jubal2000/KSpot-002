@@ -14,10 +14,11 @@ class SponsorModel {
   int     showStatus;     // 보여주기 상태 (0: disable, 1: visible)
   int     creditQty;      // 크래딧 갯수
   String  securityCode;   // 보안코드
-  String  groupId;        // 이벤트 그룹 ID
-  String  eventId;        // 이벤트 링크 ID
-  String  eventTitle;     // 이벤트 링크 Title
-  String  eventPic;       // 이벤트 링크 Pic
+  String  targetType;     // 대상 타입 ('event')
+  String  targetGroupId;  // 대상 그룹 ID
+  String  targetId;       // 대상 링크 ID
+  String  targetTitle;    // 대상 링크 Title
+  String  targetPic;      // 대상 링크 Pic
   String  userId;         // 소유 유저
   String  userName;       // 소유 유저 name
   String  userPic;        // 소유 유저 pic
@@ -26,7 +27,7 @@ class SponsorModel {
   DateTime updateTime;    // 수정 시간
   DateTime createTime;    // 생성 시간
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false)
   DateTime? cacheTime;    // for local cache refresh time..
 
   SponsorModel({
@@ -35,10 +36,11 @@ class SponsorModel {
     required this.showStatus,
     required this.creditQty,
     required this.securityCode,
-    required this.groupId,
-    required this.eventId,
-    required this.eventTitle,
-    required this.eventPic,
+    required this.targetType,
+    required this.targetGroupId,
+    required this.targetId,
+    required this.targetTitle,
+    required this.targetPic,
     required this.userId,
     required this.userName,
     required this.userPic,
@@ -50,22 +52,23 @@ class SponsorModel {
 
   static createEvent(EventModel event, UserModel user, int showStatus, int creditQty, DateTime startTime, DateTime endTime) {
     return SponsorModel(
-      id: '',
-      status: 1,
-      showStatus: showStatus,
-      creditQty: creditQty,
-      securityCode: '',
-      groupId: event.groupId,
-      eventId: event.id,
-      eventTitle: event.title,
-      eventPic: event.pic,
-      userId: user.id,
-      userName: user.nickName,
-      userPic: user.pic,
-      startTime: startTime,
-      endTime: endTime,
-      updateTime: DateTime(0),
-      createTime: DateTime(0),
+      id:             '',
+      status:         1,
+      showStatus:     showStatus,
+      creditQty:      creditQty,
+      securityCode:   '',
+      targetType:     'event',
+      targetGroupId:  event.groupId,
+      targetId:       event.id,
+      targetTitle:    event.title,
+      targetPic:      event.pic,
+      userId:         user.id,
+      userName:       user.nickName,
+      userPic:        user.pic,
+      startTime:      startTime,
+      endTime:        endTime,
+      updateTime:     DateTime.now(),
+      createTime:     DateTime.now(),
     );
   }
 

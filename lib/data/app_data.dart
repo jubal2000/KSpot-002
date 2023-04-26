@@ -171,6 +171,7 @@ class AppData {
   static JSON INFO_CURRENCY = JSON.from(infoData['currency' ] ??= {});
   static JSON INFO_CUSTOMFIELD = JSON.from(infoData['customField' ] ??= {});
   static JSON INFO_PROMOTION = JSON.from(infoData['promotion' ] ??= {});
+  static JSON DATA_EVENT_GROUP = JSON.from(infoData['eventGroup'] ??= {});
 
   static JSON INFO_STORY_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['story'] ??= {}) : {};
   static JSON INFO_TALENT_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['talent'] ??= {}) : {};
@@ -179,6 +180,7 @@ class AppData {
   static JSON INFO_PLAY_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['autoPlay'] ??= {}) : {};
   static JSON INFO_SHOP_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['shop'] ??= {}) : {};
   static JSON INFO_EVENT_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['event'] ??= {}) : {};
+
 
   static var mainListType = HomeListType.list;
 

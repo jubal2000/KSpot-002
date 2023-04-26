@@ -16,9 +16,9 @@ class UploadFileModel {
   String      url;
   String?     path;
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false)
   Uint8List?  data;
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false)
   Uint8List?  thumbData;
 
   UploadFileModel({

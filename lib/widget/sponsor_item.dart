@@ -155,7 +155,7 @@ class SponsorCardItemState extends State<SponsorCardItem> {
                       height: _imageHeight,
                       child: Stack(
                         children: [
-                          showImage(widget.itemData.eventPic, Size(_imageHeight, _imageHeight)),
+                          showImage(widget.itemData.targetPic, Size(_imageHeight, _imageHeight)),
                           if (widget.itemData.showStatus == 0)
                             OutlineIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
                           if (widget.isExpired)
@@ -189,7 +189,7 @@ class SponsorCardItemState extends State<SponsorCardItem> {
                                 Expanded(
                                   child: Row(
                                     children: [
-                                      Text(STR(widget.itemData.eventTitle), style: ItemTitleStyle(context), maxLines: 1),
+                                      Text(STR(widget.itemData.targetTitle), style: ItemTitleStyle(context), maxLines: 1),
                                       if (widget.isPromotion)...[
                                         SizedBox(width: 2),
                                         Icon(Icons.star, size: 20, color: Theme.of(context).colorScheme.tertiary),

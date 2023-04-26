@@ -60,7 +60,7 @@ class UserModel {
   List<OptionData>?   optionData;
   List<OptionData>?   optionPush;
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false)
   DateTime? cacheTime;    // for local cache refresh time..
 
   UserModel({

@@ -25,7 +25,7 @@ class ChatModel {
   List<String>? thumbList;
   List<UploadFileModel>? fileData;
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false)
   DateTime? cacheTime;    // for local cache refresh time..
 
   ChatModel({

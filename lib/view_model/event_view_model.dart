@@ -29,6 +29,13 @@ class EventListType {
   static int get list     => 1;
 }
 
+enum EventListTopicType {
+  hotPlace,
+  newPlace,
+  localPlace,
+  max,
+}
+
 class EventViewModel extends ChangeNotifier {
   BuildContext? buildContext;
   List<JSON>    showList = [];
@@ -43,8 +50,8 @@ class EventViewModel extends ChangeNotifier {
   GlobalKey mapKey = GlobalKey();
 
   var cameraPos = CameraPosition(target: LatLng(0,0));
-  var isDateOpen = false;
   var eventListType = EventListType.list;
+  var isDateOpen = false;
   var isMapUpdate = true;
   var isManagerMode = false; // 유저의 이벤트목록 일 경우 메니저이면, 기간이 지난 이벤트들도 표시..
   var isRefreshMap = false;

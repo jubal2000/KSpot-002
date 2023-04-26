@@ -42,7 +42,7 @@ class EventGroupModel {
   List<String>? tagData;      // tag
   List<String>? searchData;   // 검색어 목록
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false)
   DateTime? cacheTime;    // for local cache refresh time..
 
   EventGroupModel({

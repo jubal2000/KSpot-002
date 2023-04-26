@@ -885,11 +885,11 @@ class ApiService extends GetxService {
   }
 
 
-  Future<JSON> setEventItemFromId(String placeId, JSON updateItem) async {
+  Future<JSON> setEventItemFromId(String eventId, JSON updateItem) async {
     JSON result = {};
     var dataRef = firestore!.collection(EventCollection);
     try {
-      await dataRef.doc(placeId).update(Map<String, dynamic>.from(updateItem));
+      await dataRef.doc(eventId).update(Map<String, dynamic>.from(updateItem));
       result = FROM_SERVER_DATA(updateItem);
     } catch (e) {
       LOG('--> setEventItemFromId error : $e');
@@ -1097,6 +1097,20 @@ class ApiService extends GetxService {
 
   final SponsorCollection = 'data_sponsor';
 
+  Future<JSON> getSponsorData() async {
+    JSON result = {};
+    var snapshot = await firestore!.collection(SponsorCollection)
+        .where('status', isEqualTo: 1)
+        .get();
+    if (snapshot.docs.isNotEmpty) {
+      for (var doc in snapshot.docs) {
+        result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
+      }
+    }
+    LOG('--> getSponsorData Result : $result');
+    return result;
+  }
+
   Future<JSON?> getSponsorFromId(String sponsorId) async {
     JSON result = {};
     var snapshot = await firestore!.collection(SponsorCollection).doc(sponsorId).get();
@@ -1169,8 +1183,18 @@ class ApiService extends GetxService {
       addData["createTime"] = CURRENT_SERVER_TIME();
     }
     addData["updateTime"] = CURRENT_SERVER_TIME();
-    await ref.doc(addData['id']).set(addData);
-    LOG('--> addSponsorItem : ${addData['id']}');
+
+    if (addData['targetType'] == 'event') {
+      var eventInfo = await getEventFromId(addData['targetId']);
+      if (eventInfo != null) {
+
+
+        await ref.doc(addData['id']).set(addData);
+        LOG('--> addSponsorItem EVENT : ${addData['id']}');
+      } else {
+        LOG('---> cant find EVENT: ${addData['targetId']}');
+      }
+    }
     return FROM_SERVER_DATA(addData);
   }
 

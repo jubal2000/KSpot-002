@@ -332,6 +332,8 @@ class Words extends Translations {
       'Remaining after use:': '사용후 남은 크레딧:',
       'Sponsored period': '후원기간',
       'Use credits': '사용 크레딧',
+      'Event Sponsorship Success': '이벤트 후원 성공',
+      'Event Sponsorship Failed': '이벤트 후원 실패',
       '1day': '1일',
 
       // slide_timepicker_screen

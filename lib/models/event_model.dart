@@ -96,6 +96,9 @@ class EventModel {
   @JsonKey(includeFromJson: false)
   PlaceModel? placeInfo;
 
+  @JsonKey(includeFromJson: false)
+  Map<String, int> sponsorCount = {}; // 스폰서 정보 카운트(선택된 날짜)
+
   EventModel({
     required this.id,
     required this.status,

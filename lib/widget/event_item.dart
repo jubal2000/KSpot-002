@@ -1,6 +1,7 @@
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/data/dialogs.dart';
@@ -32,10 +33,9 @@ class EventCardItem extends StatefulWidget {
         this.isShowPlaceButton = true,
         this.isShowUser = true,
         this.isShowLike = false,
-        this.isPromotion = false,
+        this.isShowBookmark = true,
         this.isMyItem = false,
         this.isExpired = false,
-        this.isShowBookmark = true,
         this.selectMax = 9,
         this.onShowDetail,
         this.onRefresh}) : super(key: key);
@@ -48,7 +48,6 @@ class EventCardItem extends StatefulWidget {
   // bool isShowTheme;
   bool isShowUser;
   bool isShowLike;
-  bool isPromotion;
   bool isMyItem;
   bool isExpired;
   bool isShowBookmark;
@@ -141,6 +140,9 @@ class EventCardItemState extends State<EventCardItem> {
     if (timeData == null && widget.itemData.timeData != null) {
       timeData = widget.itemData.timeData!.first;
     }
+    var sponDate  = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
+    var sponCount = INT(widget.itemData.sponsorCount[sponDate]);
+    LOG('--> EventItem sponCount [${widget.itemData.title}] : $sponCount');
     return GestureDetector(
         onTap: () {
           unFocusAll(context);
@@ -192,7 +194,7 @@ class EventCardItemState extends State<EventCardItem> {
                           if (widget.isExpired)
                             Center(
                                 child: Text("EXPIRED".tr, style: ItemDescOutlineStyle(context))
-                            )
+                            ),
                         ]
                       )
                     ),
@@ -221,9 +223,9 @@ class EventCardItemState extends State<EventCardItem> {
                                   child: Row(
                                     children: [
                                       Text(STR(widget.itemData.title), style: ItemTitleStyle(context), maxLines: 1),
-                                      if (widget.isPromotion)...[
+                                      if (sponCount > 0)...[
                                         SizedBox(width: 2),
-                                        Icon(Icons.star, size: 20, color: Theme.of(context).colorScheme.tertiary),
+                                        Icon(Icons.star, size: 20.sp, color: Colors.yellowAccent),
                                       ]
                                     ],
                                   ),
@@ -239,7 +241,7 @@ class EventCardItemState extends State<EventCardItem> {
                             ]
                           ),
                           Expanded(child:
-                          Row(
+                            Row(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Expanded(
@@ -351,8 +353,8 @@ class PlaceEventVerCardItem extends StatefulWidget {
         this.selectMax = 9,
         this.onRefresh}) : super(key: key);
 
-  JSON itemData;
-  JSON? placeData;
+  EventModel  itemData;
+  PlaceModel? placeData;
   bool isSelectable;
   bool isShowHomeButton;
   bool isShowPlaceButton;
@@ -381,25 +383,29 @@ class PlaceEventVerCardItemState extends State<PlaceEventVerCardItem> {
   @override
   Widget build(context) {
     _userListData.clear();
-    if (JSON_NOT_EMPTY(widget.itemData['managerData'])) {
-      for (var item in widget.itemData['managerData'].entries) {
-        _userListData.add(item.value as JSON);
+    if (widget.itemData.managerData != null) {
+      for (var item in widget.itemData.managerData!) {
+        _userListData.add(item.toJson());
         // List<JSON>.from(widget.itemData['managerData'].entries.map((key, value) => JSON.from(value)).toList());
       }
-    } else if (STR(widget.itemData['userId']).isNotEmpty) {
-      _userListData.add(widget.itemData);
+    } else if (STR(widget.itemData.userId).isNotEmpty) {
+      _userListData.add(widget.itemData.toJson());
     }
     _imageSize = widget.itemWidth;
-    _isExpired = api.checkEventExpired(widget.itemData);
+    _isExpired = api.checkEventExpired(widget.itemData.toJson());
+
+    var sponDate  = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
+    var sponCount = INT(widget.itemData.sponsorCount[sponDate]);
+    LOG('--> PlaceEventVerCardItem sponCount [$sponDate] : $sponCount');
     return GestureDetector(
       onTap: () {
         if (widget.isSelectable) {
           if (widget.selectMax == 1) {
             AppData.listSelectData.clear();
-            AppData.listSelectData[widget.itemData['id']] = widget.itemData;
+            AppData.listSelectData[widget.itemData.id] = widget.itemData;
             Navigator.of(context).pop();
           } else {
-            AppData.listSelectData[widget.itemData['id']] = widget.itemData;
+            AppData.listSelectData[widget.itemData.id] = widget.itemData;
           }
         } else {
           unFocusAll(context);
@@ -432,39 +438,39 @@ class PlaceEventVerCardItemState extends State<PlaceEventVerCardItem> {
             child: Column(
               children: [
                 SizedBox(
-                    width: _imageSize,
-                    height: _imageSize,
-                    child: Stack(
-                        children: [
-                          showImage(STR(widget.itemData['pic']), Size(_imageSize, _imageSize)),
-                          if (INT(widget.itemData['status']) == 2)
-                            OutlineIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
-                          if (_isExpired)
-                            Center(
-                                child: Text("EXPIRED".tr, style: ItemDescOutlineStyle(context))
-                            ),
-                          if (widget.isSelectable)
-                            TopLeftAlign(
-                              child: Icon(Icons.arrow_forward_ios, color: AppData.listSelectData.containsKey(widget.itemData['id']) ?
-                              Theme.of(context).primaryColor : Theme.of(context).primaryColor.withOpacity(0.5)),
-                            ),
-                          BottomRightAlign(
-                              child: Container(
-                                  height: 35,
-                                  padding: EdgeInsets.all(5),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      if (widget.isPromotion)
-                                        Icon(Icons.star, size: 26, color: Theme.of(context).colorScheme.secondary),
-                                      if (widget.isShowLike)
-                                        LikeWidget(context, 'event', widget.itemData),
-                                    ],
-                                  )
-                              )
-                          ),
-                        ]
-                    )
+                  width: _imageSize,
+                  height: _imageSize,
+                  child: Stack(
+                    children: [
+                      showImage(STR(widget.itemData.pic), Size(_imageSize, _imageSize)),
+                      if (INT(widget.itemData.status) == 2)
+                        OutlineIcon(Icons.visibility_off_outlined, 20, Colors.white, x:3, y:3),
+                      if (_isExpired)
+                        Center(
+                            child: Text("EXPIRED".tr, style: ItemDescOutlineStyle(context))
+                        ),
+                      if (widget.isSelectable)
+                        TopLeftAlign(
+                          child: Icon(Icons.arrow_forward_ios, color: AppData.listSelectData.containsKey(widget.itemData.id) ?
+                          Theme.of(context).primaryColor : Theme.of(context).primaryColor.withOpacity(0.5)),
+                        ),
+                      BottomRightAlign(
+                        child: Container(
+                          height: 35,
+                          padding: EdgeInsets.all(5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              if (sponCount > 0)
+                                Icon(Icons.star, size: 20.sp, color: Colors.yellow),
+                              if (widget.isShowLike)
+                                LikeWidget(context, 'event', widget.itemData.toJson()),
+                            ],
+                          )
+                        )
+                      ),
+                    ]
+                  )
                 ),
                 Expanded(
                     child: Container(
@@ -474,22 +480,22 @@ class PlaceEventVerCardItemState extends State<PlaceEventVerCardItem> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                                children: [
-                                  if (widget.isShowTheme && widget.itemData['themeColor'] != null)...[
-                                    Container(
-                                      width: 12,
-                                      height: 12,
-                                      decoration: BoxDecoration(
-                                        color: COL(widget.itemData['themeColor'], defaultValue: Theme.of(context).primaryColor.withOpacity(0.5)),
-                                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                                      ),
-                                    ),
-                                    SizedBox(width: 5),
-                                  ],
-                                ]
-                            ),
-                            if (STR(widget.itemData['title']).isNotEmpty)
+                            // Row(
+                            //     children: [
+                            //       if (widget.isShowTheme && widget.itemData['themeColor'] != null)...[
+                            //         Container(
+                            //           width: 12,
+                            //           height: 12,
+                            //           decoration: BoxDecoration(
+                            //             color: COL(widget.itemData['themeColor'], defaultValue: Theme.of(context).primaryColor.withOpacity(0.5)),
+                            //             borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                            //           ),
+                            //         ),
+                            //         SizedBox(width: 5),
+                            //       ],
+                            //     ]
+                            // ),
+                            if (widget.itemData.title.isNotEmpty)
                             // Expanded(
                             //   child: Row(
                             //     children: [
@@ -503,19 +509,19 @@ class PlaceEventVerCardItemState extends State<PlaceEventVerCardItem> {
                             // ),
                               RichText(
                                   overflow: TextOverflow.ellipsis,
-                                  text: TextSpan(text: STR(widget.itemData['title']), style: ItemTitleStyle(context)),
+                                  text: TextSpan(text: widget.itemData.title, style: ItemTitleStyle(context)),
                                   maxLines: 3),
-                            if (STR(widget.itemData['title']).isEmpty && STR(widget.itemData['desc']).isNotEmpty)
+                            if (widget.itemData.title.isEmpty && widget.itemData.desc.isNotEmpty)
                               RichText(
                                   overflow: TextOverflow.ellipsis,
-                                  text: TextSpan(text: DESC(widget.itemData['desc']), style: ItemDescStyle(context)),
+                                  text: TextSpan(text: DESC(widget.itemData.desc), style: ItemDescStyle(context)),
                                   maxLines: 3),
-                            if (JSON_NOT_EMPTY(widget.itemData['timeData']))
+                            if (LIST_NOT_EMPTY(widget.itemData.timeData))
                               RichText(
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   text: TextSpan(
-                                    text: EVENT_TIMEDATA_TITLE_TIME_STR(widget.itemData['timeData']),
+                                    text: EVENT_TIMEDATA_TITLE_TIME_STR(widget.itemData.getTimeDataMap),
                                     style: ItemDescExStyle(context),
                                   )
                               ),
@@ -535,6 +541,179 @@ class PlaceEventVerCardItemState extends State<PlaceEventVerCardItem> {
             ),
           )
       ),
+    );
+  }
+}
+
+class PlaceEventMapCardItem extends StatefulWidget {
+  PlaceEventMapCardItem(this.itemData,
+      {Key? key,
+        this.placeData,
+        this.padding = const EdgeInsets.symmetric(vertical: 5),
+        this.itemHeight = 280,
+        this.itemWidth = 220,
+        this.faceSize = 45,
+        this.isShowUser = true,
+        this.isShowLike = false,
+        this.isShowBookmark = false,
+        this.isPromotion = false,
+        this.margin,
+        this.faceOutlineColor,
+        this.backgroundColor,
+        this.onShowDetail
+      }) : super(key: key);
+
+  EventModel  itemData;
+  PlaceModel? placeData;
+  bool isShowUser;
+  bool isShowLike;
+  bool isShowBookmark;
+  bool isPromotion;
+
+  double itemHeight;
+  double itemWidth;
+  double faceSize;
+
+  Color? faceOutlineColor;
+  Color? backgroundColor;
+
+  EdgeInsets? padding;
+  EdgeInsets? margin;
+  Function(String, int)? onShowDetail;
+
+  @override
+  PlaceEventMapCardItemState createState() => PlaceEventMapCardItemState();
+}
+
+class PlaceEventMapCardItemState extends State<PlaceEventMapCardItem> {
+  final api = Get.find<ApiService>();
+  final List<JSON> _userListData = [];
+
+  @override
+  Widget build(context) {
+    widget.padding ??= EdgeInsets.fromLTRB(0, 5, 5, 5);
+    _userListData.clear();
+    if (JSON_NOT_EMPTY(widget.itemData.managerData)) {
+      for (var item in widget.itemData.managerData!) {
+        _userListData.add(item.toJson());
+        // List<JSON>.from(widget.itemData['managerData'].entries.map((key, value) => JSON.from(value)).toList());
+      }
+    } else if (STR(widget.itemData.userId).isNotEmpty) {
+      _userListData.add(widget.itemData.toJson());
+    }
+    var timeData = widget.itemData.getDateTimeData(AppData.currentDate);
+    if (timeData == null && widget.itemData.timeData != null) {
+      timeData = widget.itemData.timeData!.first;
+    }
+    var sponDate  = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
+    var sponCount = INT(widget.itemData.sponsorCount[sponDate]);
+    LOG('--> EventItem sponCount [${widget.itemData.title}] : $sponCount');
+    return GestureDetector(
+      onTap: () {
+        if (widget.onShowDetail != null) widget.onShowDetail!(widget.itemData.id, 0);
+      },
+      child: Container(
+        margin: widget.margin,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16.sp),
+                  child: Container(
+                    height: widget.itemHeight - widget.faceSize * 0.5,
+                    width:  widget.itemWidth,
+                    color:  widget.backgroundColor,
+                    child: Column(
+                        children: [
+                          if (widget.itemData.pic.isNotEmpty) ...[
+                            Stack(
+                              children: [
+                                Container(
+                                  constraints: BoxConstraints(
+                                    maxHeight: widget.itemWidth,
+                                    minWidth: double.infinity,
+                                  ),
+                                  child: showImageWidget(widget.itemData.pic, BoxFit.cover),
+                                ),
+                                if (widget.isShowLike)
+                                  TopRightAlign(
+                                    child: LikeWidget(context, 'event', widget.itemData.toJson(),
+                                        iconSize: 22, padding: EdgeInsets.all(5), isShowOutline: true,
+                                        enableColor: Theme.of(context).colorScheme.tertiary, disableColor: Colors.white),
+                                  ),
+                                if (widget.isShowBookmark)
+                                  TopRightAlign(
+                                    child: BookmarkWidget(context, 'event', widget.itemData.toJson(),
+                                        iconSize: 22, padding: EdgeInsets.all(5), isShowOutline: true,
+                                        enableColor: Theme.of(context).colorScheme.tertiary, disableColor: Colors.white),
+                                  ),
+                                if (sponCount > 0)
+                                  TopLeftAlign(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(2.sp),
+                                      child: Icon(Icons.star, size: 20.sp, color: Colors.yellow),
+                                    ),
+                                  )
+                              ]
+                          ),
+                          SizedBox(height: 5),
+                        ],
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: Text(DESC(widget.itemData.title), style: ItemDescBoldStyle(context), maxLines: 2, textAlign: TextAlign.center),
+                                  ),
+                                ),
+                                if (timeData != null)
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: widget.faceSize * 0.55, top: 5),
+                                    child: Text('${timeData.startTime} ~ ${timeData.endTime}', style: ItemDescColorStyle(context)),
+                                  ),
+                                // if (widget.descMaxLine > 0 && STR(_goodsItem['desc']).isNotEmpty)...[
+                                //   Text(DESC(_goodsItem['desc']),
+                                //       style: widget.descStyle,
+                                //       maxLines: widget.descMaxLine,
+                                //       textAlign: TextAlign.center
+                                //   ),
+                                // ],
+                                // if (STR(_goodsItem['timeRange']).isNotEmpty)...[
+                                //   Text(DESC(_goodsItem['timeRange']),
+                                //       style: widget.extraStyle,
+                                //       maxLines: 1,
+                                //       textAlign: TextAlign.center
+                                //   ),
+                                // ]
+                              ],
+                            )
+                          )
+                        ),
+                      ]
+                    )
+                  ),
+                )
+              ],
+            ),
+            if (widget.isShowUser)...[
+              Positioned(
+                bottom: 0,
+                child: UserIdCardOneWidget(widget.itemData.userId,
+                    size: widget.faceSize,
+                    faceCircleSize: 2.0,
+                    borderColor: widget.faceOutlineColor,
+                    backColor: Color(0xFF333333)),
+              ),
+            ],
+          ]
+        )
+      )
     );
   }
 }

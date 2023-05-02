@@ -781,9 +781,14 @@ class UserViewModel extends ChangeNotifier {
               LOG('--> showEventSponsorDialog result : $dResult');
               if (dResult != null) {
                 sponRepo.addSponsorItem(dResult).then((addItem) {
-                  sponsorData[addItem['id']] = SponsorModel.fromJson(addItem);
-                  LOG('--> sponsorData add : ${sponsorData.length} / ${addItem.toString()}');
-                  notifyListeners();
+                  if (addItem != null) {
+                    sponsorData[addItem['id']] = SponsorModel.fromJson(addItem);
+                    LOG('--> sponsorData Success : ${sponsorData.length} / ${addItem.toString()}');
+                    ShowToast('Event Sponsorship Success'.tr);
+                    notifyListeners();
+                  } else {
+                    ShowToast('Event Sponsorship Failed'.tr);
+                  }
                 });
               }
             });

@@ -3,6 +3,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:helpers/helpers.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
@@ -435,6 +436,7 @@ class GoodsItemCardState extends State<GoodsItemCard> {
   var _isDataReady = false;
   var _isSale = false;
   var roundCorner = 8.0;
+  var sponCount = 0;
 
   JSON _goodsItem = {};
 
@@ -503,6 +505,11 @@ class GoodsItemCardState extends State<GoodsItemCard> {
       _orgId = _goodsItem['id'];
       refresh();
     }
+    if (_goodsItem['sponsorCount'] != null) {
+      var sponDate  = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
+      sponCount = INT(_goodsItem['sponsorCount'][sponDate]);
+      LOG('--> sponCount [$sponDate] : $sponCount');
+    }
     switch (widget.showType) {
       case GoodsItemCardType.square:
       case GoodsItemCardType.squareSmall:
@@ -566,6 +573,13 @@ class GoodsItemCardState extends State<GoodsItemCard> {
                                         iconSize: 22, padding: EdgeInsets.all(5), isShowOutline: true,
                                         enableColor: Theme.of(context).colorScheme.tertiary, disableColor: Colors.white),
                                     ),
+                                  if (sponCount > 0)
+                                    TopLeftAlign(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(2.sp),
+                                        child: Icon(Icons.star, size: 20.sp, color: Colors.yellow),
+                                      ),
+                                    )
                                 ]
                               ),
                               SizedBox(height: 5),

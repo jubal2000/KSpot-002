@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import '../models/event_model.dart';
 import '../models/sponsor_model.dart';
 import '../services/api_service.dart';
 import '../services/cache_service.dart';
@@ -20,8 +21,12 @@ class SponsorRepository {
     return result;
   }
 
-  Future<JSON> addSponsorItem(SponsorModel sponsorInfo) async {
-    return await api.addSponsorItem(sponsorInfo.toJson());
+  Future<JSON?> addSponsorItem(SponsorModel sponsorInfo) async {
+    var eventItem = await api.getEventFromId(sponsorInfo.targetId);
+    if (eventItem != null) {
+      return await api.addSponsorItem(sponsorInfo.toJson());
+    }
+    return null;
   }
 
   Future<bool> setSponsorStatus(String sponsorId, int status) async {

@@ -185,7 +185,7 @@ class UserRepository {
       if (cacheItem != null) return cacheItem;
       final response = await api.getUserInfoFromId(userId);
       if (response != null) {
-        LOG("--> getUserInfo result: ${response.toString()}");
+        // LOG("--> getUserInfo result: ${response.toString()}");
         final addItem = UserModel.fromJson(FROM_SERVER_DATA(response));
         cache.setUserItem(addItem);
         return addItem;

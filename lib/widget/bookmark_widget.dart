@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/services/api_service.dart';
 
@@ -14,7 +15,7 @@ Widget BookmarkSmallWidget(BuildContext context, String type, JSON targetInfo,
 
 Widget BookmarkWidget(BuildContext context, String type, JSON targetInfo,
     {
-      double iconSize = 24,
+      double iconSize = 20,
       String title = '',
       bool isEnabled = true,
       bool isShowOutline = false,
@@ -25,8 +26,8 @@ Widget BookmarkWidget(BuildContext context, String type, JSON targetInfo,
       EdgeInsets? padding,
       Function(JSON)? onChangeCount
     }) {
-  var iconColor0 = enableColor ?? Theme.of(context).primaryColor;
-  var iconColor1 = disableColor ?? Theme.of(context).primaryColor;
+  var iconColor0 = enableColor  ?? Theme.of(context).primaryColor;
+  var iconColor1 = disableColor ?? Theme.of(context).disabledColor;
   var api = Get.find<ApiService>();
 
   return FutureBuilder(
@@ -53,9 +54,9 @@ Widget BookmarkWidget(BuildContext context, String type, JSON targetInfo,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (isShowOutline)
-                            OutlineIcon(isChecked ? Icons.bookmark : Icons.bookmark_border_outlined, iconSize, isChecked ? iconColor0 : iconColor1, x: iconX, y: iconY),
+                            OutlineIcon(isChecked ? Icons.bookmark : Icons.bookmark_border_outlined, iconSize.sp, isChecked ? iconColor0 : iconColor1, x: iconX, y: iconY),
                           if (!isShowOutline)
-                            Icon(isChecked ? Icons.bookmark : Icons.bookmark_border_outlined, size: iconSize, color: isChecked ? iconColor0 : iconColor1),
+                            Icon(isChecked ? Icons.bookmark : Icons.bookmark_border_outlined, size: iconSize.sp, color: isChecked ? iconColor0 : iconColor1),
                           if (title.isNotEmpty)...[
                             Text(title, style: ItemDescExStyle(context))
                           ],

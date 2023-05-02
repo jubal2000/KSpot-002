@@ -130,11 +130,11 @@ class EventViewModel extends ChangeNotifier {
       for (var item in cache.eventData.entries) {
         final isExpired = eventRepo.checkIsExpired(item.value);
         if (isManagerMode || (!isExpired && item.value.status == 1)) {
-          final showItem = item.value.toJson();
+          var showItem  = item.value.toJson();
           var placeInfo = showItem['placeInfo'];
           placeInfo ??= await placeRepo.getPlaceFromId(item.value.placeId);
           if (placeInfo != null) {
-            // LOG('--> showList set Place [${placeInfo.id}] : ${placeInfo.toJson()}');
+            LOG('--> setShowList [${placeInfo.id}] : ${item.value.sponsorCount}');
             showItem['placeInfo'] = placeInfo.toJson();
             showItem['address'  ] = placeInfo.address.toJson();
             final pos = LatLng(DBL(showItem['address']['lat']), DBL(showItem['address']['lng']));
@@ -150,6 +150,8 @@ class EventViewModel extends ChangeNotifier {
             //   // LOG('--> eventShowList add : ${showItem['id']}');
             //   result.add(showItem);
             // }
+          } else {
+            LOG('----------> no place info');
           }
         }
       }
@@ -275,29 +277,41 @@ class EventViewModel extends ChangeNotifier {
 
   showEventMap(itemWidth, itemHeight) {
     List<Widget> tmpList = [];
-    for (var item in showList) {
-      var addItem = cache.eventMapItemData[item['id']];
-      LOG('--> showEventMap : ${item['id']} / ${item['title']} / ${addItem != null ? 'OK': 'none'}');
-      addItem ??= Container(
-        width:  itemWidth,
-        height: itemHeight,
+    for (var eventItem in showList) {
+      var item = eventRepo.setSponsorCount(EventModel.fromJson(eventItem));
+      var addItem = cache.eventMapItemData[item.id];
+      LOG('--> showEventMap : ${item.id} / ${item.title} / ${addItem != null ? 'OK': 'none'}');
+      addItem ??= PlaceEventMapCardItem(
+        item,
+        itemHeight: itemHeight,
+        itemWidth: itemWidth,
         margin: EdgeInsets.symmetric(horizontal: 3),
-        child: EventSquareItem(
-          item,
-          backgroundColor: Theme.of(buildContext!).cardColor,
-          faceOutlineColor: Theme.of(buildContext!).colorScheme.secondary,
-          padding: EdgeInsets.zero,
-          imageHeight: itemWidth,
-          titleMaxLine: 2,
-          descMaxLine: 0,
-          titleStyle: CardTitleStyle(buildContext!),
-          descStyle: CardDescStyle(buildContext!),
-          onShowDetail: (key, status) {
-            showEventItemDetail(item);
-          },
-        )
+        backgroundColor:  Theme.of(Get.context!).cardColor,
+        faceOutlineColor: Theme.of(Get.context!).colorScheme.secondary,
+        onShowDetail: (key, status) {
+          showEventItemDetail(eventItem);
+        },
       );
-      cache.eventMapItemData[item['id']] = addItem;
+      // addItem ??= Container(
+      //   width:  itemWidth,
+      //   height: itemHeight,
+      //   margin: EdgeInsets.symmetric(horizontal: 3),
+      //   child: PlaceEventMapCardItem(
+      //     item,
+      //     backgroundColor: Theme.of(buildContext!).cardColor,
+      //     faceOutlineColor: Theme.of(buildContext!).colorScheme.secondary,
+      //     padding: EdgeInsets.zero,
+      //     imageHeight: itemWidth,
+      //     titleMaxLine: 2,
+      //     descMaxLine: 0,
+      //     titleStyle: CardTitleStyle(buildContext!),
+      //     descStyle: CardDescStyle(buildContext!),
+      //     onShowDetail: (key, status) {
+      //       showEventItemDetail(item);
+      //     },
+      //   )
+      // );
+      cache.eventMapItemData[eventItem['id']] = addItem;
       tmpList.add(addItem);
     }
     if (isMapUpdate) {
@@ -316,16 +330,17 @@ class EventViewModel extends ChangeNotifier {
 
   showEventList(itemHeight) {
     List<Widget> tmpList = [];
-    for (var item in showList) {
-      var addItem = cache.eventListItemData[item['id']];
+    for (var eventItem in showList) {
+      var item = eventRepo.setSponsorCount(EventModel.fromJson(eventItem));
+      var addItem = cache.eventListItemData[item.id];
       addItem ??= EventCardItem(
-        EventModel.fromJson(item),
+        item,
         itemHeight: itemHeight,
         onShowDetail: (key, status) {
-          showEventItemDetail(item);
+          showEventItemDetail(eventItem);
         },
       );
-      cache.eventListItemData[item['id']] = addItem;
+      cache.eventListItemData[eventItem['id']] = addItem;
       tmpList.add(addItem);
     }
     return tmpList;

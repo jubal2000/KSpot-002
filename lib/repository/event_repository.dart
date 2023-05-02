@@ -29,15 +29,20 @@ class EventRepository {
 
   /////////////////////////////////////////////////////////////////////////////////////////////
 
+  Future<List<JSON>> getEventSponsorList(String targetId) async {
+    return await api.getSponsorFromTargetId(targetId, type: 'event');
+  }
+
   Future<Map<String, EventModel>> getEventListFromCountry(String groupId, String country, [String countryState = '']) async {
     Map<String, EventModel> result = {};
     try {
       final response = await api.getEventListFromCountry(groupId, country, countryState);
       for (var item in response.entries) {
-        LOG('--> getEventListFromCountry item : ${item.value}');
-        var addItem = EventModel.fromJson(item.value);
-        result[item.key] = addItem;
-        cache.setEventItem(addItem);
+        item.value['sponsorData'] = await getEventSponsorList(item.key);
+        var eventItem = EventModel.fromJson(item.value);
+        LOG('--> eventItem.sponsorData [${eventItem.title}] : ${eventItem.sponsorData}');
+        result[item.key] = eventItem;
+        cache.setEventItem(eventItem);
       }
     } catch (e) {
       LOG('--> getEventListFromCountry error [$groupId] : $e');
@@ -51,10 +56,11 @@ class EventRepository {
       if (cacheItem != null) return cacheItem;
       final response = await api.getEventFromId(eventId);
       if (response != null) {
-        final eventData = EventModel.fromJson(FROM_SERVER_DATA(response));
-        LOG("--> getEventFromId result: ${eventData.toJson()}");
-        cache.setEventItem(eventData);
-        return eventData;
+        response['sponsorData'] = await getEventSponsorList(response['id']);
+        final eventItem = EventModel.fromJson(FROM_SERVER_DATA(response));
+        LOG("--> getEventFromId result: ${eventItem.toJson()}");
+        cache.setEventItem(eventItem);
+        return eventItem;
       }
     } catch (e) {
       LOG('--> getEventFromId error [$eventId] : $e');
@@ -152,7 +158,24 @@ class EventRepository {
     return await api.uploadImageData(imageInfo, path);
   }
 
-  checkIsExpired(EventModel eventModel) {
-    return api.checkEventExpired(eventModel.toJson());
+  checkIsExpired(EventModel event) {
+    return api.checkEventExpired(event.toJson());
+  }
+
+  EventModel setSponsorCount(EventModel event) {
+    var eventDate = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
+    event.sponsorCount[eventDate] = 0;
+    LOG('--> checkSponsored [${event.title}] : ${event.sponsorData}');
+    if (LIST_NOT_EMPTY(event.sponsorData)) {
+      for (var item in event.sponsorData!) {
+        LOG('--> event.sponsorData check [$eventDate] : ${item.toJson()}');
+        if (checkDateRange(item.startTime, item.endTime)) {
+          var orgCount = event.sponsorCount[eventDate] ?? 0;
+          event.sponsorCount[eventDate] = orgCount + 1;
+          LOG('--> checkSponsored add [$eventDate] : ${event.sponsorCount[eventDate]}');
+        }
+      }
+    }
+    return event;
   }
 }

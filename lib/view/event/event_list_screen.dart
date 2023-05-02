@@ -270,7 +270,7 @@ class EventListTabState extends State<EventListTab> {
                       itemBuilder: (context, index) {
                         var showItem = showList[index];
                         if (isHorizontalStyle) {
-                          return PlaceEventVerCardItem(showItem.toJson(), itemHeight: Get.height, itemWidth: Get.height * 0.5,
+                          return PlaceEventVerCardItem(showItem, itemHeight: Get.height, itemWidth: Get.height * 0.5,
                             isShowHomeButton: false,
                             isShowPlaceButton: true,
                             isShowTheme: false,

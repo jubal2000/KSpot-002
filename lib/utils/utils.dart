@@ -28,6 +28,7 @@ import '../data/app_data.dart';
 import '../data/common_colors.dart';
 import '../data/common_sizes.dart';
 import '../data/style.dart';
+import '../models/etc_model.dart';
 import '../models/user_model.dart';
 import '../view/place/place_list_screen.dart';
 import '../view_model/event_edit_view_model.dart';
@@ -2048,17 +2049,23 @@ checkPromotionDateRangeFromData(JSON item, [String type = 'promotion_listTop']) 
       checkPromotionDateRange(STR(item[type]['startDate']), STR(item[type]['endDate']));
 }
 
-checkPromotionDateRange(String startDate, String endDate) {
+checkPromotionDateRange(String startDate, String endDate, [DateTime? targetTime]) {
   LOG('--> checkPromotionDateRange: $startDate / $endDate');
   try {
     var start = DateTime.parse(startDate);
     var end   = DateTime.parse(endDate);
-    var now   = DateTime.now();
-    LOG('--> now.compareTo : ${now.compareTo(start)} / ${now.compareTo(end)}');
-    return now.compareTo(start) > 0 && now.compareTo(end) < 0;
+    return checkDateRange(start, end, targetTime);
   } catch (e) {
     LOG('--> checkPromotionDateRange error: $e');
   }
+  return false;
+}
+
+checkDateRange(DateTime start, DateTime end, [DateTime? targetTime]) {
+  LOG('--> checkDateRange: $start / $end - $targetTime');
+  var now = targetTime ?? DateTime.now();
+  LOG('--> now.compareTo : ${now.compareTo(start)} / ${now.compareTo(end)}');
+  return now.compareTo(start) > 0 && now.compareTo(end) < 0;
 }
 
 Widget ContentTypeSelectWidget(BuildContext context, String selectId, Function(String) onChanged) {

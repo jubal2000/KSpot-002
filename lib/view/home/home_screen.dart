@@ -61,6 +61,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppData.appViewModel.init(context);
+    LOG('--> HomeScreen');
+
     return WillPopScope(
         onWillPop: () async => await showAlertYesNoDialog(context,
             'APP EXIT'.tr,

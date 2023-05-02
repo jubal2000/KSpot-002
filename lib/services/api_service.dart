@@ -531,7 +531,7 @@ class ApiService extends GetxService {
   }
   
   Future<JSON?> getPlaceFromId(String placeId, [var status = 0]) async {
-    LOG('--> getPlaceFromId : $placeId');
+    // LOG('--> getPlaceFromId : $placeId');
     var ref = firestore!.collection(PlaceCollection);
     var snapshot = await ref.where('status', isGreaterThan: status)
         .where('id', isEqualTo: placeId)
@@ -636,13 +636,12 @@ class ApiService extends GetxService {
   //
 
   final EventCollection = 'data_event';
-  
+
   Future<JSON> getEventListFromCountry(String groupId, String country, [String countryState = '']) async {
     LOG('--> getEventListFromCountry : $groupId / $country / $countryState');
     JSON result = {};
     var ref = firestore!.collection(EventCollection);
     var query = ref.where('status', isEqualTo: 1);
-  
     if (groupId.isNotEmpty) {
       query = query.where('groupId', isEqualTo: groupId);
     }
@@ -652,14 +651,12 @@ class ApiService extends GetxService {
         query = query.where('countryState', isEqualTo: countryState);
       }
     }
-  
     var snapshot = await query.get();
-
     for (var doc in snapshot.docs)  {
       result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
       LOG('--> add event : ${doc.data()['id']}');
     }
-    // result = await cleanEventExpire(result);
+    result = await cleanEventExpire(result);
     LOG('--> getEventListFromCountry result : ${result.length}');
     return result;
   }
@@ -671,7 +668,7 @@ class ApiService extends GetxService {
       for (var item in linkList) {
         var event = await getEventFromId(item.toString());
         if (event != null) {
-          result[event['id']] = event;
+          result[event['id']] = FROM_SERVER_DATA(event);
         }
       }
     }
@@ -682,7 +679,6 @@ class ApiService extends GetxService {
     log('--> getPlaceEventSearch : $searchText');
     var targetField = [[1, 'search'], [1, 'tagData']]; // 0: text, 1: array
     var result = await getSearchItem(EventCollection, searchText, targetField);
-    result = await cleanEventExpire(result);
     LOG('--> getPlaceEventSearch result : $result');
     return result;
   }
@@ -698,7 +694,6 @@ class ApiService extends GetxService {
     for (var doc in snapshot.docs)  {
       result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
     }
-    // firestoreCacheData['follow'][userId] = FROM_SERVER_DATA(result);
     result = await cleanEventExpire(result);
     LOG('--> getEventListFromId result [${result.length}] : $result');
     return result;
@@ -887,9 +882,9 @@ class ApiService extends GetxService {
 
   Future<JSON> setEventItemFromId(String eventId, JSON updateItem) async {
     JSON result = {};
-    var dataRef = firestore!.collection(EventCollection);
+    var ref = firestore!.collection(EventCollection);
     try {
-      await dataRef.doc(eventId).update(Map<String, dynamic>.from(updateItem));
+      await ref.doc(eventId).update(Map<String, dynamic>.from(updateItem));
       result = FROM_SERVER_DATA(updateItem);
     } catch (e) {
       LOG('--> setEventItemFromId error : $e');
@@ -898,6 +893,21 @@ class ApiService extends GetxService {
     return result;
   }
 
+  Future<bool> setEventInfoItem(JSON evebtInfo, String key) async {
+    LOG('--> setEventInfoItem : ${evebtInfo['id']} - $key / ${evebtInfo[key]}');
+    var ref = firestore!.collection(EventCollection);
+    return ref.doc(evebtInfo['id']).update(
+      {
+        key : evebtInfo[key],
+        'updateTime': CURRENT_SERVER_TIME()
+      }
+    ).then((result) {
+      return true;
+    }).onError((e, stackTrace) {
+      LOG('--> setEventInfoItem error : ${evebtInfo['id']} / $e');
+      return false;
+    });
+  }
 
   //----------------------------------------------------------------------------------------
   //
@@ -1122,12 +1132,13 @@ class ApiService extends GetxService {
     return null;
   }
 
-  Future<JSON> getSponsorFromTargetId(String eventId, {DateTime? lastTime, int limit = 0}) async {
-    JSON result = {};
+  Future<List<JSON>> getSponsorFromTargetId(String eventId, {var type = 'event', DateTime? lastTime, int limit = 0}) async {
+    List<JSON> result = [];
     var ref = firestore!.collection(SponsorCollection);
     var query = ref
-        .where('status', isEqualTo: 1)
-        .where('eventId', isEqualTo: eventId);
+        .where('status'     , isEqualTo: 1)
+        .where('targetType' , isEqualTo: type)
+        .where('targetId'   , isEqualTo: eventId);
 
     if (lastTime != null) {
       var startTime = Timestamp.fromDate(lastTime);
@@ -1141,9 +1152,8 @@ class ApiService extends GetxService {
 
     for (var doc in snapshot.docs) {
       var item = FROM_SERVER_DATA(doc.data());
-      result[item['id']] = item;
+      result.add(item);
     }
-    result = JSON_CREATE_TIME_SORT_DESC(result);
     LOG('--> getSponsorFromTargetId Result [$eventId] : ${result.length}');
     return result;
   }
@@ -1183,18 +1193,21 @@ class ApiService extends GetxService {
       addData["createTime"] = CURRENT_SERVER_TIME();
     }
     addData["updateTime"] = CURRENT_SERVER_TIME();
-
-    if (addData['targetType'] == 'event') {
-      var eventInfo = await getEventFromId(addData['targetId']);
-      if (eventInfo != null) {
-
-
-        await ref.doc(addData['id']).set(addData);
-        LOG('--> addSponsorItem EVENT : ${addData['id']}');
-      } else {
-        LOG('---> cant find EVENT: ${addData['targetId']}');
-      }
-    }
+    // if (addData['targetType'] == 'event') {
+    //   var eventInfo = await getEventFromId(addData['targetId']);
+    //   if (eventInfo != null) {
+    //     eventInfo['sponsorData'] ??= [];
+    //     eventInfo['sponsorData'].add(addData);
+    //     if (await setEventInfoItem(eventInfo, 'sponsorData')) {
+    //       await ref.doc(addData['id']).set(addData);
+    //       LOG('--> addSponsorItem EVENT : ${addData['id']}');
+    //     }
+    //   } else {
+    //     LOG('---> cant find EVENT: ${addData['targetId']}');
+    //   }
+    // }
+    await ref.doc(addData['id']).set(addData);
+    LOG('--> addSponsorItem : ${addData['id']}');
     return FROM_SERVER_DATA(addData);
   }
 

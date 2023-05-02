@@ -81,7 +81,7 @@ class PlaceListItemState extends State<PlaceListItem> {
                     AppData.listSelectData[widget.itemData.id] = widget.itemData;
                   }
                 } else {
-                  LOG('--> getPlaceFromId : ${widget.itemData.id}');
+                  // LOG('--> getPlaceFromId : ${widget.itemData.id}');
                   // api.getPlaceFromId(widget.itemData['id']).then((result) {
                   //   widget.itemData = result;
                   //   Navigator.push(

@@ -801,7 +801,7 @@ class PlaceListCardItemState extends State<PlaceListCardItem> {
                                     //   });
                                     // }
                                   } else {
-                                    LOG('--> getPlaceFromId : ${widget.itemData['id']}');
+                                    // LOG('--> getPlaceFromId : ${widget.itemData['id']}');
                                     // AppData.placeStateKey = GlobalKey<PlaceDetailState>();
                                     // Navigator.push(
                                     //     context, MaterialPageRoute(builder: (context) =>

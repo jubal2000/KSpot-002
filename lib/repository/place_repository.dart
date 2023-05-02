@@ -41,7 +41,7 @@ class PlaceRepository {
   }
 
   Future<PlaceModel?> getPlaceFromId(String placeId) async {
-    LOG('--> getPlaceFromId : $placeId');
+    // LOG('--> getPlaceFromId : $placeId');
     try {
       var cacheItem = cache.getPlaceItem(placeId);
       // LOG('--> getPlaceFromId cacheItem : ${cacheItem != null ? cacheItem.toJson() : 'null'}');

@@ -225,7 +225,7 @@ class EventCardItemState extends State<EventCardItem> {
                                       Text(STR(widget.itemData.title), style: ItemTitleStyle(context), maxLines: 1),
                                       if (sponCount > 0)...[
                                         SizedBox(width: 2),
-                                        Icon(Icons.star, size: 20.sp, color: Colors.yellowAccent),
+                                        Icon(Icons.star, size: 14.sp, color: Colors.yellowAccent),
                                       ]
                                     ],
                                   ),
@@ -462,7 +462,7 @@ class PlaceEventVerCardItemState extends State<PlaceEventVerCardItem> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               if (sponCount > 0)
-                                Icon(Icons.star, size: 20.sp, color: Colors.yellow),
+                                Icon(Icons.star, size: 14.sp, color: Colors.yellow),
                               if (widget.isShowLike)
                                 LikeWidget(context, 'event', widget.itemData.toJson()),
                             ],
@@ -555,7 +555,7 @@ class PlaceEventMapCardItem extends StatefulWidget {
         this.faceSize = 45,
         this.isShowUser = true,
         this.isShowLike = false,
-        this.isShowBookmark = false,
+        this.isShowBookmark = true,
         this.isPromotion = false,
         this.margin,
         this.faceOutlineColor,
@@ -641,20 +641,20 @@ class PlaceEventMapCardItemState extends State<PlaceEventMapCardItem> {
                                 if (widget.isShowLike)
                                   TopRightAlign(
                                     child: LikeWidget(context, 'event', widget.itemData.toJson(),
-                                        iconSize: 22, padding: EdgeInsets.all(5), isShowOutline: true,
-                                        enableColor: Theme.of(context).colorScheme.tertiary, disableColor: Colors.white),
+                                        iconSize: 22, padding: EdgeInsets.all(5.sp), isShowOutline: true,
+                                        disableColor: Colors.grey),
                                   ),
                                 if (widget.isShowBookmark)
                                   TopRightAlign(
                                     child: BookmarkWidget(context, 'event', widget.itemData.toJson(),
-                                        iconSize: 22, padding: EdgeInsets.all(5), isShowOutline: true,
-                                        enableColor: Theme.of(context).colorScheme.tertiary, disableColor: Colors.white),
+                                        iconSize: 16.sp, padding: EdgeInsets.all(5.sp), isShowOutline: true,
+                                        disableColor: Colors.grey),
                                   ),
                                 if (sponCount > 0)
                                   TopLeftAlign(
                                     child: Padding(
-                                      padding: EdgeInsets.all(2.sp),
-                                      child: Icon(Icons.star, size: 20.sp, color: Colors.yellow),
+                                      padding: EdgeInsets.all(5.sp),
+                                      child: OutlineIcon(Icons.star, 18.sp, Colors.yellow),
                                     ),
                                   )
                               ]

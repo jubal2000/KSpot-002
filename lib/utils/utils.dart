@@ -29,6 +29,7 @@ import '../data/common_colors.dart';
 import '../data/common_sizes.dart';
 import '../data/style.dart';
 import '../models/etc_model.dart';
+import '../models/event_model.dart';
 import '../models/user_model.dart';
 import '../view/place/place_list_screen.dart';
 import '../view_model/event_edit_view_model.dart';
@@ -517,6 +518,17 @@ JSON_INDEX_SORT_ASCE(JSON data) {
     }
     return 0;
   }));
+}
+
+// ignore: non_constant_identifier_names
+EVENT_SORT_HOT(List<EventModel> data) {
+  // LOG("--> JSON_INDEX_SORT_ASCE : $data");
+  if (data.length < 2) return data;
+  var checkDate = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
+  data.sort((a, b) =>
+    a.sponsorCount[checkDate] != null && b.sponsorCount[checkDate] != null &&
+    a.sponsorCount[checkDate]! > b.sponsorCount[checkDate]! ? -1 : 1);
+  return data;
 }
 
 // ignore: non_constant_identifier_names

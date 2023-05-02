@@ -277,8 +277,14 @@ class EventViewModel extends ChangeNotifier {
 
   showEventMap(itemWidth, itemHeight) {
     List<Widget> tmpList = [];
+    List<EventModel> showHotList = [];
     for (var eventItem in showList) {
       var item = eventRepo.setSponsorCount(EventModel.fromJson(eventItem));
+      showHotList.add(item);
+    }
+    showHotList = EVENT_SORT_HOT(showHotList);
+    for (var eventItem in showHotList) {
+      var item = eventRepo.setSponsorCount(eventItem);
       var addItem = cache.eventMapItemData[item.id];
       LOG('--> showEventMap : ${item.id} / ${item.title} / ${addItem != null ? 'OK': 'none'}');
       addItem ??= PlaceEventMapCardItem(
@@ -311,7 +317,7 @@ class EventViewModel extends ChangeNotifier {
       //     },
       //   )
       // );
-      cache.eventMapItemData[eventItem['id']] = addItem;
+      cache.eventMapItemData[eventItem.id] = addItem;
       tmpList.add(addItem);
     }
     if (isMapUpdate) {
@@ -330,17 +336,22 @@ class EventViewModel extends ChangeNotifier {
 
   showEventList(itemHeight) {
     List<Widget> tmpList = [];
+    List<EventModel> showHotList = [];
     for (var eventItem in showList) {
       var item = eventRepo.setSponsorCount(EventModel.fromJson(eventItem));
-      var addItem = cache.eventListItemData[item.id];
+      showHotList.add(item);
+    }
+    showHotList = EVENT_SORT_HOT(showHotList);
+    for (var eventItem in showHotList) {
+      var addItem = cache.eventListItemData[eventItem.id];
       addItem ??= EventCardItem(
-        item,
+        eventItem,
         itemHeight: itemHeight,
         onShowDetail: (key, status) {
           showEventItemDetail(eventItem);
         },
       );
-      cache.eventListItemData[eventItem['id']] = addItem;
+      cache.eventListItemData[eventItem.id] = addItem;
       tmpList.add(addItem);
     }
     return tmpList;

@@ -100,7 +100,15 @@ SET_TO_SERVER_TIME_ALL(data) {
       return Timestamp(data['_seconds'], data['_nanoseconds']);
     }
     for (var item in data.entries) {
-      data[item.key] = SET_TO_SERVER_TIME_ALL_ITEM(item.value);
+      if (item.key.contains('Time') && item.value is String) {
+        LOG('--> SET_TO_SERVER_TIME_ALL : ${item.key} / ${item.value}');
+        final tmp = DateTime.tryParse(item.value);
+        if (tmp != null) {
+          data[item.key] = Timestamp.fromDate(tmp);
+        }
+      } else {
+        data[item.key] = SET_TO_SERVER_TIME_ALL_ITEM(item.value);
+      }
     }
   } else if (data is List) {
     data = SET_TO_SERVER_TIME_ALL_ITEM(data);
@@ -1193,6 +1201,7 @@ class ApiService extends GetxService {
       addData["createTime"] = CURRENT_SERVER_TIME();
     }
     addData["updateTime"] = CURRENT_SERVER_TIME();
+    addData = TO_SERVER_DATA(addData);
     // if (addData['targetType'] == 'event') {
     //   var eventInfo = await getEventFromId(addData['targetId']);
     //   if (eventInfo != null) {

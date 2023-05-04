@@ -660,7 +660,7 @@ class UserViewModel extends ChangeNotifier {
   }
 
   showThumbList() {
-    LOG('-->  sponsorData [$isMyProfile] : ${sponsorData.length}');
+    LOG('-->  showThumbList [$isMyProfile] : ${sponsorData.length}');
     // sort status..
     List<Widget> showItemList = [];
     for (var item in sponsorData.entries) {
@@ -677,6 +677,7 @@ class UserViewModel extends ChangeNotifier {
   }
 
   getStartContentData(ProfileContentType type) async {
+    LOG('-->  getStartContentData : $type');
     switch(type) {
       case ProfileContentType.event:
         if (eventData.isEmpty) {

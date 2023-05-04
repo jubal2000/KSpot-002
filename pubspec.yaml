@@ -129,6 +129,9 @@ dependencies:
   video_viewer: ^1.2.7
   ffmpeg_kit_flutter_min_gpl: 4.5.1-LTS
 
+  # device..
+  device_info_plus: ^8.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

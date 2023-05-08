@@ -189,6 +189,7 @@ class ApiService extends GetxService {
         'info_declare',
         'info_currency',
         'info_customField',
+        'info_promotion',
         'data_eventGroup',
       ];
       final outName = [
@@ -201,6 +202,7 @@ class ApiService extends GetxService {
         'declare',
         'currency',
         'customField',
+        'promotion',
         'eventGroup',
       ];
       for (var i = 0; i < infoDB.length; i++) {

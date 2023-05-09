@@ -23,8 +23,6 @@ class EventScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppData.eventViewModel.init(context);
-
     return SafeArea(
       top: false,
       child: Scaffold(

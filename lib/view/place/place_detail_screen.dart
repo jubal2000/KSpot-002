@@ -52,7 +52,6 @@ class PlaceDetailState extends State<PlaceDetailScreen> with TickerProviderState
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context);
     return SafeArea(
       top: false,
       child: Scaffold(

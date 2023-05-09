@@ -25,7 +25,6 @@ class ProfileContentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    parentViewModel.init(context);
     return SafeArea(
       top: false,
       child: Scaffold(

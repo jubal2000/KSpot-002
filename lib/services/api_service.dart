@@ -1763,19 +1763,47 @@ class ApiService extends GetxService {
     return result;
   }
 
-  Future<JSON> getPromotionFromUserId(String userId) async {
-    // LOG('------> getCouponData : ${AppData.USER_ID}');
+  Future<JSON> getPromotionFromUserId(String userId, {var isAuthor = false, DateTime? lastTime, int limit = 0}) async {
+    LOG('--> getPromotionFromUserId : $userId / $lastTime / $isAuthor / $limit');
     JSON result = {};
-    // get cart data..
-    var snapshot = await firestore!.collection(PromotionCollection)
-        .where('status', isEqualTo:1)
-        .where('userId', isEqualTo:userId)
-        .get();
-    for (var item in snapshot.docs) {
-      result[item.data()['id']] = FROM_SERVER_DATA(item.data());
+    try {
+      var ref = firestore!.collection(PromotionCollection);
+      var query = ref.where('status', isEqualTo: 1);
+      if (!isAuthor) {
+        query = query.where('showStatus', isEqualTo: 1);
+      }
+      if (lastTime != null) {
+        var startTime = Timestamp.fromDate(lastTime);
+        query = query.where('createTime', isLessThan: startTime);
+      }
+      if (limit > 0) {
+        query = query.limit(limit);
+      }
+      query = query.where('userId', isEqualTo: userId);
+      var snapshot = await query.orderBy('createTime', descending: true).get();
+      for (var doc in snapshot.docs) {
+        result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
+      }
+      LOG('--> getPromotionFromUserId result : ${result.length}');
+    } catch (e) {
+      LOG('--> getPromotionFromUserId error : ${e.toString()}');
     }
     return result;
   }
+
+  // Future<JSON> getPromotionFromUserId(String userId) async {
+  //   // LOG('------> getCouponData : ${AppData.USER_ID}');
+  //   JSON result = {};
+  //   // get cart data..
+  //   var snapshot = await firestore!.collection(PromotionCollection)
+  //       .where('status', isEqualTo:1)
+  //       .where('userId', isEqualTo:userId)
+  //       .get();
+  //   for (var item in snapshot.docs) {
+  //     result[item.data()['id']] = FROM_SERVER_DATA(item.data());
+  //   }
+  //   return result;
+  // }
   
   Future<JSON?> addPromotionItem(JSON user, JSON addItem) async {
     LOG('------> addPromotionItem : $addItem');

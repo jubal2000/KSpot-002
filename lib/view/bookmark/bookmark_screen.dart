@@ -71,7 +71,6 @@ class BookmarkState extends State<BookmarkScreen> {
 
   @override
   Widget build(BuildContext context) {
-    userView.init(context);
     if (widget.isShowAppBar) {
       return SafeArea(
         top: false,

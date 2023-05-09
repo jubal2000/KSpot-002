@@ -12,7 +12,7 @@ class SetupContentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context);
+    _viewModel.init();
     _viewModel.initContentSetting();
     return SafeArea(
       top: false,

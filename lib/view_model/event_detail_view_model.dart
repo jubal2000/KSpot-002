@@ -55,26 +55,21 @@ class EventDetailViewModel extends ChangeNotifier {
   JSON? selectInfo;
   EventModel? eventInfo;
   PlaceModel? placeInfo;
-  BuildContext? buildContext;
-
-  init(BuildContext context) {
-    buildContext = context;
-  }
 
   setEventData(EventModel eventModel, PlaceModel? placeModel) {
     eventInfo = eventModel;
     placeInfo = placeModel;
     isManager = CheckManager(eventInfo!.toJson());
-    LOG('--> setEventData : $isManager / ${placeInfo!.toJson()}');
+    LOG('--> setEventData : $isManager / ${placeInfo != null ? placeInfo!.toJson() : 'place none'}');
   }
 
   toggleStatus() {
     if (eventInfo == null) return;
     var title = eventInfo!.status == 1 ? 'Disable' : 'Enable';
-    showAlertYesNoDialog(buildContext!, title.tr, '$title spot?'.tr, 'In the disable state, other users cannot see it'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
+    showAlertYesNoDialog(Get.context!, title.tr, '$title spot?'.tr, 'In the disable state, other users cannot see it'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
       if (value == 1) {
         if (eventRepo.checkIsExpired(eventInfo!)) {
-          showAlertDialog(buildContext!, title.tr, 'Event period has ended'.tr, 'Event duration must be modified'.tr, 'OK'.tr);
+          showAlertDialog(Get.context!, title.tr, 'Event period has ended'.tr, 'Event duration must be modified'.tr, 'OK'.tr);
           return;
         }
         eventRepo.setEventStatus(eventInfo!.id, eventInfo!.status == 1 ? 2 : 1).then((result) {
@@ -99,10 +94,10 @@ class EventDetailViewModel extends ChangeNotifier {
   }
 
   deleteEvent() {
-    showAlertYesNoDialog(buildContext!, 'Delete'.tr,
+    showAlertYesNoDialog(Get.context!, 'Delete'.tr,
         'Are you sure you want to delete it?'.tr, 'Alert) Recovery is not possible'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
       if (value == 1) {
-        // showTextInputDialog(buildContext!, 'Delete confirm'.tr,
+        // showTextInputDialog(Get.context!, 'Delete confirm'.tr,
         //     'Typing \'delete now\''.tr, 'Alert) Recovery is not possible'.tr, 10, null).then((result) {
         //   if (result.toLowerCase() == 'delete now') {
             eventRepo.setEventStatus(eventInfo!.id, 0).then((result) {
@@ -131,7 +126,7 @@ class EventDetailViewModel extends ChangeNotifier {
         deleteEvent();
         break;
       case DropdownItemType.promotion:
-        // Navigator.push(buildContext!, MaterialPageRoute(builder: (context) =>
+        // Navigator.push(Get.context!, MaterialPageRoute(builder: (context) =>
         //     PromotionTabScreen('event', targetInfo: widget.eventInfo)));
     }
   }
@@ -150,30 +145,30 @@ class EventDetailViewModel extends ChangeNotifier {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(12.0)),
-        border: Border.all(color: Theme.of(buildContext!).primaryColor.withOpacity(0.5), width: 3),
+        border: Border.all(color: Theme.of(Get.context!).primaryColor.withOpacity(0.5), width: 3),
       ),
       child: showSizedRoundImage(eventInfo!.pic, 60, 8),
     );
   }
 
   showTitle() {
-    return Text(DESC(eventInfo!.title), style: MainTitleStyle(buildContext!), maxLines: 2);
+    return Text(DESC(eventInfo!.title), style: MainTitleStyle(Get.context!), maxLines: 2);
   }
 
   showDesc() {
-    return Text(DESC(eventInfo!.desc), style: DescBodyStyle(buildContext!));
+    return Text(DESC(eventInfo!.desc), style: DescBodyStyle(Get.context!));
   }
 
   showShareBox() {
     return Row(
         children: [
-          ShareWidget(buildContext!, 'event', eventInfo!.toJson(), showTitle: true),
+          ShareWidget(Get.context!, 'event', eventInfo!.toJson(), showTitle: true),
           SizedBox(width: 10),
-          BookmarkWidget(buildContext!, 'event', eventInfo!.toJson(), title:'BOOKMARK'.tr, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
+          BookmarkWidget(Get.context!, 'event', eventInfo!.toJson(), title:'BOOKMARK'.tr, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
 
           }),
           SizedBox(width: 10),
-          LikeWidget(buildContext!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
+          LikeWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
             LOG('--> LikeWidget result : $count');
             eventInfo!.likeCount = count;
             updateEventInfo();
@@ -200,7 +195,7 @@ class EventDetailViewModel extends ChangeNotifier {
                 if (JSON_NOT_EMPTY(userInfo)) {
                   Get.to(() => ProfileTargetScreen(userInfo!));
                 } else {
-                  showUserAlertDialog(buildContext!, '${user.value['userId']}');
+                  showUserAlertDialog(Get.context!, '${user.value['userId']}');
                 }
               });
             }),
@@ -209,7 +204,7 @@ class EventDetailViewModel extends ChangeNotifier {
     }
     return Column(
       children: [
-        SubTitle(buildContext!, 'MANAGER'.tr),
+        SubTitle(Get.context!, 'MANAGER'.tr),
         Wrap(
           children: userList,
         )
@@ -218,41 +213,41 @@ class EventDetailViewModel extends ChangeNotifier {
   }
 
   showCustomFieldList() {
-    return ShowCustomField(buildContext!, eventInfo!.getCustomDataMap);
+    return ShowCustomField(Get.context!, eventInfo!.getCustomDataMap);
   }
 
   showTagList() {
-    return TagTextList(buildContext!, eventInfo!.tagData!, headTitle: '#');
+    return TagTextList(Get.context!, eventInfo!.tagData!, headTitle: '#');
   }
 
   showLocation() {
     return Column(
       children: [
-        SubTitle(buildContext!, 'PLACE & LOCATION'.tr, height: 40),
+        SubTitle(Get.context!, 'PLACE & LOCATION'.tr, height: 40),
         ContentItem(placeInfo!.toJson(),
           padding: EdgeInsets.zero,
           showType: GoodsItemCardType.place,
           descMaxLine: 2,
           isShowExtra: false,
-          outlineColor: Theme.of(buildContext!).colorScheme.tertiary,
-          titleStyle: ItemTitleLargeStyle(buildContext!),
-          descStyle: ItemDescStyle(buildContext!),
+          outlineColor: Theme.of(Get.context!).colorScheme.tertiary,
+          titleStyle: ItemTitleLargeStyle(Get.context!),
+          descStyle: ItemDescStyle(Get.context!),
           onShowDetail: (id, type) {
             Get.to(() => PlaceDetailScreen(placeInfo!, AppData.currentEventGroup));
           },
         ),
         SizedBox(height: 5),
-        SubTitle(buildContext!, 'ADDRESS'.tr, height: 40),
+        SubTitle(Get.context!, 'ADDRESS'.tr, height: 40),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(placeInfo!.address.address1, style: Theme
-                .of(buildContext!)
+                .of(Get.context!)
                 .textTheme
                 .bodyText1),
             SizedBox(height: 2),
             Text(placeInfo!.address.address2, style: Theme
-                .of(buildContext!)
+                .of(Get.context!)
                 .textTheme
                 .bodyText1),
             SizedBox(height: 15),
@@ -264,7 +259,7 @@ class EventDetailViewModel extends ChangeNotifier {
                     height: 40,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(30)),
-                      color: Theme.of(buildContext!).cardColor,
+                      color: Theme.of(Get.context!).cardColor,
                     ),
                     child: Icon(Icons.map_outlined, size: 24),
                   ),
@@ -286,7 +281,7 @@ class EventDetailViewModel extends ChangeNotifier {
                     height: 40,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(30)),
-                      color: Theme.of(buildContext!).cardColor,
+                      color: Theme.of(Get.context!).cardColor,
                     ),
                     child: Icon(Icons.copy, size: 24),
                   ),
@@ -350,7 +345,7 @@ class EventDetailViewModel extends ChangeNotifier {
   showTimeList() {
     return Column(
       children: [
-        SubTitleBar(buildContext!, 'SCHEDULE'.tr),
+        SubTitleBar(Get.context!, 'SCHEDULE'.tr),
         ShowTimeList(eventInfo!.getTimeDataMap, currentDate: AppData.currentDate, showAddButton: false,
           onInitialSelected: (dateTime, jsonData) {
             LOG('--> ShowTimeList onInitialSelected : $dateTime / $jsonData');
@@ -368,7 +363,7 @@ class EventDetailViewModel extends ChangeNotifier {
   showCommentList() {
     return Column(
       children: [
-        SubTitleBar(buildContext!, 'COMMENT'.tr, height: subTabHeight, icon: isOpenStoryList ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
+        SubTitleBar(Get.context!, 'COMMENT'.tr, height: subTabHeight, icon: isOpenStoryList ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
             isOpenStoryList = !isOpenStoryList;
             notifyListeners();
         }),
@@ -408,12 +403,12 @@ class EventDetailViewModel extends ChangeNotifier {
       child: Container(
         width: Get.width,
         height: botHeight,
-        color: Theme.of(buildContext!).colorScheme.secondary,
+        color: Theme.of(Get.context!).colorScheme.secondary,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('RESERVATION'.tr, style: ItemTitleLargeInverseStyle(buildContext!)),
+              Text('RESERVATION'.tr, style: ItemTitleLargeInverseStyle(Get.context!)),
               // Text(STR(_selectReserve!['descEx']), style: ItemTitleInverseStyle(context)),
             ]
           )

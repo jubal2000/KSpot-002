@@ -12,8 +12,7 @@ class SetupContactScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context);
-
+    _viewModel.init();
     return SafeArea(
       top: false,
       child: Scaffold(

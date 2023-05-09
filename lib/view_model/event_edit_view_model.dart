@@ -29,7 +29,6 @@ import '../widget/event_group_dialog.dart';
 class EventEditViewModel extends ChangeNotifier {
   EventModel?   editItem;
   PlaceModel?   placeInfo;
-  BuildContext? buildContext;
   final userRepo  = UserRepository();
   final eventRepo = EventRepository();
   final titleN = ['Agree to Terms and Conditions', 'Place Setting', 'Event Information'];
@@ -89,10 +88,6 @@ class EventEditViewModel extends ChangeNotifier {
     return result;
   }
 
-  init(BuildContext context) {
-    buildContext = context;
-  }
-
   initData() {
     imageData = {};
     managerData = {};
@@ -133,7 +128,7 @@ class EventEditViewModel extends ChangeNotifier {
   }
 
   onItemAdd(EditListType type, JSON listItem) {
-    unFocusAll(buildContext!);
+    unFocusAll(Get.context!);
     AppData.listSelectData = listItem;
     switch (type) {
       // case EditListType.reserve:
@@ -166,7 +161,7 @@ class EventEditViewModel extends ChangeNotifier {
         });
         break;
       case EditListType.customField:
-        showCustomFieldSelectDialog(buildContext!).then((customId) {
+        showCustomFieldSelectDialog(Get.context!).then((customId) {
           if (customId.isNotEmpty) {
             var key = Uuid().v1();
             var customInfo = AppData.INFO_CUSTOMFIELD[customId];
@@ -185,7 +180,7 @@ class EventEditViewModel extends ChangeNotifier {
   }
 
   onItemSelected(EditListType type, String key, int status) async {
-    unFocusAll(buildContext!);
+    unFocusAll(Get.context!);
     switch (type) {
       case EditListType.reserve:
         // if (status == 0) {
@@ -205,7 +200,7 @@ class EventEditViewModel extends ChangeNotifier {
           }
           onEditTime(editItem!.getTimeData(key)!.toJson());
         } else {
-          showAlertYesNoDialog(buildContext!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+          showAlertYesNoDialog(Get.context!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
             if (result == 1) {
               editItem!.removeTimeData(key);
               isEdited = true;
@@ -222,10 +217,10 @@ class EventEditViewModel extends ChangeNotifier {
 
             });
           } else {
-            showUserAlertDialog(buildContext!, '${managerData[key]['id']}');
+            showUserAlertDialog(Get.context!, '${managerData[key]['id']}');
           }
         } else {
-          showAlertYesNoDialog(buildContext!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+          showAlertYesNoDialog(Get.context!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
             if (result == 1) {
               managerData.remove(key);
               editItem!.setManagerDataMap(managerData);
@@ -236,7 +231,7 @@ class EventEditViewModel extends ChangeNotifier {
         break;
       case EditListType.customField:
         if (status == 1) {
-          showAlertYesNoDialog(buildContext!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+          showAlertYesNoDialog(Get.context!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
             if (result == 1) {
               customData.remove(key);
               editItem!.setCustomDataMap(customData);
@@ -248,11 +243,11 @@ class EventEditViewModel extends ChangeNotifier {
       // case EditListType.goods:
       //   if (status == 0) {
       //     var userInfo =  _eventInfo['linkGoodsData'][key];
-      //     Navigator.push(buildContext!, MaterialPageRoute(builder: (context) => TargetGoodsScreen(userInfo))).then((value) {
+      //     Navigator.push(Get.context!, MaterialPageRoute(builder: (context) => TargetGoodsScreen(userInfo))).then((value) {
       //       _eventInfo['linkGoodsData'] = AppData.listSelectData;
       //     });
       //   } else {
-      //     showAlertYesNoDialog(buildContext!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+      //     showAlertYesNoDialog(Get.context!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
       //       if (result == 1) {
       //         customData.remove(key);
       //         eventInfo['linkGoodsData'].remove(key);
@@ -264,7 +259,7 @@ class EventEditViewModel extends ChangeNotifier {
 
   onItemChanged(EditListType type, JSON listData) {
     LOG('-----> onItemChanged : $listData');
-    unFocusAll(buildContext!);
+    unFocusAll(Get.context!);
     switch (type) {
       case EditListType.customField:
         customData = listData;
@@ -412,19 +407,19 @@ class EventEditViewModel extends ChangeNotifier {
 
   checkEditDone(showAlert) {
     if (imageData.isEmpty) {
-      if (showAlert) showAlertDialog(buildContext!, 'Upload Failed'.tr, 'Please enter select picture..'.tr, '', 'OK'.tr);
+      if (showAlert) showAlertDialog(Get.context!, 'Upload Failed'.tr, 'Please enter select picture..'.tr, '', 'OK'.tr);
       return false;
     }
     if (editItem!.title.isEmpty) {
-      if (showAlert) showAlertDialog(buildContext!, 'Upload Failed'.tr, 'Please enter event title..'.tr, '', 'OK'.tr);
+      if (showAlert) showAlertDialog(Get.context!, 'Upload Failed'.tr, 'Please enter event title..'.tr, '', 'OK'.tr);
       return false;
     }
     if (editItem!.timeData == null || editItem!.timeData!.isEmpty) {
-      if (showAlert) showAlertDialog(buildContext!, 'Upload Failed'.tr, 'Please enter event time..'.tr, '', 'OK'.tr);
+      if (showAlert) showAlertDialog(Get.context!, 'Upload Failed'.tr, 'Please enter event time..'.tr, '', 'OK'.tr);
       return false;
     }
     if (editItem!.managerData == null || editItem!.managerData!.isEmpty) {
-      if (showAlert) showAlertDialog(buildContext!, 'Upload Failed'.tr, 'Please enter select manager..'.tr, '', 'OK'.tr);
+      if (showAlert) showAlertDialog(Get.context!, 'Upload Failed'.tr, 'Please enter select manager..'.tr, '', 'OK'.tr);
       return false;
     }
     return true;
@@ -457,7 +452,7 @@ class EventEditViewModel extends ChangeNotifier {
 
   uploadStart() async {
     LOG('---> uploadStart: ${imageData.length}');
-    showLoadingDialog(buildContext!, 'Uploading now...'.tr);
+    showLoadingDialog(Get.context!, 'Uploading now...'.tr);
     // upload new images..
     editItem!.picData = null;
     if (imageData.isNotEmpty) {
@@ -530,11 +525,11 @@ class EventEditViewModel extends ChangeNotifier {
     eventRepo.addEventItem(editItem!).then((result) {
       hideLoadingDialog();
       if (result != null) {
-        showAlertDialog(buildContext!, 'Upload'.tr, 'Event Upload Complete'.tr, '', 'OK'.tr).then((_) {
+        showAlertDialog(Get.context!, 'Upload'.tr, 'Event Upload Complete'.tr, '', 'OK'.tr).then((_) {
           Get.back(result: result);
         });
       } else {
-        showAlertDialog(buildContext!, 'Upload'.tr, 'Event Upload Failed'.tr, '', 'OK'.tr);
+        showAlertDialog(Get.context!, 'Upload'.tr, 'Event Upload Failed'.tr, '', 'OK'.tr);
       }
     });
   }

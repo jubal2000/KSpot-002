@@ -27,7 +27,6 @@ class IntroScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context);
     return WillPopScope(
         onWillPop: () async => await showAlertYesNoDialog(context,
           'APP EXIT'.tr,

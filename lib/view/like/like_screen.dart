@@ -79,7 +79,6 @@ class LikeState extends State<LikeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    userView.init(context);
     if (widget.isShowAppBar) {
       return SafeArea(
         top: false,

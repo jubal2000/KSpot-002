@@ -29,8 +29,6 @@ class SignUpViewModel extends ChangeNotifier {
   var isSignUpDone = false;
   var textEditController = List.generate(TextInputId.values.length, (index) => TextEditingController());
 
-  BuildContext? viewContext;
-
   get isNextEnable {
     switch(stepIndex) {
       case 0: return isChecked[0] && isChecked[1];
@@ -39,12 +37,11 @@ class SignUpViewModel extends ChangeNotifier {
     return isSignUpDone;
   }
 
-  init(context) {
-    viewContext = context;
+  init() {
     auth.onError = (type) {
       switch(type) {
         case 0:
-          showAlertDialog(context, 'User error'.tr, 'User data does not exist'.tr, '', 'OK'.tr).then((_) {
+          showAlertDialog(Get.context!, 'User error'.tr, 'User data does not exist'.tr, '', 'OK'.tr).then((_) {
             auth.signOut();
           });
           break;
@@ -73,7 +70,7 @@ class SignUpViewModel extends ChangeNotifier {
           AppData.userInfo = result;
           Get.to(() => SignupStepDoneScreen());
         } else {
-          showAlertDialog(viewContext!, 'Sign up'.tr, 'Sign up failed', '', 'OK'.tr);
+          showAlertDialog(Get.context!, 'Sign up'.tr, 'Sign up failed', '', 'OK'.tr);
         }
       });
     }

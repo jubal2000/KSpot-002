@@ -33,16 +33,11 @@ class StoryViewModel extends ChangeNotifier {
   final cache     = Get.find<CacheService>();
   final storyRepo = StoryRepository();
 
-  BuildContext? buildContext;
   Stream? stream;
 
   // var lastUpdateKey = '';
   var lastIndex = -1;
   var storyListType = StoryListType.single;
-
-  init(context) {
-    buildContext = context;
-  }
 
   refreshModel() {
     cache.storyListItemData.clear();

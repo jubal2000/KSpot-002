@@ -14,14 +14,9 @@ import '../utils/utils.dart';
 import '../widget/card_scroll_viewer.dart';
 
 class PlaceViewModel extends ChangeNotifier {
-  BuildContext? buildContext;
   PlaceModel? placeInfo;
   final _imageGalleryKey  = GlobalKey();
   final JSON imageData = {};
-
-  init(BuildContext context) {
-    buildContext = context;
-  }
 
   setPlaceInfo(PlaceModel item) {
     placeInfo = item;

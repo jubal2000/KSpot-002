@@ -54,7 +54,6 @@ class ChatTalkScreenState extends State<ChatTalkScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context);
     return SafeArea(
       top: false,
       child: WillPopScope(

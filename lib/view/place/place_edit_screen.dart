@@ -31,7 +31,6 @@ class _PlaceEditScreenState extends State<PlaceEditScreen> {
   @override
   void initState () {
     widget.placeItem ??= PlaceModelEx.empty('', title: 'test title', desc: 'test desc..');
-    _viewModel.init(context);
     _viewModel.setPlaceInfo(widget.placeItem!);
     super.initState ();
   }

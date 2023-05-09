@@ -24,14 +24,9 @@ class MessageViewModel extends ChangeNotifier {
   final repo  = MessageRepository();
   final cache = Get.find<CacheService>();
   final api   = Get.find<ApiService>();
-  BuildContext? buildContext;
   Stream? stream;
 
   List<MessageGroupItem> mainShowList = [];
-
-  init(BuildContext context) {
-    buildContext = context;
-  }
 
   getMessageData() {
     stream = repo.startMessageStreamToMe();

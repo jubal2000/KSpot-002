@@ -30,7 +30,6 @@ class ChatEditViewModel extends ChangeNotifier {
   final userRepo  = UserRepository();
   final imageGalleryKey = GlobalKey();
 
-  BuildContext? buildContext;
   ChatRoomModel? editItem;
   String inviteMessage = '';
   final tabText = ['PUBLIC CHAT'.tr, 'PRIVATE CHAT'.tr];
@@ -56,15 +55,14 @@ class ChatEditViewModel extends ChangeNotifier {
     }
   }
 
-  init(context, selectedTab) {
-    buildContext = context;
+  init(selectedTab) {
     editItem ??= ChatRoomModelEx.create(AppData.USER_ID, selectedTab);
     type = selectedTab;
     editItem!.type = type;
   }
 
   onItemAdd(EditListType type, JSON listItem) {
-    unFocusAll(buildContext!);
+    unFocusAll(Get.context!);
     switch (type) {
       case EditListType.member:
         Get.to(() => FollowScreen(AppData.userInfo, selectData: editItem!.getMemberDataMap, isShowMe: false, isSelectable: true))!.then((value) {
@@ -90,7 +88,7 @@ class ChatEditViewModel extends ChangeNotifier {
   }
 
   onItemSelected(EditListType type, String key, int status) async {
-    unFocusAll(buildContext!);
+    unFocusAll(Get.context!);
     switch (type) {
       case EditListType.member:
         if (status == 0) {
@@ -98,10 +96,10 @@ class ChatEditViewModel extends ChangeNotifier {
           if (userInfo != null) {
             Get.to(() => ProfileTargetScreen(userInfo));
           } else {
-            showUserAlertDialog(buildContext!, '${memberData[key]['id']}');
+            showUserAlertDialog(Get.context!, '${memberData[key]['id']}');
           }
         } else {
-          showAlertYesNoDialog(buildContext!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+          showAlertYesNoDialog(Get.context!, 'Delete'.tr, 'Are you sure you want to delete it?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
             if (result == 1) {
               memberData.remove(key);
               editItem!.setMemberDataMap(memberData);
@@ -117,7 +115,7 @@ class ChatEditViewModel extends ChangeNotifier {
   showTypeSelect() {
     return Column(
     children: [
-      SubTitle(buildContext!, 'TYPE SELECT'.tr, child: SubTitleSmall(buildContext!, '(You can choose only one type)'.tr, height: 15)),
+      SubTitle(Get.context!, 'TYPE SELECT'.tr, child: SubTitleSmall(Get.context!, '(You can choose only one type)'.tr, height: 15)),
       SizedBox(height: 10.w),
       Row(
         children: tabText.map((item) => Expanded(
@@ -135,8 +133,8 @@ class ChatEditViewModel extends ChangeNotifier {
               padding: EdgeInsets.symmetric(horizontal: 5),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: type == tabText.indexOf(item) ? Theme.of(buildContext!).colorScheme.tertiaryContainer :
-                Theme.of(buildContext!).colorScheme.primary.withOpacity(0.05),
+                color: type == tabText.indexOf(item) ? Theme.of(Get.context!).colorScheme.tertiaryContainer :
+                Theme.of(Get.context!).colorScheme.primary.withOpacity(0.05),
                 borderRadius: tabText.indexOf(item) == 0 ? BorderRadius.only(
                     topLeft:Radius.circular(10),
                     bottomLeft:Radius.circular(10)
@@ -145,11 +143,11 @@ class ChatEditViewModel extends ChangeNotifier {
                     bottomRight:Radius.circular(10)
                 ),
                 border: Border.all(
-                    color: type == tabText.indexOf(item) ? Theme.of(buildContext!).colorScheme.tertiary.withOpacity(0.8) :
-                    Theme.of(buildContext!).colorScheme.primary.withOpacity(0.5), width: type == tabText.indexOf(item) ? 2.0 : 1.0),
+                    color: type == tabText.indexOf(item) ? Theme.of(Get.context!).colorScheme.tertiary.withOpacity(0.8) :
+                    Theme.of(Get.context!).colorScheme.primary.withOpacity(0.5), width: type == tabText.indexOf(item) ? 2.0 : 1.0),
                 ),
                 child: Text(item,
-                    style: type == tabText.indexOf(item) ? ItemTitleHotStyle(buildContext!) : ItemTitleStyle(buildContext!),
+                    style: type == tabText.indexOf(item) ? ItemTitleHotStyle(Get.context!) : ItemTitleStyle(Get.context!),
                     textAlign: TextAlign.center),
               )
             )
@@ -204,21 +202,21 @@ class ChatEditViewModel extends ChangeNotifier {
   }
 
   showTitle() {
-    return EditTextField(buildContext!, 'TITLE'.tr, editItem!.title, hint: 'Room Title *'.tr, maxLength: TITLE_LENGTH,
+    return EditTextField(Get.context!, 'TITLE'.tr, editItem!.title, hint: 'Room Title *'.tr, maxLength: TITLE_LENGTH,
       maxLines: 1, keyboardType: TextInputType.text, onChanged: (value) {
         editItem!.title = value;
       });
   }
 
   showPassword() {
-    return EditTextField(buildContext!, 'PASSWORD'.tr, editItem!.password, hint: 'Password *'.tr, maxLength: PASSWORD_LENGTH,
+    return EditTextField(Get.context!, 'PASSWORD'.tr, editItem!.password, hint: 'Password *'.tr, maxLength: PASSWORD_LENGTH,
       maxLines: 1, keyboardType: TextInputType.text, onChanged: (value) {
         editItem!.password = value;
       });
   }
 
   showInviteMessage() {
-    return EditTextField(buildContext!, 'INVITE MESSAGE'.tr, inviteMessage, hint: 'Enter message *'.tr, maxLength: TITLE_LENGTH,
+    return EditTextField(Get.context!, 'INVITE MESSAGE'.tr, inviteMessage, hint: 'Enter message *'.tr, maxLength: TITLE_LENGTH,
       maxLines: 1, keyboardType: TextInputType.text, onChanged: (value) {
         inviteMessage = value;
       });
@@ -233,7 +231,7 @@ class ChatEditViewModel extends ChangeNotifier {
     LOG('---> uploadStart: $inviteMessage / $createButtonEnable');
     if (!createButtonEnable || !AppData.isMainActive) return;
     AppData.isMainActive = false;
-    showLoadingDialog(buildContext!, 'Uploading now...'.tr);
+    showLoadingDialog(Get.context!, 'Uploading now...'.tr);
     // upload new images..
     if (picInfo.isNotEmpty && picInfo['data'] != null) {
       var result = await repo.uploadImageInfo(picInfo);
@@ -242,7 +240,7 @@ class ChatEditViewModel extends ChangeNotifier {
         LOG('---> editItem!.pic: $result');
       } else {
         hideLoadingDialog();
-        showAlertDialog(buildContext!, 'Chat room create'.tr, 'Chat room create failed'.tr, '', 'OK'.tr);
+        showAlertDialog(Get.context!, 'Chat room create'.tr, 'Chat room create failed'.tr, '', 'OK'.tr);
         AppData.isMainActive = true;
         return;
       }
@@ -277,7 +275,7 @@ class ChatEditViewModel extends ChangeNotifier {
       repo.createChatItem(editItem!, '', inviteMessage);
       hideLoadingDialog();
       AppData.isMainActive = true;
-      showAlertDialog(buildContext!, 'Chat room create'.tr, 'Chat room create complete'.tr, '', 'OK'.tr).then((_) {
+      showAlertDialog(Get.context!, 'Chat room create'.tr, 'Chat room create complete'.tr, '', 'OK'.tr).then((_) {
         Get.back(result: editItem);
       });
     });

@@ -38,7 +38,6 @@ class ChatTalkViewModel extends ChangeNotifier {
   final textController    = TextEditingController();
   final scrollController  = ScrollController();
 
-  BuildContext? buildContext;
   ChatRoomModel? roomInfo;
 
   final iconSize      = 24.0;
@@ -59,10 +58,6 @@ class ChatTalkViewModel extends ChangeNotifier {
   var  isEmojiShow  = false.obs;
 
   var sendText = '';
-
-  init(context) {
-    buildContext = context;
-  }
 
   initData(ChatRoomModel room) {
     roomInfo = room;
@@ -223,7 +218,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                         height: itemHeight * 0.5,
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(8)),
-                            border: Border.all(color: Theme.of(buildContext!).cardColor)
+                            border: Border.all(color: Theme.of(Get.context!).cardColor)
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -243,9 +238,9 @@ class ChatTalkViewModel extends ChangeNotifier {
     return Obx(() => Row(
       children: [
         for (var i=0; i<memberList.length; i++)
-          Text(i > 0 ? ', ${memberList[i]}' : memberList[i], style: ItemDescStyle(buildContext!)),
+          Text(i > 0 ? ', ${memberList[i]}' : memberList[i], style: ItemDescStyle(Get.context!)),
         SizedBox(width: 10),
-        Text('${memberList.length}', style: ItemTitleBoldStyle(buildContext!)),
+        Text('${memberList.length}', style: ItemTitleBoldStyle(Get.context!)),
       ],
     ));
   }
@@ -426,7 +421,7 @@ class ChatTalkViewModel extends ChangeNotifier {
 
   showChatMessageMenu(String key, String desc, bool isOwner) {
     onSelected(type) {
-      Navigator.pop(buildContext!, {});
+      Navigator.pop(Get.context!, {});
       switch (type) {
         case DropdownItemType.copy:
           Clipboard.setData(ClipboardData(text: desc)).then((result) {
@@ -434,7 +429,7 @@ class ChatTalkViewModel extends ChangeNotifier {
           });
           break;
         case DropdownItemType.delete:
-          showAlertYesNoDialog(buildContext!, 'Delete'.tr, 'Are you sure you want to delete?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+          showAlertYesNoDialog(Get.context!, 'Delete'.tr, 'Are you sure you want to delete?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
             if (result == 1) {
               chatRepo.setChatItemState(roomInfo!.id, key, 0);
             }
@@ -445,16 +440,16 @@ class ChatTalkViewModel extends ChangeNotifier {
           break;
       }
     }
-    unFocusAll(buildContext!);
+    unFocusAll(Get.context!);
     List<Widget> btnList = [
-        ...DropdownItems.chatItemMenu0.map((item) => UserMenuItems.buildItem(buildContext!, item, onSelected: onSelected)),
+        ...DropdownItems.chatItemMenu0.map((item) => UserMenuItems.buildItem(Get.context!, item, onSelected: onSelected)),
       if (isOwner)
-        ...DropdownItems.chatItemMenu1.map((item) => UserMenuItems.buildItem(buildContext!, item, onSelected: onSelected)),
+        ...DropdownItems.chatItemMenu1.map((item) => UserMenuItems.buildItem(Get.context!, item, onSelected: onSelected)),
       if (isAdmin.value)...[
-        ...DropdownItems.chatItemMenu2.map((item) => UserMenuItems.buildItem(buildContext!, item, onSelected: onSelected)),
+        ...DropdownItems.chatItemMenu2.map((item) => UserMenuItems.buildItem(Get.context!, item, onSelected: onSelected)),
       ],
     ];
-    showButtonListDialog(buildContext!, btnList);
+    showButtonListDialog(Get.context!, btnList);
   }
   
   showChatMainList() {
@@ -479,7 +474,7 @@ class ChatTalkViewModel extends ChangeNotifier {
         child: Container(
         width: Get.width,
         padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-        color: Theme.of(buildContext!).dialogBackgroundColor,
+        color: Theme.of(Get.context!).dialogBackgroundColor,
         child: Column(
           children: [
             SizedBox(height: 10),
@@ -511,7 +506,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                   ),
                   IconButton(
                     onPressed: () {
-                      showAlertYesNoDialog(buildContext!, 'Remove'.tr, 'Remove all files?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
+                      showAlertYesNoDialog(Get.context!, 'Remove'.tr, 'Remove all files?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
                         if (result == 1) {
                           fileData.clear();
                           uploadFileData.clear();
@@ -531,11 +526,11 @@ class ChatTalkViewModel extends ChangeNotifier {
                 Expanded(
                   child: TextFormField(
                     controller: textController,
-                    decoration: inputChatSuffix(buildContext!),
+                    decoration: inputChatSuffix(Get.context!),
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
                     maxLength: 200,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Theme.of(buildContext!).primaryColor),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Theme.of(Get.context!).primaryColor),
                     onChanged: (value) {
                       scrollController.jumpTo(0);
                     },
@@ -550,13 +545,13 @@ class ChatTalkViewModel extends ChangeNotifier {
                         if (!AppData.isMainActive || (textController.text.isEmpty && fileData.isEmpty)) return;
                         if (sendText == textController.text) return; // block spam message..
                         if (fileData.length > UPLOAD_FILE_MAX) {
-                          showAlertDialog(buildContext!, 'Upload'.tr,
+                          showAlertDialog(Get.context!, 'Upload'.tr,
                               'You can\'t add any more'.tr, '${'Max'.tr}: $UPLOAD_FILE_MAX', 'OK'.tr);
                           return;
                         }
                         AppData.isMainActive = false;
                         if (uploadFileData.isNotEmpty) {
-                          showLoadingDialog(buildContext!, 'Uploading now...'.tr);
+                          showLoadingDialog(Get.context!, 'Uploading now...'.tr);
                         }
                         chatRepo.createChatItem(roomInfo!, '', textController.text, 1, 0, uploadFileData).then((result) {
                           hideLoadingDialog();
@@ -569,11 +564,11 @@ class ChatTalkViewModel extends ChangeNotifier {
                               borderRadius: BorderRadius.circular(5.0),
                             )
                         ),
-                        backgroundColor: MaterialStateProperty.all<Color>(Theme.of(buildContext!).primaryColor),
+                        backgroundColor: MaterialStateProperty.all<Color>(Theme.of(Get.context!).primaryColor),
                       ),
                       child: Text('Send'.tr,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
-                          color: Theme.of(buildContext!).colorScheme.inversePrimary))
+                          color: Theme.of(Get.context!).colorScheme.inversePrimary))
                   )
                 )
               ]
@@ -661,7 +656,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(DESC(notice.desc), style: ItemDescStyle(buildContext!)),
+                      child: Text(DESC(notice.desc), style: ItemDescStyle(Get.context!)),
                     ),
                     SizedBox(
                       width: 30,
@@ -682,7 +677,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                   ]
                 ),
                 SizedBox(height: 5),
-              // Text('$index. ${SERVER_TIME_STR(notice.createTime)}', style: ItemDescExInfoStyle(buildContext!)),
+              // Text('$index. ${SERVER_TIME_STR(notice.createTime)}', style: ItemDescExInfoStyle(Get.context!)),
                 if (notice.fileData != null && notice.fileData!.isNotEmpty)...[
                   SizedBox(
                     width: notice.fileData!.length * imageSize,
@@ -696,13 +691,13 @@ class ChatTalkViewModel extends ChangeNotifier {
                       backgroundPadding: EdgeInsets.zero,
                       onActionCallback: (key, status) {
                         LOG('--> onActionCallback : $key / $status');
-                        showFileSlideDialog(buildContext!, notice.fileDataMap, isCanDownload: true, startKey: key);
+                        showFileSlideDialog(Get.context!, notice.fileDataMap, isCanDownload: true, startKey: key);
                       },
                     ),
                   ),
                   SizedBox(height: 5),
                 ],
-                Text(SERVER_TIME_STR(notice.createTime), style: ItemDescExInfoStyle(buildContext!)),
+                Text(SERVER_TIME_STR(notice.createTime), style: ItemDescExInfoStyle(Get.context!)),
               ],
             )
           ),
@@ -720,7 +715,7 @@ class ChatTalkViewModel extends ChangeNotifier {
           height: isNoticeShow.value ? null : 0,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(8)),
-            color: Theme.of(buildContext!).canvasColor.withOpacity(0.8)
+            color: Theme.of(Get.context!).canvasColor.withOpacity(0.8)
           ),
           child: FittedBox(
             child: Column(
@@ -764,7 +759,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                 selectAttachFile();
               },
               child: Icon(Icons.attach_file, size: iconSize,
-                  color: Theme.of(buildContext!).primaryColor.withOpacity(uploadFileData.isNotEmpty ? 1 : 0.5)),
+                  color: Theme.of(Get.context!).primaryColor.withOpacity(uploadFileData.isNotEmpty ? 1 : 0.5)),
             ),
             SizedBox(width: 15),
             GestureDetector(
@@ -772,7 +767,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                 isEmojiShow.value = !isEmojiShow.value;
               },
               child: Icon(Icons.emoji_emotions_outlined, size: iconSize,
-                  color: Theme.of(buildContext!).primaryColor.withOpacity(isEmojiShow.value ? 1 : 0.5)),
+                  color: Theme.of(Get.context!).primaryColor.withOpacity(isEmojiShow.value ? 1 : 0.5)),
             ),
             SizedBox(width: 15),
             GestureDetector(
@@ -784,7 +779,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                 }
               },
               child: Icon(Icons.paste, size: iconSize,
-                color: Theme.of(buildContext!).primaryColor.withOpacity(0.5)),
+                color: Theme.of(Get.context!).primaryColor.withOpacity(0.5)),
             ),
           ],
         )
@@ -803,7 +798,7 @@ class ChatTalkViewModel extends ChangeNotifier {
   }
 
   startNoticeEdit(String title, JSON notice) {
-    showNoticeEditDialog(buildContext!, title, notice).then((result) async {
+    showNoticeEditDialog(Get.context!, title, notice).then((result) async {
       if (result != null) {
         if (result['fileData'] != null) LOG('--> showNoticeEditDialog result : ${result['fileData'].length}} ${result['fileData']}');
         JSON addItem = {};
@@ -812,7 +807,7 @@ class ChatTalkViewModel extends ChangeNotifier {
         addItem['index' ] = result['index'] ?? 0;
         addItem['desc'  ] = result['desc'] ?? '';
         if (INT(addItem['status']) > 0 && JSON_NOT_EMPTY(result['fileData'])) {
-          showLoadingDialog(buildContext!, 'Uploading now...'.tr);
+          showLoadingDialog(Get.context!, 'Uploading now...'.tr);
           for (JSON item in result['fileData']) {
             if (BOL(item['upStatue'])) {
               if (item['data'] != null) {
@@ -850,31 +845,31 @@ class ChatTalkViewModel extends ChangeNotifier {
     return [
       ...DropdownItems.chatRoomMenu2.map((item) => DropdownMenuItem<DropdownItem>(
         value: item,
-        child: DropdownItems.buildItem(buildContext!, item),
+        child: DropdownItems.buildItem(Get.context!, item),
       )),
       if (isAdmin.value)...[
         if (roomInfo!.type == ChatType.public)...[
           if (LIST_NOT_EMPTY(roomInfo!.banData))
             ...DropdownItems.chatRoomAdmin0.map((item) => DropdownMenuItem<DropdownItem>(
               value: item,
-              child: DropdownItems.buildItem(buildContext!, item),
+              child: DropdownItems.buildItem(Get.context!, item),
             )),
           if (LIST_EMPTY(roomInfo!.banData))
             ...DropdownItems.chatRoomAdmin1.map((item) => DropdownMenuItem<DropdownItem>(
               value: item,
-              child: DropdownItems.buildItem(buildContext!, item),
+              child: DropdownItems.buildItem(Get.context!, item),
             )),
         ],
         if (roomInfo!.type == ChatType.private)
           ...DropdownItems.chatRoomAdmin2.map((item) => DropdownMenuItem<DropdownItem>(
             value: item,
-            child: DropdownItems.buildItem(buildContext!, item),
+            child: DropdownItems.buildItem(Get.context!, item),
           )),
       ],
       if (isAdmin.value || roomInfo!.type == ChatType.public)...[
         ...DropdownItems.chatUserInvite.map((item) => DropdownMenuItem<DropdownItem>(
           value: item,
-          child: DropdownItems.buildItem(buildContext!, item),
+          child: DropdownItems.buildItem(Get.context!, item),
         )),
       ]
     ];
@@ -887,7 +882,7 @@ class ChatTalkViewModel extends ChangeNotifier {
           ShowToast('You are currently an admin'.tr);
           return;
         }
-        showAlertYesNoCheckDialog(buildContext!, 'Room Exit'.tr, 'Would you like to leave the chat room?'.tr,
+        showAlertYesNoCheckDialog(Get.context!, 'Room Exit'.tr, 'Would you like to leave the chat room?'.tr,
             'Leave quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
           if (result > 0) {
             chatRepo.exitChatRoom(roomInfo!.id, result == 1).then((result2) {
@@ -903,7 +898,7 @@ class ChatTalkViewModel extends ChangeNotifier {
         break;
       case DropdownItemType.title:
         JSON? imageInfo = roomInfo!.type == ChatType.public ? {roomInfo!.id: {'id': roomInfo!.id, 'url': roomInfo!.pic}} : null;
-        showTextInputImageDialog(buildContext!, 'Room Title'.tr, '', roomInfo!.title, 1, null, imageInfo: imageInfo).then((result) {
+        showTextInputImageDialog(Get.context!, 'Room Title'.tr, '', roomInfo!.title, 1, null, imageInfo: imageInfo).then((result) {
           if (JSON_NOT_EMPTY(result['desc'])) {
             JSON? imageResult = JSON_NOT_EMPTY(result['imageInfo']) ? result['imageInfo'].entries.toList()[0].value : null;
             if (roomInfo!.title != STR(result['desc']) || (JSON_NOT_EMPTY(imageResult) && BOL(imageResult!['imageChanged']))) {
@@ -918,7 +913,7 @@ class ChatTalkViewModel extends ChangeNotifier {
           for (var item in roomInfo!.banData!) {
             banList[item.id] = {'key': item.id, 'title': item.nickName, 'desc': SERVER_TIME_STR(item.createTime, true), 'check': 0};
           }
-          showJsonMultiSelectDialog(buildContext!, 'Ban List'.tr, banList, 'Ban cancel'.tr).then((result) async {
+          showJsonMultiSelectDialog(Get.context!, 'Ban List'.tr, banList, 'Ban cancel'.tr).then((result) async {
             if (result != null) {
               for (var item in result.entries) {
                 await chatRepo.setChatRoomKickUser(roomInfo!.id, item.key, item.value['title'], 1);

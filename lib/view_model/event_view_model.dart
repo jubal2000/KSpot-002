@@ -37,7 +37,6 @@ enum EventListTopicType {
 }
 
 class EventViewModel extends ChangeNotifier {
-  BuildContext? buildContext;
   List<JSON>    showList = [];
   LatLngBounds? mapBounds;
   GoogleMapWidget? googleWidget;
@@ -59,10 +58,6 @@ class EventViewModel extends ChangeNotifier {
   JSON eventData = {};
 
   DatePicker? datePicker;
-
-  init(BuildContext context) {
-    buildContext = context;
-  }
 
   refreshModel() {
     isMapUpdate = true;
@@ -167,10 +162,10 @@ class EventViewModel extends ChangeNotifier {
       height: 60.0,
       controller: dateController,
       initialSelectedDate: AppData.currentDate,
-      selectionColor: Theme.of(buildContext!).primaryColor,
-      monthTextStyle: TextStyle(color: Theme.of(buildContext!).hintColor, fontSize: UI_FONT_SIZE_SX),
-      dateTextStyle: TextStyle(color: Theme.of(buildContext!).indicatorColor, fontSize: UI_FONT_SIZE_LT),
-      dayTextStyle: TextStyle(color: Theme.of(buildContext!).hintColor, fontSize: UI_FONT_SIZE_SX),
+      selectionColor: Theme.of(Get.context!).primaryColor,
+      monthTextStyle: TextStyle(color: Theme.of(Get.context!).hintColor, fontSize: UI_FONT_SIZE_SX),
+      dateTextStyle: TextStyle(color: Theme.of(Get.context!).indicatorColor, fontSize: UI_FONT_SIZE_LT),
+      dayTextStyle: TextStyle(color: Theme.of(Get.context!).hintColor, fontSize: UI_FONT_SIZE_SX),
       locale: Get.locale.toString(),
       onDateChange: (date) {
         // New date selected
@@ -194,7 +189,7 @@ class EventViewModel extends ChangeNotifier {
           Container(
             width: isDateOpen ? Get.width : 0,
             height: UI_DATE_PICKER_HEIGHT.h,
-            color: Theme.of(buildContext!).canvasColor.withOpacity(0.5),
+            color: Theme.of(Get.context!).canvasColor.withOpacity(0.5),
             child: datePicker ?? initDatePicker(),
           ),
         ]
@@ -304,14 +299,14 @@ class EventViewModel extends ChangeNotifier {
       //   margin: EdgeInsets.symmetric(horizontal: 3),
       //   child: PlaceEventMapCardItem(
       //     item,
-      //     backgroundColor: Theme.of(buildContext!).cardColor,
-      //     faceOutlineColor: Theme.of(buildContext!).colorScheme.secondary,
+      //     backgroundColor: Theme.of(Get.context!).cardColor,
+      //     faceOutlineColor: Theme.of(Get.context!).colorScheme.secondary,
       //     padding: EdgeInsets.zero,
       //     imageHeight: itemWidth,
       //     titleMaxLine: 2,
       //     descMaxLine: 0,
-      //     titleStyle: CardTitleStyle(buildContext!),
-      //     descStyle: CardDescStyle(buildContext!),
+      //     titleStyle: CardTitleStyle(Get.context!),
+      //     descStyle: CardDescStyle(Get.context!),
       //     onShowDetail: (key, status) {
       //       showEventItemDetail(item);
       //     },
@@ -357,8 +352,8 @@ class EventViewModel extends ChangeNotifier {
     return tmpList;
   }
 
-  showEventItemDetail(item) {
-    Get.to(() => EventDetailScreen(EventModel.fromJson(item), PlaceModel.fromJson(item['placeInfo'])))!.then((eventInfo) {
+  showEventItemDetail(EventModel item) {
+    Get.to(() => EventDetailScreen(item, item.placeInfo))!.then((eventInfo) {
       if (eventInfo != null) {
         isMapUpdate = true;
         showList.clear();

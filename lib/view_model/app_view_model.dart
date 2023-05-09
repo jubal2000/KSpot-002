@@ -46,15 +46,10 @@ class AppViewModel extends ChangeNotifier {
   final fire  = Get.find<FirebaseService>();
   var isShowDialog = false;
   var isCanStart = false;
-  BuildContext? buildContext;
 
   // app bar..
   var appbarMenuMode = MainMenuID.event;
   var menuIndex = 0;
-
-  init(BuildContext context) {
-    buildContext = context;
-  }
 
   signOut() {
     Future.delayed(const Duration(milliseconds: 500), () {
@@ -103,7 +98,7 @@ class AppViewModel extends ChangeNotifier {
   }
 
   showGroupSelect() {
-    EventGroupSelectDialog(buildContext!,
+    EventGroupSelectDialog(Get.context!,
         AppData.currentEventGroup!.id,
         AppData.currentEventGroup!.contentType).then((_) {
           AppData.eventViewModel.refreshModel();
@@ -123,7 +118,7 @@ class AppViewModel extends ChangeNotifier {
     // final version = ''; // for Dev..
     LOG('--> version : $isForceUpdate / $versionLocal / $versionServer');
     if (checkVersionString(APP_VERSION, versionServer, versionLocal ?? '')) {
-      var dlgResult = await showAppUpdateDialog(buildContext!,
+      var dlgResult = await showAppUpdateDialog(Get.context!,
         'New Version',
         '$APP_VERSION > $versionServer',
         isForceUpdate: isForceUpdate,
@@ -210,7 +205,7 @@ class AppViewModel extends ChangeNotifier {
                   (item) =>
                   DropdownMenuItem<DropdownItem>(
                     value: item,
-                    child: DropdownItems.buildItem(buildContext!, item),
+                    child: DropdownItems.buildItem(Get.context!, item),
                   ),
             ),
           if (appbarMenuMode == MainMenuID.story)
@@ -218,7 +213,7 @@ class AppViewModel extends ChangeNotifier {
                   (item) =>
                   DropdownMenuItem<DropdownItem>(
                     value: item,
-                    child: DropdownItems.buildItem(buildContext!, item),
+                    child: DropdownItems.buildItem(Get.context!, item),
                   ),
             ),
           if (appbarMenuMode == MainMenuID.chat)
@@ -226,7 +221,7 @@ class AppViewModel extends ChangeNotifier {
                   (item) =>
                   DropdownMenuItem<DropdownItem>(
                     value: item,
-                    child: DropdownItems.buildItem(buildContext!, item),
+                    child: DropdownItems.buildItem(Get.context!, item),
                   ),
             ),
           if (appbarMenuMode == MainMenuID.my)
@@ -234,7 +229,7 @@ class AppViewModel extends ChangeNotifier {
                   (item) =>
                   DropdownMenuItem<DropdownItem>(
                     value: item,
-                    child: DropdownItems.buildItem(buildContext!, item),
+                    child: DropdownItems.buildItem(Get.context!, item),
                   ),
             ),
         ],
@@ -266,7 +261,7 @@ class AppViewModel extends ChangeNotifier {
               break;
             case DropdownItemType.chatOpen:
               AppData.chatViewModel.onChattingNew(ChatType.public);
-              // showChattingMenu(buildContext!).then((result) {
+              // showChattingMenu(Get.context!).then((result) {
               //   if (result == 'message') {
               //
               //   } else if (result != null) {

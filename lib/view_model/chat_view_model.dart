@@ -46,7 +46,6 @@ class ChatViewModel extends ChangeNotifier {
   final userRepo = UserRepository();
   final cache = Get.find<CacheService>();
   final api   = Get.find<ApiService>();
-  BuildContext? buildContext;
   Stream? stream;
   int currentTab = 0;
 
@@ -55,8 +54,7 @@ class ChatViewModel extends ChangeNotifier {
   List<GlobalKey> tabKeyList = [];
   var isTabOpen = [true, true];
 
-  init(context) {
-    buildContext = context;
+  init() {
     initMessageTab();
     getChatStreamData();
   }
@@ -177,7 +175,7 @@ class ChatViewModel extends ChangeNotifier {
               ShowToast('You can not enter now'.tr);
               return;
             }
-            showAlertYesNoCheckDialog(buildContext!, item.value.title, 'Would you like to enter the chat room?'.tr,
+            showAlertYesNoCheckDialog(Get.context!, item.value.title, 'Would you like to enter the chat room?'.tr,
               'Enter quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
               if (result > 0) {
                 enterRoom(key, item.value, result == 1);
@@ -194,7 +192,7 @@ class ChatViewModel extends ChangeNotifier {
                 ShowToast('You can not enter now'.tr);
                 return;
               }
-              showAlertYesNoCheckDialog(buildContext!, item.value.title, 'Would you like to enter the chat room?'.tr,
+              showAlertYesNoCheckDialog(Get.context!, item.value.title, 'Would you like to enter the chat room?'.tr,
                 'Enter quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
                 if (result > 0) {
                   enterRoom(key, item.value, result == 1);
@@ -206,7 +204,7 @@ class ChatViewModel extends ChangeNotifier {
                 ShowToast('You are currently an admin'.tr);
                 return;
               }
-              showAlertYesNoCheckDialog(buildContext!, item.value.title, 'Would you like to leave the chat room?'.tr,
+              showAlertYesNoCheckDialog(Get.context!, item.value.title, 'Would you like to leave the chat room?'.tr,
                 'Leave quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
                 if (result > 0) {
                   chatRepo.exitChatRoom(key, result == 1).then((result2) {
@@ -219,13 +217,13 @@ class ChatViewModel extends ChangeNotifier {
               });
               break;
             case DropdownItemType.report:
-              userRepo.addReportItem(buildContext!, 'chatRoom', item.value.toJson(), (_) {
+              userRepo.addReportItem(Get.context!, 'chatRoom', item.value.toJson(), (_) {
                   notifyListeners();
               });
               break;
             case DropdownItemType.unReport:
               if (reportData != null) {
-                userRepo.removeReportItem(buildContext!, reportData['id'], item.key, () {
+                userRepo.removeReportItem(Get.context!, reportData['id'], item.key, () {
                   LOG('--> unReport done : ${reportData.toString()}');
                   notifyListeners();
                 });
@@ -284,7 +282,7 @@ class ChatViewModel extends ChangeNotifier {
     // LOG('--> showList : ${showList.length} / ${showResultList.length}');
     return Column(
       children: [
-        SubTitleBar(buildContext!, '${isMy ? 'MY CHAT'.tr : 'OTHER CHAT'.tr} ${showResultList.length}',
+        SubTitleBar(Get.context!, '${isMy ? 'MY CHAT'.tr : 'OTHER CHAT'.tr} ${showResultList.length}',
           height: 40,
           icon: isTabOpen[isMy ? 0 : 1] ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
           onActionSelect: (select) {

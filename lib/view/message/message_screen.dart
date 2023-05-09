@@ -17,7 +17,6 @@ class MessageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppData.messageViewModel.init(context);
     return SafeArea(
       top: false,
       child: Scaffold(

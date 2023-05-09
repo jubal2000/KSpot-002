@@ -18,7 +18,7 @@ class ChattingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppData.chatViewModel.init(context);
+    AppData.chatViewModel.init();
     return SafeArea(
       top: false,
       child: Container(

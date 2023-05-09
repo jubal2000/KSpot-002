@@ -50,7 +50,6 @@ class _StoryEditInputScreenState extends State<StoryEditInputScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context);
     // auto add manager..
     // if (_viewModel.editItem!.managerData == null || _viewModel.editItem!.managerData!.isEmpty) {
     //   final addItem = ManagerData(

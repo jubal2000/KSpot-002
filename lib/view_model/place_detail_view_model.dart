@@ -37,11 +37,6 @@ class PlaceDetailViewModel extends ChangeNotifier {
   var isShowMap = false;
 
   PlaceModel? placeInfo;
-  BuildContext? buildContext;
-
-  init(BuildContext context) {
-    buildContext = context;
-  }
 
   setPlaceData(PlaceModel placeItem) {
     placeInfo = placeItem;
@@ -65,11 +60,11 @@ class PlaceDetailViewModel extends ChangeNotifier {
         moveToEdit();
         break;
       case DropdownItemType.delete:
-        // showAlertYesNoDialog(buildContext!, 'Delete'.tr,
+        // showAlertYesNoDialog(Get.context!, 'Delete'.tr,
         //     'Are you sure you want to delete it?'.tr, 'Alert) Recovery is not possible'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
         //   if (value == 1) {
         //     if (!AppData.isDevMode) {
-        //       showTextInputDialog(buildContext!, 'Delete confirm'.tr,
+        //       showTextInputDialog(Get.context!, 'Delete confirm'.tr,
         //           'Typing \'delete now\''.tr, 'Alert) Recovery is not possible'.tr, 10, null).then((result) {
         //         if (result == 'delete now') {
         //           eventRepo.setEventStatus(placeInfo!.id, 0).then((result) {
@@ -92,7 +87,7 @@ class PlaceDetailViewModel extends ChangeNotifier {
         // });
         break;
       case DropdownItemType.promotion:
-      // Navigator.push(buildContext!, MaterialPageRoute(builder: (context) =>
+      // Navigator.push(Get.context!, MaterialPageRoute(builder: (context) =>
       //     PromotionTabScreen('place', targetInfo: widget.eventInfo)));
     }
   }
@@ -115,26 +110,26 @@ class PlaceDetailViewModel extends ChangeNotifier {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(12.0)),
-        border: Border.all(color: Theme.of(buildContext!).primaryColor.withOpacity(0.5), width: 3),
+        border: Border.all(color: Theme.of(Get.context!).primaryColor.withOpacity(0.5), width: 3),
       ),
       child: showSizedRoundImage(placeInfo!.pic, 60, 8),
     );
   }
 
   showTitle() {
-    return Text(DESC(placeInfo!.title), style: MainTitleStyle(buildContext!), maxLines: 2);
+    return Text(DESC(placeInfo!.title), style: MainTitleStyle(Get.context!), maxLines: 2);
   }
 
   showDesc() {
-    return Text(DESC(placeInfo!.desc), style: DescBodyStyle(buildContext!));
+    return Text(DESC(placeInfo!.desc), style: DescBodyStyle(Get.context!));
   }
 
   showShareBox() {
     return Row(
         children: [
-          ShareWidget(buildContext!, 'place', placeInfo!.toJson(), showTitle: true),
+          ShareWidget(Get.context!, 'place', placeInfo!.toJson(), showTitle: true),
           SizedBox(width: 10),
-          LikeWidget(buildContext!, 'place', placeInfo!.toJson(), showCount: true),
+          LikeWidget(Get.context!, 'place', placeInfo!.toJson(), showCount: true),
         ]
     );
   }
@@ -142,17 +137,17 @@ class PlaceDetailViewModel extends ChangeNotifier {
   showLocation() {
     return Column(
       children: [
-        SubTitle(buildContext!, 'ADDRESS'.tr, height: 40),
+        SubTitle(Get.context!, 'ADDRESS'.tr, height: 40),
         Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(placeInfo!.address.address1, style: Theme
-                  .of(buildContext!)
+                  .of(Get.context!)
                   .textTheme
                   .bodyText1),
               SizedBox(height: 2),
               Text(placeInfo!.address.address2, style: Theme
-                  .of(buildContext!)
+                  .of(Get.context!)
                   .textTheme
                   .bodyText1),
               SizedBox(height: 15),
@@ -164,7 +159,7 @@ class PlaceDetailViewModel extends ChangeNotifier {
                       height: 40,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(30)),
-                        color: Theme.of(buildContext!).cardColor,
+                        color: Theme.of(Get.context!).cardColor,
                       ),
                       child: Icon(Icons.map_outlined, size: 24),
                     ),
@@ -186,7 +181,7 @@ class PlaceDetailViewModel extends ChangeNotifier {
                       height: 40,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(30)),
-                        color: Theme.of(buildContext!).cardColor,
+                        color: Theme.of(Get.context!).cardColor,
                       ),
                       child: Icon(Icons.copy, size: 24),
                     ),
@@ -250,7 +245,7 @@ class PlaceDetailViewModel extends ChangeNotifier {
   showCommentList() {
     return Column(
         children: [
-          SubTitleBar(buildContext!, 'COMMENT'.tr, height: subTabHeight, icon: isOpenStoryList ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
+          SubTitleBar(Get.context!, 'COMMENT'.tr, height: subTabHeight, icon: isOpenStoryList ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
             isOpenStoryList = !isOpenStoryList;
             notifyListeners();
           }),

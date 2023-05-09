@@ -7,11 +7,6 @@ import '../utils/utils.dart';
 
 class FollowViewModel extends ChangeNotifier {
   final repo = FollowRepository();
-  BuildContext? buildContext;
-
-  init(BuildContext context) {
-    buildContext = context;
-  }
 
   Future<Map<String, FollowModel>> getFollowList(String userId) async {
     AppData.followData = await repo.getFollowList(userId);

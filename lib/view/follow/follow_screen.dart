@@ -70,7 +70,6 @@ class FollowScreenState extends State<FollowScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context);
     return WillPopScope(
       onWillPop: () async {
         Get.back(result: selectDataOrg);

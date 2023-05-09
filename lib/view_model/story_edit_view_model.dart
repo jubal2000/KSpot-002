@@ -26,7 +26,6 @@ class StoryEditViewModel extends ChangeNotifier {
 
   StoryModel?   editItem;
   EventModel?   eventInfo;
-  BuildContext? buildContext;
   JSON imageData = {};
   var isEditMode = false;
   var isEdited = false;
@@ -51,10 +50,6 @@ class StoryEditViewModel extends ChangeNotifier {
       case 0: return agreeChecked;
     }
     return eventInfo != null;
-  }
-
-  init(BuildContext context) {
-    buildContext = context;
   }
 
   initData() {
@@ -161,10 +156,10 @@ class StoryEditViewModel extends ChangeNotifier {
   showDesc() {
     return Column(
       children: [
-        SubTitle(buildContext!, 'DESC'.tr),
+        SubTitle(Get.context!, 'DESC'.tr),
         TextFormField(
           controller: _descController,
-          decoration: inputLabel(buildContext!, 'Description'.tr, ''),
+          decoration: inputLabel(Get.context!, 'Description'.tr, ''),
           keyboardType: TextInputType.multiline,
           maxLines: null,
           maxLength: STORY_DESC_LENGTH,
@@ -182,7 +177,7 @@ class StoryEditViewModel extends ChangeNotifier {
   showTag() {
     return Column(
       children: [
-        SubTitle(buildContext!, 'TAG'.tr),
+        SubTitle(Get.context!, 'TAG'.tr),
         TagTextField(List<String>.from(editItem!.getTagDataMap), (value) {
           editItem!.tagData = value;
         }),
@@ -197,11 +192,11 @@ class StoryEditViewModel extends ChangeNotifier {
 
   checkEditDone(showAlert) {
     if (imageData.isEmpty) {
-      if (showAlert) showAlertDialog(buildContext!, 'Upload Failed'.tr, 'Please enter select picture..'.tr, '', 'OK'.tr);
+      if (showAlert) showAlertDialog(Get.context!, 'Upload Failed'.tr, 'Please enter select picture..'.tr, '', 'OK'.tr);
       return false;
     }
     if (editItem!.desc.isEmpty) {
-      if (showAlert) showAlertDialog(buildContext!, 'Upload Failed'.tr, 'Please enter desc..'.tr, '', 'OK'.tr);
+      if (showAlert) showAlertDialog(Get.context!, 'Upload Failed'.tr, 'Please enter desc..'.tr, '', 'OK'.tr);
       return false;
     }
     return true;
@@ -229,7 +224,7 @@ class StoryEditViewModel extends ChangeNotifier {
 
   uploadStart() async {
     LOG('---> uploadStart: ${imageData.length}');
-    showLoadingDialog(buildContext!, 'Uploading now...'.tr);
+    showLoadingDialog(Get.context!, 'Uploading now...'.tr);
     // upload new images..
     editItem!.picData = null;
     if (imageData.isNotEmpty) {
@@ -247,7 +242,7 @@ class StoryEditViewModel extends ChangeNotifier {
             item.value['url'] = result;
             upCount++;
           } else {
-            showAlertDialog(buildContext!, 'Upload'.tr, 'Upload has been failed!'.tr, '', 'OK'.tr);
+            showAlertDialog(Get.context!, 'Upload'.tr, 'Upload has been failed!'.tr, '', 'OK'.tr);
             return;
           }
         } else if (JSON_NOT_EMPTY(item.value['url'])) {
@@ -281,11 +276,11 @@ class StoryEditViewModel extends ChangeNotifier {
     storyRepo.addStoryItem(editItem!).then((result) {
       hideLoadingDialog();
       if (result != null) {
-        showAlertDialog(buildContext!, 'Upload'.tr, 'Story Upload Complete'.tr, '', 'OK'.tr).then((_) {
+        showAlertDialog(Get.context!, 'Upload'.tr, 'Story Upload Complete'.tr, '', 'OK'.tr).then((_) {
           Get.back(result: result);
         });
       } else {
-        showAlertDialog(buildContext!, 'Upload'.tr, 'Story Upload Failed'.tr, '', 'OK'.tr);
+        showAlertDialog(Get.context!, 'Upload'.tr, 'Story Upload Failed'.tr, '', 'OK'.tr);
       }
     });
   }

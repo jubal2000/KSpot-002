@@ -34,7 +34,7 @@ class SignInScreen extends StatelessWidget {
       value: _viewModel,
       child: Consumer<SignUpViewModel>(
         builder: (context, viewModel, _) {
-          viewModel.init(context);
+          viewModel.init();
           return WillPopScope(
             onWillPop: () async {
               viewModel.moveBackStep();

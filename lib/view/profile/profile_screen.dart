@@ -64,7 +64,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _setupViewModel.init(context);
+    _setupViewModel.init();
     var expandHeight = UI_PROFILE_BACK_SIZE + UI_FACE_SIZE * 0.5 + 10;
     return SafeArea(
       top: false,
@@ -72,7 +72,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         value: widget.userViewModel,
         child: Consumer<UserViewModel>(
           builder: (context, userViewModel, _) {
-            userViewModel.init(context);
             LOG('--> UserViewModel redraw');
             return Scaffold(
               key: _key,

@@ -65,7 +65,6 @@ class ProfileTapState extends State<ProfileTabScreen> {
 
   @override
   Widget build(BuildContext context) {
-    widget.userViewModel.init(context);
     switch (widget.selectedTab) {
       case ProfileMainTab.profile: {
         return ChangeNotifierProvider<UserViewModel>.value(

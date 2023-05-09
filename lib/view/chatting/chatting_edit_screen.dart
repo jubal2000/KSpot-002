@@ -25,7 +25,7 @@ class ChattingEditScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context, selectedTab);
+    _viewModel.init(selectedTab);
     return SafeArea(
       top: false,
       child: Scaffold(

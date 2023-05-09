@@ -49,7 +49,6 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context);
     // auto add manager..
     if (_viewModel.editItem!.managerData == null || _viewModel.editItem!.managerData!.isEmpty) {
       final addItem = MemberData(

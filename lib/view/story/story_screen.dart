@@ -21,7 +21,6 @@ class StoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppData.storyViewModel.init(context);
     return SafeArea(
       top: false,
       child: Scaffold(

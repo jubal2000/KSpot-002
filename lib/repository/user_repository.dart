@@ -7,6 +7,7 @@ import '../data/app_data.dart';
 import '../data/dialogs.dart';
 import '../models/chat_model.dart';
 import '../models/event_model.dart';
+import '../models/promotion_model.dart';
 import '../models/story_model.dart';
 import '../services/cache_service.dart';
 import '../services/local_service.dart';
@@ -268,6 +269,21 @@ class UserRepository {
       }
     } catch (e) {
       LOG('--> getStoryFromUserId error : ${e.toString()}');
+    }
+    return result;
+  }
+
+  Future<Map<String, PromotionModel>> getPromotionFromUserId(String userId, {bool isAuthor = false, DateTime? lastTime}) async {
+    Map<String, PromotionModel> result = {};
+    try {
+      final response = await api.getPromotionFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, limit: PROFILE_CONTENT_MAX);
+      if (JSON_NOT_EMPTY(response)) {
+        for (var item in response.entries) {
+          result[item.key] = PromotionModel.fromJson(item.value);
+        }
+      }
+    } catch (e) {
+      LOG('--> getPromotionFromUserId error : ${e.toString()}');
     }
     return result;
   }

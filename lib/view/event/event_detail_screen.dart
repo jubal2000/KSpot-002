@@ -117,22 +117,8 @@ class _EventDetailState extends State<EventDetailScreen> {
     child: ChangeNotifierProvider<EventDetailViewModel>.value(
       value: _viewModel,
       child: Consumer<EventDetailViewModel>(builder: (context, viewModel, _) {
-        viewModel.init(context);
         return Scaffold(
           appBar: AppBar(
-            // title: Row(
-            //   children: [
-            //     if (widget.placeInfo != null && widget.placeInfo!.pic.isNotEmpty)...[
-            //       showImage(widget.placeInfo!.pic, Size(30,30)),
-            //       SizedBox(width: 10),
-            //       Text(widget.placeInfo!.title.toUpperCase(), style: AppBarTitleStyle(context)),
-            //     ],
-            //     if (widget.placeInfo == null || widget.placeInfo!.pic.isEmpty)...[
-            //       Text(STR(widget.topTitle).isNotEmpty ? widget.topTitle.toUpperCase() : '', style: AppBarTitleStyle(context)),
-            //     ],
-            //   ],
-            // ),
-            // title: Text(viewModel.eventInfo!.title, style: AppBarTitleStyle(context)),
             titleSpacing: 0,
             toolbarHeight: UI_APPBAR_TOOL_HEIGHT,
             actions: [

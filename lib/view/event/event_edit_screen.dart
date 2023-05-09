@@ -53,7 +53,6 @@ class _EventEditScreenState extends State<EventEditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _viewModel.init(context);
     return  ChangeNotifierProvider<EventEditViewModel>.value(
       value: _viewModel,
       child: Consumer<EventEditViewModel>(

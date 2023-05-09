@@ -62,12 +62,10 @@ class SetupViewModel extends ChangeNotifier {
 
   Function(bool)? onRefresh;
   UserModel? editUserInfo;
-  BuildContext? context;
   bool isEdited = false;
 
 
-  init(BuildContext context) {
-    this.context = context;
+  init() {
     refreshData();
   }
 
@@ -96,7 +94,7 @@ class SetupViewModel extends ChangeNotifier {
   setUserData() async {
     if (editUserInfo == null) return false;
     LOG('--> setUserData : ${editUserInfo!.toJson()}');
-    showLoadingDialog(context!, 'updating now...'.tr);
+    showLoadingDialog(Get.context!, 'updating now...'.tr);
     AppData.userInfo = UserModel.fromJson(editUserInfo!.toJson());
     var result = await userRepo.setMyUserInfo();
     hideLoadingDialog();
@@ -127,12 +125,12 @@ class SetupViewModel extends ChangeNotifier {
     return TextFormField(
       enabled: enabled ?? true,
       controller: controller,
-      decoration: enabled ?? true ? inputLabel(context!, label ?? '', '') : viewLabel(context!, label ?? '', ''),
+      decoration: enabled ?? true ? inputLabel(Get.context!, label ?? '', '') : viewLabel(Get.context!, label ?? '', ''),
       keyboardType: keyboardType ?? TextInputType.text,
       maxLines: maxLines ?? 1,
       maxLength: maxLength,
       autovalidateMode: AutovalidateMode.always,
-      style: ItemTitleNormalStyle(context!),
+      style: ItemTitleNormalStyle(Get.context!),
       validator: validator,
       onChanged: (value) {
         if (onChanged != null) onChanged(controller.text);
@@ -179,7 +177,7 @@ class SetupViewModel extends ChangeNotifier {
               IconButton(
                 onPressed: () {
                 },
-                icon: Icon(Icons.edit, color: Theme.of(context!).disabledColor),
+                icon: Icon(Icons.edit, color: Theme.of(Get.context!).disabledColor),
               ),
             if (!isEditMode)
               IconButton(
@@ -229,8 +227,8 @@ class SetupViewModel extends ChangeNotifier {
           fullWidth: false,
           minWidth: 80.w,
           radius: 8.w,
-          textColor: Theme.of(context!).colorScheme.inverseSurface,
-          backgroundColor: Theme.of(context!).colorScheme.secondary.withOpacity(0.5),
+          textColor: Theme.of(Get.context!).colorScheme.inverseSurface,
+          backgroundColor: Theme.of(Get.context!).colorScheme.secondary.withOpacity(0.5),
           onPressed: () {
             isEditMode = false;
             itemEditFlag[SetupTextType.mobile.index] = false;
@@ -270,8 +268,8 @@ class SetupViewModel extends ChangeNotifier {
                 minWidth: 80.w,
                 radius: 8.w,
                 height: UI_BUTTON_HEIGHT_S.h,
-                textColor: Theme.of(context!).colorScheme.inverseSurface,
-                backgroundColor: Theme.of(context!).colorScheme.secondary.withOpacity(0.5),
+                textColor: Theme.of(Get.context!).colorScheme.inverseSurface,
+                backgroundColor: Theme.of(Get.context!).colorScheme.secondary.withOpacity(0.5),
                 onPressed: () {
                   editUserInfo!.email = editUserInfo!.emailNew!;
                   AppData.userInfo = editUserInfo!;
@@ -295,8 +293,8 @@ class SetupViewModel extends ChangeNotifier {
           fullWidth: false,
           minWidth: 80.w,
           radius: 8.w,
-          textColor: Theme.of(context!).colorScheme.inverseSurface,
-          backgroundColor: Theme.of(context!).colorScheme.secondary.withOpacity(0.5),
+          textColor: Theme.of(Get.context!).colorScheme.inverseSurface,
+          backgroundColor: Theme.of(Get.context!).colorScheme.secondary.withOpacity(0.5),
           onPressed: () {
             isEditMode = false;
             itemEditFlag[SetupTextType.email.index] = false;
@@ -312,7 +310,7 @@ class SetupViewModel extends ChangeNotifier {
   updateProfile(Function(bool) onEditEnd) {
     if (!isEdited || !AppData.isMainActive) return;
     if (formKey.currentState?.validate() ?? false) {
-      showAlertYesNoDialog(context!, 'Profile Update'.tr,
+      showAlertYesNoDialog(Get.context!, 'Profile Update'.tr,
           'Do you want to save the modified profile?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
         if (result == 1) {
           AppData.isMainActive = false;
@@ -454,7 +452,7 @@ class SetupViewModel extends ChangeNotifier {
         });
         break;
       // case 'promotion':
-      //   Navigator.of(AppData.topMenuContext!).push(SecondPageRoute(PromotionListScreen()));
+      //   Navigator.of(AppData.topMenuGet.context!).push(SecondPageRoute(PromotionListScreen()));
       //   Get.to(() => SetupServiceScreen())!.then((result) {
       //     if (onRefresh != null) onRefresh!(result != null && result);
       //   });

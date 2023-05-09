@@ -21,6 +21,7 @@ import '../data/app_data.dart';
 import '../data/common_sizes.dart';
 import '../data/dialogs.dart';
 import '../models/event_model.dart';
+import '../models/promotion_model.dart';
 import '../repository/event_repository.dart';
 import '../repository/place_repository.dart';
 import '../repository/sponsor_repository.dart';
@@ -47,6 +48,7 @@ enum ProfileContentType {
   story,
   follow,
   bookmark,
+  promotion,
   sponsor,
   max,
 }
@@ -61,7 +63,6 @@ class UserViewModel extends ChangeNotifier {
   final scrollController = List.generate(ProfileContentType.max.index, (index) => ScrollController());
 
   UserModel? userInfo;
-  BuildContext? context;
 
   var currentTab = 0;
   var isMyProfile = false;
@@ -78,16 +79,13 @@ class UserViewModel extends ChangeNotifier {
   List<DateTime?> showLastTime = List.generate(ProfileContentType.max.index, (index) => null);
   List<bool> isLastContent = List.generate(ProfileContentType.max.index, (index) => false);
 
-  Map<String, EventModel> eventData = {};
-  Map<String, StoryModel> storyData = {};
-  Map<String, SponsorModel> sponsorData = {};
+  Map<String, EventModel>     eventData = {};
+  Map<String, StoryModel>     storyData = {};
+  Map<String, PromotionModel> promotionData = {};
+  Map<String, SponsorModel>   sponsorData = {};
   JSON snsData = {};
   JSON likeData = {};
   JSON bookmarkData = {};
-
-  init(context) {
-    this.context = context;
-  }
 
   initUserModel(UserModel user) {
     userInfo    = user;
@@ -169,37 +167,19 @@ class UserViewModel extends ChangeNotifier {
     return storyData;
   }
 
-  getSponsorData([bool isShowEmpty = false]) async {
-    // sponsorData.clear();
-    // if (JSON_NOT_EMPTY(AppData.DATA_SPONSOR)) {
-    //   for (var item in AppData.DATA_SPONSOR.entries) {
-    //     var sponsorItem = SponsorModel.fromJson(item.value);
-    //     if (sponsorItem.userId == AppData.userInfo.id) {
-    //       sponsorData[item.key] = sponsorItem;
-    //     }
-    //   }
-    // }
+  getPromotionData([bool isShowEmpty = false]) async {
     // LOG('--> getSponsorData : ${sponsorData.length}');
-    if (JSON_NOT_EMPTY(sponsorData)) {
-      for (var item in sponsorData.entries) {
-        var checkTime = item.value.createTime;
-        if (showLastTime[ProfileContentType.sponsor.index] == null ||
-            checkTime.isBefore(showLastTime[ProfileContentType.sponsor.index]!)) {
-          showLastTime[ProfileContentType.sponsor.index] = checkTime;
-        }
-      }
-    }
-    LOG('---> getSponsorData : ${sponsorData.length} - ${showLastTime[ProfileContentType.sponsor.index].toString()}');
-    var newData = await repo.getSponsorFromUserId(userInfo!.id,
-        isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.sponsor.index]);
-    if (newData.isNotEmpty) {
-      sponsorData.addAll(newData);
-    } else {
-      isLastContent[ProfileContentType.sponsor.index] = true;
-      if (isShowEmpty) {
-        ShowErrorToast('No more list'.tr);
-      }
-    }
+    promotionData.clear();
+    var newData = await repo.getPromotionFromUserId(userInfo!.id, isAuthor: isMyProfile);
+    promotionData.addAll(newData);
+    return promotionData;
+  }
+
+  getSponsorData([bool isShowEmpty = false]) async {
+    // LOG('--> getSponsorData : ${sponsorData.length}');
+    sponsorData.clear();
+    var newData = await repo.getSponsorFromUserId(userInfo!.id, isAuthor: isMyProfile);
+    sponsorData.addAll(newData);
     return sponsorData;
   }
 
@@ -215,18 +195,18 @@ class UserViewModel extends ChangeNotifier {
       var imageUrl  = await ShowUserPicCroper(pickImage.path);
       LOG('---> imageUrl : $imageUrl');
       if (imageUrl != null) {
-        showLoadingDialog(context!, 'uploading now...'.tr);
+        showLoadingDialog(Get.context!, 'uploading now...'.tr);
         var imageData = await ReadFileByte(imageUrl);
         JSON imageInfo = {'id': AppData.userInfo.id, 'data': imageData};
         var upResult = await repo.uploadImageData(imageInfo, 'user_img');
         if (upResult == null) {
-          showAlertDialog(context!, 'Profile image'.tr, 'Image update is failed'.tr, '', 'OK'.tr);
+          showAlertDialog(Get.context!, 'Profile image'.tr, 'Image update is failed'.tr, '', 'OK'.tr);
         }
         AppData.userInfo.pic = upResult!;
         var setResult = await repo.setUserInfoItem(AppData.userInfo, 'pic');
         hideLoadingDialog();
         if (setResult) {
-          showAlertDialog(context!, 'Profile image'.tr, 'Image update is complete'.tr, '', 'OK'.tr);
+          showAlertDialog(Get.context!, 'Profile image'.tr, 'Image update is complete'.tr, '', 'OK'.tr);
           AppData.USER_PIC = upResult;
           LOG('---> setUserPic success : ${AppData.USER_PIC}');
           notifyListeners();
@@ -252,7 +232,7 @@ class UserViewModel extends ChangeNotifier {
               color: const Color(0xff7c94b6),
               borderRadius: BorderRadius.all(Radius.circular(UI_FACE_SIZE.w)),
               border: Border.all(
-                color: Theme.of(context!).colorScheme.secondary,
+                color: Theme.of(Get.context!).colorScheme.secondary,
                 width: 2.0,
               ),
             ),
@@ -313,7 +293,7 @@ class UserViewModel extends ChangeNotifier {
                   var url = Uri.parse(protocolUrl);
                   await launchUrl(url, mode: launchMode);
                 },
-                child: showImage(STR(item.value['icon']), Size(UI_SNS_SIZE.sp, UI_SNS_SIZE.sp), color: Theme.of(context!).hintColor)
+                child: showImage(STR(item.value['icon']), Size(UI_SNS_SIZE.sp, UI_SNS_SIZE.sp), color: Theme.of(Get.context!).hintColor)
               ),
             ]
           ]
@@ -323,10 +303,10 @@ class UserViewModel extends ChangeNotifier {
   }
 
   onMessageEdit() {
-    showTextInputLimitDialog(context!, 'Edit message'.tr, '', userInfo!.message, 1, 200, 6, null).then((result) async {
+    showTextInputLimitDialog(Get.context!, 'Edit message'.tr, '', userInfo!.message, 1, 200, 6, null).then((result) async {
       if (result.isNotEmpty) {
         userInfo!.message = result;
-        showLoadingDialog(context!, 'Now Uploading...');
+        showLoadingDialog(Get.context!, 'Now Uploading...');
         var setResult = await repo.setUserInfoItem(userInfo!, 'message');
         hideLoadingDialog();
         if (setResult) {
@@ -355,7 +335,7 @@ class UserViewModel extends ChangeNotifier {
           controller: msgTextController,
           maxLines: 6,
           enabled: isMyProfile,
-          decoration: isMyProfile ? inputLabel(context!, '', 'Enter your message to show here'.tr) : viewLabel(context!, '', ''),
+          decoration: isMyProfile ? inputLabel(Get.context!, '', 'Enter your message to show here'.tr) : viewLabel(Get.context!, '', ''),
           onTap: () {
             onMessageEdit();
           },
@@ -368,7 +348,7 @@ class UserViewModel extends ChangeNotifier {
               onTap: () {
                 onMessageEdit();
               },
-              child: Icon(Icons.edit, color: Theme.of(context!).hintColor)
+              child: Icon(Icons.edit, color: Theme.of(Get.context!).hintColor)
             )
           ),
       ]
@@ -388,17 +368,17 @@ class UserViewModel extends ChangeNotifier {
         padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w, vertical: 5.w),
         child: Row(
           children: [
-            Icon(icon, size: UI_MENU_ICON_SIZE.w, color: Theme.of(context!).primaryColor.withOpacity(0.5)),
+            Icon(icon, size: UI_MENU_ICON_SIZE.w, color: Theme.of(Get.context!).primaryColor.withOpacity(0.5)),
             SizedBox(width: UI_ITEM_SPACE.w),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: ItemTitleLargeStyle(context!)),
+                  Text(title, style: ItemTitleLargeStyle(Get.context!)),
                   if (desc.isNotEmpty)...[
                     SizedBox(height: 5.w),
-                    Text(desc, style: ItemTitleExStyle(context!)),
+                    Text(desc, style: ItemTitleExStyle(Get.context!)),
                   ],
                 ],
               )
@@ -410,15 +390,15 @@ class UserViewModel extends ChangeNotifier {
               padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE_S.w),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(UI_MENU_ICON_SIZE_S.w)),
-                color: Theme.of(context!).cardColor,
+                color: Theme.of(Get.context!).cardColor,
               ),
               child: Center(
-                child: Text('$count', style: ItemTitleNormalStyle(context!)),
+                child: Text('$count', style: ItemTitleNormalStyle(Get.context!)),
               ),
             ),
             SizedBox(width: UI_ITEM_SPACE.w),
             ],
-            Icon(Icons.keyboard_arrow_right_outlined, size: UI_MENU_ICON_SIZE.w, color: Theme.of(context!).primaryColor),
+            Icon(Icons.keyboard_arrow_right_outlined, size: UI_MENU_ICON_SIZE.w, color: Theme.of(Get.context!).primaryColor),
           ],
         ),
       )
@@ -458,38 +438,26 @@ class UserViewModel extends ChangeNotifier {
         showHorizontalDivider(Size(double.infinity, 30.w)),
       // if (userInfo!.checkOption('event_on'))
         contentItem(Icons.event_available, isMyProfile ? 'MY EVENT LIST'.tr : 'EVENT LIST'.tr, '', 0, () {
-          var orgContext = context;
-          Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.event, 'EVENT LIST'))).then((_) {
-            context = orgContext;
-          });
+          Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.event, 'EVENT LIST')));
         }),
       // if (userInfo!.checkOption('story_on'))
         contentItem(Icons.photo_library_outlined, isMyProfile ? 'MY STORY LIST'.tr : 'STORY LIST'.tr, '', 0, () {
-          var orgContext = context;
-          Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'))).then((_) {
-            context = orgContext;
-          });
+          Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST')));
         }),
         // if (userInfo!.checkOption('follow_on'))
         contentItem(Icons.face, isMyProfile ? 'MY FOLLOW LIST'.tr : 'FOLLOW LIST'.tr, '', 0, () {
-          var orgContext = context;
-          Navigator.of(context!).push(createAniRoute(FollowScreen(userInfo!))).then((_) {
-            context = orgContext;
-          });
+          Navigator.of(Get.context!).push(createAniRoute(FollowScreen(userInfo!)));
         }),
         // if (userInfo!.checkOption('bookmark_on'))
         contentItem(Icons.bookmark_border, isMyProfile ? 'MY BOOKMARK LIST'.tr : 'BOOKMARK LIST'.tr, '', 0, () {
-          var orgContext = context;
-          Navigator.of(context!).push(createAniRoute(BookmarkScreen(userInfo!))).then((_) {
-            context = orgContext;
-          });
+          Navigator.of(Get.context!).push(createAniRoute(BookmarkScreen(userInfo!)));
         }),
         if (isMyProfile && APP_STORE_OPEN)...[
-          contentItem(Icons.workspace_premium_outlined, 'SPONSORED EVENT LIST'.tr, '', 0, () {
-            var orgContext = context;
-            Navigator.of(context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.sponsor, 'SPONSORED EVENT LIST'))).then((_) {
-              context = orgContext;
-            });
+          contentItem(Icons.workspace_premium_outlined, 'PROMOTION LIST'.tr, '', 0, () {
+            Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.promotion, 'PROMOTION LIST')));
+          }),
+          contentItem(Icons.workspace_premium_outlined, 'SPONSORED LIST'.tr, '', 0, () {
+            Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.sponsor, 'SPONSORED LIST')));
           }),
         ],
       ],
@@ -497,7 +465,7 @@ class UserViewModel extends ChangeNotifier {
   }
 
   showEventItemDetail(EventModel item) {
-    Navigator.of(context!).push(createAniRoute(EventDetailScreen(item, item.placeInfo))).then((result) {
+    Navigator.of(Get.context!).push(createAniRoute(EventDetailScreen(item, item.placeInfo))).then((result) {
       if (result != null) {
         notifyListeners();
       }
@@ -505,7 +473,7 @@ class UserViewModel extends ChangeNotifier {
   }
 
   showStoryItemDetail(StoryModel item) {
-    Navigator.of(context!).push(createAniRoute(StoryDetailScreen(item))).then((result) {
+    Navigator.of(Get.context!).push(createAniRoute(StoryDetailScreen(item))).then((result) {
       if (result != null) {
         notifyListeners();
       }
@@ -590,7 +558,7 @@ class UserViewModel extends ChangeNotifier {
     // return Column(
     //   children: [
     //     if (showItemList[0].isNotEmpty)...[
-    //       SubTitleBar(context!, '${'Activated story'.tr} ${showItemList[0].length}'),
+    //       SubTitleBar(Get.context!, '${'Activated story'.tr} ${showItemList[0].length}'),
     //       MasonryGridView.count(
     //         shrinkWrap: true,
     //         physics: NeverScrollableScrollPhysics(),
@@ -606,7 +574,7 @@ class UserViewModel extends ChangeNotifier {
     //       ),
     //     ],
     //     if (showItemList[1].isNotEmpty)...[
-    //       SubTitleBar(context!, '${'Disabled story'.tr} ${showItemList[1].length}',
+    //       SubTitleBar(Get.context!, '${'Disabled story'.tr} ${showItemList[1].length}',
     //         icon: isDisableOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, onActionSelect: (select) {
     //           isDisableOpen = !isDisableOpen;
     //           notifyListeners();
@@ -691,6 +659,12 @@ class UserViewModel extends ChangeNotifier {
         } else {
           return storyData;
         }
+      case ProfileContentType.promotion:
+        if (promotionData.isEmpty) {
+          return getSponsorData(false);
+        } else {
+          return promotionData;
+        }
       case ProfileContentType.sponsor:
         if (sponsorData.isEmpty) {
           return getSponsorData(false);
@@ -704,7 +678,7 @@ class UserViewModel extends ChangeNotifier {
     LOG('--> reloadContentData : $type / $isLastContent / ${AppData.isMainActive}');
     if (isLastContent[type.index] || !AppData.isMainActive) return;
     AppData.isMainActive = false;
-    showLoadingToast(context!);
+    showLoadingToast(Get.context!);
     await Future.delayed(Duration(seconds: 1));
     switch(type) {
       case ProfileContentType.event:
@@ -778,7 +752,7 @@ class UserViewModel extends ChangeNotifier {
         Get.to(() => EventListScreen(isMyProfile, isSelectable: true))!.then((result) {
           if (result != null) {
             LOG('--> EventListScreen result : ${result.toJson()}');
-            showEventSponsorDialog(context!, result, AppData.userInfo.creditCount).then((dResult) {
+            showEventSponsorDialog(Get.context!, result, AppData.userInfo.creditCount).then((dResult) {
               LOG('--> showEventSponsorDialog result : $dResult');
               if (dResult != null) {
                 sponRepo.addSponsorItem(dResult).then((addItem) {

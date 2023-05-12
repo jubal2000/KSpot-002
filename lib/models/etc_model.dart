@@ -181,12 +181,18 @@ class AddressData {
   String address2;
   double lat;
   double lng;
+  String? postCode;
+  String? country;
+  String? city;
 
   AddressData({
     required this.address1,
     required this.address2,
     required this.lat,
     required this.lng,
+    this.postCode,
+    this.country,
+    this.city,
   });
   factory AddressData.fromJson(JSON json) => _$AddressDataFromJson(json);
   JSON toJson() => _$AddressDataToJson(this);

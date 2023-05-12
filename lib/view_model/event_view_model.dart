@@ -127,11 +127,14 @@ class EventViewModel extends ChangeNotifier {
         if (isManagerMode || (!isExpired && item.value.status == 1)) {
           var showItem  = item.value.toJson();
           var placeInfo = showItem['placeInfo'];
-          placeInfo ??= await placeRepo.getPlaceFromId(item.value.placeId);
-          if (placeInfo != null) {
-            LOG('--> setShowList [${placeInfo.id}] : ${item.value.sponsorCount}');
-            showItem['placeInfo'] = placeInfo.toJson();
-            showItem['address'  ] = placeInfo.address.toJson();
+          PlaceModel? placeData;
+          if (JSON_NOT_EMPTY(placeInfo)) placeData = PlaceModel.fromJson(placeInfo);
+          placeData ??= await placeRepo.getPlaceFromId(item.value.placeId);
+          if (placeData != null) {
+            placeInfo = placeData.toJson();
+            LOG('--> setShowList placeInfo [${placeData.id}] : ${placeData.title}');
+            showItem['placeInfo'] = placeInfo;
+            showItem['address'  ] = placeData.address.toJson();
             final pos = LatLng(DBL(showItem['address']['lat']), DBL(showItem['address']['lng']));
             // if (mapBounds !=  null) LOG('--> eventShowList add : ${mapBounds!.toJson()} / $pos');
             // if (eventListType == EventListType.map) {
@@ -334,6 +337,7 @@ class EventViewModel extends ChangeNotifier {
     List<EventModel> showHotList = [];
     for (var eventItem in showList) {
       var item = eventRepo.setSponsorCount(EventModel.fromJson(eventItem));
+      item.placeInfo = PlaceModel.fromJson(eventItem['placeInfo']);
       showHotList.add(item);
     }
     showHotList = EVENT_SORT_HOT(showHotList);

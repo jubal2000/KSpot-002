@@ -476,8 +476,8 @@ ItemTitleExStyle(BuildContext context) {
   return TextStyle(fontSize: 14, color: Theme.of(context).primaryColor.withOpacity(0.65), fontWeight: FontWeight.w600);
 }
 
-ItemDescStyle(BuildContext context) {
-  return TextStyle(fontSize: 12, color: Theme.of(context).textTheme.titleSmall!.color, height: 1.1);
+ItemDescStyle(BuildContext context, {var fontSize = 12.0}) {
+  return TextStyle(fontSize: fontSize, color: Theme.of(context).textTheme.titleSmall!.color, height: 1.1);
 }
 
 ItemDescColorStyle(BuildContext context, [var color = Colors.yellowAccent]) {
@@ -498,6 +498,10 @@ ItemDescBoldInverseStyle(BuildContext context) {
 
 ItemDescPriceStyle(BuildContext context) {
   return TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.tertiary, height: 1.1, fontWeight: FontWeight.w800);
+}
+
+ItemDescPriceOrgStyle(BuildContext context) {
+  return TextStyle(fontSize: 12, color: Colors.grey, height: 1.1, fontWeight: FontWeight.w800, decoration: TextDecoration.lineThrough);
 }
 
 ItemDescSelectStyle(BuildContext context) {

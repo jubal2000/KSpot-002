@@ -57,7 +57,7 @@ class PlaceRepository {
         // TODO: place 가 삭제됬거나 없을경우 처리..
       }
     } catch (e) {
-      LOG('--> getPlaceFromId error : $e');
+      LOG('--> getPlaceFromId error [$placeId] : $e');
     }
     return null;
   }

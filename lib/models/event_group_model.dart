@@ -17,9 +17,6 @@ class EventGroupModelEx extends EventGroupModel {
     descKr: '',
     pic: '',
     contentType: '',
-    updateTime: DateTime(0),
-    createTime: DateTime(0),
-
     tagData: [],
     searchData: [],
   );
@@ -36,8 +33,6 @@ class EventGroupModel {
   String    descKr;
   String    pic;            // title image
   String    contentType;    // content type id
-  DateTime  updateTime;     // update time
-  DateTime  createTime;     // create time
 
   List<String>? tagData;      // tag
   List<String>? searchData;   // 검색어 목록
@@ -54,8 +49,6 @@ class EventGroupModel {
     required this.descKr,
     required this.pic,
     required this.contentType,
-    required this.updateTime,
-    required this.createTime,
 
     this.tagData,
     this.searchData,

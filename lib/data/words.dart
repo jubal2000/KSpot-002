@@ -336,6 +336,8 @@ class Words extends Translations {
       'Event Sponsorship Success': '이벤트 후원 성공',
       'Event Sponsorship Failed': '이벤트 후원 실패',
       '1day': '1일',
+      'Promotion select': '광고 종류 선택',
+      'Discount now': '할인중',
 
       // slide_timepicker_screen
       'Select Time Range': '시간 범위 선택',

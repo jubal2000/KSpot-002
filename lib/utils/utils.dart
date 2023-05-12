@@ -355,6 +355,72 @@ PRICE_FULL_STR(price, currency, [bool isShowEx = true]) {
 }
 
 // ignore: non_constant_identifier_names
+PRICE_DATA_STR(priceData, [bool isShowEx = false]) {
+  // "priceData": {
+  //  "price": 50000.0,
+  //  "priceSale": 1000.0,
+  //  "priceSaleRatio": 10.0,
+  //  "currency": "KRW",
+  // },
+  var price           = DBL(priceData['price']);
+  var priceSale       = DBL(priceData['priceSale']);
+  var priceSaleRatio  = DBL(priceData['priceSaleRatio']);
+  var currency        = priceData['currency'] ?? '';
+  var priceTotal      = price - priceSale - (priceSaleRatio / 100 * price);
+  var priceStr        = PRICE_STR(priceTotal);
+  if (priceSale > 0) {
+    priceStr += '(${PRICE_STR(priceSale)} sale)';
+  }
+  if (priceSaleRatio > 0) {
+    priceStr += '($priceSaleRatio% sale)';
+  }
+  return '${CURRENCY_STR(currency)}$priceStr ${isShowEx?'($currency)':''}';
+}
+// ignore: non_constant_identifier_names
+PriceRow(priceData, [bool isShowEx = false]) {
+  // "priceData": {
+  //  "price": 50000.0,
+  //  "priceSale": 1000.0,
+  //  "priceSaleRatio": 10.0,
+  //  "currency": "KRW",
+  // },
+  var price           = DBL(priceData['price']);
+  var priceSale       = DBL(priceData['priceSale']);
+  var priceSaleRatio  = DBL(priceData['priceSaleRatio']);
+  var currency        = priceData['currency'] ?? '';
+  var priceTotal      = price - priceSale - (priceSaleRatio / 100 * price);
+  var priceStr        = PRICE_STR(price);
+  var priceTotalStr   = PRICE_STR(priceTotal);
+  var saleStr = '';
+
+  if (priceSale > 0 || priceSaleRatio > 0) {
+    saleStr += '(';
+    if (priceSale > 0) {
+      saleStr += '${PRICE_STR(priceSale)}';
+    }
+    if (priceSaleRatio > 0) {
+      if (priceSale > 0) {
+        saleStr += '/';
+      }
+      saleStr += '$priceSaleRatio%';
+    }
+    saleStr += ' ${'Discount now'.tr})';
+  }
+
+  return Row(
+    children: [
+      Text('${CURRENCY_STR(currency)}$priceTotalStr', style: ItemDescPriceStyle(Get.context!)),
+      SizedBox(width: 5),
+      Text('${CURRENCY_STR(currency)}$priceStr', style: ItemDescPriceOrgStyle(Get.context!)),
+      if (saleStr.isNotEmpty)...[
+        SizedBox(width: 5),
+        Text(saleStr, style: ItemDescStyle(Get.context!)),
+      ],
+    ],
+  );
+}
+
+// ignore: non_constant_identifier_names
 FILE_SIZE_STR(size) {
   if (size == null || size.toString().isEmpty) return '0';
   var value = 0.0;

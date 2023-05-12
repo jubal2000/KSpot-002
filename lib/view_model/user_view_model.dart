@@ -11,6 +11,7 @@ import 'package:kspot_002/models/sponsor_model.dart';
 import 'package:kspot_002/view/bookmark/bookmark_screen.dart';
 import 'package:kspot_002/view/event/event_list_screen.dart';
 import 'package:kspot_002/view/follow/follow_screen.dart';
+import 'package:kspot_002/view/promotion/promotion_screen.dart';
 import 'package:kspot_002/view/story/story_detail_screen.dart';
 import 'package:kspot_002/view/story/story_edit_screen.dart';
 import 'package:kspot_002/widget/bookmark_widget.dart';
@@ -746,6 +747,30 @@ class UserViewModel extends ChangeNotifier {
             storyData[result.id] = result;
             notifyListeners();
           }
+        });
+        break;
+      case ProfileContentType.promotion:
+        Get.to(() => PromotionScreen(isSelect: true))!.then((result1) {
+          Get.to(() => EventListScreen(isMyProfile, isSelectable: true))!.then((result) {
+            if (result != null) {
+              LOG('--> EventListScreen result : ${result.toJson()}');
+              showEventSponsorDialog(Get.context!, result, AppData.userInfo.creditCount).then((dResult) {
+                LOG('--> showEventSponsorDialog result : $dResult');
+                if (dResult != null) {
+                  sponRepo.addSponsorItem(dResult).then((addItem) {
+                    if (addItem != null) {
+                      sponsorData[addItem['id']] = SponsorModel.fromJson(addItem);
+                      LOG('--> sponsorData Success : ${sponsorData.length} / ${addItem.toString()}');
+                      ShowToast('Event Sponsorship Success'.tr);
+                      notifyListeners();
+                    } else {
+                      ShowToast('Event Sponsorship Failed'.tr);
+                    }
+                  });
+                }
+              });
+            }
+          });
         });
         break;
       case ProfileContentType.sponsor:

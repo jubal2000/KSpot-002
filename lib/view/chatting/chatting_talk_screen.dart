@@ -74,14 +74,20 @@ class ChatTalkScreenState extends State<ChatTalkScreen> {
                         Obx(() => viewModel.showTitlePic(viewModel.roomPic.value)),
                         SizedBox(width: 10),
                       ],
-                      Obx(() => Column(
+                      Obx(() => Expanded(child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(viewModel.roomTitle.value, style: ChatTitleStyle(context)),
+                          Row(
+                            children: [
+                              Text(viewModel.roomTitle.value, style: ChatTitleStyle(context)),
+                              SizedBox(width: 5),
+                              Text('${viewModel.memberList.length}', style: ItemDescColorBoldStyle(context)),
+                            ],
+                          ),
                           viewModel.showMemberListText(),
                         ]
-                      )),
+                      ))),
                     ],
                     if (widget.roomInfo.type == ChatType.private)...[
                       viewModel.showMemberListText(),

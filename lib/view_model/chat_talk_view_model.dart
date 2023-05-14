@@ -159,10 +159,8 @@ class ChatTalkViewModel extends ChangeNotifier {
             child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
+                  width:  itemHeight - 10,
                   height: itemHeight - 10,
-                  constraints: BoxConstraints (
-                    maxWidth: itemHeight * 1.5,
-                  ),
                   child: showImageFit(pic),
                 )
             ),
@@ -235,14 +233,14 @@ class ChatTalkViewModel extends ChangeNotifier {
   }
 
   showMemberListText() {
-    return Obx(() => Row(
-      children: [
-        for (var i=0; i<memberList.length; i++)
-          Text(i > 0 ? ', ${memberList[i]}' : memberList[i], style: ItemDescStyle(Get.context!)),
-        SizedBox(width: 10),
-        Text('${memberList.length}', style: ItemTitleBoldStyle(Get.context!)),
-      ],
-    ));
+    var memberStr = '';
+    for (var i=0; i<memberList.length; i++) {
+      memberStr += i > 0 ? ', ${memberList[i]}' : memberList[i];
+    }
+    return Container(
+      width: Get.width * 0.65,
+      child: Text(memberStr, style: ItemDescStyle(Get.context!)),
+    );
   }
 
   setChatAction() {

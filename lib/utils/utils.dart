@@ -109,12 +109,13 @@ COL2STR(dynamic value, {String defaultValue = 'ffffff'}) {
 TME(dynamic value, {dynamic defaultValue = '00:00'}) {
   DateTime? result;
   try {
-    result = value != null && value != 'null' && value!.toString().isNotEmpty
-        ? value is String ? DateTime.parse(value.toString()) :
-        value is Timestamp ? DateTime.fromMillisecondsSinceEpoch(value.seconds * 1000) : DateTime.fromMillisecondsSinceEpoch(value['seconds']*1000)
-        : defaultValue != null && defaultValue != ''
-        ? DateTime.parse(defaultValue!.toString())
-        : DateTime.parse('00:00');
+    result =
+    value is DateTime ? value :
+    value is String ? DateTime.parse(value.toString()) :
+    value is Timestamp ? DateTime.fromMillisecondsSinceEpoch(value.seconds * 1000) :
+    value is Map && value['seconds'] != null ? DateTime.fromMillisecondsSinceEpoch(value['seconds'] * 1000) :
+    defaultValue != null && defaultValue != '' ? DateTime.parse(defaultValue!.toString())
+    : DateTime.parse('00:00');
   } catch (e) {
     LOG("--> TME error : ${value.toString()} -> $e");
   }

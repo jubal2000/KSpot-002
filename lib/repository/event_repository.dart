@@ -40,13 +40,13 @@ class EventRepository {
       for (var item in response.entries) {
         item.value['sponsorData'] = await getEventSponsorList(item.key);
         var eventItem = EventModel.fromJson(item.value);
-        LOG('--> eventItem.sponsorData [${eventItem.title}] : ${eventItem.sponsorData}');
         result[item.key] = eventItem;
         cache.setEventItem(eventItem);
       }
     } catch (e) {
       LOG('--> getEventListFromCountry error [$groupId] : $e');
     }
+    LOG('--> getEventListFromCountry result : ${result.length}');
     return result;
   }
 
@@ -165,10 +165,10 @@ class EventRepository {
   EventModel setSponsorCount(EventModel event) {
     var eventDate = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
     event.sponsorCount[eventDate] = 0;
-    LOG('--> checkSponsored [${event.title}] : ${event.sponsorData}');
+    // LOG('--> checkSponsored [${event.title}] : ${event.sponsorData}');
     if (LIST_NOT_EMPTY(event.sponsorData)) {
       for (var item in event.sponsorData!) {
-        LOG('--> event.sponsorData check [$eventDate] : ${item.toJson()}');
+        // LOG('--> event.sponsorData check [$eventDate] : ${item.toJson()}');
         if (checkDateRange(item.startTime, item.endTime)) {
           var orgCount = event.sponsorCount[eventDate] ?? 0;
           event.sponsorCount[eventDate] = orgCount + 1;

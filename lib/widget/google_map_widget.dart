@@ -15,6 +15,7 @@ import 'package:helpers/helpers.dart';
 import 'package:http/http.dart';
 import 'package:image_editor/image_editor.dart';
 import 'package:kspot_002/data/common_sizes.dart';
+import 'package:kspot_002/models/event_model.dart';
 import 'package:location/location.dart' as loc;
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'dart:ui' as ui;
@@ -118,19 +119,6 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
       checkRefresh = sameCount != list.length;
     }
     if (!checkRefresh) return;
-    // widget.showLocation.clear();
-    // for (var item in list) {
-    //   var isAdd = true;
-    //   for (var mark in widget.showLocation) {
-    //     if (mark['address'] == item['address']) {
-    //       isAdd = false;
-    //       break;
-    //     }
-    //   }
-    //   if (isAdd) {
-    //     widget.showLocation.add(item);
-    //   }
-    // }
     widget.showLocation = list;
     initMarker(isBoundsFresh);
   }
@@ -143,6 +131,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
       // add normal marker..
       for (var item in widget.showLocation) {
         var address = item['address'];
+        LOG('--> initMarker item : $address');
         if (address != null) {
           var loc = LatLng(DBL(address['lat']), DBL(address['lng']));
           targetLoc ??= loc;
@@ -229,7 +218,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
     //   return result;
     // }
     final localData = await readLocalFile(fileName);
-    LOG('--> localData : ${localData.length}');
+    // LOG('--> localData : ${localData.length}');
     if (localData.isNotEmpty) {
       var result = Uint8List.fromList(localData.codeUnits);
       return BitmapDescriptor.fromBytes(result);
@@ -437,9 +426,9 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
                 },
                 onCameraMove: (pos) {
                   if (widget.mapController == null || !isMoveActive) return;
-                  LOG('--> onCameraMove  :$isMoveActive');
+                  LOG('--> onCameraMove : $isMoveActive');
                   isMoveActive = false;
-                  Future.delayed(Duration(milliseconds: 200), () {
+                  Future.delayed(Duration(milliseconds: 500), () {
                     isMoveActive = true;
                   });
                   widget.mapController!.getVisibleRegion().then((region) {

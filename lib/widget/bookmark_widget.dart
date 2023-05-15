@@ -44,7 +44,7 @@ Widget BookmarkWidget(BuildContext context, String type, JSON targetInfo,
                 targetPic = STR(targetInfo['picData'].first is JSON ? targetInfo['picData'].first['url'] : targetInfo['picData'].first);
               }
               var targetTitle = type == 'story' ? STR(targetInfo['desc']) : type == 'user' ? STR(targetInfo['nickName']) : STR(targetInfo['title']);
-              LOG('--> BookmarkWidget isOn [$targetTitle] : $isChecked / ${targetInfo['likeCount']}');
+              // LOG('--> BookmarkWidget isOn [$targetTitle] : $isChecked / ${targetInfo['likeCount']}');
               return GestureDetector(
                 child: Container(
                     width:  iconSize + 15,

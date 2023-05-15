@@ -250,7 +250,7 @@ class _UserIdCardOneState extends State<UserIdCardOneWidget> {
   }
 
   refreshData() {
-    LOG('--> UserIdCardWidget refresh : ${userInfo.id} / [${userInfo.pic}]');
+    // LOG('--> UserIdCardWidget refresh : ${userInfo.id} / [${userInfo.pic}]');
     if (userInfo.id == AppData.USER_ID) {
       isMyProfile = true;
       // if (_userInfo['pic'] != AppData.USER_PIC || _userInfo['nickName'] != AppData.USER_NICKNAME) {

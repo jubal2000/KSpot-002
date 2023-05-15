@@ -142,7 +142,7 @@ class EventCardItemState extends State<EventCardItem> {
     }
     var sponDate  = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
     var sponCount = INT(widget.itemData.sponsorCount[sponDate]);
-    LOG('--> EventItem sponCount [${widget.itemData.title}] : $sponCount');
+    // LOG('--> EventItem sponCount [${widget.itemData.title}] : $sponCount');
     return GestureDetector(
         onTap: () {
           unFocusAll(context);
@@ -607,7 +607,7 @@ class PlaceEventMapCardItemState extends State<PlaceEventMapCardItem> {
     }
     var sponDate  = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
     var sponCount = INT(widget.itemData.sponsorCount[sponDate]);
-    LOG('--> EventItem sponCount [${widget.itemData.title}] : $sponCount');
+    // LOG('--> EventItem sponCount [${widget.itemData.title}] : $sponCount');
     return GestureDetector(
       onTap: () {
         if (widget.onShowDetail != null) widget.onShowDetail!(widget.itemData.id, 0);

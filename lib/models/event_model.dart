@@ -133,7 +133,6 @@ class EventModel {
   factory EventModel.fromJson(JSON json) => _$EventModelFromJson(json);
   JSON toJson() => _$EventModelToJson(this);
 
-
   //------------------------------------------------------------------------------------------------------
   //  PicData
   //

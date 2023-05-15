@@ -33,35 +33,37 @@ class EventScreen extends StatelessWidget {
               LOG('--> AppViewModel');
               // AppData.eventViewModel.googleWidget = null;
               return Stack(
-                    children: [
-                      FutureBuilder(
-                        future: AppData.eventViewModel.getEventData(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            LOG('--> set eventData : ${cache.eventData.length}');
-                            return ChangeNotifierProvider<EventViewModel>.value(
-                              value: AppData.eventViewModel,
-                              child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-                                return Stack(
-                                  children: [
-                                    LayoutBuilder(
-                                      builder: (context, layout) {
-                                        return viewModel.showMainList(layout);
-                                      }
-                                    ),
-                                    viewModel.showDatePicker(),
-                                    viewModel.showTopMenuBar(),
-                                  ]
-                                );
-                              })
+                children: [
+                  FutureBuilder(
+                    future: AppData.eventViewModel.getEventData(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        cache.eventData = snapshot.data;
+                        AppData.eventViewModel.isMapUpdate = true;
+                        LOG('--> set eventData : ${cache.eventData.length}');
+                        return ChangeNotifierProvider<EventViewModel>.value(
+                          value: AppData.eventViewModel,
+                          child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+                            return Stack(
+                              children: [
+                                LayoutBuilder(
+                                  builder: (context, layout) {
+                                    return viewModel.showMainList(layout);
+                                  }
+                                ),
+                                viewModel.showDatePicker(),
+                                viewModel.showTopMenuBar(),
+                              ]
                             );
-                          } else {
-                            return showLoadingFullPage(context);
-                          }
-                        }
-                      ),
-                    ]
-                  );
+                          })
+                        );
+                      } else {
+                        return showLoadingFullPage(context);
+                      }
+                    }
+                  ),
+                ]
+              );
             }
           )
         )

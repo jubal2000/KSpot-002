@@ -2141,9 +2141,9 @@ checkPromotionDateRange(String startDate, String endDate, [DateTime? targetTime]
 }
 
 checkDateRange(DateTime start, DateTime end, [DateTime? targetTime]) {
-  LOG('--> checkDateRange: $start / $end - $targetTime');
+  // LOG('--> checkDateRange: $start / $end - $targetTime');
   var now = targetTime ?? DateTime.now();
-  LOG('--> now.compareTo : ${now.compareTo(start)} / ${now.compareTo(end)}');
+  // LOG('--> now.compareTo : ${now.compareTo(start)} / ${now.compareTo(end)}');
   return now.compareTo(start) > 0 && now.compareTo(end) < 0;
 }
 

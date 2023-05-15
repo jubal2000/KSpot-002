@@ -351,7 +351,7 @@ clearSearchResult() async {
 Future<File> _initLocalFile(String fileName) async {
   final _directory = await getApplicationDocumentsDirectory();
   final _path = _directory.path;
-  log('--> _initLocalFile : $_path/tmp/$fileName');
+  // log('--> _initLocalFile : $_path/tmp/$fileName');
   return File('$_path/$fileName');
 }
 
@@ -381,7 +381,7 @@ Future<String> readLocalFile(String fileName) async {
       final File fl = await _initLocalFile(fileName);
       result = await fl.readAsString();
     }
-    LOG('--> readLocalFile : $fileName / ${result.length}');
+    // LOG('--> readLocalFile : $fileName / ${result.length}');
   } catch (e) {
     LOG('--> readLocalFile error : $e');
   }

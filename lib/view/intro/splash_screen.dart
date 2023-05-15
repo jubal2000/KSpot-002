@@ -17,16 +17,16 @@ class SplashScreenState extends State<SplashScreen> {
 
   @override
   void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     if (!auth.isLoginCheckDone) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         auth.initUserSignIn();
       });
     }
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return SafeArea(
       top: false,
       child: Scaffold(

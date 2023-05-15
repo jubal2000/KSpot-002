@@ -3304,7 +3304,7 @@ class ApiService extends GetxService {
   Future<File> _initLocalFile(String fileName) async {
     final directory = await getApplicationDocumentsDirectory();
     final path = directory.path;
-    log('--> _initLocalFile : $path/tmp/$fileName');
+    // log('--> _initLocalFile : $path/tmp/$fileName');
     return File('$path/$fileName');
   }
 
@@ -3316,9 +3316,9 @@ class ApiService extends GetxService {
         final File fl = await _initLocalFile(fileName);
         await fl.writeAsString(data);
       }
-      LOG('--> writeLocalFile : $fileName');
+      LOG('--> api writeLocalFile : $fileName');
     } catch (e) {
-      LOG('--> writeLocalFile error : $e');
+      LOG('--> api writeLocalFile error : $e');
     }
     return true;
   }
@@ -3334,9 +3334,9 @@ class ApiService extends GetxService {
         final File fl = await _initLocalFile(fileName);
         result = await fl.readAsString();
       }
-      LOG('--> readLocalFile : $fileName / ${result.length}');
+      LOG('--> api readLocalFile : $fileName / ${result.length}');
     } catch (e) {
-      LOG('--> readLocalFile error : $e');
+      LOG('--> api readLocalFile error : $e');
     }
     return result;
   }

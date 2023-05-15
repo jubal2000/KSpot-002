@@ -55,8 +55,6 @@ class EventViewModel extends ChangeNotifier {
   var isManagerMode = false; // 유저의 이벤트목록 일 경우 메니저이면, 기간이 지난 이벤트들도 표시..
   var isRefreshMap = false;
 
-  JSON eventData = {};
-
   DatePicker? datePicker;
 
   refreshModel() {
@@ -72,15 +70,13 @@ class EventViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future getEventData() async {
+  Future getEventData() {
     LOG('--> getEventData : ${AppData.currentEventGroup!.id} / ${AppData.currentCountry} / ${AppData.currentState}');
     mapBounds = null;
+    isMapUpdate = true;
     showList.clear();
     cache.eventData.clear();
-    eventData = await eventRepo.getEventListFromCountry(AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
-    LOG('--> eventData result : ${eventData.length}');
-    cache.setEventData(eventData);
-    return eventData;
+    return eventRepo.getEventListFromCountry(AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
   }
 
   Future getBookmarkData(String userId) async {
@@ -93,7 +89,6 @@ class EventViewModel extends ChangeNotifier {
 
   showGoogleWidget(layout) {
     LOG('--> showGoogleWidget : ${googleWidget == null ? 'none' : 'ready'} / ${showList.length}');
-    isRefreshMap = googleWidget == null;
     googleWidget ??= GoogleMapWidget(
       showList,
       key: mapKey,
@@ -226,7 +221,6 @@ class EventViewModel extends ChangeNotifier {
     mapBounds = region;
     List<JSON> tmpList = await setShowList();
     if (compareShowList(tmpList)) {
-      LOG('--> onMapRegionChanged cancel');
       return false;
     }
     // LOG('--> onMapRegionChanged update : ${showList.length} / ${tmpList.length}');
@@ -278,13 +272,14 @@ class EventViewModel extends ChangeNotifier {
     List<EventModel> showHotList = [];
     for (var eventItem in showList) {
       var item = eventRepo.setSponsorCount(EventModel.fromJson(eventItem));
+      item.placeInfo = PlaceModel.fromJson(eventItem['placeInfo']);
       showHotList.add(item);
     }
     showHotList = EVENT_SORT_HOT(showHotList);
     for (var eventItem in showHotList) {
       var item = eventRepo.setSponsorCount(eventItem);
       var addItem = cache.eventMapItemData[item.id];
-      LOG('--> showEventMap : ${item.id} / ${item.title} / ${addItem != null ? 'OK': 'none'}');
+      // LOG('--> showEventMap : ${item.id} / ${item.title} / ${addItem != null ? 'OK': 'none'}');
       addItem ??= PlaceEventMapCardItem(
         item,
         itemHeight: itemHeight,
@@ -318,12 +313,22 @@ class EventViewModel extends ChangeNotifier {
       cache.eventMapItemData[eventItem.id] = addItem;
       tmpList.add(addItem);
     }
+    LOG('----> showEventMap : $isMapUpdate / ${tmpList.length} / ${showHotList.length} / ${showList.length}');
     if (isMapUpdate) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Future.delayed(const Duration(milliseconds: 500), () async {
           if (mapKey.currentState != null) {
+            List<JSON> markerList = showHotList.map((e) {
+              var item = e.toJson();
+              LOG('--> placeInfo : ${e.placeInfo}');
+              if (e.placeInfo != null) {
+                item['placeInfo'] = e.placeInfo;
+                item['address'  ] = e.placeInfo!.address.toJson();
+              }
+              return item;
+            }).toList();
             var state = mapKey.currentState as GoogleMapState;
-            state.refreshMarker(showList);
+            state.refreshMarker(markerList);
             isMapUpdate = false;
           }
         });

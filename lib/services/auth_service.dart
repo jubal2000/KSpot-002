@@ -31,6 +31,7 @@ class AuthService extends GetxService {
   var isSignOutStatus = false;
 
   initUserSignIn() {
+    LOG('------> initUserSignIn');
     if (isLoginCheckDone) return;
     isSignOutStatus = true;
     fire.fireAuth!.authStateChanges()
@@ -40,11 +41,11 @@ class AuthService extends GetxService {
       AppData.userInfo  = UserModel.empty;
 
       if (user == null) {
-        LOG('------> User is currently signed out!');
+        LOG('--> User is currently signed out!');
         Get.offAllNamed(Routes.INTRO);
         if (onSignOut != null) onSignOut!();
       } else {
-        LOG('------> User is signed in! : ${AppData.isSignUpMode}');
+        LOG('--> User is signed in! / isSignUpMode: ${AppData.isSignUpMode}');
         setLoginUserInfo(user);
 
         if (!AppData.isSignUpMode) {

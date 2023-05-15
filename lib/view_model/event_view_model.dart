@@ -49,11 +49,12 @@ class EventViewModel extends ChangeNotifier {
   GlobalKey mapKey = GlobalKey();
 
   var cameraPos = CameraPosition(target: LatLng(0,0));
-  var eventListType = EventListType.list;
+  var eventListType = EventListType.map;
   var isDateOpen = false;
   var isMapUpdate = true;
   var isManagerMode = false; // 유저의 이벤트목록 일 경우 메니저이면, 기간이 지난 이벤트들도 표시..
   var isRefreshMap = false;
+  var itemHeight = 180.0;
 
   DatePicker? datePicker;
 
@@ -87,12 +88,12 @@ class EventViewModel extends ChangeNotifier {
     return cache.bookmarkData;
   }
 
-  showGoogleWidget(layout) {
+  showGoogleWidget({var height = 300.0}) {
     LOG('--> showGoogleWidget : ${googleWidget == null ? 'none' : 'ready'} / ${showList.length}');
     googleWidget ??= GoogleMapWidget(
       showList,
       key: mapKey,
-      mapHeight: layout.maxHeight - UI_MENU_HEIGHT + 6,
+      mapHeight: height - UI_MENU_HEIGHT + 6,
       onMarkerSelected: (selectItem) {
         LOG('--> onMarkerSelected : ${selectItem['title']} / ${selectItem['id']}');
       },
@@ -132,17 +133,16 @@ class EventViewModel extends ChangeNotifier {
             showItem['address'  ] = placeData.address.toJson();
             final pos = LatLng(DBL(showItem['address']['lat']), DBL(showItem['address']['lng']));
             // if (mapBounds !=  null) LOG('--> eventShowList add : ${mapBounds!.toJson()} / $pos');
-            // if (eventListType == EventListType.map) {
+            if (eventListType == EventListType.map) {
               final timeData = item.value.getDateTimeData(AppData.currentDate, item.value.title);
               if (timeData != null && (mapBounds == null || mapBounds!.contains(pos))) {
                 showItem['timeRange'] = '${timeData.startTime} ~ ${timeData.endTime}';
                 // LOG('--> eventShowList add : ${showItem['id']} / ${showItem['timeRange']}');
                 result.add(showItem);
               }
-            // } else {
-            //   // LOG('--> eventShowList add : ${showItem['id']}');
-            //   result.add(showItem);
-            // }
+            } else {
+              result.add(showItem);
+            }
           } else {
             LOG('----------> no place info');
           }
@@ -372,7 +372,76 @@ class EventViewModel extends ChangeNotifier {
     });
   }
 
-  showMainList(layout) {
+  showMapList() {
+    var itemWidth = itemHeight * 0.6;
+    return Container(
+      color: Colors.white,
+      child: Stack(
+        children: [
+          showGoogleWidget(height: Get.height),
+          BottomLeftAlign(
+            child: Container(
+              height: itemHeight,
+              margin: EdgeInsets.only(bottom: UI_MENU_BG_HEIGHT),
+              child: FutureBuilder(
+                future: setShowList(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    showList = snapshot.data as List<JSON>;
+                    return ListView(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                      children: showEventMap(itemWidth, itemHeight),
+                    );
+                  } else {
+                    return Container();
+                  }
+                }
+              ),
+            ),
+          ),
+        ],
+      )
+    );
+  }
+
+  showMainList() {
+    var itemWidth  = itemHeight * 0.6;
+    return Container(
+      padding: EdgeInsets.fromLTRB(0, UI_LIST_TOP_HEIGHT, 0, UI_MENU_HEIGHT),
+      child: FutureBuilder(
+        future: setShowList(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            showList = snapshot.data as List<JSON>;
+            return Column(
+              children: [
+                if (isDateOpen)
+                  SizedBox(height: UI_DATE_PICKER_HEIGHT.h + 5.h),
+                Expanded(
+                  child: ListView(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                      children: [
+                        if (isDateOpen)
+                          SizedBox(height: 10.h),
+                        ...showEventList(itemWidth),
+                        SizedBox(height: 10.h),
+                      ]
+                  ),
+                )
+              ],
+            );
+          } else {
+            return Container();
+          }
+        },
+      ),
+    );
+  }
+
+  showMainListxx(layout) {
     final itemWidth  = layout.maxWidth / 4.0;
     final itemHeight = itemWidth * 2.0;
     return Container(
@@ -380,7 +449,7 @@ class EventViewModel extends ChangeNotifier {
       child: Stack(
         children: [
           if (eventListType == EventListType.map)...[
-            showGoogleWidget(layout),
+            showGoogleWidget(),
             BottomLeftAlign(
               child: Container(
                 height: itemHeight,

@@ -31,39 +31,87 @@ class EventScreen extends StatelessWidget {
           child: Consumer<AppViewModel>(
             builder: (context, appViewModel, _) {
               LOG('--> AppViewModel');
-              // AppData.eventViewModel.googleWidget = null;
-              return Stack(
-                children: [
-                  FutureBuilder(
-                    future: AppData.eventViewModel.getEventData(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        cache.eventData = snapshot.data;
-                        AppData.eventViewModel.isMapUpdate = true;
-                        LOG('--> set eventData : ${cache.eventData.length}');
-                        return ChangeNotifierProvider<EventViewModel>.value(
-                          value: AppData.eventViewModel,
-                          child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-                            return Stack(
-                              children: [
-                                LayoutBuilder(
-                                  builder: (context, layout) {
-                                    return viewModel.showMainList(layout);
-                                  }
-                                ),
-                                viewModel.showDatePicker(),
-                                viewModel.showTopMenuBar(),
-                              ]
-                            );
-                          })
-                        );
-                      } else {
-                        return showLoadingFullPage(context);
-                      }
-                    }
-                  ),
-                ]
+              return FutureBuilder(
+                future: AppData.eventViewModel.getEventData(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    cache.eventData = snapshot.data;
+                    AppData.eventViewModel.isMapUpdate = true;
+                    LOG('--> cache.eventData : ${cache.eventData.length}');
+                    return ChangeNotifierProvider<EventViewModel>.value(
+                        value: AppData.eventViewModel,
+                        child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+                          return Stack(
+                            children: [
+                              IndexedStack(
+                                index: viewModel.eventListType == EventListType.map ? 0 : 1,
+                                children: [
+                                  viewModel.showMapList(),
+                                  viewModel.showMainList()
+                                ],
+                              ),
+                              viewModel.showDatePicker(),
+                              viewModel.showTopMenuBar(),
+                            ]
+                          );
+                        }
+                      )
+                    );
+                  } else {
+                    return showLoadingFullPage(context);
+                  }
+                }
               );
+              // return Stack(
+              //   children: [
+              //     if (cache.eventData.isEmpty)
+              //       FutureBuilder(
+              //         future: AppData.eventViewModel.getEventData(),
+              //         builder: (context, snapshot) {
+              //           if (snapshot.hasData) {
+              //             cache.eventData = snapshot.data;
+              //             AppData.eventViewModel.isMapUpdate = true;
+              //             LOG('--> set eventData : ${cache.eventData.length}');
+              //             return ChangeNotifierProvider<EventViewModel>.value(
+              //               value: AppData.eventViewModel,
+              //               child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+              //                 return Stack(
+              //                   children: [
+              //                     LayoutBuilder(
+              //                       builder: (context, layout) {
+              //                         return viewModel.showMainList(layout);
+              //                       }
+              //                     ),
+              //                     viewModel.showDatePicker(),
+              //                     viewModel.showTopMenuBar(),
+              //                   ]
+              //                 );
+              //               })
+              //             );
+              //           } else {
+              //             return showLoadingFullPage(context);
+              //           }
+              //         }
+              //       ),
+              //     if (cache.eventData.isNotEmpty)
+              //       ChangeNotifierProvider<EventViewModel>.value(
+              //         value: AppData.eventViewModel,
+              //         child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+              //           return Stack(
+              //             children: [
+              //               LayoutBuilder(
+              //                 builder: (context, layout) {
+              //                   return viewModel.showMainList(layout);
+              //                 }
+              //               ),
+              //               viewModel.showDatePicker(),
+              //               viewModel.showTopMenuBar(),
+              //             ]
+              //           );
+              //         })
+              //       )
+              //   ]
+              // );
             }
           )
         )

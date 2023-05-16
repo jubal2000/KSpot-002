@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:kspot_002/models/story_model.dart';
 import 'package:kspot_002/models/sponsor_model.dart';
+import 'package:kspot_002/services/cache_service.dart';
 import 'package:kspot_002/view/bookmark/bookmark_screen.dart';
 import 'package:kspot_002/view/event/event_list_screen.dart';
 import 'package:kspot_002/view/follow/follow_screen.dart';
@@ -21,6 +22,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../data/app_data.dart';
 import '../data/common_sizes.dart';
 import '../data/dialogs.dart';
+import '../models/etc_model.dart';
 import '../models/event_model.dart';
 import '../models/promotion_model.dart';
 import '../repository/event_repository.dart';
@@ -59,6 +61,8 @@ class UserViewModel extends ChangeNotifier {
   final eventRepo = EventRepository();
   final sponRepo  = SponsorRepository();
   final placeRepo = PlaceRepository();
+
+  final cache     = Get.find<CacheService>();
 
   final msgTextController = TextEditingController();
   final scrollController = List.generate(ProfileContentType.max.index, (index) => ScrollController());
@@ -457,7 +461,7 @@ class UserViewModel extends ChangeNotifier {
           contentItem(Icons.workspace_premium_outlined, 'PROMOTION LIST'.tr, '', 0, () {
             Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.promotion, 'PROMOTION LIST')));
           }),
-          contentItem(Icons.workspace_premium_outlined, 'SPONSORED LIST'.tr, '', 0, () {
+          contentItem(Icons.star_border_outlined, 'SPONSORED LIST'.tr, '', 0, () {
             Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.sponsor, 'SPONSORED LIST')));
           }),
         ],
@@ -750,28 +754,28 @@ class UserViewModel extends ChangeNotifier {
         });
         break;
       case ProfileContentType.promotion:
-        Get.to(() => PromotionScreen(isSelect: true))!.then((result1) {
-          Get.to(() => EventListScreen(isMyProfile, isSelectable: true))!.then((result) {
-            if (result != null) {
-              LOG('--> EventListScreen result : ${result.toJson()}');
-              showEventSponsorDialog(Get.context!, result, AppData.userInfo.creditCount).then((dResult) {
-                LOG('--> showEventSponsorDialog result : $dResult');
-                if (dResult != null) {
-                  sponRepo.addSponsorItem(dResult).then((addItem) {
-                    if (addItem != null) {
-                      sponsorData[addItem['id']] = SponsorModel.fromJson(addItem);
-                      LOG('--> sponsorData Success : ${sponsorData.length} / ${addItem.toString()}');
-                      ShowToast('Event Sponsorship Success'.tr);
-                      notifyListeners();
-                    } else {
-                      ShowToast('Event Sponsorship Failed'.tr);
-                    }
-                  });
-                }
-              });
-            }
-          });
-        });
+        // Get.to(() => PromotionScreen(isSelect: true))!.then((result1) {
+        //   Get.to(() => EventListScreen(isMyProfile, isSelectable: true))!.then((result) {
+        //     if (result != null) {
+        //       LOG('--> EventListScreen result : ${result.toJson()}');
+        //       showEventSponsorDialog(Get.context!, result, AppData.userInfo.creditCount).then((dResult) {
+        //         LOG('--> showEventSponsorDialog result : $dResult');
+        //         if (dResult != null) {
+        //           sponRepo.addSponsorItem(dResult).then((addItem) {
+        //             if (addItem != null) {
+        //               sponsorData[addItem['id']] = SponsorModel.fromJson(addItem);
+        //               LOG('--> sponsorData Success : ${sponsorData.length} / ${addItem.toString()}');
+        //               ShowToast('Event Sponsorship Success'.tr);
+        //               notifyListeners();
+        //             } else {
+        //               ShowToast('Event Sponsorship Failed'.tr);
+        //             }
+        //           });
+        //         }
+        //       });
+        //     }
+        //   });
+        // });
         break;
       case ProfileContentType.sponsor:
         Get.to(() => EventListScreen(isMyProfile, isSelectable: true))!.then((result) {
@@ -783,6 +787,9 @@ class UserViewModel extends ChangeNotifier {
                 sponRepo.addSponsorItem(dResult).then((addItem) {
                   if (addItem != null) {
                     sponsorData[addItem['id']] = SponsorModel.fromJson(addItem);
+                    var sponsorItem = SponsorData.fromSponsorModel(SponsorModel.fromJson(addItem));
+                    cache.eventData[result.id]!.sponsorData ??= [];
+                    cache.eventData[result.id]!.sponsorData!.add(sponsorItem);
                     LOG('--> sponsorData Success : ${sponsorData.length} / ${addItem.toString()}');
                     ShowToast('Event Sponsorship Success'.tr);
                     notifyListeners();

@@ -169,11 +169,11 @@ class EventRepository {
     // LOG('--> checkSponsored [${event.title}] : ${event.sponsorData}');
     if (LIST_NOT_EMPTY(event.sponsorData)) {
       for (var item in event.sponsorData!) {
-        // LOG('--> event.sponsorData check [$eventDate] : ${item.toJson()}');
+        LOG('--> event.sponsorData check [$eventDate] : ${item.toJson()}');
         if (checkDateRange(item.startTime, item.endTime, targetTime)) {
           var orgCount = event.sponsorCount![eventDate] ?? 0;
           event.sponsorCount![eventDate] = orgCount + 1;
-          LOG('--> checkSponsored add [$eventDate] : ${event.sponsorCount![eventDate]}');
+          LOG('--> checkSponsored add [${event.title}-$eventDate] : ${event.sponsorCount![eventDate]}');
         }
       }
     }

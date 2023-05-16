@@ -150,11 +150,6 @@ class EventViewModel extends ChangeNotifier {
       }
     }
     LOG('--> eventShowList : ${result.length} / ${cache.eventData.length} / ${AppData.currentDate.toString()}');
-    // sponsor count..
-    for (var i=0; i<result.length; i++) {
-      result[i] = eventRepo.setSponsorCount(result[i], AppData.currentDate);
-    }
-    LOG('--> eventShowList result : ${result.length}');
     return result;
   }
 
@@ -252,6 +247,21 @@ class EventViewModel extends ChangeNotifier {
 
   showEventMap() {
     List<Widget> tmpList = [];
+    // sponsor count..
+    for (var i=0; i<showList.length; i++) {
+      var eventOrg = cache.eventData[showList[i].id];
+      if (eventOrg != null) {
+        LOG('--> eventOrg.sponsorData [${showList[i].title}] : ${eventOrg.sponsorData}');
+        if (LIST_NOT_EMPTY(eventOrg.sponsorData)) {
+          for (var item in eventOrg.sponsorData!) {
+            LOG('--> sponsorData item : ${item.toJson()}');
+          }
+        }
+        showList[i].sponsorData = eventOrg.sponsorData;
+      }
+      showList[i] = eventRepo.setSponsorCount(showList[i], AppData.currentDate);
+    }
+    LOG('--> eventShowList result : ${showList.length}');
     showList = EVENT_SORT_HOT(showList);
     for (var eventItem in showList) {
       var addItem = cache.eventMapItemData[eventItem.id];
@@ -325,6 +335,14 @@ class EventViewModel extends ChangeNotifier {
 
   showEventList(itemHeight) {
     List<Widget> tmpList = [];
+    // sponsor count..
+    for (var i=0; i<showList.length; i++) {
+      var eventOrg = cache.eventData[showList[i].id];
+      if (eventOrg != null) {
+        showList[i].sponsorData = eventOrg.sponsorData;
+      }
+      showList[i] = eventRepo.setSponsorCount(showList[i], AppData.currentDate);
+    }
     showList = EVENT_SORT_HOT(showList);
     for (var eventItem in showList) {
       var addItem = cache.eventListItemData[eventItem.id];

@@ -255,15 +255,30 @@ class SponsorData {
   factory SponsorData.fromJson(JSON json) => _$SponsorDataFromJson(json);
   JSON toJson() => _$SponsorDataToJson(this);
 
-  setFromSponsorModel(SponsorModel sponsor) {
-    id          = sponsor.id;
-    creditQty   = sponsor.creditQty;
-    userId      = sponsor.userId;
-    userName    = sponsor.userName;
-    userPic     = sponsor.userPic;
-    createTime  = DateTime.now();
-    startTime   = DateTime.now();
-    endTime     = DateTime.now();
+  static empty() {
+    return SponsorData(
+      id: '',
+      creditQty: 0,
+      userId: '',
+      userPic: '',
+      userName: '',
+      createTime: DateTime.now(),
+      startTime: DateTime.now(),
+      endTime: DateTime.now(),
+    );
+  }
+
+  static fromSponsorModel(SponsorModel sponsor) {
+    return SponsorData(
+      id: sponsor.id,
+      creditQty: sponsor.creditQty,
+      userId: sponsor.userId,
+      userPic: sponsor.userPic,
+      userName: sponsor.userName,
+      createTime: sponsor.createTime,
+      startTime: sponsor.startTime,
+      endTime: sponsor.endTime,
+    );
   }
 }
 

@@ -30,6 +30,7 @@ import '../widget/custom_field_widget.dart';
 import '../widget/image_scroll_viewer.dart';
 import '../widget/like_widget.dart';
 import '../widget/share_widget.dart';
+import '../widget/sponsor_widget.dart';
 import '../widget/time_list_widget.dart';
 import '../widget/user_card_widget.dart';
 
@@ -166,11 +167,15 @@ class EventDetailViewModel extends ChangeNotifier {
         children: [
           ShareWidget(Get.context!, 'event', eventInfo!.toJson(), showTitle: true),
           SizedBox(width: 10),
-          BookmarkWidget(Get.context!, 'event', eventInfo!.toJson(), title:'BOOKMARK'.tr, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
-
-          }),
+          BookmarkWidget(Get.context!, 'event', eventInfo!.toJson(), title:'BOOKMARK'.tr, iconSize: 22, isEnabled: AppData.IS_LOGIN),
           SizedBox(width: 10),
           LikeWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
+            LOG('--> LikeWidget result : $count');
+            eventInfo!.likeCount = count;
+            updateEventInfo();
+          }),
+          SizedBox(width: 10),
+          SponsorWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
             LOG('--> LikeWidget result : $count');
             eventInfo!.likeCount = count;
             updateEventInfo();

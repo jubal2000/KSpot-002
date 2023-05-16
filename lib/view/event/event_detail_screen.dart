@@ -196,17 +196,8 @@ class _EventDetailState extends State<EventDetailScreen> {
                                     viewModel.showPicture(),
                                     SizedBox(width: 15),
                                     Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          viewModel.showTitle()
-                                        ]
-                                      ),
+                                      child: viewModel.showTitle(),
                                     ),
-                                    if (!widget.isPreview)...[
-                                      SizedBox(height: 20),
-                                      viewModel.showShareBox(),
-                                    ],
                                   ]
                                 ),
                                 SizedBox(height: 20),
@@ -217,11 +208,10 @@ class _EventDetailState extends State<EventDetailScreen> {
                                   SizedBox(height: 30),
                                   viewModel.showTagList(),
                                 ],
-                                // if (INT(_eventInfo['price']) > 0)...[
-                                //   showHorizontalDivider(Size(double.infinity * 0.9, 40), color: LineColor(context)),
-                                //   SubTitle(context, 'ENTRANCE FEE(site)'.tr),
-                                //   Text('${PRICE_FULL_STR(_eventInfo['price'], _eventInfo['priceCurrency'])}', style: DescBodyPriceStyle(context)),
-                                // ],
+                                if (!widget.isPreview)...[
+                                  showHorizontalDivider(Size(double.infinity * 0.9, 40), color: LineColor(context)),
+                                  viewModel.showShareBox(),
+                                ],
                                 if (JSON_NOT_EMPTY(viewModel.eventInfo!.managerData))...[
                                   showHorizontalDivider(Size(double.infinity * 0.9, 40), color: LineColor(context)),
                                   viewModel.showManagerList(),

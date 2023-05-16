@@ -262,7 +262,7 @@ class _EventDetailState extends State<EventDetailScreen> {
                     )
                   );
                 }
-              )
+              ),
             );
           }
         )

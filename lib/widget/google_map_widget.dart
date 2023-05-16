@@ -42,6 +42,7 @@ class GoogleMapWidget extends StatefulWidget{
     this.onButtonAction,
     this.onMarkerSelected,
     this.onCameraMoved,
+    this.mapController,
   }) : super(key: key);
 
   bool showMyLocation;
@@ -57,7 +58,7 @@ class GoogleMapWidget extends StatefulWidget{
 
   // LatLng startLocation  = LatLng(27.6683619, 85.3101895);
   // LatLng endLocation    = LatLng(27.6875436, 85.2751138);
-  GoogleMapController? mapController; //contrller for Google map
+  GoogleMapController? mapController; //controller for Google map
   ByteData? markerBgImage;
 
   @override
@@ -144,7 +145,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
             //   // snippet: DESC(item['desc']),
             // ),
             onTap: () {
-              onMarkerTaped(item);
+              if (widget.onMarkerSelected != null) widget.onMarkerSelected!(item);
             },
           ));
         }
@@ -168,7 +169,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
                   //   // snippet: DESC(item['desc']),
                   // ),
                   onTap: () {
-                    onMarkerTaped(item);
+                    if (widget.onMarkerSelected != null) widget.onMarkerSelected!(item);
                   },
                   // onTap: onMarkerTaped(item),
                 ));
@@ -235,10 +236,6 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
     return null;
   }
 
-  onMarkerTaped(JSON item) {
-    if (widget.onMarkerSelected != null) widget.onMarkerSelected!(item);
-  }
-
   Future<Uint8List?> getBytesFromAsset(String imagePath, double width) async {
     Uint8List? result;
     try {
@@ -288,6 +285,13 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
     initMarker();
   }
 
+  moveToLocation(LatLng position) async {
+    var zoom = await widget.mapController!.getZoomLevel();
+    LOG('--> moveToLocation -> $position / $zoom');
+    var newPos = LatLng(position.latitude - 0.05 / zoom, position.longitude);
+    widget.mapController!.animateCamera(CameraUpdate.newLatLngZoom(newPos, zoom));
+  }
+
   Future getDarkMapStyle() async {
     darkMapStyle = await rootBundle.loadString('assets/map_style/dark.json');
     return darkMapStyle;
@@ -299,7 +303,6 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
   }
 
   getDirections(LatLng endLocation) async {
-    LOG('--> GoogleMapWidget getDirections : ${AppData.currentLocation} -> $endLocation');
     List<LatLng> polylineCoordinates = [];
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       GOOGLE_MAP_KEY,
@@ -307,6 +310,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
       PointLatLng(endLocation.latitude, endLocation.longitude),
       travelMode: TravelMode.transit,
     );
+    LOG('--> GoogleMapWidget getDirections : ${AppData.currentLocation} -> $endLocation / ${result.points.length}');
     if (result.points.isNotEmpty) {
       for (var point in result.points) {
         var loc = LatLng(point.latitude, point.longitude);
@@ -317,6 +321,11 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
         //   icon: BitmapDescriptor.defaultMarker,
         // ));
       }
+      markers.add(Marker( //add distination location marker
+        markerId: MarkerId(GlobalKey().toString()),
+        position: LatLng(AppData.currentLocation!.latitude, AppData.currentLocation!.longitude),
+        icon: BitmapDescriptor.defaultMarker,
+      ));
     } else {
       LOG('--> getDirections errorMessage : ${result.errorMessage}');
     }
@@ -336,7 +345,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
       if (widget.mapController != null) {
         Future.delayed(
             Duration(milliseconds: 200), () => widget.mapController!.animateCamera(CameraUpdate.newLatLngBounds(
-            MapUtils.boundsFromLatLngList(markers.map((loc) => loc.position).toList()), 50))
+            MapUtils.boundsFromLatLngList(markers.map((loc) => loc.position).toList()), 100))
         );
       }
     });
@@ -446,32 +455,32 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
                         Factory<ScaleGestureRecognizer>(() => ScaleGestureRecognizer()))
               ),
               if (widget.showButtons)...[
-                BottomRightAlign(
-                  child: GestureDetector(
-                    onTap: () {
-                      if (widget.onButtonAction != null) widget.onButtonAction!(MapButtonAction.direction);
-                    },
-                    child: Container(
-                      margin: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
-                          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 3)]),
-                      child: Center(
-                        child: Icon(Icons.place, color: Colors.blueAccent, size: 30),
-                      )
-                    )
-                  ),
-                ),
+                // BottomRightAlign(
+                //   child: GestureDetector(
+                //     onTap: () {
+                //       if (widget.onButtonAction != null) widget.onButtonAction!(MapButtonAction.direction);
+                //     },
+                //     child: Container(
+                //       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                //       width: 40,
+                //       height: 40,
+                //       decoration: BoxDecoration(
+                //           color: Colors.white,
+                //           borderRadius: BorderRadius.circular(6),
+                //           boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 3)]),
+                //       child: Center(
+                //         child: Icon(Icons.place, color: Colors.blueAccent, size: 30),
+                //       )
+                //     )
+                //   ),
+                // ),
                 BottomRightAlign(
                   child: GestureDetector(
                       onTap: () {
                         if (widget.onButtonAction != null) widget.onButtonAction!(MapButtonAction.bus);
                       },
                       child: Container(
-                          margin: EdgeInsets.symmetric(vertical: 5, horizontal: 50),
+                          margin: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
@@ -492,7 +501,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
                           color: Colors.white,
                           child: Container(
                               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                              child: Text(distance.toStringAsFixed(2) + " km",
+                              child: Text("${distance.toStringAsFixed(2)} km",
                                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blueAccent))
                           ),
                         )
@@ -715,6 +724,7 @@ GoogleMapLinkDirectionMake(String? name, double? lat, double? lng) {
   lng ??= 0.0;
   if (Platform.isAndroid) {
     return 'geo:$lat,$lng($name)';
+    // return 'google.navigation:q=$lat,$lng&mode=d';
   } else {
     return 'comgooglemaps://?center=$lat,$lng';
   }

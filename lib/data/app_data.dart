@@ -49,7 +49,7 @@ const FACE_CIRCLE_SIZE_S = 40.0;
 const FACE_CIRCLE_SIZE_SS = 30.0;
 const FACE_CIRCLE_SIZE_SE = 20.0;
 
-const GOOGLE_MAP_KEY = 'AIzaSyD4ESmTaou10BumFoJ7DQ7jkTI7emh4Hvo';
+const GOOGLE_MAP_KEY = 'AIzaSyB4BgTVRI400uwFkTuH1YvSDfaKtdLpij8';
 
 const APP_STORE_OPEN = true;
 

@@ -157,6 +157,9 @@ AddressData _$AddressDataFromJson(Map<String, dynamic> json) => AddressData(
       address2: json['address2'] as String,
       lat: (json['lat'] as num).toDouble(),
       lng: (json['lng'] as num).toDouble(),
+      postCode: json['postCode'] as String?,
+      country: json['country'] as String?,
+      city: json['city'] as String?,
     );
 
 Map<String, dynamic> _$AddressDataToJson(AddressData instance) =>
@@ -165,6 +168,9 @@ Map<String, dynamic> _$AddressDataToJson(AddressData instance) =>
       'address2': instance.address2,
       'lat': instance.lat,
       'lng': instance.lng,
+      'postCode': instance.postCode,
+      'country': instance.country,
+      'city': instance.city,
     };
 
 MemberData _$MemberDataFromJson(Map<String, dynamic> json) => MemberData(

@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/models/place_model.dart';
 import 'package:kspot_002/repository/event_repository.dart';
+import 'package:kspot_002/view/place/place_detail_screen.dart';
 import 'package:kspot_002/widget/event_item.dart';
 
 import '../data/app_data.dart';
@@ -37,7 +38,7 @@ enum EventListTopicType {
 }
 
 class EventViewModel extends ChangeNotifier {
-  List<JSON>    showList = [];
+  List<EventModel> showList = [];
   LatLngBounds? mapBounds;
   GoogleMapWidget? googleWidget;
 
@@ -54,7 +55,7 @@ class EventViewModel extends ChangeNotifier {
   var isMapUpdate = true;
   var isManagerMode = false; // 유저의 이벤트목록 일 경우 메니저이면, 기간이 지난 이벤트들도 표시..
   var isRefreshMap = false;
-  var itemHeight = 180.0;
+  var itemHeight = 220.0;
 
   DatePicker? datePicker;
 
@@ -91,11 +92,13 @@ class EventViewModel extends ChangeNotifier {
   showGoogleWidget({var height = 300.0}) {
     LOG('--> showGoogleWidget : ${googleWidget == null ? 'none' : 'ready'} / ${showList.length}');
     googleWidget ??= GoogleMapWidget(
-      showList,
+      showList.map((e) => e.toJson()).toList(),
       key: mapKey,
       mapHeight: height - UI_MENU_HEIGHT + 6,
       onMarkerSelected: (selectItem) {
         LOG('--> onMarkerSelected : ${selectItem['title']} / ${selectItem['id']}');
+          Get.to(() => PlaceDetailScreen(PlaceModel.fromJson(selectItem), null))!.then((eventInfo) {
+        });
       },
       onCameraMoved: (pos, region) {
         cameraPos = pos;
@@ -115,33 +118,30 @@ class EventViewModel extends ChangeNotifier {
     );
   }
 
-  Future<List<JSON>> setShowList() async {
-    List<JSON> result = [];
+  Future<List<EventModel>> setShowList() async {
+    List<EventModel> result = [];
     if (JSON_NOT_EMPTY(cache.eventData)) {
       for (var item in cache.eventData.entries) {
         final isExpired = eventRepo.checkIsExpired(item.value);
         if (isManagerMode || (!isExpired && item.value.status == 1)) {
-          var showItem  = item.value.toJson();
-          var placeInfo = showItem['placeInfo'];
-          PlaceModel? placeData;
-          if (JSON_NOT_EMPTY(placeInfo)) placeData = PlaceModel.fromJson(placeInfo);
-          placeData ??= await placeRepo.getPlaceFromId(item.value.placeId);
-          if (placeData != null) {
-            placeInfo = placeData.toJson();
-            LOG('--> setShowList placeInfo [${placeData.id}] : ${placeData.title}');
-            showItem['placeInfo'] = placeInfo;
-            showItem['address'  ] = placeData.address.toJson();
-            final pos = LatLng(DBL(showItem['address']['lat']), DBL(showItem['address']['lng']));
+          var placeInfo = item.value.placeInfo;
+          placeInfo ??= await placeRepo.getPlaceFromId(item.value.placeId);
+          if (placeInfo != null) {
+            LOG('--> setShowList placeInfo [${placeInfo.id}] : ${placeInfo.title}');
+            item.value.placeInfo = placeInfo;
+            final pos = LatLng(DBL(placeInfo.address.lat), DBL(placeInfo.address.lng));
             // if (mapBounds !=  null) LOG('--> eventShowList add : ${mapBounds!.toJson()} / $pos');
             if (eventListType == EventListType.map) {
               final timeData = item.value.getDateTimeData(AppData.currentDate, item.value.title);
               if (timeData != null && (mapBounds == null || mapBounds!.contains(pos))) {
-                showItem['timeRange'] = '${timeData.startTime} ~ ${timeData.endTime}';
-                // LOG('--> eventShowList add : ${showItem['id']} / ${showItem['timeRange']}');
-                result.add(showItem);
+                item.value.timeRange = '${timeData.startTime} ~ ${timeData.endTime}';
+                // LOG('--> eventShowList add : ${item.value.title} / ${item.value.timeRange}');
+                result.add(item.value);
+              } else {
+                LOG('--> eventShowList del : ${item.value.title} / $timeData');
               }
             } else {
-              result.add(showItem);
+              result.add(item.value);
             }
           } else {
             LOG('----------> no place info');
@@ -150,6 +150,11 @@ class EventViewModel extends ChangeNotifier {
       }
     }
     LOG('--> eventShowList : ${result.length} / ${cache.eventData.length} / ${AppData.currentDate.toString()}');
+    // sponsor count..
+    for (var i=0; i<result.length; i++) {
+      result[i] = eventRepo.setSponsorCount(result[i], AppData.currentDate);
+    }
+    LOG('--> eventShowList result : ${result.length}');
     return result;
   }
 
@@ -219,76 +224,55 @@ class EventViewModel extends ChangeNotifier {
 
   onMapRegionChanged(region) async {
     mapBounds = region;
-    List<JSON> tmpList = await setShowList();
+    var tmpList = await setShowList();
     if (compareShowList(tmpList)) {
       return false;
     }
-    // LOG('--> onMapRegionChanged update : ${showList.length} / ${tmpList.length}');
-    // eventShowList = tmpList;
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   Future.delayed(const Duration(milliseconds: 200), () async {
-    //     var state = mapKey.currentState as GoogleMapState;
-    //     state.refreshMarker(eventShowList, false);
-      // });
-      notifyListeners();
-    // });
+    notifyListeners();
     return true;
   }
 
   onMapDayChanged() async {
     mapBounds = null;
     isMapUpdate = true;
-    // List<JSON> tmpList = await setShowList();
-    // if (compareShowList(tmpList)) {
-    //   LOG('--> onMapDayChanged cancel');
-    //   return false;
-    // }
-    // googleWidget = null;
-    // eventShowList = tmpList;
-    // LOG('--> onMapDayChanged update : ${showList.length}');
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   Future.delayed(const Duration(milliseconds: 200), () async {
-    //     var state = mapKey.currentState as GoogleMapState;
-    //     state.refreshMarker(eventShowList);
-    //   });
-      notifyListeners();
-    // });
+    notifyListeners();
     return true;
   }
 
-  compareShowList(List<JSON> checkList) {
+  compareShowList(List<EventModel> checkList) {
     if (checkList.length != showList.length) return false;
     var checkCount = 0;
     for (var eItem in showList) {
       for (var cItem in checkList) {
-        if (eItem['id'] == cItem['id']) checkCount++;
+        if (eItem.id == cItem.id) checkCount++;
       }
     }
     return showList.length > checkList.length ? checkCount == showList.length : checkCount == checkList.length;
   }
 
-  showEventMap(itemWidth, itemHeight) {
+  showEventMap() {
     List<Widget> tmpList = [];
-    List<EventModel> showHotList = [];
+    showList = EVENT_SORT_HOT(showList);
     for (var eventItem in showList) {
-      var item = eventRepo.setSponsorCount(EventModel.fromJson(eventItem));
-      item.placeInfo = PlaceModel.fromJson(eventItem['placeInfo']);
-      showHotList.add(item);
-    }
-    showHotList = EVENT_SORT_HOT(showHotList);
-    for (var eventItem in showHotList) {
-      var item = eventRepo.setSponsorCount(eventItem);
-      var addItem = cache.eventMapItemData[item.id];
+      var addItem = cache.eventMapItemData[eventItem.id];
       // LOG('--> showEventMap : ${item.id} / ${item.title} / ${addItem != null ? 'OK': 'none'}');
       addItem ??= PlaceEventMapCardItem(
-        item,
+        eventItem,
         itemHeight: itemHeight,
-        itemWidth: itemWidth,
-        margin: EdgeInsets.symmetric(horizontal: 3),
+        itemWidth:  itemHeight * 0.5,
+        margin: EdgeInsets.all(5),
         backgroundColor:  Theme.of(Get.context!).cardColor,
         faceOutlineColor: Theme.of(Get.context!).colorScheme.secondary,
         onShowDetail: (key, status) {
-          showEventItemDetail(eventItem);
+          switch(status) {
+            case 1:
+              var state = mapKey.currentState as GoogleMapState;
+              state.moveToLocation(LATLNG(eventItem.placeInfo!.address.toJson()));
+              break;
+            default:
+              showEventItemDetail(eventItem);
+              break;
+          }
         },
       );
       // addItem ??= Container(
@@ -313,20 +297,22 @@ class EventViewModel extends ChangeNotifier {
       cache.eventMapItemData[eventItem.id] = addItem;
       tmpList.add(addItem);
     }
-    LOG('----> showEventMap : $isMapUpdate / ${tmpList.length} / ${showHotList.length} / ${showList.length}');
+    LOG('----> showEventMap : $isMapUpdate / ${tmpList.length} / ${showList.length}');
     if (isMapUpdate) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Future.delayed(const Duration(milliseconds: 500), () async {
           if (mapKey.currentState != null) {
-            List<JSON> markerList = showHotList.map((e) {
-              var item = e.toJson();
-              LOG('--> placeInfo : ${e.placeInfo}');
+            List addList = [];
+            List<JSON> markerList = [];
+            for (var e in showList) {
               if (e.placeInfo != null) {
-                item['placeInfo'] = e.placeInfo;
-                item['address'  ] = e.placeInfo!.address.toJson();
+                // LOG('--> addList : ${addList.length} / ${e.placeInfo!.id}');
+                if (!addList.contains(e.placeInfo!.id)) {
+                  markerList.add(e.placeInfo!.toJson());
+                  addList.add(e.placeInfo!.id);
+                }
               }
-              return item;
-            }).toList();
+            }
             var state = mapKey.currentState as GoogleMapState;
             state.refreshMarker(markerList);
             isMapUpdate = false;
@@ -339,14 +325,8 @@ class EventViewModel extends ChangeNotifier {
 
   showEventList(itemHeight) {
     List<Widget> tmpList = [];
-    List<EventModel> showHotList = [];
+    showList = EVENT_SORT_HOT(showList);
     for (var eventItem in showList) {
-      var item = eventRepo.setSponsorCount(EventModel.fromJson(eventItem));
-      item.placeInfo = PlaceModel.fromJson(eventItem['placeInfo']);
-      showHotList.add(item);
-    }
-    showHotList = EVENT_SORT_HOT(showHotList);
-    for (var eventItem in showHotList) {
       var addItem = cache.eventListItemData[eventItem.id];
       addItem ??= EventCardItem(
         eventItem,
@@ -362,37 +342,38 @@ class EventViewModel extends ChangeNotifier {
   }
 
   showEventItemDetail(EventModel item) {
-    Get.to(() => EventDetailScreen(item, item.placeInfo))!.then((eventInfo) {
-      if (eventInfo != null) {
-        isMapUpdate = true;
-        showList.clear();
-        cache.setEventItem(eventInfo!);
-        notifyListeners();
-      }
+    Future.delayed(Duration(milliseconds: 500)).then((_) {
+      Get.to(() => EventDetailScreen(item, item.placeInfo))!.then((eventInfo) {
+        if (eventInfo != null) {
+          isMapUpdate = true;
+          showList.clear();
+          cache.setEventItem(eventInfo!);
+          notifyListeners();
+        }
+      });
     });
   }
 
   showMapList() {
-    var itemWidth = itemHeight * 0.6;
     return Container(
       color: Colors.white,
       child: Stack(
         children: [
-          showGoogleWidget(height: Get.height),
+          showGoogleWidget(height: Get.height - 47),
           BottomLeftAlign(
             child: Container(
               height: itemHeight,
-              margin: EdgeInsets.only(bottom: UI_MENU_BG_HEIGHT),
+              margin: EdgeInsets.only(bottom: UI_MENU_BG_HEIGHT - 10),
               child: FutureBuilder(
                 future: setShowList(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
-                    showList = snapshot.data as List<JSON>;
+                    showList = snapshot.data!;
                     return ListView(
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
                       padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                      children: showEventMap(itemWidth, itemHeight),
+                      children: showEventMap(),
                     );
                   } else {
                     return Container();
@@ -414,7 +395,7 @@ class EventViewModel extends ChangeNotifier {
         future: setShowList(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            showList = snapshot.data as List<JSON>;
+            showList = snapshot.data!;
             return Column(
               children: [
                 if (isDateOpen)
@@ -438,76 +419,6 @@ class EventViewModel extends ChangeNotifier {
           }
         },
       ),
-    );
-  }
-
-  showMainListxx(layout) {
-    final itemWidth  = layout.maxWidth / 4.0;
-    final itemHeight = itemWidth * 2.0;
-    return Container(
-      color: eventListType == EventListType.map ? Colors.white : null,
-      child: Stack(
-        children: [
-          if (eventListType == EventListType.map)...[
-            showGoogleWidget(),
-            BottomLeftAlign(
-              child: Container(
-                height: itemHeight,
-                margin: EdgeInsets.only(bottom: UI_MENU_BG_HEIGHT),
-                child: FutureBuilder(
-                  future: setShowList(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      showList = snapshot.data as List<JSON>;
-                      return ListView(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                        children: showEventMap(itemWidth, itemHeight),
-                      );
-                    } else {
-                      return Container();
-                    }
-                  }
-                ),
-              ),
-            ),
-          ],
-          if (eventListType == EventListType.list)...[
-            Container(
-              padding: EdgeInsets.fromLTRB(0, UI_LIST_TOP_HEIGHT, 0, UI_MENU_HEIGHT),
-              child: FutureBuilder(
-                future: setShowList(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    showList = snapshot.data as List<JSON>;
-                    return Column(
-                      children: [
-                        if (isDateOpen)
-                          SizedBox(height: UI_DATE_PICKER_HEIGHT.h + 5.h),
-                        Expanded(
-                          child: ListView(
-                            shrinkWrap: true,
-                            padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                            children: [
-                              if (isDateOpen)
-                              SizedBox(height: 10.h),
-                              ...showEventList(itemWidth),
-                              SizedBox(height: 10.h),
-                            ]
-                          ),
-                        )
-                      ],
-                    );
-                  } else {
-                    return Container();
-                  }
-                },
-              ),
-            ),
-          ],
-        ],
-      )
     );
   }
 

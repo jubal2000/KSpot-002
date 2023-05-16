@@ -476,7 +476,7 @@ ItemTitleExStyle(BuildContext context) {
   return TextStyle(fontSize: 14, color: Theme.of(context).primaryColor.withOpacity(0.65), fontWeight: FontWeight.w600);
 }
 
-ItemDescStyle(BuildContext context, {var fontSize = 12.0}) {
+ItemDescStyle(BuildContext context, {double fontSize = 12.0}) {
   return TextStyle(fontSize: fontSize, color: Theme.of(context).textTheme.titleSmall!.color, height: 1.1);
 }
 

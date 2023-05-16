@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:helpers/helpers.dart';
 import 'package:kspot_002/view/place/place_detail_screen.dart';
 import 'package:kspot_002/view/place/place_edit_screen.dart';
 import 'package:kspot_002/widget/google_map_widget.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -164,8 +166,9 @@ class PlaceDetailViewModel extends ChangeNotifier {
                       child: Icon(Icons.map_outlined, size: 24),
                     ),
                     onTap: () {
-                      isShowMap = !isShowMap;
-                      notifyListeners();
+                      showGoogleMap();
+                      // isShowMap = !isShowMap;
+                      // notifyListeners();
                     },
                   ),
                   SizedBox(width: 5),
@@ -190,55 +193,131 @@ class PlaceDetailViewModel extends ChangeNotifier {
               )
             ]
         ),
-        if (isShowMap)...[
-          SizedBox(height: 10),
-          GoogleMapWidget(
-              [placeInfo!.toJson()],
-              mapHeight: Get.width,
-              showDirection: true,
-              showButtons: true,
-              showMyLocation: true,
-              onButtonAction: (action) {
-                if (action == MapButtonAction.direction) {
-                  var url = Uri.parse(GoogleMapLinkDirectionMake(
-                      placeInfo!.title, placeInfo!.address.lat, placeInfo!.address.lng));
-                  canLaunchUrl(url).then((result) {
-                    if (!result) {
-                      if (Platform.isIOS) {
-                        url = Uri.parse(
-                            'https://apps.apple.com/gb/app/google-maps-transit-food/id585027354');
-                      } else {
-                        url = Uri.parse(
-                            'https://play.google.com/store/apps/details?id=com.google.android.apps.maps');
-                      }
-                    }
-                    launchUrl(url);
-                  });
-                } else {
-                  GetCurrentLocation().then((result) {
-                    if (AppData.currentLocation != null) {
-                      var url = Uri.parse(GoogleMapLinkBusLineMake(
-                          'My Location'.tr, AppData.currentLocation!,
-                          placeInfo!.title, LATLNG(placeInfo!.address.toJson())));
-                      canLaunchUrl(url).then((result) {
-                        if (!result) {
-                          if (Platform.isIOS) {
-                            url = Uri.parse(
-                                'https://apps.apple.com/gb/app/google-maps-transit-food/id585027354');
-                          } else {
-                            url = Uri.parse(
-                                'https://play.google.com/store/apps/details?id=com.google.android.apps.maps');
-                          }
-                        }
-                        LOG('--> url : $url');
-                        launchUrl(url);
-                      });
-                    }
-                  });
-                }
-              }),
-        ],
+        // if (isShowMap)...[
+        //   SizedBox(height: 10),
+        //   GoogleMapWidget(
+        //       [placeInfo!.toJson()],
+        //       mapHeight: Get.width,
+        //       showDirection: true,
+        //       showButtons: true,
+        //       showMyLocation: true,
+        //       onButtonAction: (action) {
+        //         if (action == MapButtonAction.direction) {
+        //           var url = Uri.parse(GoogleMapLinkDirectionMake(
+        //               placeInfo!.title, placeInfo!.address.lat, placeInfo!.address.lng));
+        //           canLaunchUrl(url).then((result) {
+        //             if (!result) {
+        //               if (Platform.isIOS) {
+        //                 url = Uri.parse(
+        //                     'https://apps.apple.com/gb/app/google-maps-transit-food/id585027354');
+        //               } else {
+        //                 url = Uri.parse(
+        //                     'https://play.google.com/store/apps/details?id=com.google.android.apps.maps');
+        //               }
+        //             }
+        //             launchUrl(url);
+        //           });
+        //         } else {
+        //           GetCurrentLocation().then((result) {
+        //             if (AppData.currentLocation != null) {
+        //               var url = Uri.parse(GoogleMapLinkBusLineMake(
+        //                   'My Location'.tr, AppData.currentLocation!,
+        //                   placeInfo!.title, LATLNG(placeInfo!.address.toJson())));
+        //               canLaunchUrl(url).then((result) {
+        //                 if (!result) {
+        //                   if (Platform.isIOS) {
+        //                     url = Uri.parse(
+        //                         'https://apps.apple.com/gb/app/google-maps-transit-food/id585027354');
+        //                   } else {
+        //                     url = Uri.parse(
+        //                         'https://play.google.com/store/apps/details?id=com.google.android.apps.maps');
+        //                   }
+        //                 }
+        //                 LOG('--> url : $url');
+        //                 launchUrl(url);
+        //               });
+        //             }
+        //           });
+        //         }
+        //       }),
+        // ],
       ],
+    );
+  }
+
+  showGoogleMap() async {
+    return await showModalBottomSheet(
+        context: Get.context!,
+        isScrollControlled: true,
+        enableDrag: false,
+        builder: (context) {
+          return SafeArea(
+            child: Container(
+              height: Get.height * 0.7,
+              child: Stack(
+              children: [
+                BottomCenterAlign(
+                  child: PointerInterceptor(
+                    child: GoogleMapWidget(
+                      [placeInfo!.toJson()],
+                      mapHeight: Get.height * 0.7,
+                      showDirection: true,
+                      showButtons: true,
+                      showMyLocation: true,
+                      onButtonAction: (action) {
+                        if (action == MapButtonAction.direction) {
+                          var url = Uri.parse(GoogleMapLinkDirectionMake(
+                              placeInfo!.title, placeInfo!.address.lat, placeInfo!.address.lng));
+                          canLaunchUrl(url).then((result) {
+                            if (!result) {
+                              if (Platform.isIOS) {
+                                url = Uri.parse(
+                                    'https://apps.apple.com/gb/app/google-maps-transit-food/id585027354');
+                              } else {
+                                url = Uri.parse(
+                                    'https://play.google.com/store/apps/details?id=com.google.android.apps.maps');
+                              }
+                            }
+                            launchUrl(url);
+                          });
+                        } else {
+                          GetCurrentLocation().then((result) {
+                            if (AppData.currentLocation != null) {
+                              var url = Uri.parse(GoogleMapLinkBusLineMake(
+                                  'My Location'.tr, AppData.currentLocation!,
+                                  placeInfo!.title, LATLNG(placeInfo!.address.toJson())));
+                              canLaunchUrl(url).then((result) {
+                                if (!result) {
+                                  if (Platform.isIOS) {
+                                    url = Uri.parse(
+                                        'https://apps.apple.com/gb/app/google-maps-transit-food/id585027354');
+                                  } else {
+                                    url = Uri.parse(
+                                        'https://play.google.com/store/apps/details?id=com.google.android.apps.maps');
+                                  }
+                                }
+                                launchUrl(url);
+                              });
+                            }
+                          });
+                        }
+                      }
+                    )
+                  )
+                ),
+                TopRightAlign(
+                  child: IconButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    icon: Icon(Icons.close, color: Colors.black),
+                  ),
+                )
+              ],
+            )
+          )
+        );
+      }
     );
   }
 

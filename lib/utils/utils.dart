@@ -593,8 +593,8 @@ EVENT_SORT_HOT(List<EventModel> data) {
   if (data.length < 2) return data;
   var checkDate = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
   data.sort((a, b) =>
-    a.sponsorCount[checkDate] != null && b.sponsorCount[checkDate] != null &&
-    a.sponsorCount[checkDate]! > b.sponsorCount[checkDate]! ? -1 : 1);
+  a.sponsorCount != null && b.sponsorCount != null && a.sponsorCount![checkDate] != null && b.sponsorCount![checkDate] != null &&
+  a.sponsorCount![checkDate]! > b.sponsorCount![checkDate]! ? -1 : 1);
   return data;
 }
 

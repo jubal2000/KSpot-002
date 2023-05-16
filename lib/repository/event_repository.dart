@@ -162,17 +162,18 @@ class EventRepository {
     return api.checkEventExpired(event.toJson());
   }
 
-  EventModel setSponsorCount(EventModel event) {
+  EventModel setSponsorCount(EventModel event, [DateTime? targetTime]) {
     var eventDate = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
-    event.sponsorCount[eventDate] = 0;
+    event.sponsorCount ??= {};
+    event.sponsorCount![eventDate] = 0;
     // LOG('--> checkSponsored [${event.title}] : ${event.sponsorData}');
     if (LIST_NOT_EMPTY(event.sponsorData)) {
       for (var item in event.sponsorData!) {
         // LOG('--> event.sponsorData check [$eventDate] : ${item.toJson()}');
-        if (checkDateRange(item.startTime, item.endTime)) {
-          var orgCount = event.sponsorCount[eventDate] ?? 0;
-          event.sponsorCount[eventDate] = orgCount + 1;
-          LOG('--> checkSponsored add [$eventDate] : ${event.sponsorCount[eventDate]}');
+        if (checkDateRange(item.startTime, item.endTime, targetTime)) {
+          var orgCount = event.sponsorCount![eventDate] ?? 0;
+          event.sponsorCount![eventDate] = orgCount + 1;
+          LOG('--> checkSponsored add [$eventDate] : ${event.sponsorCount![eventDate]}');
         }
       }
     }

@@ -49,9 +49,17 @@ EventModel _$EventModelFromJson(Map<String, dynamic> json) => EventModel(
       managerData: (json['managerData'] as List<dynamic>?)
           ?.map((e) => MemberData.fromJson(e as Map<String, dynamic>))
           .toList(),
-    )..sponsorData = (json['sponsorData'] as List<dynamic>?)
-        ?.map((e) => SponsorData.fromJson(e as Map<String, dynamic>))
-        .toList();
+    )
+      ..sponsorData = (json['sponsorData'] as List<dynamic>?)
+          ?.map((e) => SponsorData.fromJson(e as Map<String, dynamic>))
+          .toList()
+      ..placeInfo = json['placeInfo'] == null
+          ? null
+          : PlaceModel.fromJson(json['placeInfo'] as Map<String, dynamic>)
+      ..sponsorCount = (json['sponsorCount'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as int),
+      )
+      ..timeRange = json['timeRange'] as String?;
 
 Map<String, dynamic> _$EventModelToJson(EventModel instance) =>
     <String, dynamic>{
@@ -83,4 +91,7 @@ Map<String, dynamic> _$EventModelToJson(EventModel instance) =>
       'managerData': instance.managerData?.map((e) => e.toJson()).toList(),
       'promotionData': instance.promotionData?.map((e) => e.toJson()).toList(),
       'sponsorData': instance.sponsorData?.map((e) => e.toJson()).toList(),
+      'placeInfo': instance.placeInfo?.toJson(),
+      'sponsorCount': instance.sponsorCount,
+      'timeRange': instance.timeRange,
     };

@@ -141,7 +141,7 @@ class EventCardItemState extends State<EventCardItem> {
       timeData = widget.itemData.timeData!.first;
     }
     var sponDate  = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
-    var sponCount = INT(widget.itemData.sponsorCount[sponDate]);
+    var sponCount = widget.itemData.sponsorCount != null ? INT(widget.itemData.sponsorCount![sponDate]) : 0;
     // LOG('--> EventItem sponCount [${widget.itemData.title}] : $sponCount');
     return GestureDetector(
         onTap: () {
@@ -240,6 +240,10 @@ class EventCardItemState extends State<EventCardItem> {
                                 ],
                             ]
                           ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 3),
+                            child: Text(DESC(widget.itemData.desc), style: ItemDescStyle(context, fontSize: 11.0), maxLines: 2),
+                          ),
                           Expanded(child:
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.end,
@@ -252,7 +256,7 @@ class EventCardItemState extends State<EventCardItem> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(timeData != null ? timeData.title : '', style: ItemDescExStyle(context)),
-                                        Text(timeData != null ? timeData.desc  : '', style: ItemDescExStyle(context), maxLines: 3),
+                                        Text(timeData != null ? timeData.desc  : '', style: ItemDescExStyle(context), maxLines:2),
                                       ],
                                     ),
                                   ),
@@ -395,7 +399,7 @@ class PlaceEventVerCardItemState extends State<PlaceEventVerCardItem> {
     _isExpired = api.checkEventExpired(widget.itemData.toJson());
 
     var sponDate  = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
-    var sponCount = INT(widget.itemData.sponsorCount[sponDate]);
+    var sponCount = widget.itemData.sponsorCount != null ? INT(widget.itemData.sponsorCount![sponDate]) : 0;
     LOG('--> PlaceEventVerCardItem sponCount [$sponDate] : $sponCount');
     return GestureDetector(
       onTap: () {
@@ -552,8 +556,9 @@ class PlaceEventMapCardItem extends StatefulWidget {
         this.padding = const EdgeInsets.symmetric(vertical: 5),
         this.itemHeight = 280,
         this.itemWidth = 220,
-        this.faceSize = 45,
-        this.isShowUser = true,
+        this.faceSize = 50,
+        this.isShowUser = false,
+        this.isShowPlace = true,
         this.isShowLike = false,
         this.isShowBookmark = true,
         this.isPromotion = false,
@@ -566,6 +571,7 @@ class PlaceEventMapCardItem extends StatefulWidget {
   EventModel  itemData;
   PlaceModel? placeData;
   bool isShowUser;
+  bool isShowPlace;
   bool isShowLike;
   bool isShowBookmark;
   bool isPromotion;
@@ -606,24 +612,36 @@ class PlaceEventMapCardItemState extends State<PlaceEventMapCardItem> {
       timeData = widget.itemData.timeData!.first;
     }
     var sponDate  = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
-    var sponCount = INT(widget.itemData.sponsorCount[sponDate]);
-    // LOG('--> EventItem sponCount [${widget.itemData.title}] : $sponCount');
-    return GestureDetector(
-      onTap: () {
-        if (widget.onShowDetail != null) widget.onShowDetail!(widget.itemData.id, 0);
-      },
-      child: Container(
-        margin: widget.margin,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ClipRRect(
+    var sponCount = widget.itemData.sponsorCount != null ? INT(widget.itemData.sponsorCount![sponDate]) : 0;
+    // LOG('--> EventItem [${widget.itemData.title}] : ${widget.itemData.placeInfo!.pic} / $sponCount');
+    return Container(
+      margin: widget.margin,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16.sp),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.35),
+                      spreadRadius: 1,
+                      blurRadius: 1,
+                      offset: Offset(1, 1), // changes position of shadow
+                    ),
+                  ],
+                ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16.sp),
+                child: GestureDetector(
+                  onTap: () {
+                    if (widget.onShowDetail != null) widget.onShowDetail!(widget.itemData.id, 0);
+                  },
                   child: Container(
-                    height: widget.itemHeight - widget.faceSize * 0.5,
+                    height: widget.itemHeight - widget.faceSize * 0.5 - 10,
                     width:  widget.itemWidth,
                     color:  widget.backgroundColor,
                     child: Column(
@@ -699,20 +717,53 @@ class PlaceEventMapCardItemState extends State<PlaceEventMapCardItem> {
                     )
                   ),
                 )
-              ],
-            ),
-            if (widget.isShowUser)...[
-              Positioned(
-                bottom: 0,
-                child: UserIdCardOneWidget(widget.itemData.userId,
-                    size: widget.faceSize,
-                    faceCircleSize: 2.0,
-                    borderColor: widget.faceOutlineColor,
-                    backColor: Color(0xFF333333)),
-              ),
+              )
+              )
             ],
+          ),
+          if (widget.isShowUser)...[
+            Positioned(
+              bottom: 0,
+              child: UserIdCardOneWidget(widget.itemData.userId,
+                size: widget.faceSize,
+                faceCircleSize: 2.0,
+                borderColor: widget.faceOutlineColor,
+                backColor: Color(0xFF333333)),
+            ),
+          ],
+          if (widget.isShowPlace && widget.itemData.placeInfo != null)...[
+            Positioned(
+              bottom: 2,
+              child: GestureDetector(
+                onTap: () {
+                  if (widget.onShowDetail != null) widget.onShowDetail!(widget.itemData.id, 1);
+                },
+                child: Container(
+                  width: widget.faceSize,
+                  height: widget.faceSize,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(widget.faceSize)),
+                    border: Border.all(
+                      color: widget.backgroundColor ?? Theme.of(context).colorScheme.secondary,
+                      width: 3.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.35),
+                        spreadRadius: 1,
+                        blurRadius: 1,
+                        offset: Offset(1, 1), // changes position of shadow
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: showImageFit(widget.itemData.placeInfo!.pic),
+                  ),
+                ),
+              ),
+            ),
           ]
-        )
+        ]
       )
     );
   }

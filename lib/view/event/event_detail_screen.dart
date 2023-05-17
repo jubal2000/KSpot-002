@@ -41,62 +41,7 @@ class _EventDetailState extends State<EventDetailScreen> {
 
   initData() {
     _viewModel.setEventData(widget.eventInfo, widget.placeInfo);
-
-    // _eventInfo['reserveDay'] ??= 7;
-    // _eventInfo['reserveData'] ??= {};
-    // if (_eventInfo['reserveData'].length > 1) {
-    //   _eventInfo['reserveData'] = JSON_START_DAY_SORT_DESC(_eventInfo['reserveData']);
-    // }
-
-    // if (AppData.isMoveListBottom) {
-    //   Future.delayed(const Duration(milliseconds: 200), () {
-    //     _scrollController.scrollToIndex(0, preferPosition: AutoScrollPosition.begin);
-    //     AppData.isMoveListBottom = false;
-    //   });
-    // }
   }
-
-  // refreshReservButton(DateTime? date, JSON? jsonData) async {
-  //   LOG('--> refreshReservButton : $date / $jsonData');
-  //   if (date == null) return;
-  //   AppData.currentDate = date;
-  //   _selectInfo       = jsonData;
-  //   _selectReserve    = null;
-  //   _isCanReserve     = false;
-  //   _isShowReserveBtn = false;
-  //
-  //   if (date != null && JSON_NOT_EMPTY(jsonData)) {
-  //     _isCanReserve       = _eventInfo['option'] != null && BOL(_eventInfo['option']['reserv']);
-  //     _isShowReserveList  = !BOL(_eventInfo['option']['rev_show']) || _isManager;
-  //     if (_isCanReserve) {
-  //       if (JSON_NOT_EMPTY(_eventInfo['reserveData'])) {
-  //         _eventInfo['reserveData'] = JSON_START_DAY_SORT(_eventInfo['reserveData']);
-  //         for (var item in _eventInfo['reserveData'].entries) {
-  //           // var time = STR(item.value['startTime']).split(':');
-  //           // LOG('--> checkTime : ${item.value['startTime']} => $time');
-  //           // var checkTime = DateTime(date.year, date.month, date.day, int.parse(time[0]), int.parse(time[1]));
-  //           if (CheckCanReserve(date, INT(item.value['startDay']))) {
-  //             _selectReserve = item.value;
-  //             // LOG('--> refreshSelectReservItem check : $_selectReserve = ${AppData.currentDate!} / ${INT(item.value['startDay'])}');
-  //             break;
-  //           }
-  //         }
-  //         _isCanReserve = _selectReserve != null;
-  //         _isShowReserveBtn = _isCanReserve;
-  //         // check today reserve..
-  //         if (date.isToday()) {
-  //           _isShowReserveBtn = _eventInfo['option'] == null || !BOL(_eventInfo['option']['today_off']);
-  //         }
-  //         // check already reserved..
-  //         if (_isShowReserveBtn) {
-  //           _isShowReserveBtn = await api.checkReserveDay(_eventInfo['id'], AppData.USER_ID, DATE_STR(date));
-  //         }
-  //       }
-  //       LOG('--> refreshSelectReservItem result : $_isCanReserve / $_isShowReserveBtn');
-  //     }
-  //   }
-  //   setState(() { });
-  // }
 
   @override
   void initState() {

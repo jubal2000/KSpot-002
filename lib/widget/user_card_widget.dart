@@ -89,6 +89,7 @@ class _UserCardState extends State<UserCardWidget> {
                         width:  widget.faceSize - (widget.isBottomNameShow ? widget.nameHeight : 0),
                         height: widget.faceSize - (widget.isBottomNameShow ? widget.nameHeight : 0),
                         decoration: BoxDecoration(
+                          color: Colors.white,
                           borderRadius: BorderRadius.all(Radius.circular(widget.faceSize)),
                           border: Border.all(
                             color: Theme.of(context).primaryColor.withOpacity(0.8),
@@ -112,13 +113,13 @@ class _UserCardState extends State<UserCardWidget> {
                     ],
                   ),
                 ),
-                if (!widget.isSideNameShow)...[
+                if (widget.isSideNameShow)...[
                   SizedBox(width: 10),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(STR(widget.userInfo['userName']), style: _isMyProfile ? DescNameMyStyle(context) : DescNameStyle(context)),
+                      Text(STR(widget.userInfo['userName']), style: _isMyProfile ? DescNameMyStyle(context, fontSize: 14) : DescNameStyle(context, fontSize: 14)),
                       if (widget.isCanFollow && !_isMyProfile)...[
                         SizedBox(height: 3),
                         // UserFollowWidget(widget.userInfo),

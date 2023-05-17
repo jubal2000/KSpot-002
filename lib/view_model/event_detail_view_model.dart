@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
+import 'package:kspot_002/data/common_sizes.dart';
+import 'package:kspot_002/data/style.dart';
 import 'package:kspot_002/view/place/place_detail_screen.dart';
 import 'package:kspot_002/widget/google_map_widget.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
@@ -53,7 +56,6 @@ class EventDetailViewModel extends ChangeNotifier {
   var isShowReserveList = false;
   var isShowMap = false;
   var isEdited = false;
-  var isShowRecommend = false;
 
   JSON? selectReserve;
   JSON? selectInfo;
@@ -176,10 +178,91 @@ class EventDetailViewModel extends ChangeNotifier {
             updateEventInfo();
           }),
           SizedBox(width: 8),
-          RecommendWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onSelected: () {
-
+          RecommendWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onSelected: (recommendCount) {
+            if (recommendCount > 0) {
+              showRecommendBox();
+            }
           }),
         ]
+    );
+  }
+
+  showRecommendBox() async {
+    var itemHeight = 45.0;
+    return await showModalBottomSheet(
+      context: Get.context!,
+      enableDrag: false,
+      builder: (context) {
+        return SafeArea(
+          child: Container(
+              child: Stack(
+                children: [
+                  BottomCenterAlign(
+                    child: PointerInterceptor(
+                      child: Column(
+                        children: [
+                          SizedBox(height: 20),
+                          Text('Recommender list'.tr, style: SubTitleStyle(context)),
+                          SizedBox(height: 10),
+                          Expanded(
+                            child: ListView(
+                              padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                              children: eventInfo!.recommendData!.map((e) => Container(
+                                height: itemHeight,
+                                child: Row(
+                                  children: [
+                                    UserCardWidget({'userId':e.userId, 'pic':e.showStatus > 0 ? e.userPic : NO_IMAGE},
+                                      isSideNameShow: false, faceSize: itemHeight - 10, 
+                                      onSelected: (userId) {
+                                        if (e.showStatus > 0) {
+                                          userRepo.getUserInfo(e.userId).then((userInfo) {
+                                            if (userInfo != null) {
+                                              Get.to(() => ProfileTargetScreen(userInfo));
+                                            } else {
+                                              ShowToast('User not found'.tr);
+                                            }
+                                          });
+                                        }
+                                      }
+                                    ),
+                                    SizedBox(width: 10),
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(e.showStatus > 0 ? e.userName : '?????', style: ItemTitleStyle(context)),
+                                            SizedBox(width: 10),
+                                            Icon(Icons.star, color: Colors.yellowAccent, size: 16),
+                                            Text(' x ${e.creditQty}', style: ItemDescStyle(context)),
+                                          ],
+                                        ),
+                                        Text(DATETIME_FULL_STR(e.createTime), style: ItemDescExInfoStyle(context)),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              )).toList(),
+                            )
+                          )
+                        ],
+                      )
+                    )
+                  ),
+                  TopRightAlign(
+                    child: IconButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      icon: Icon(Icons.close, color: Theme.of(context).indicatorColor),
+                  ),
+                )
+              ],
+            )
+          )
+        );
+      }
     );
   }
 

@@ -9,7 +9,7 @@ import '../data/theme_manager.dart';
 import '../utils/utils.dart';
 
 Widget RecommendSmallWidget(BuildContext context, String type, JSON targetInfo,
-    {double iconSize = 18, String title = '', Function(int)? onChangeCount, Function()? onSelected}) {
+    {double iconSize = 18, String title = '', Function(int)? onChangeCount, Function(int)? onSelected}) {
   return RecommendWidget(context, type, targetInfo, iconSize: iconSize, title: title, showCount: false, onChangeCount: onChangeCount, onSelected: onSelected);
 }
 
@@ -26,7 +26,7 @@ Widget RecommendWidget(BuildContext context, String type, JSON targetInfo,
       Color? disableColor,
       EdgeInsets? padding,
       Function(int)? onChangeCount,
-      Function()? onSelected
+      Function(int)? onSelected
     }) {
   var iconColor0 = enableColor ?? Colors.yellow;
   var iconColor1 = disableColor ?? Theme.of(context).disabledColor;
@@ -55,7 +55,7 @@ Widget RecommendWidget(BuildContext context, String type, JSON targetInfo,
     ),
     onTap: () {
       if (!isEnabled) return;
-      if (onSelected != null) onSelected();
+      if (onSelected != null) onSelected(recommendCount);
     },
   );
 }

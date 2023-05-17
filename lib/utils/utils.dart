@@ -170,6 +170,12 @@ DATETIME_STR(DateTime date) {
 
 // ignore: non_constant_identifier_names
 DATETIME_FULL_STR(DateTime date) {
+  var format = DateFormat('yyyy-MM-dd HH:mm:ss');
+  return format.format(date).toString();
+}
+
+// ignore: non_constant_identifier_names
+DATETIME_UUID_STR(DateTime date) {
   var format = DateFormat('yyyy-MM-dd_HH:mm:ss');
   return format.format(date).toString();
 }

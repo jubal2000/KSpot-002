@@ -340,7 +340,7 @@ Future showImageSlideDialog(BuildContext context, List<String> imageData, int st
     final result = await ImageGallerySaver.saveImage(
         Uint8List.fromList(response.data),
         quality: 100,
-        name: "KSpot-download-${Uuid().v1()}-${DATETIME_FULL_STR(DateTime.now())}");
+        name: "KSpot-download-${Uuid().v1()}-${DATETIME_UUID_STR(DateTime.now())}");
     LOG('--> saveImage result : $result');
   }
 
@@ -430,7 +430,7 @@ Future showFileSlideDialog(BuildContext context, JSON fileData, {bool isCanDownl
     final result = await ImageGallerySaver.saveImage(
         Uint8List.fromList(response.data),
         quality: 100,
-        name: fileName ?? "KSpot-download-${Uuid().v1()}-${DATETIME_FULL_STR(DateTime.now())}");
+        name: fileName ?? "KSpot-download-${Uuid().v1()}-${DATETIME_UUID_STR(DateTime.now())}");
     LOG('--> saveImage result : $result');
   }
 

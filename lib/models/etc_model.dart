@@ -233,6 +233,7 @@ class MemberData {
 @JsonSerializable()
 class RecommendData {
   String    id;            // user id
+  int       showStatus;
   int       creditQty;
   String    userId;
   String    userPic;
@@ -243,6 +244,7 @@ class RecommendData {
 
   RecommendData({
     required this.id,
+    required this.showStatus,
     required this.creditQty,
     required this.userId,
     required this.userPic,
@@ -258,6 +260,7 @@ class RecommendData {
   static empty() {
     return RecommendData(
       id: '',
+      showStatus: 0,
       creditQty: 0,
       userId: '',
       userPic: '',
@@ -271,6 +274,7 @@ class RecommendData {
   static fromRecommendModel(RecommendModel source) {
     return RecommendData(
       id: source.id,
+      showStatus: source.showStatus,
       creditQty: source.creditQty,
       userId: source.userId,
       userPic: source.userPic,

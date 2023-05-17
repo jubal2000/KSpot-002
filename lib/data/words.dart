@@ -111,6 +111,8 @@ class Words extends Translations {
       'Sponsorship has already started and cannot be deleted': '이미 후원이 시작되어 삭제할 수 없습니다',
       'Show recommend': '공개 추천',
       'Recommend the target event\n(If event is recommended, it may appear first)': '대상 이벤트를 추천합니다\n(추천을 많이 받은 이벤트가 먼저 표시됩니다)',
+      'Recommender list': '추천인 목록',
+      'User not found': '유저를 찾을 수 없습니다',
 
       // main_event
       'There are no events': '이벤트가 없습니다',

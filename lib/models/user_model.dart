@@ -135,6 +135,39 @@ class UserModel {
     );
   }
 
+  static createTemp(String id, String nickName, String pic) {
+    return UserModel(
+      id: id,
+      nickName: nickName,
+      pic: pic,
+      status: 1,
+      loginId: '',
+      loginType: '',
+      realName: '',
+      message: '',
+      birthYear: 0,
+      gender: '',
+      mobile: '',
+      mobileIntl: '',
+      mobileShow: 0,
+      mobileVerifyTime: '',
+      email: '',
+      emailShow: 0,
+      emailVerifyTime: '',
+      country: '',
+      countryState: '',
+      followCount: 0,
+      followerCount: 0,
+      likeCount: 0,
+      creditCount: 0,
+      pushToken: '',
+      deviceType: '',
+      updateTime: DateTime.now(),
+      createTime: DateTime.now(),
+    );
+  }
+
+
   factory UserModel.fromJson(JSON json) => _$UserModelFromJson(json);
   JSON toJson() => _$UserModelToJson(this);
 

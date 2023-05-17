@@ -392,7 +392,7 @@ AppBarTitleShadowStyle(BuildContext context, Color borderColor, {Color? color}) 
 }
 
 SubTitleStyle(BuildContext context) {
-  return TextStyle(fontSize: 14, color: Theme.of(context).primaryColor.withOpacity(0.8), fontWeight: FontWeight.w800);
+  return TextStyle(fontSize: 14, color: Theme.of(context).focusColor.withOpacity(0.8), fontWeight: FontWeight.w800);
 }
 
 SubTitleExStyle(BuildContext context) {
@@ -578,12 +578,12 @@ CardNameStyle(BuildContext context) {
   return TextStyle(fontSize: 11, color: Theme.of(context).hintColor.withOpacity(0.75), fontWeight: FontWeight.w600, height: 1.1);
 }
 
-DescNameStyle(BuildContext context) {
-  return TextStyle(fontSize: 16, color: Theme.of(context).hintColor, fontWeight: FontWeight.w600);
+DescNameStyle(BuildContext context, {double fontSize = 15}) {
+  return TextStyle(fontSize: fontSize, color: Theme.of(context).hintColor, fontWeight: FontWeight.w600);
 }
 
-DescNameMyStyle(BuildContext context) {
-  return TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.tertiary, fontWeight: FontWeight.w800);
+DescNameMyStyle(BuildContext context, {double fontSize = 16}) {
+  return TextStyle(fontSize: fontSize, color: Theme.of(context).colorScheme.tertiary, fontWeight: FontWeight.w800);
 }
 
 DescTitleLargeStyle(BuildContext context) {

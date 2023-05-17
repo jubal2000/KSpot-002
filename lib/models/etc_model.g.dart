@@ -192,6 +192,7 @@ Map<String, dynamic> _$MemberDataToJson(MemberData instance) =>
 
 RecommendData _$RecommendDataFromJson(Map<String, dynamic> json) => RecommendData(
       id: json['id'] as String,
+      showStatus: json['showStatus'] as int,
       creditQty: json['creditQty'] as int,
       userId: json['userId'] as String,
       userPic: json['userPic'] as String,
@@ -204,6 +205,7 @@ RecommendData _$RecommendDataFromJson(Map<String, dynamic> json) => RecommendDat
 Map<String, dynamic> _$RecommendDataToJson(RecommendData instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'showStatus': instance.showStatus,
       'creditQty': instance.creditQty,
       'userId': instance.userId,
       'userPic': instance.userPic,

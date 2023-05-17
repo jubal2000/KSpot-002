@@ -342,6 +342,7 @@ class Words extends Translations {
       'Discount now': '할인중',
       'RECOMMEND': '추천하기',
       'PROMOTION': '광고하기',
+      'Credit': '추천권',
 
       // slide_timepicker_screen
       'Select Time Range': '시간 범위 선택',

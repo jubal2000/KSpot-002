@@ -235,6 +235,7 @@ class RecommendData {
   String    id;            // user id
   int       showStatus;
   int       creditQty;
+  String    desc;
   String    userId;
   String    userPic;
   String    userName;
@@ -246,6 +247,7 @@ class RecommendData {
     required this.id,
     required this.showStatus,
     required this.creditQty,
+    required this.desc,
     required this.userId,
     required this.userPic,
     required this.userName,
@@ -262,6 +264,7 @@ class RecommendData {
       id: '',
       showStatus: 0,
       creditQty: 0,
+      desc: '',
       userId: '',
       userPic: '',
       userName: '',
@@ -276,6 +279,7 @@ class RecommendData {
       id: source.id,
       showStatus: source.showStatus,
       creditQty: source.creditQty,
+      desc: source.desc,
       userId: source.userId,
       userPic: source.userPic,
       userName: source.userName,

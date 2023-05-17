@@ -1162,7 +1162,12 @@ class ApiService extends GetxService {
 
     for (var doc in snapshot.docs) {
       var item = FROM_SERVER_DATA(doc.data());
-      result.add(item);
+      if (DateTime.parse(STR(item['endTime'])).isBefore(DateTime.now())) {
+        LOG('--> getRecommendFromTargetId removed : [${item['id']}]');
+        await ref.doc(item['id']).update({'status': 0});
+      } else {
+        result.add(item);
+      }
     }
     LOG('--> getRecommendFromTargetId Result [$eventId] : ${result.length}');
     return result;
@@ -1219,7 +1224,7 @@ class ApiService extends GetxService {
     // }
     await ref.doc(addData['id']).set(addData);
     var result = FROM_SERVER_DATA(addData);
-    LOG('--> addRecommendItem result : ${result.length}');
+    LOG('--> addRecommendItem result : ${result['id']}');
     return result;
   }
 

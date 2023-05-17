@@ -64,9 +64,47 @@ class _EventDetailState extends State<EventDetailScreen> {
       child: Consumer<EventDetailViewModel>(builder: (context, viewModel, _) {
         return Scaffold(
           appBar: AppBar(
+            title: Row(
+              children: [
+                viewModel.showPicture(),
+                SizedBox(width: 15),
+                Expanded(
+                  child: viewModel.showTitle(),
+                ),
+              ]
+            ),
             titleSpacing: 0,
-            toolbarHeight: UI_APPBAR_TOOL_HEIGHT,
+            toolbarHeight: UI_EVENT_TOOL_HEIGHT,
             actions: [
+              if (!viewModel.isManager)...[
+                SizedBox(width: 15),
+                DropdownButtonHideUnderline(
+                  child: DropdownButton2(
+                    customButton: SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: Icon(Icons.more_vert),
+                    ),
+                    items: [
+                      ...DropdownItems.placeItems2.map((item) =>
+                        DropdownMenuItem<DropdownItem>(
+                          value: item,
+                          child: DropdownItems.buildItem(context, item),
+                        ),
+                      )
+                    ],
+                    onChanged: (value) {
+                      var selected = value as DropdownItem;
+                      viewModel.onEventTopMenuAction(selected);
+                    },
+                    // customItemsHeights: const [5],
+                    itemHeight: 45,
+                    dropdownWidth: 190,
+                    itemPadding: const EdgeInsets.all(10),
+                    offset: const Offset(0, 10),
+                  ),
+                ),
+              ],
               if (viewModel.isManager || AppData.IS_ADMIN)...[
                 SizedBox(width: 15),
                 GestureDetector(
@@ -85,20 +123,18 @@ class _EventDetailState extends State<EventDetailScreen> {
                     ),
                     items: [
                       if (viewModel.eventInfo!.status == 1)
-                        ...DropdownItems.placeItems0.map(
-                              (item) =>
-                              DropdownMenuItem<DropdownItem>(
-                                value: item,
-                                child: DropdownItems.buildItem(context, item),
-                              ),
+                        ...DropdownItems.placeItems0.map((item) =>
+                          DropdownMenuItem<DropdownItem>(
+                            value: item,
+                            child: DropdownItems.buildItem(context, item),
+                          ),
                         ),
                       if (viewModel.eventInfo!.status != 1)
-                        ...DropdownItems.placeItems1.map(
-                              (item) =>
-                              DropdownMenuItem<DropdownItem>(
-                                value: item,
-                                child: DropdownItems.buildItem(context, item),
-                              ),
+                        ...DropdownItems.placeItems1.map((item) =>
+                          DropdownMenuItem<DropdownItem>(
+                            value: item,
+                            child: DropdownItems.buildItem(context, item),
+                          ),
                         ),
                     ],
                     onChanged: (value) {
@@ -136,26 +172,16 @@ class _EventDetailState extends State<EventDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 SizedBox(height: 20),
-                                Row(
-                                  children: [
-                                    viewModel.showPicture(),
-                                    SizedBox(width: 15),
-                                    Expanded(
-                                      child: viewModel.showTitle(),
-                                    ),
-                                  ]
-                                ),
-                                SizedBox(height: 20),
+                                if (!widget.isPreview)...[
+                                  viewModel.showShareBox(),
+                                ],
                                 if (viewModel.eventInfo!.desc.isNotEmpty)...[
+                                  SizedBox(height: 30),
                                   viewModel.showDesc(),
                                 ],
                                 if (JSON_NOT_EMPTY(viewModel.eventInfo!.tagData))...[
                                   SizedBox(height: 30),
                                   viewModel.showTagList(),
-                                ],
-                                if (!widget.isPreview)...[
-                                  showHorizontalDivider(Size(double.infinity * 0.9, 40), color: LineColor(context)),
-                                  viewModel.showShareBox(),
                                 ],
                                 if (JSON_NOT_EMPTY(viewModel.eventInfo!.managerData))...[
                                   showHorizontalDivider(Size(double.infinity * 0.9, 40), color: LineColor(context)),

@@ -31,7 +31,8 @@ Widget RecommendWidget(BuildContext context, String type, JSON targetInfo,
   var iconColor0 = enableColor ?? Colors.yellow;
   var iconColor1 = disableColor ?? Theme.of(context).disabledColor;
   var eventDate = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
-  var recommendCount = JSON_NOT_EMPTY(targetInfo['recommendCount']) ? targetInfo['recommendCount'][eventDate] : 0;
+  var recommendNow = JSON_NOT_EMPTY(targetInfo['recommendCount']) ? targetInfo['recommendCount'][eventDate] : 0;
+  var recommendCount = targetInfo['recommendData'] != null ? targetInfo['recommendData'].length : 0;
 
   return GestureDetector(
     child: Container(
@@ -46,7 +47,7 @@ Widget RecommendWidget(BuildContext context, String type, JSON targetInfo,
               if (!isShowOutline)
                 Icon(recommendCount > 0 ? Icons.star : Icons.star_outline_rounded, size: iconSize.sp, color: recommendCount > 0 ? iconColor0 : iconColor1),
               if (showCount)
-                Text(PRICE_STR(recommendCount), style: ItemDescExStyle(context)),
+                Text('${PRICE_STR(recommendNow)}/${PRICE_STR(recommendCount)}', style: ItemDescExStyle(context)),
               if (title.isNotEmpty)...[
                 Text(title, style: ItemDescExStyle(context))
               ],

@@ -30,6 +30,7 @@ import '../data/common_sizes.dart';
 import '../data/style.dart';
 import '../models/etc_model.dart';
 import '../models/event_model.dart';
+import '../models/recommend_model.dart';
 import '../models/user_model.dart';
 import '../view/place/place_list_screen.dart';
 import '../view_model/event_edit_view_model.dart';
@@ -698,6 +699,14 @@ LIST_LAST_INDEX(List<JSON> data, int offset) {
     if (checkIndex > result) result = checkIndex;
   }
   return result + offset;
+}
+
+// ignore: non_constant_identifier_names
+LIST_RECOMMEND_SORT_DESC(List<JSON> data) {
+  if (LIST_EMPTY(data)) return [];
+  if (data.length < 2) return data;
+  data.sort((a, b) => a['creditQty'] < b['creditQty'] ? 1 : -1);
+  return data;
 }
 
 colorToHexString(Color color) {
@@ -1700,7 +1709,7 @@ RoundRectButton(String title, double? height, Function()? onPressed) {
       },
       child: Text(title, style: _titleStyle),
       style: ElevatedButton.styleFrom(
-          primary: Colors.white,
+          primary: Theme.of(Get.context!).primaryColor,
           minimumSize: Size.zero, // Set this
           padding: EdgeInsets.symmetric(horizontal: 15), // and this
           shadowColor: Colors.transparent,

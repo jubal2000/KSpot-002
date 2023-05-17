@@ -38,7 +38,7 @@ class EventRepository {
     try {
       final response = await api.getEventListFromCountry(groupId, country, countryState);
       for (var item in response.entries) {
-        item.value['recommendData'] = await getEventRecommendList(item.key);
+        item.value['recommendData'] = LIST_RECOMMEND_SORT_DESC(await getEventRecommendList(item.key));
         var eventItem = EventModel.fromJson(item.value);
         result[item.key] = eventItem;
         cache.setEventItem(eventItem);

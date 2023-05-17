@@ -16,10 +16,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../data/app_data.dart';
 import '../data/dialogs.dart';
 import '../data/theme_manager.dart';
+import '../models/etc_model.dart';
 import '../models/event_model.dart';
 import '../models/place_model.dart';
+import '../models/recommend_model.dart';
 import '../models/user_model.dart';
 import '../repository/event_repository.dart';
+import '../repository/recommend_repository.dart';
 import '../repository/user_repository.dart';
 import '../services/cache_service.dart';
 import '../utils/utils.dart';
@@ -41,6 +44,7 @@ class EventDetailViewModel extends ChangeNotifier {
   final scrollController = AutoScrollController();
   final eventRepo = EventRepository();
   final userRepo  = UserRepository();
+  final sponRepo  = RecommendRepository();
   final cache     = Get.find<CacheService>();
 
   final topHeight = 50.0;
@@ -134,6 +138,22 @@ class EventDetailViewModel extends ChangeNotifier {
       case DropdownItemType.promotion:
         // Navigator.push(Get.context!, MaterialPageRoute(builder: (context) =>
         //     PromotionTabScreen('event', targetInfo: widget.eventInfo)));
+        break;
+      case DropdownItemType.report:
+        final reportInfo = cache.reportData['report'] != null ? cache.reportData['report'][eventInfo!.id] : null;
+        if (reportInfo == null) {
+          showReportDialog(Get.context!, ReportType.report,
+              'Event'.tr, 'event', eventInfo!.toJson(), subTitle: 'Please write what you want to report'.tr).then((result) async {
+            if (result.isNotEmpty) {
+              cache.reportData['report'] ??= {};
+              cache.reportData['report'][eventInfo!.id] = result;
+              showAlertDialog(Get.context!, 'Report'.tr, 'Report has been completed'.tr, '', 'OK'.tr);
+            }
+          });
+        } else {
+          showAlertDialog(Get.context!, 'Report'.tr, 'Already reported'.tr, '', 'OK');
+        }
+        break;
     }
   }
 
@@ -149,11 +169,7 @@ class EventDetailViewModel extends ChangeNotifier {
 
   showPicture() {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-        border: Border.all(color: Theme.of(Get.context!).primaryColor.withOpacity(0.5), width: 3),
-      ),
-      child: showSizedRoundImage(eventInfo!.pic, 60, 8),
+      child: showSizedRoundImage(eventInfo!.pic, 40, 5),
     );
   }
 
@@ -167,28 +183,28 @@ class EventDetailViewModel extends ChangeNotifier {
 
   showShareBox() {
     return Row(
-        children: [
-          ShareWidget(Get.context!, 'event', eventInfo!.toJson(), showTitle: true),
-          SizedBox(width: 10),
-          BookmarkWidget(Get.context!, 'event', eventInfo!.toJson(), title:'BOOKMARK'.tr, iconSize: 22, isEnabled: AppData.IS_LOGIN),
-          SizedBox(width: 10),
-          LikeWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
-            LOG('--> LikeWidget result : $count');
-            eventInfo!.likeCount = count;
-            updateEventInfo();
-          }),
-          SizedBox(width: 8),
-          RecommendWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onSelected: (recommendCount) {
-            if (recommendCount > 0) {
-              showRecommendBox();
-            }
-          }),
-        ]
+      children: [
+        ShareWidget(Get.context!, 'event', eventInfo!.toJson(), showTitle: true),
+        Expanded(child: SizedBox(height: 1)),
+        BookmarkWidget(Get.context!, 'event', eventInfo!.toJson(), title:'BOOKMARK'.tr, iconSize: 22, isEnabled: AppData.IS_LOGIN),
+        SizedBox(width: 10),
+        LikeWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
+          LOG('--> LikeWidget result : $count');
+          eventInfo!.likeCount = count;
+          updateEventInfo();
+        }),
+        SizedBox(width: 5),
+        RecommendWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onSelected: (recommendCount) {
+          if (recommendCount > 0) {
+            showRecommendBox();
+          }
+        }),
+      ]
     );
   }
 
   showRecommendBox() async {
-    var itemHeight = 45.0;
+    var itemHeight = 55.0;
     return await showModalBottomSheet(
       context: Get.context!,
       enableDrag: false,
@@ -225,27 +241,43 @@ class EventDetailViewModel extends ChangeNotifier {
                                         }
                                       }
                                     ),
-                                    SizedBox(width: 10),
-                                    Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(e.showStatus > 0 ? e.userName : '?????', style: ItemTitleStyle(context)),
-                                            SizedBox(width: 10),
-                                            Icon(Icons.star, color: Colors.yellowAccent, size: 16),
-                                            Text(' x ${e.creditQty}', style: ItemDescStyle(context)),
-                                          ],
-                                        ),
-                                        Text(DATETIME_FULL_STR(e.createTime), style: ItemDescExInfoStyle(context)),
-                                      ],
+                                    SizedBox(width: 5),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text(e.showStatus > 0 ? e.userName : '?????', style: ItemDescColorBoldStyle(context, Theme.of(context).primaryColor)),
+                                              SizedBox(width: 5),
+                                              Icon(Icons.star, color: Colors.yellowAccent, size: 16),
+                                              Text(' x ${e.creditQty}', style: ItemDescStyle(context)),
+                                            ],
+                                          ),
+                                          Text(STR(e.desc), style: ItemDescStyle(context, fontSize: 12), overflow: TextOverflow.ellipsis),
+                                          Row(
+                                            children: [
+                                              Text('${'PERIOD'.tr}: ${DATE_STR(e.startTime)} ~ ${DATE_STR(e.endTime)}', style: ItemDescExStyle(context)),
+                                              SizedBox(width: 10),
+                                              Text('[${DATETIME_FULL_STR(e.createTime)}]', style: ItemDescExInfoStyle(context)),
+                                            ],
+                                          )
+                                        ],
+                                      )
                                     )
                                   ],
                                 ),
                               )).toList(),
                             )
-                          )
+                          ),
+                          Container(
+                            width: Get.width,
+                            margin: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE, vertical: 10),
+                            child: RoundRectButton('${'RECOMMEND'.tr} (${'Credit'.tr}: ${AppData.userInfo.creditCount})', 50, () {
+                              Get.back(result: 'recommend');
+                            }),
+                          ),
                         ],
                       )
                     )
@@ -256,14 +288,39 @@ class EventDetailViewModel extends ChangeNotifier {
                         Get.back();
                       },
                       icon: Icon(Icons.close, color: Theme.of(context).indicatorColor),
-                  ),
-                )
+                    ),
+                  )
               ],
             )
           )
         );
       }
-    );
+    ).then((result) {
+      if (result == 'recommend') {
+        if (AppData.userInfo.creditCount > 0) {
+          showEventRecommendDialog(Get.context!, eventInfo!, AppData.userInfo.creditCount, '').then((dResult) {
+            if (dResult != null) {
+              LOG('--> showEventRecommendDialog result : ${dResult.toJson()}');
+              sponRepo.addRecommendItem(dResult).then((addItem) {
+                if (addItem != null) {
+                  var recommendItem = RecommendData.fromRecommendModel(RecommendModel.fromJson(addItem));
+                  cache.eventData[eventInfo!.id]!.recommendData ??= [];
+                  cache.eventData[eventInfo!.id]!.recommendData!.add(recommendItem);
+                  cache.eventData[eventInfo!.id] = eventRepo.setRecommendCount(cache.eventData[eventInfo!.id]!, AppData.currentDate);
+                  LOG('--> recommendData Success : $recommendItem / ${addItem.toString()}');
+                  ShowToast('Event Recommend Success'.tr);
+                  notifyListeners();
+                } else {
+                  ShowToast('Event Recommend Failed'.tr);
+                }
+              });
+            }
+          });
+        } else {
+          // TODO: show credit buy shop
+        }
+      }
+    });
   }
 
   updateEventInfo() {
@@ -382,53 +439,6 @@ class EventDetailViewModel extends ChangeNotifier {
             )
           ]
         ),
-        // if (isShowMap)...[
-        //   SizedBox(height: 10),
-        //   GoogleMapWidget(
-        //       [placeInfo!.toJson()],
-        //       mapHeight: mapHeight,
-        //       showDirection: true,
-        //       showButtons: true,
-        //       showMyLocation: true,
-        //       onButtonAction: (action) {
-        //         if (action == MapButtonAction.direction) {
-        //           var url = Uri.parse(GoogleMapLinkDirectionMake(
-        //               placeInfo!.title, placeInfo!.address.lat, placeInfo!.address.lng));
-        //           canLaunchUrl(url).then((result) {
-        //             if (!result) {
-        //               if (Platform.isIOS) {
-        //                 url = Uri.parse(
-        //                     'https://apps.apple.com/gb/app/google-maps-transit-food/id585027354');
-        //               } else {
-        //                 url = Uri.parse(
-        //                     'https://play.google.com/store/apps/details?id=com.google.android.apps.maps');
-        //               }
-        //             }
-        //             launchUrl(url);
-        //           });
-        //         } else {
-        //           GetCurrentLocation().then((result) {
-        //             if (AppData.currentLocation != null) {
-        //               var url = Uri.parse(GoogleMapLinkBusLineMake(
-        //                   'My Location'.tr, AppData.currentLocation!,
-        //                   placeInfo!.title, LATLNG(placeInfo!.address.toJson())));
-        //               canLaunchUrl(url).then((result) {
-        //                 if (!result) {
-        //                   if (Platform.isIOS) {
-        //                     url = Uri.parse(
-        //                         'https://apps.apple.com/gb/app/google-maps-transit-food/id585027354');
-        //                   } else {
-        //                     url = Uri.parse(
-        //                         'https://play.google.com/store/apps/details?id=com.google.android.apps.maps');
-        //                   }
-        //                 }
-        //                 launchUrl(url);
-        //               });
-        //             }
-        //           });
-        //         }
-        //       }),
-        // ],
       ],
     );
   }

@@ -342,7 +342,7 @@ ButtonTitleInverseStyle(BuildContext context) {
 }
 
 MainTitleStyle(BuildContext context) {
-  return TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w800, fontSize: 22, height: 1.3);
+  return TextStyle(fontSize: 16, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600, height: 1.3);
 }
 
 DialogTitleStyle(BuildContext context) {

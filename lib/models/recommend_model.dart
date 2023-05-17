@@ -5,14 +5,15 @@ import '../utils/utils.dart';
 import 'etc_model.dart';
 import 'event_model.dart';
 
-part 'sponsor_model.g.dart';
+part 'recommend_model.g.dart';
 
 @JsonSerializable()
-class SponsorModel {
+class RecommendModel {
   String  id;
   int     status;         // 상태 (0:removed, 1:active)
   int     showStatus;     // 보여주기 상태 (0: disable, 1: visible)
   int     creditQty;      // 크래딧 갯수
+  String  desc;
   String  securityCode;   // 보안코드
   String  targetType;     // 대상 타입 ('event')
   String  targetGroupId;  // 대상 그룹 ID
@@ -30,11 +31,12 @@ class SponsorModel {
   @JsonKey(includeFromJson: false)
   DateTime? cacheTime;    // for local cache refresh time..
 
-  SponsorModel({
+  RecommendModel({
     required this.id,
     required this.status,
     required this.showStatus,
     required this.creditQty,
+    required this.desc,
     required this.securityCode,
     required this.targetType,
     required this.targetGroupId,
@@ -50,12 +52,13 @@ class SponsorModel {
     required this.createTime,
   });
 
-  static createEvent(EventModel event, UserModel user, int showStatus, int creditQty, DateTime startTime, DateTime endTime) {
-    return SponsorModel(
+  static createEvent(EventModel event, UserModel user, int showStatus, int creditQty, DateTime startTime, DateTime endTime, String desc) {
+    return RecommendModel(
       id:             '',
       status:         1,
       showStatus:     showStatus,
       creditQty:      creditQty,
+      desc:           desc,
       securityCode:   '',
       targetType:     'event',
       targetGroupId:  event.groupId,
@@ -72,6 +75,6 @@ class SponsorModel {
     );
   }
 
-  factory SponsorModel.fromJson(JSON json) => _$SponsorModelFromJson(json);
-  JSON toJson() => _$SponsorModelToJson(this);
+  factory RecommendModel.fromJson(JSON json) => _$RecommendModelFromJson(json);
+  JSON toJson() => _$RecommendModelToJson(this);
 }

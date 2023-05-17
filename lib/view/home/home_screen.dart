@@ -62,16 +62,16 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     LOG('--> HomeScreen');
     return WillPopScope(
-        onWillPop: () async => await showAlertYesNoDialog(context,
-            'APP EXIT'.tr,
-            'Are you sure you want to quit the app?'.tr,
-            '',
-            'Cancel'.tr,
-            'OK'.tr
-        ).then((result) {
-          return result == 1;
-        }),
-        child: SafeArea(
+      onWillPop: () async => await showAlertYesNoDialog(context,
+          'APP EXIT'.tr,
+          'Are you sure you want to quit the app?'.tr,
+          '',
+          'Cancel'.tr,
+          'OK'.tr
+      ).then((result) {
+        return result == 1;
+      }),
+      child: SafeArea(
         top: false,
         child: ChangeNotifierProvider<AppViewModel>.value(
         value: AppData.appViewModel,
@@ -87,7 +87,11 @@ class HomeScreen extends StatelessWidget {
                     //     child: pages[viewModel.menuIndex],
                     //   )
                     // ),
-                    pages[viewModel.menuIndex],
+                    IndexedStack(
+                      index: viewModel.menuIndex,
+                      children: pages,
+                    ),
+                    // pages[viewModel.menuIndex],
                     BottomCenterAlign(
                       child: Container(
                         height: UI_MENU_BG_HEIGHT,
@@ -106,7 +110,7 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                     color: Theme.of(context).bottomAppBarColor,
                                   ),
-                                  padding: EdgeInsets.only(left: UI_HORIZONTAL_SPACE_S),
+                                  padding: EdgeInsets.only(left: UI_HORIZONTAL_SPACE, right: UI_HORIZONTAL_SPACE_ES),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                                     children: [
@@ -160,7 +164,7 @@ class HomeScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.only(topRight: Radius.circular(_radiusSize)),
                                     color: Theme.of(context).bottomAppBarColor,
                                   ),
-                                  padding: EdgeInsets.only(right: UI_HORIZONTAL_SPACE_S),
+                                  padding: EdgeInsets.only(left: UI_HORIZONTAL_SPACE_ES, right: UI_HORIZONTAL_SPACE),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                                     children: [

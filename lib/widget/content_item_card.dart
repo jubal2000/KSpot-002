@@ -505,9 +505,9 @@ class GoodsItemCardState extends State<GoodsItemCard> {
       _orgId = _goodsItem['id'];
       refresh();
     }
-    if (_goodsItem['sponsorCount'] != null) {
+    if (_goodsItem['recommendCount'] != null) {
       var sponDate  = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
-      sponCount = INT(_goodsItem['sponsorCount'][sponDate]);
+      sponCount = INT(_goodsItem['recommendCount'][sponDate]);
       LOG('--> sponCount [$sponDate] : $sponCount');
     }
     switch (widget.showType) {

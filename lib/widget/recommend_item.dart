@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/data/dialogs.dart';
-import 'package:kspot_002/models/sponsor_model.dart';
+import 'package:kspot_002/models/recommend_model.dart';
 
 import '../data/app_data.dart';
 import '../data/theme_manager.dart';
 import '../models/event_model.dart';
 import '../models/place_model.dart';
 import '../repository/event_repository.dart';
-import '../repository/sponsor_repository.dart';
+import '../repository/recommend_repository.dart';
 import '../services/api_service.dart';
 import '../utils/utils.dart';
 import '../view_model/event_detail_view_model.dart';
@@ -19,8 +19,8 @@ import 'like_widget.dart';
 import 'user_item_widget.dart';
 import '../view/event/event_edit_screen.dart';
 
-class SponsorCardItem extends StatefulWidget {
-  SponsorCardItem(this.itemData,
+class RecommendCardItem extends StatefulWidget {
+  RecommendCardItem(this.itemData,
       {Key? key,
         this.animationController,
         this.itemPadding,
@@ -38,7 +38,7 @@ class SponsorCardItem extends StatefulWidget {
         this.onShowDetail,
         this.onRefresh}) : super(key: key);
 
-  SponsorModel itemData;
+  RecommendModel itemData;
   bool isSelectable;
   bool isShowHomeButton;
   bool isShowPlaceButton;
@@ -57,24 +57,24 @@ class SponsorCardItem extends StatefulWidget {
   AnimationController? animationController;
 
   @override
-  SponsorCardItemState createState() => SponsorCardItemState();
+  RecommendCardItemState createState() => RecommendCardItemState();
 }
 
-class SponsorCardItemState extends State<SponsorCardItem> {
-  final repo = SponsorRepository();
+class RecommendCardItemState extends State<RecommendCardItem> {
+  final repo = RecommendRepository();
   final api = Get.find<ApiService>();
   var _imageHeight = 0.0;
   List<JSON> _userListData = [];
 
   toggleShowStatus(context) {
     var title = widget.itemData.showStatus == 1 ? 'Hide' : 'Show';
-    showAlertYesNoDialog(context, title.tr, '$title sponsored?'.tr, 'In the hide state, other users cannot see it'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
+    showAlertYesNoDialog(context, title.tr, '$title recommend?'.tr, 'In the hide state, other users cannot see it'.tr, 'Cancel'.tr, 'OK'.tr).then((value) {
       if (value == 1) {
         if (repo.checkIsExpired(widget.itemData)) {
-          showAlertDialog(context, title.tr, 'This sponsored event has expired'.tr, '', 'OK'.tr);
+          showAlertDialog(context, title.tr, 'This recommended event has expired'.tr, '', 'OK'.tr);
           return;
         }
-        repo.setSponsorShowStatus(widget.itemData.id, widget.itemData.showStatus == 1 ? 0 : 1).then((result) {
+        repo.setRecommendShowStatus(widget.itemData.id, widget.itemData.showStatus == 1 ? 0 : 1).then((result) {
           if (result) {
             setState(() {
               widget.itemData.showStatus = widget.itemData.showStatus == 1 ? 0 : 1;
@@ -98,9 +98,9 @@ class SponsorCardItemState extends State<SponsorCardItem> {
         //     'Typing \'delete now\''.tr, 'Alert) Recovery is not possible'.tr, 10, null).then((result) {
         //   if (result.toLowerCase() == 'delete now') {
         if (repo.checkIsEnabled(widget.itemData)) {
-          showAlertDialog(context, 'Delete'.tr, '', 'Sponsorship has already started and cannot be deleted'.tr, 'OK'.tr);
+          showAlertDialog(context, 'Delete'.tr, '', 'Recommendship has already started and cannot be deleted'.tr, 'OK'.tr);
         } else {
-            repo.setSponsorStatus(widget.itemData.id, 0).then((result) {
+            repo.setRecommendStatus(widget.itemData.id, 0).then((result) {
               if (result) {
                 setState(() {
                   widget.itemData.status = 0;
@@ -206,7 +206,7 @@ class SponsorCardItemState extends State<SponsorCardItem> {
                             Expanded(child:
                               Row(
                               children: [
-                                Text('Sponsored period'.tr, style: ItemDescStyle(context)),
+                                Text('period'.tr, style: ItemDescStyle(context)),
                                 SizedBox(width: 10),
                                 Text(DATETIME_STR(widget.itemData.startTime), style: ItemDescExStyle(context)),
                                 Text(' ~ ', style: ItemDescExStyle(context)),

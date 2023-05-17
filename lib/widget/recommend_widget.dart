@@ -8,12 +8,12 @@ import '../data/app_data.dart';
 import '../data/theme_manager.dart';
 import '../utils/utils.dart';
 
-Widget SponsorSmallWidget(BuildContext context, String type, JSON targetInfo,
-    {double iconSize = 18, String title = '', Function(int)? onChangeCount}) {
-  return SponsorWidget(context, type, targetInfo, iconSize: iconSize, title: title, showCount: false, onChangeCount: onChangeCount);
+Widget RecommendSmallWidget(BuildContext context, String type, JSON targetInfo,
+    {double iconSize = 18, String title = '', Function(int)? onChangeCount, Function()? onSelected}) {
+  return RecommendWidget(context, type, targetInfo, iconSize: iconSize, title: title, showCount: false, onChangeCount: onChangeCount, onSelected: onSelected);
 }
 
-Widget SponsorWidget(BuildContext context, String type, JSON targetInfo,
+Widget RecommendWidget(BuildContext context, String type, JSON targetInfo,
     {
       double iconSize = 26,
       String title = '',
@@ -25,13 +25,13 @@ Widget SponsorWidget(BuildContext context, String type, JSON targetInfo,
       Color? enableColor,
       Color? disableColor,
       EdgeInsets? padding,
-      Function(int)? onChangeCount
+      Function(int)? onChangeCount,
+      Function()? onSelected
     }) {
   var iconColor0 = enableColor ?? Colors.yellow;
   var iconColor1 = disableColor ?? Theme.of(context).disabledColor;
-  var api = Get.find<ApiService>();
   var eventDate = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
-  var sponCount = JSON_NOT_EMPTY(targetInfo['sponsorCount']) ? targetInfo['sponsorCount'][eventDate] : 0;
+  var recommendCount = JSON_NOT_EMPTY(targetInfo['recommendCount']) ? targetInfo['recommendCount'][eventDate] : 0;
 
   return GestureDetector(
     child: Container(
@@ -42,11 +42,11 @@ Widget SponsorWidget(BuildContext context, String type, JSON targetInfo,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (isShowOutline)
-                OutlineIcon(sponCount > 0 ? Icons.star : Icons.star_outline_rounded, iconSize.sp, sponCount > 0 ? iconColor0 : iconColor1, x: iconX, y: iconY),
+                OutlineIcon(recommendCount > 0 ? Icons.star : Icons.star_outline_rounded, iconSize.sp, recommendCount > 0 ? iconColor0 : iconColor1, x: iconX, y: iconY),
               if (!isShowOutline)
-                Icon(sponCount > 0 ? Icons.star : Icons.star_outline_rounded, size: iconSize.sp, color: sponCount > 0 ? iconColor0 : iconColor1),
+                Icon(recommendCount > 0 ? Icons.star : Icons.star_outline_rounded, size: iconSize.sp, color: recommendCount > 0 ? iconColor0 : iconColor1),
               if (showCount)
-                Text('$sponCount', style: ItemDescExStyle(context)),
+                Text(PRICE_STR(recommendCount), style: ItemDescExStyle(context)),
               if (title.isNotEmpty)...[
                 Text(title, style: ItemDescExStyle(context))
               ],
@@ -55,7 +55,7 @@ Widget SponsorWidget(BuildContext context, String type, JSON targetInfo,
     ),
     onTap: () {
       if (!isEnabled) return;
-
+      if (onSelected != null) onSelected();
     },
   );
 }

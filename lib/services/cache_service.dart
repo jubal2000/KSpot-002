@@ -9,7 +9,7 @@ import '../models/event_group_model.dart';
 import '../models/event_model.dart';
 import '../models/message_model.dart';
 import '../models/place_model.dart';
-import '../models/sponsor_model.dart';
+import '../models/recommend_model.dart';
 import '../models/story_model.dart';
 import '../models/user_model.dart';
 import '../utils/utils.dart';
@@ -38,7 +38,7 @@ class CacheService extends GetxService {
   Map<String, ChatModel> chatData = {};
   Map<String, ChatRoomModel> chatRoomData = {};
 
-  Map<String, SponsorModel> sponsorData = {};
+  Map<String, RecommendModel> recommendData = {};
 
   JSON bookmarkData = {};
   JSON reportData = {};
@@ -72,7 +72,7 @@ class CacheService extends GetxService {
     messageGroupData = {};
     chatData = {};
     chatRoomData = {};
-    sponsorData = {};
+    recommendData = {};
     reportData = {};
     blockData = {};
     chatItemData = {};
@@ -194,17 +194,17 @@ class CacheService extends GetxService {
     LOG('--> setChatRoomItem [${addItem.id}] :  ${chatRoomData.length}');
   }
 
-  setSponsorItem(SponsorModel addItem) {
+  setRecommendItem(RecommendModel addItem) {
     addItem.cacheTime = DateTime.now();
-    sponsorData[addItem.id] = addItem;
-    // LOG('--> setSponsorItem [${addItem.id}] : ${messageData![addItem.id]!.desc} / ${messageData!.length}');
+    recommendData[addItem.id] = addItem;
+    // LOG('--> setRecommendItem [${addItem.id}] : ${messageData![addItem.id]!.desc} / ${messageData!.length}');
   }
 
-  setSponsorData(JSON addData) {
+  setRecommendData(JSON addData) {
     for (var item in addData.entries) {
-      setSponsorItem(item.value);
+      setRecommendItem(item.value);
     }
-    return sponsorData;
+    return recommendData;
   }
 
   UserModel? getUserItem(String key) {
@@ -267,8 +267,8 @@ class CacheService extends GetxService {
     return cacheItem;
   }
 
-  getSponsorItem(String key) {
-    var cacheItem = sponsorData[key];
+  getRecommendItem(String key) {
+    var cacheItem = recommendData[key];
     if (cacheItem != null && cacheItem.cacheTime != null) {
       if (cacheItem.cacheTime!.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
         return null;

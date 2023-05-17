@@ -1,6 +1,6 @@
 
 import 'package:json_annotation/json_annotation.dart';
-import 'package:kspot_002/models/sponsor_model.dart';
+import 'package:kspot_002/models/recommend_model.dart';
 import 'package:kspot_002/models/upload_model.dart';
 import 'package:kspot_002/models/user_model.dart';
 import 'package:uuid/uuid.dart';
@@ -231,7 +231,7 @@ class MemberData {
 }
 
 @JsonSerializable()
-class SponsorData {
+class RecommendData {
   String    id;            // user id
   int       creditQty;
   String    userId;
@@ -241,7 +241,7 @@ class SponsorData {
   DateTime  startTime;
   DateTime  endTime;
 
-  SponsorData({
+  RecommendData({
     required this.id,
     required this.creditQty,
     required this.userId,
@@ -252,11 +252,11 @@ class SponsorData {
     required this.endTime,
   });
 
-  factory SponsorData.fromJson(JSON json) => _$SponsorDataFromJson(json);
-  JSON toJson() => _$SponsorDataToJson(this);
+  factory RecommendData.fromJson(JSON json) => _$RecommendDataFromJson(json);
+  JSON toJson() => _$RecommendDataToJson(this);
 
   static empty() {
-    return SponsorData(
+    return RecommendData(
       id: '',
       creditQty: 0,
       userId: '',
@@ -268,16 +268,16 @@ class SponsorData {
     );
   }
 
-  static fromSponsorModel(SponsorModel sponsor) {
-    return SponsorData(
-      id: sponsor.id,
-      creditQty: sponsor.creditQty,
-      userId: sponsor.userId,
-      userPic: sponsor.userPic,
-      userName: sponsor.userName,
-      createTime: sponsor.createTime,
-      startTime: sponsor.startTime,
-      endTime: sponsor.endTime,
+  static fromRecommendModel(RecommendModel source) {
+    return RecommendData(
+      id: source.id,
+      creditQty: source.creditQty,
+      userId: source.userId,
+      userPic: source.userPic,
+      userName: source.userName,
+      createTime: source.createTime,
+      startTime: source.startTime,
+      endTime: source.endTime,
     );
   }
 }

@@ -1112,14 +1112,14 @@ class ApiService extends GetxService {
 
   //----------------------------------------------------------------------------------------
   //
-  //    SPONSOR function..
+  //    RECOMMEND function..
   //
 
-  final SponsorCollection = 'data_sponsor';
+  final RecommendCollection = 'data_recommend';
 
-  Future<JSON> getSponsorData() async {
+  Future<JSON> getRecommendData() async {
     JSON result = {};
-    var snapshot = await firestore!.collection(SponsorCollection)
+    var snapshot = await firestore!.collection(RecommendCollection)
         .where('status', isEqualTo: 1)
         .get();
     if (snapshot.docs.isNotEmpty) {
@@ -1127,24 +1127,24 @@ class ApiService extends GetxService {
         result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
       }
     }
-    LOG('--> getSponsorData Result : $result');
+    LOG('--> getRecommendData Result : $result');
     return result;
   }
 
-  Future<JSON?> getSponsorFromId(String sponsorId) async {
+  Future<JSON?> getRecommendFromId(String recommendId) async {
     JSON result = {};
-    var snapshot = await firestore!.collection(SponsorCollection).doc(sponsorId).get();
+    var snapshot = await firestore!.collection(RecommendCollection).doc(recommendId).get();
     if (snapshot.data() != null) {
       result = FROM_SERVER_DATA(snapshot.data());
-      LOG('--> getSponsorFromId Result : $result');
+      LOG('--> getRecommendFromId Result : $result');
       return result;
     }
     return null;
   }
 
-  Future<List<JSON>> getSponsorFromTargetId(String eventId, {var type = 'event', DateTime? lastTime, int limit = 0}) async {
+  Future<List<JSON>> getRecommendFromTargetId(String eventId, {var type = 'event', DateTime? lastTime, int limit = 0}) async {
     List<JSON> result = [];
-    var ref = firestore!.collection(SponsorCollection);
+    var ref = firestore!.collection(RecommendCollection);
     var query = ref
         .where('status'     , isEqualTo: 1)
         .where('targetType' , isEqualTo: type)
@@ -1164,15 +1164,15 @@ class ApiService extends GetxService {
       var item = FROM_SERVER_DATA(doc.data());
       result.add(item);
     }
-    LOG('--> getSponsorFromTargetId Result [$eventId] : ${result.length}');
+    LOG('--> getRecommendFromTargetId Result [$eventId] : ${result.length}');
     return result;
   }
 
-  Future<JSON> getSponsorFromUserId(String userId, {var isAuthor = false, DateTime? lastTime, int limit = 0}) async {
-    LOG('--> getSponsorFromUserId : $userId / $lastTime / $isAuthor / $limit');
+  Future<JSON> getRecommendFromUserId(String userId, {var isAuthor = false, DateTime? lastTime, int limit = 0}) async {
+    LOG('--> getRecommendFromUserId : $userId / $lastTime / $isAuthor / $limit');
     JSON result = {};
     try {
-      var ref = firestore!.collection(SponsorCollection);
+      var ref = firestore!.collection(RecommendCollection);
       var query = ref.where('status', isEqualTo: 1);
       if (!isAuthor) {
         query = query.where('showStatus', isEqualTo: 1);
@@ -1189,15 +1189,15 @@ class ApiService extends GetxService {
       for (var doc in snapshot.docs) {
         result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
       }
-      LOG('--> getSponsorFromUserId result : ${result.length}');
+      LOG('--> getRecommendFromUserId result : ${result.length}');
     } catch (e) {
-      LOG('--> getSponsorFromUserId error : ${e.toString()}');
+      LOG('--> getRecommendFromUserId error : ${e.toString()}');
     }
     return result;
   }
 
-  Future<JSON> addSponsorItem(JSON addData) async {
-    var ref = firestore!.collection(SponsorCollection);
+  Future<JSON> addRecommendItem(JSON addData) async {
+    var ref = firestore!.collection(RecommendCollection);
     if (STR(addData["id"]).isEmpty) {
       addData["id"] = ref.doc().id;
       addData["createTime"] = CURRENT_SERVER_TIME();
@@ -1218,34 +1218,35 @@ class ApiService extends GetxService {
     //   }
     // }
     await ref.doc(addData['id']).set(addData);
-    LOG('--> addSponsorItem : ${addData['id']}');
-    return FROM_SERVER_DATA(addData);
+    var result = FROM_SERVER_DATA(addData);
+    LOG('--> addRecommendItem result : ${result.length}');
+    return result;
   }
 
-  Future<bool> setSponsorStatus(String eventId, int status) async {
+  Future<bool> setRecommendStatus(String eventId, int status) async {
     // LOG('------> setSponsorStatus : $eventId / $status');
     try {
-      var ref = firestore!.collection(SponsorCollection);
+      var ref = firestore!.collection(RecommendCollection);
       await ref.doc(eventId).update({
         'status': status,
       });
       return true;
     } catch (e) {
-      LOG('--> setSponsorStatus error : $e');
+      LOG('--> setRecommendStatus error : $e');
     }
     return false;
   }
 
-  Future<bool> setSponsorShowStatus(String eventId, int status) async {
+  Future<bool> setRecommendShowStatus(String eventId, int status) async {
     // LOG('------> setEventShowStatus : $eventId / $status');
     try {
-      var ref = firestore!.collection(SponsorCollection);
+      var ref = firestore!.collection(RecommendCollection);
       await ref.doc(eventId).update({
         'showStatus': status,
       });
       return true;
     } catch (e) {
-      LOG('--> setSponsorShowStatus error : $e');
+      LOG('--> setRecommendShowStatus error : $e');
     }
     return false;
   }

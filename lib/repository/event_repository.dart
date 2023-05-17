@@ -29,8 +29,8 @@ class EventRepository {
 
   /////////////////////////////////////////////////////////////////////////////////////////////
 
-  Future<List<JSON>> getEventSponsorList(String targetId) async {
-    return await api.getSponsorFromTargetId(targetId, type: 'event');
+  Future<List<JSON>> getEventRecommendList(String targetId) async {
+    return await api.getRecommendFromTargetId(targetId, type: 'event');
   }
 
   Future<Map<String, EventModel>> getEventListFromCountry(String groupId, String country, [String countryState = '']) async {
@@ -38,7 +38,7 @@ class EventRepository {
     try {
       final response = await api.getEventListFromCountry(groupId, country, countryState);
       for (var item in response.entries) {
-        item.value['sponsorData'] = await getEventSponsorList(item.key);
+        item.value['recommendData'] = await getEventRecommendList(item.key);
         var eventItem = EventModel.fromJson(item.value);
         result[item.key] = eventItem;
         cache.setEventItem(eventItem);
@@ -56,7 +56,7 @@ class EventRepository {
       if (cacheItem != null) return cacheItem;
       final response = await api.getEventFromId(eventId);
       if (response != null) {
-        response['sponsorData'] = await getEventSponsorList(response['id']);
+        response['recommendData'] = await getEventRecommendList(response['id']);
         final eventItem = EventModel.fromJson(FROM_SERVER_DATA(response));
         LOG("--> getEventFromId result: ${eventItem.toJson()}");
         cache.setEventItem(eventItem);
@@ -162,18 +162,18 @@ class EventRepository {
     return api.checkEventExpired(event.toJson());
   }
 
-  EventModel setSponsorCount(EventModel event, [DateTime? targetTime]) {
+  EventModel setRecommendCount(EventModel event, [DateTime? targetTime]) {
     var eventDate = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
-    event.sponsorCount ??= {};
-    event.sponsorCount![eventDate] = 0;
+    event.recommendCount ??= {};
+    event.recommendCount![eventDate] = 0;
     // LOG('--> checkSponsored [${event.title}] : ${event.sponsorData}');
-    if (LIST_NOT_EMPTY(event.sponsorData)) {
-      for (var item in event.sponsorData!) {
-        LOG('--> event.sponsorData check [$eventDate] : ${item.toJson()}');
+    if (LIST_NOT_EMPTY(event.recommendData)) {
+      for (var item in event.recommendData!) {
+        LOG('--> event.recommendData check [$eventDate] : ${item.startTime} ~ ${item.endTime}');
         if (checkDateRange(item.startTime, item.endTime, targetTime)) {
-          var orgCount = event.sponsorCount![eventDate] ?? 0;
-          event.sponsorCount![eventDate] = orgCount + 1;
-          LOG('--> checkSponsored add [${event.title}-$eventDate] : ${event.sponsorCount![eventDate]}');
+          var orgCount = event.recommendCount![eventDate] ?? 0;
+          event.recommendCount![eventDate] = orgCount + 1;
+          LOG('--> recommendData add [${event.title}-$eventDate] : ${event.recommendCount![eventDate]}');
         }
       }
     }

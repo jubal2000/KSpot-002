@@ -15,11 +15,12 @@ import '../event/event_edit_screen.dart';
 import '../story/story_item.dart';
 
 class ProfileContentScreen extends StatelessWidget {
-  ProfileContentScreen(this.parentViewModel, this.type, this.title, {Key? key}) : super(key: key);
+  ProfileContentScreen(this.parentViewModel, this.type, this.title, {Key? key, this.addText}) : super(key: key);
 
   UserViewModel parentViewModel;
   ProfileContentType type;
   String title;
+  String? addText;
 
   final cache = Get.find<CacheService>();
 
@@ -29,7 +30,7 @@ class ProfileContentScreen extends StatelessWidget {
       top: false,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(title.tr, style: AppBarTitleStyle(context)),
+          title: Text(title, style: AppBarTitleStyle(context)),
           titleSpacing: 0,
           toolbarHeight: UI_EDIT_TOOL_HEIGHT,
           actions: [
@@ -38,7 +39,9 @@ class ProfileContentScreen extends StatelessWidget {
                 onPressed: () {
                   parentViewModel.addNewContent(type);
                 },
-                icon: Icon(Icons.add)
+                icon: addText != null ?
+                  Text(addText!, style: ItemDescColorBoldStyle(context)) :
+                  Icon(Icons.add, color: Colors.yellowAccent)
               ),
               SizedBox(width: 10.w),
             ],

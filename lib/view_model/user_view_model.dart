@@ -7,7 +7,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:kspot_002/models/story_model.dart';
-import 'package:kspot_002/models/sponsor_model.dart';
+import 'package:kspot_002/models/recommend_model.dart';
 import 'package:kspot_002/services/cache_service.dart';
 import 'package:kspot_002/view/bookmark/bookmark_screen.dart';
 import 'package:kspot_002/view/event/event_list_screen.dart';
@@ -16,7 +16,7 @@ import 'package:kspot_002/view/promotion/promotion_screen.dart';
 import 'package:kspot_002/view/story/story_detail_screen.dart';
 import 'package:kspot_002/view/story/story_edit_screen.dart';
 import 'package:kspot_002/widget/bookmark_widget.dart';
-import 'package:kspot_002/widget/sponsor_item.dart';
+import 'package:kspot_002/widget/recommend_item.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/app_data.dart';
@@ -27,7 +27,7 @@ import '../models/event_model.dart';
 import '../models/promotion_model.dart';
 import '../repository/event_repository.dart';
 import '../repository/place_repository.dart';
-import '../repository/sponsor_repository.dart';
+import '../repository/recommend_repository.dart';
 import '../utils/utils.dart';
 import '../models/user_model.dart';
 import '../repository/user_repository.dart';
@@ -52,14 +52,14 @@ enum ProfileContentType {
   follow,
   bookmark,
   promotion,
-  sponsor,
+  recommend,
   max,
 }
 
 class UserViewModel extends ChangeNotifier {
   final repo      = UserRepository();
   final eventRepo = EventRepository();
-  final sponRepo  = SponsorRepository();
+  final sponRepo  = RecommendRepository();
   final placeRepo = PlaceRepository();
 
   final cache     = Get.find<CacheService>();
@@ -87,7 +87,7 @@ class UserViewModel extends ChangeNotifier {
   Map<String, EventModel>     eventData = {};
   Map<String, StoryModel>     storyData = {};
   Map<String, PromotionModel> promotionData = {};
-  Map<String, SponsorModel>   sponsorData = {};
+  Map<String, RecommendModel>   recommendData = {};
   JSON snsData = {};
   JSON likeData = {};
   JSON bookmarkData = {};
@@ -110,7 +110,7 @@ class UserViewModel extends ChangeNotifier {
     initUserModel(source.userInfo!);
     eventData     = source.eventData;
     storyData     = source.storyData;
-    sponsorData   = source.sponsorData;
+    recommendData   = source.recommendData;
     bookmarkData  = source.bookmarkData;
   }
 
@@ -119,18 +119,18 @@ class UserViewModel extends ChangeNotifier {
   }
 
   getEventData([bool isShowEmpty = false]) async {
-    if (JSON_NOT_EMPTY(eventData)) {
-      for (var item in eventData.entries) {
-        var checkTime = item.value.createTime;
-        if (showLastTime[ProfileContentType.event.index] == null ||
-            checkTime.isBefore(showLastTime[ProfileContentType.event.index]!)) {
-          showLastTime[ProfileContentType.event.index] = checkTime;
-        }
-      }
-    }
-    LOG('---> getEventData : ${eventData.length} - ${showLastTime[ProfileContentType.event.index].toString()}');
-    var eventNewData = await repo.getEventFromUserId(userInfo!.id,
-        isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.event.index]);
+    // if (JSON_NOT_EMPTY(eventData)) {
+    //   for (var item in eventData.entries) {
+    //     var checkTime = item.value.createTime;
+    //     if (showLastTime[ProfileContentType.event.index] == null ||
+    //         checkTime.isBefore(showLastTime[ProfileContentType.event.index]!)) {
+    //       showLastTime[ProfileContentType.event.index] = checkTime;
+    //     }
+    //   }
+    // }
+    // LOG('---> getEventData : ${eventData.length} - ${showLastTime[ProfileContentType.event.index].toString()}');
+    var eventNewData = await repo.getEventFromUserId(userInfo!.id, isAuthor: isMyProfile);
+        // isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.event.index]);
     if (eventNewData.isNotEmpty) {
       for (var item in eventNewData.entries) {
         var placeInfo = await placeRepo.getPlaceFromId(item.value.placeId);
@@ -139,11 +139,11 @@ class UserViewModel extends ChangeNotifier {
         }
         eventData[item.key] = item.value;
       }
-    } else {
-      isLastContent[ProfileContentType.event.index] = true;
-      if (isShowEmpty) {
-        ShowErrorToast('No more list'.tr);
-      }
+    // } else {
+    //   isLastContent[ProfileContentType.event.index] = true;
+    //   if (isShowEmpty) {
+    //     ShowErrorToast('No more list'.tr);
+    //   }
     }
     return eventData;
   }
@@ -157,6 +157,8 @@ class UserViewModel extends ChangeNotifier {
           showLastTime[ProfileContentType.story.index] = checkTime;
         }
       }
+    } else {
+      showLastTime[ProfileContentType.story.index] = DateTime.now();
     }
     LOG('---> getStoryData : ${storyData.length} - ${showLastTime[ProfileContentType.story.index].toString()}');
     var storyNewData = await repo.getStoryFromUserId(userInfo!.id,
@@ -173,19 +175,19 @@ class UserViewModel extends ChangeNotifier {
   }
 
   getPromotionData([bool isShowEmpty = false]) async {
-    // LOG('--> getSponsorData : ${sponsorData.length}');
+    // LOG('--> getRecommendData : ${recommendData.length}');
     promotionData.clear();
     var newData = await repo.getPromotionFromUserId(userInfo!.id, isAuthor: isMyProfile);
     promotionData.addAll(newData);
     return promotionData;
   }
 
-  getSponsorData([bool isShowEmpty = false]) async {
-    // LOG('--> getSponsorData : ${sponsorData.length}');
-    sponsorData.clear();
-    var newData = await repo.getSponsorFromUserId(userInfo!.id, isAuthor: isMyProfile);
-    sponsorData.addAll(newData);
-    return sponsorData;
+  getRecommendData([bool isShowEmpty = false]) async {
+    // LOG('--> getRecommendData : ${recommendData.length}');
+    recommendData.clear();
+    var newData = await repo.getRecommendFromUserId(userInfo!.id, isAuthor: isMyProfile);
+    recommendData.addAll(newData);
+    return recommendData;
   }
 
   setMainTab(index) {
@@ -443,11 +445,11 @@ class UserViewModel extends ChangeNotifier {
         showHorizontalDivider(Size(double.infinity, 30.w)),
       // if (userInfo!.checkOption('event_on'))
         contentItem(Icons.event_available, isMyProfile ? 'MY EVENT LIST'.tr : 'EVENT LIST'.tr, '', 0, () {
-          Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.event, 'EVENT LIST')));
+          Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.event, 'EVENT LIST'.tr)));
         }),
       // if (userInfo!.checkOption('story_on'))
         contentItem(Icons.photo_library_outlined, isMyProfile ? 'MY STORY LIST'.tr : 'STORY LIST'.tr, '', 0, () {
-          Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST')));
+          Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.story, 'STORY LIST'.tr)));
         }),
         // if (userInfo!.checkOption('follow_on'))
         contentItem(Icons.face, isMyProfile ? 'MY FOLLOW LIST'.tr : 'FOLLOW LIST'.tr, '', 0, () {
@@ -458,11 +460,11 @@ class UserViewModel extends ChangeNotifier {
           Navigator.of(Get.context!).push(createAniRoute(BookmarkScreen(userInfo!)));
         }),
         if (isMyProfile && APP_STORE_OPEN)...[
-          contentItem(Icons.workspace_premium_outlined, 'PROMOTION LIST'.tr, '', 0, () {
-            Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.promotion, 'PROMOTION LIST')));
+          contentItem(Icons.workspace_premium_outlined, 'MY PROMOTION LIST'.tr, '', 0, () {
+            Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.promotion, 'MY PROMOTION LIST'.tr, addText: 'PROMOTION'.tr)));
           }),
-          contentItem(Icons.star_border_outlined, 'SPONSORED LIST'.tr, '', 0, () {
-            Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.sponsor, 'SPONSORED LIST')));
+          contentItem(Icons.star_border_outlined, 'MY RECOMMENDED LIST'.tr, '', 0, () {
+            Navigator.of(Get.context!).push(createAniRoute(ProfileContentScreen(this, ProfileContentType.recommend, 'MY RECOMMENDED LIST'.tr, addText: 'RECOMMEND'.tr)));
           }),
         ],
       ],
@@ -604,18 +606,18 @@ class UserViewModel extends ChangeNotifier {
     // );
   }
 
-  showSponsorList() {
+  showRecommendList() {
     List<Widget> showItemList = [];
-    for (var item in sponsorData.entries) {
+    for (var item in recommendData.entries) {
       var showItem = showWidgetList[ProfileContentType.story.index][item.key];
       showItem ??= ClipRRect(
           borderRadius: BorderRadius.all(Radius.circular(8)),
-          child: SponsorCardItem(
+          child: RecommendCardItem(
             item.value,
             isShowUser: false,
             onRefresh: (updateData) {
               LOG('--> onRefresh : ${updateData['id']} / ${updateData['status']}');
-              sponsorData[updateData['id']] = SponsorModel.fromJson(updateData);
+              recommendData[updateData['id']] = RecommendModel.fromJson(updateData);
               notifyListeners();
             },
             onShowDetail: (key, status) {
@@ -633,11 +635,11 @@ class UserViewModel extends ChangeNotifier {
   }
 
   showThumbList() {
-    LOG('-->  showThumbList [$isMyProfile] : ${sponsorData.length}');
+    LOG('-->  showThumbList [$isMyProfile] : ${recommendData.length}');
     // sort status..
     List<Widget> showItemList = [];
-    for (var item in sponsorData.entries) {
-      var showItem = showWidgetList[ProfileContentType.sponsor.index][item.key];
+    for (var item in recommendData.entries) {
+      var showItem = showWidgetList[ProfileContentType.recommend.index][item.key];
       showItem ??= Container(
       );
       if (item.value.status > 0) {
@@ -666,15 +668,15 @@ class UserViewModel extends ChangeNotifier {
         }
       case ProfileContentType.promotion:
         if (promotionData.isEmpty) {
-          return getSponsorData(false);
+          return getRecommendData(false);
         } else {
           return promotionData;
         }
-      case ProfileContentType.sponsor:
-        if (sponsorData.isEmpty) {
-          return getSponsorData(false);
+      case ProfileContentType.recommend:
+        if (recommendData.isEmpty) {
+          return getRecommendData(false);
         } else {
-          return sponsorData;
+          return recommendData;
         }
     }
   }
@@ -701,11 +703,13 @@ class UserViewModel extends ChangeNotifier {
   }
 
   showContentList(ProfileContentType type) {
-    scrollController[type.index].addListener(() {
-      if (scrollController[type.index].position.pixels == scrollController[type.index].position.maxScrollExtent) {
-        reloadContentData(type);
-      }
-    });
+    if (type == ProfileContentType.story) {
+      scrollController[type.index].addListener(() {
+        if (scrollController[type.index].position.pixels == scrollController[type.index].position.maxScrollExtent) {
+          reloadContentData(type);
+        }
+      });
+    }
     return LayoutBuilder(
       builder: (context, layout) {
         return Container(
@@ -722,8 +726,8 @@ class UserViewModel extends ChangeNotifier {
                     showEventList(),
                   if (type == ProfileContentType.story)
                     showStoryList(),
-                  if (type == ProfileContentType.sponsor)
-                    showSponsorList(),
+                  if (type == ProfileContentType.recommend)
+                    showRecommendList(),
                 ],
               )
             )
@@ -758,17 +762,17 @@ class UserViewModel extends ChangeNotifier {
         //   Get.to(() => EventListScreen(isMyProfile, isSelectable: true))!.then((result) {
         //     if (result != null) {
         //       LOG('--> EventListScreen result : ${result.toJson()}');
-        //       showEventSponsorDialog(Get.context!, result, AppData.userInfo.creditCount).then((dResult) {
-        //         LOG('--> showEventSponsorDialog result : $dResult');
+        //       showEventRecommendDialog(Get.context!, result, AppData.userInfo.creditCount).then((dResult) {
+        //         LOG('--> showEventRecommendDialog result : $dResult');
         //         if (dResult != null) {
-        //           sponRepo.addSponsorItem(dResult).then((addItem) {
+        //           sponRepo.addRecommendItem(dResult).then((addItem) {
         //             if (addItem != null) {
-        //               sponsorData[addItem['id']] = SponsorModel.fromJson(addItem);
-        //               LOG('--> sponsorData Success : ${sponsorData.length} / ${addItem.toString()}');
-        //               ShowToast('Event Sponsorship Success'.tr);
+        //               recommendData[addItem['id']] = RecommendModel.fromJson(addItem);
+        //               LOG('--> recommendData Success : ${recommendData.length} / ${addItem.toString()}');
+        //               ShowToast('Event Recommendship Success'.tr);
         //               notifyListeners();
         //             } else {
-        //               ShowToast('Event Sponsorship Failed'.tr);
+        //               ShowToast('Event Recommendship Failed'.tr);
         //             }
         //           });
         //         }
@@ -777,24 +781,24 @@ class UserViewModel extends ChangeNotifier {
         //   });
         // });
         break;
-      case ProfileContentType.sponsor:
+      case ProfileContentType.recommend:
         Get.to(() => EventListScreen(isMyProfile, isSelectable: true))!.then((result) {
           if (result != null) {
             LOG('--> EventListScreen result : ${result.toJson()}');
-            showEventSponsorDialog(Get.context!, result, AppData.userInfo.creditCount).then((dResult) {
-              LOG('--> showEventSponsorDialog result : $dResult');
+            showEventRecommendDialog(Get.context!, result, AppData.userInfo.creditCount, '').then((dResult) {
               if (dResult != null) {
-                sponRepo.addSponsorItem(dResult).then((addItem) {
+                LOG('--> showEventRecommendDialog result : ${dResult.toJson()}');
+                sponRepo.addRecommendItem(dResult).then((addItem) {
                   if (addItem != null) {
-                    sponsorData[addItem['id']] = SponsorModel.fromJson(addItem);
-                    var sponsorItem = SponsorData.fromSponsorModel(SponsorModel.fromJson(addItem));
-                    cache.eventData[result.id]!.sponsorData ??= [];
-                    cache.eventData[result.id]!.sponsorData!.add(sponsorItem);
-                    LOG('--> sponsorData Success : ${sponsorData.length} / ${addItem.toString()}');
-                    ShowToast('Event Sponsorship Success'.tr);
+                    recommendData[addItem['id']] = RecommendModel.fromJson(addItem);
+                    var recommendItem = RecommendData.fromRecommendModel(RecommendModel.fromJson(addItem));
+                    cache.eventData[result.id]!.recommendData ??= [];
+                    cache.eventData[result.id]!.recommendData!.add(recommendItem);
+                    LOG('--> recommendData Success : ${recommendData.length} / ${addItem.toString()}');
+                    ShowToast('Event Recommend Success'.tr);
                     notifyListeners();
                   } else {
-                    ShowToast('Event Sponsorship Failed'.tr);
+                    ShowToast('Event Recommend Failed'.tr);
                   }
                 });
               }

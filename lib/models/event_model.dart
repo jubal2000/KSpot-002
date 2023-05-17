@@ -82,10 +82,10 @@ class EventModel {
   List<MemberData>?     managerData;    // 관리자 목록
 
   List<PromotionData>?  promotionData;  // 광고 정보
-  List<SponsorData>?    sponsorData;    // 스폰서 정보
+  List<RecommendData>?  recommendData;  // 추천 정보
 
   PlaceModel?           placeInfo;
-  Map<String, int>?     sponsorCount;   // 스폰서 정보 카운트(선택된 날짜)
+  Map<String, int>?     recommendCount;   // 추천 정보 카운트(선택된 날짜)
   String?               timeRange;
 
   @JsonKey(includeFromJson: false)

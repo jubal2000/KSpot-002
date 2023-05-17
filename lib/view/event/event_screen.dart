@@ -30,38 +30,25 @@ class EventScreen extends StatelessWidget {
           value: AppData.appViewModel,
           child: Consumer<AppViewModel>(
             builder: (context, appViewModel, _) {
-              LOG('--> AppViewModel');
-              return FutureBuilder(
-                future: AppData.eventViewModel.getEventData(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    cache.eventData = snapshot.data;
-                    AppData.eventViewModel.isMapUpdate = true;
-                    LOG('--> cache.eventData : ${cache.eventData.length}');
-                    return ChangeNotifierProvider<EventViewModel>.value(
-                        value: AppData.eventViewModel,
-                        child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
-                          return Stack(
-                            children: [
-                              IndexedStack(
-                                index: viewModel.eventListType == EventListType.map ? 0 : 1,
-                                children: [
-                                  viewModel.showMapList(),
-                                  viewModel.showMainList()
-                                ],
-                              ),
-                              viewModel.showDatePicker(),
-                              viewModel.showTopMenuBar(),
-                            ]
-                          );
-                        }
-                      )
-                    );
-                  } else {
-                    return showLoadingFullPage(context);
+              LOG('--> AppViewModel : ${appViewModel.isRedraw}');
+              if (appViewModel.isRedraw) {
+                return FutureBuilder(
+                  future: AppData.eventViewModel.getEventData(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      cache.eventData = snapshot.data;
+                      AppData.eventViewModel.isMapUpdate = true;
+                      LOG('--> cache.eventData : ${cache.eventData.length}');
+                      return AppData.eventViewModel.showEventMain();
+                    } else {
+                      return showLoadingFullPage(context);
+                    }
                   }
-                }
-              );
+                );
+              } else {
+                appViewModel.isRedraw = true;
+                return AppData.eventViewModel.showEventMain();
+              }
               // return Stack(
               //   children: [
               //     if (cache.eventData.isEmpty)

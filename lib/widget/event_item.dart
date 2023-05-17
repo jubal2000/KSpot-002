@@ -32,6 +32,7 @@ class EventCardItem extends StatefulWidget {
         this.isShowHomeButton = true,
         this.isShowPlaceButton = true,
         this.isShowUser = true,
+        this.isShowDesc = false,
         this.isShowLike = false,
         this.isShowBookmark = true,
         this.isMyItem = false,
@@ -51,6 +52,7 @@ class EventCardItem extends StatefulWidget {
   bool isMyItem;
   bool isExpired;
   bool isShowBookmark;
+  bool isShowDesc;
   int selectMax;
 
   double itemHeight;
@@ -141,7 +143,7 @@ class EventCardItemState extends State<EventCardItem> {
       timeData = widget.itemData.timeData!.first;
     }
     var sponDate  = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
-    var sponCount = widget.itemData.sponsorCount != null ? INT(widget.itemData.sponsorCount![sponDate]) : 0;
+    var sponCount = widget.itemData.recommendCount != null ? INT(widget.itemData.recommendCount![sponDate]) : 0;
     // LOG('--> EventItem sponCount [${widget.itemData.title}] : $sponCount');
     return GestureDetector(
         onTap: () {
@@ -203,7 +205,6 @@ class EventCardItemState extends State<EventCardItem> {
                       child: Container(
                         padding: EdgeInsets.only(top: 5),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
@@ -240,31 +241,32 @@ class EventCardItemState extends State<EventCardItem> {
                                 ],
                             ]
                           ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(vertical: 3),
-                            child: Text(DESC(widget.itemData.desc), style: ItemDescStyle(context, fontSize: 11.0), maxLines: 2),
-                          ),
-                          Expanded(child:
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding: EdgeInsets.only(bottom: 5),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(timeData != null ? timeData.title : '', style: ItemDescExStyle(context)),
-                                        Text(timeData != null ? timeData.desc  : '', style: ItemDescExStyle(context), maxLines:2),
-                                      ],
-                                    ),
+                          if (widget.isShowDesc)
+                            Expanded(
+                              child: Container(
+                                alignment: Alignment.centerLeft,
+                                child: Text(DESC(widget.itemData.desc), style: ItemDescStyle(context, fontSize: 11.0), maxLines: 2),
+                              ),
+                            ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(bottom: 5),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(timeData != null ? timeData.title : '', style: ItemDescExStyle(context)),
+                                      Text(timeData != null ? timeData.desc  : '', style: ItemDescExStyle(context), maxLines:2),
+                                    ],
                                   ),
                                 ),
-                                if (widget.isShowUser && _userListData.isNotEmpty)
-                                  UserIdCardWidget(_userListData),
-                              ]
-                            )
+                              ),
+                              if (widget.isShowUser && _userListData.isNotEmpty)
+                                UserIdCardWidget(_userListData),
+                            ]
                           )
                         ],
                       )
@@ -399,7 +401,7 @@ class PlaceEventVerCardItemState extends State<PlaceEventVerCardItem> {
     _isExpired = api.checkEventExpired(widget.itemData.toJson());
 
     var sponDate  = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
-    var sponCount = widget.itemData.sponsorCount != null ? INT(widget.itemData.sponsorCount![sponDate]) : 0;
+    var sponCount = widget.itemData.recommendCount != null ? INT(widget.itemData.recommendCount![sponDate]) : 0;
     LOG('--> PlaceEventVerCardItem sponCount [$sponDate] : $sponCount');
     return GestureDetector(
       onTap: () {
@@ -612,7 +614,7 @@ class PlaceEventMapCardItemState extends State<PlaceEventMapCardItem> {
       timeData = widget.itemData.timeData!.first;
     }
     var sponDate  = '${AppData.currentDate.year}-${AppData.currentDate.month}-${AppData.currentDate.day}';
-    var sponCount = widget.itemData.sponsorCount != null ? INT(widget.itemData.sponsorCount![sponDate]) : 0;
+    var recommendCount = widget.itemData.recommendCount != null ? INT(widget.itemData.recommendCount![sponDate]) : 0;
     // LOG('--> EventItem [${widget.itemData.title}] : ${widget.itemData.placeInfo!.pic} / $sponCount');
     return Container(
       margin: widget.margin,
@@ -668,7 +670,7 @@ class PlaceEventMapCardItemState extends State<PlaceEventMapCardItem> {
                                         iconSize: 16.sp, padding: EdgeInsets.all(5.sp), isShowOutline: true,
                                         disableColor: Colors.grey),
                                   ),
-                                if (sponCount > 0)
+                                if (recommendCount > 0)
                                   TopLeftAlign(
                                     child: Padding(
                                       padding: EdgeInsets.all(5.sp),

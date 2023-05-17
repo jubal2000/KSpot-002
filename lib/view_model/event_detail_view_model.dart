@@ -30,7 +30,7 @@ import '../widget/custom_field_widget.dart';
 import '../widget/image_scroll_viewer.dart';
 import '../widget/like_widget.dart';
 import '../widget/share_widget.dart';
-import '../widget/sponsor_widget.dart';
+import '../widget/recommend_widget.dart';
 import '../widget/time_list_widget.dart';
 import '../widget/user_card_widget.dart';
 
@@ -53,6 +53,7 @@ class EventDetailViewModel extends ChangeNotifier {
   var isShowReserveList = false;
   var isShowMap = false;
   var isEdited = false;
+  var isShowRecommend = false;
 
   JSON? selectReserve;
   JSON? selectInfo;
@@ -174,11 +175,9 @@ class EventDetailViewModel extends ChangeNotifier {
             eventInfo!.likeCount = count;
             updateEventInfo();
           }),
-          SizedBox(width: 10),
-          SponsorWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
-            LOG('--> LikeWidget result : $count');
-            eventInfo!.likeCount = count;
-            updateEventInfo();
+          SizedBox(width: 8),
+          RecommendWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onSelected: () {
+
           }),
         ]
     );

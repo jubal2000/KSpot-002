@@ -46,6 +46,7 @@ class AppViewModel extends ChangeNotifier {
   final fire  = Get.find<FirebaseService>();
   var isShowDialog = false;
   var isCanStart = false;
+  var isRedraw = true;
 
   // app bar..
   var appbarMenuMode = MainMenuID.event;
@@ -70,6 +71,7 @@ class AppViewModel extends ChangeNotifier {
 
   setMainIndex(index) {
     menuIndex = index;
+    isRedraw = false;
     var statusColorDark = false;
     switch(index) {
       case 0:

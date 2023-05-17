@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import 'package:kspot_002/models/sponsor_model.dart';
+import 'package:kspot_002/models/recommend_model.dart';
 import 'package:kspot_002/services/api_service.dart';
 
 import '../data/app_data.dart';
@@ -238,7 +238,7 @@ class UserRepository {
   Future<Map<String, EventModel>> getEventFromUserId(String userId, {bool isAuthor = false, DateTime? lastTime}) async {
     Map<String, EventModel> result = {};
     try {
-      final response = await api.getEventFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, limit: PROFILE_CONTENT_MAX);
+      final response = await api.getEventFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, limit: lastTime != null ? PROFILE_CONTENT_MAX : 0);
       if (JSON_NOT_EMPTY(response)) {
         for (var item in response.entries) {
           result[item.key] = EventModel.fromJson(item.value);
@@ -261,7 +261,7 @@ class UserRepository {
   Future<Map<String, StoryModel>> getStoryFromUserId(String userId, {bool isAuthor = false, DateTime? lastTime}) async {
     Map<String, StoryModel> result = {};
     try {
-      final response = await api.getStoryFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, limit: PROFILE_CONTENT_MAX);
+      final response = await api.getStoryFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, limit: lastTime != null ? PROFILE_CONTENT_MAX : 0);
       if (JSON_NOT_EMPTY(response)) {
         for (var item in response.entries) {
           result[item.key] = StoryModel.fromJson(item.value);
@@ -276,7 +276,7 @@ class UserRepository {
   Future<Map<String, PromotionModel>> getPromotionFromUserId(String userId, {bool isAuthor = false, DateTime? lastTime}) async {
     Map<String, PromotionModel> result = {};
     try {
-      final response = await api.getPromotionFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, limit: PROFILE_CONTENT_MAX);
+      final response = await api.getPromotionFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, limit: lastTime != null ? PROFILE_CONTENT_MAX : 0);
       if (JSON_NOT_EMPTY(response)) {
         for (var item in response.entries) {
           result[item.key] = PromotionModel.fromJson(item.value);
@@ -288,17 +288,17 @@ class UserRepository {
     return result;
   }
 
-  Future<Map<String, SponsorModel>> getSponsorFromUserId(String userId, {bool isAuthor = false, DateTime? lastTime}) async {
-    Map<String, SponsorModel> result = {};
+  Future<Map<String, RecommendModel>> getRecommendFromUserId(String userId, {bool isAuthor = false, DateTime? lastTime}) async {
+    Map<String, RecommendModel> result = {};
     try {
-      final response = await api.getSponsorFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, limit: PROFILE_CONTENT_MAX);
+      final response = await api.getRecommendFromUserId(userId, isAuthor: isAuthor, lastTime: lastTime, limit: lastTime != null ? PROFILE_CONTENT_MAX : 0);
       if (JSON_NOT_EMPTY(response)) {
         for (var item in response.entries) {
-          result[item.key] = SponsorModel.fromJson(item.value);
+          result[item.key] = RecommendModel.fromJson(item.value);
         }
       }
     } catch (e) {
-      LOG('--> getSponsorFromUserId error : ${e.toString()}');
+      LOG('--> getRecommendFromUserId error : ${e.toString()}');
     }
     return result;
   }

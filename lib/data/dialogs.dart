@@ -33,7 +33,7 @@ import 'package:path/path.dart' as p;
 import '../models/chat_model.dart';
 import '../models/event_model.dart';
 import '../models/message_model.dart';
-import '../models/sponsor_model.dart';
+import '../models/recommend_model.dart';
 import '../models/upload_model.dart';
 import '../services/local_service.dart';
 import '../utils/address_utils.dart';
@@ -1879,21 +1879,24 @@ Future<JSON>? showOptionItemAddDialog(BuildContext context, JSON optionItem, JSO
   ) ?? '';
 }
 
-Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel event, int max, [DateTime? startDate, int credit = 1])
+Future<RecommendModel?> showEventRecommendDialog(BuildContext context, EventModel event, int max, String desc, [DateTime? startDate, int credit = 1])
 {
   final startTextController = TextEditingController();
   final endTextController   = TextEditingController();
-  final timeTextController  = TextEditingController();
+  final descTextController  = TextEditingController();
   var creditCount = credit;
-  startDate ??= DateTime.now();
+  var creditRemain = max;
   var endDate = DateTime.now();
   var showStatus = 1;
+  var descText = desc;
 
   refreshDateTime() {
+    startDate ??= DateTime.now();
     endDate = startDate!.add(Duration(days: creditCount));
     startTextController.text = DATE_STR(startDate!);
     endTextController.text   = DATE_STR(endDate);
-    timeTextController.text  = TIME_STR(startDate!);
+    descTextController.text  = descText;
+    creditRemain = max - creditCount;
   }
 
   setDateChange(setState) {
@@ -1908,17 +1911,18 @@ Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel ev
     });
   }
 
-  setTimeChange(setState) {
-    showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(startDate!)).then((result) {
-      if (result != null) {
-        setState(() {
-          startDate = startDate!.applyTimeOfDay(hour: result.hour, minute: result.minute);
-          LOG('--> changed time : ${startDate.toString()}');
-          refreshDateTime();
-        });
-      }
-    });
-  }
+  // setTimeChange(setState) {
+  //   showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(startDate!)).then((result) {
+  //     if (result != null) {
+  //       setState(() {
+  //         startDate = startDate!.applyTimeOfDay(hour: result.hour, minute: result.minute);
+  //         LOG('--> changed time : ${startDate.toString()}');
+  //         refreshDateTime();
+  //       });
+  //     }
+  //   });
+  // }
+
   refreshDateTime();
 
   return showDialog(
@@ -1927,7 +1931,7 @@ Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel ev
     builder: (BuildContext context) {
       return PointerInterceptor(
         child: AlertDialog(
-          title: Text('Event sponsor'.tr, style: dialogTitleTextStyle(context)),
+          title: Text('Event recommend'.tr, style: dialogTitleTextStyle(context)),
           titlePadding: EdgeInsets.fromLTRB(20, 20, 0, 10),
           insetPadding: EdgeInsets.all(20),
           actionsPadding: EdgeInsets.all(10),
@@ -1944,11 +1948,11 @@ Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel ev
                   builder: (context, setState) {
                     return ListBody(
                       children: [
-                        Text('Sponsor the target event\n(If event is sponsored, it may appear first)'.tr, style: DialogDescExStyle(context)),
+                        Text('Recommend the target event\n(If event is recommended, it may appear first)'.tr, style: DialogDescExStyle(context)),
                         SizedBox(height: 10),
                         EventCardItem(event, itemHeight: 105.0, isShowLike: false),
                         SizedBox(height: 10),
-                        SubTitle(context, 'Sponsored period'.tr, height: 40),
+                        SubTitle(context, 'Period'.tr, height: 40),
                         Row(
                           children: [
                             Expanded(
@@ -1979,31 +1983,31 @@ Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel ev
                           ]
                         ),
                         SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: timeTextController,
-                                decoration: inputLabel(context, 'Start time'.tr, ''),
-                                maxLines: 1,
-                                readOnly: true,
-                                textAlign: TextAlign.center,
-                                onTap: () {
-                                  setTimeChange(setState);
-                                },
-                              )
-                            ),
-                            Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Text('   '),
-                            ),
-                            Expanded(
-                              child: Container()
-                            ),
-                          ]
-                        ),
-                        SizedBox(height: 30),
-                        Text('${'Holding credits:'.tr} $max', style: DialogDescBoldStyle(context)),
+                        // Row(
+                        //   children: [
+                        //     Expanded(
+                        //       child: TextFormField(
+                        //         controller: timeTextController,
+                        //         decoration: inputLabel(context, 'Start time'.tr, ''),
+                        //         maxLines: 1,
+                        //         readOnly: true,
+                        //         textAlign: TextAlign.center,
+                        //         onTap: () {
+                        //           setTimeChange(setState);
+                        //         },
+                        //       )
+                        //     ),
+                        //     Padding(
+                        //       padding: EdgeInsets.all(10),
+                        //       child: Text('   '),
+                        //     ),
+                        //     Expanded(
+                        //       child: Container()
+                        //     ),
+                        //   ]
+                        // ),
+                        // SizedBox(height: 30),
+                        Text('${'Holding credits:'.tr} $creditRemain', style: DialogDescBoldStyle(context)),
                         SizedBox(height: 20),
                         Row(
                           children: [
@@ -2022,7 +2026,7 @@ Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel ev
                         ),
                         SizedBox(height: 10),
                         TextCheckBox(context,
-                          'Show sponsorship'.tr,
+                          'Show recommend'.tr,
                           showStatus == 1,
                           isExpanded: false,
                           textSpace: 20.0,
@@ -2032,6 +2036,15 @@ Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel ev
                               showStatus = status ? 1 : 0;
                             });
                         }),
+                        SizedBox(height: 10),
+                        TextFormField(
+                          controller: descTextController,
+                          decoration: inputLabel(context, 'Description'.tr, ''),
+                          maxLines: 3,
+                          onChanged: (text) {
+                            descText = descTextController.text;
+                          },
+                        ),
                       ],
                     );
                   }
@@ -2049,8 +2062,10 @@ Future<SponsorModel?> showEventSponsorDialog(BuildContext context, EventModel ev
             TextButton(
               child: Text('OK'.tr, style: ItemTitleStyle(context)),
               onPressed: () {
-                var addItem = SponsorModel.createEvent(
-                  event, AppData.userInfo, showStatus, creditCount, startDate!, endDate);
+                startDate = DateTime(startDate!.year, startDate!.month, startDate!.day, 0, 0, 0, 0, 0);
+                endDate   = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59, 0, 0);
+                var addItem = RecommendModel.createEvent(
+                  event, AppData.userInfo, showStatus, creditCount, startDate!, endDate, descText);
                 Navigator.of(context).pop(addItem);
               },
             ),

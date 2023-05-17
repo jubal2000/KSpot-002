@@ -10,6 +10,7 @@ import 'package:kspot_002/models/place_model.dart';
 import 'package:kspot_002/repository/event_repository.dart';
 import 'package:kspot_002/view/place/place_detail_screen.dart';
 import 'package:kspot_002/widget/event_item.dart';
+import 'package:provider/provider.dart';
 
 import '../data/app_data.dart';
 import '../data/common_sizes.dart';
@@ -55,7 +56,6 @@ class EventViewModel extends ChangeNotifier {
   var isMapUpdate = true;
   var isManagerMode = false; // 유저의 이벤트목록 일 경우 메니저이면, 기간이 지난 이벤트들도 표시..
   var isRefreshMap = false;
-  var itemHeight = 220.0;
 
   DatePicker? datePicker;
 
@@ -246,20 +246,21 @@ class EventViewModel extends ChangeNotifier {
   }
 
   showEventMap() {
+    var itemHeight = 220.0;
     List<Widget> tmpList = [];
-    // sponsor count..
+    // recommend count..
     for (var i=0; i<showList.length; i++) {
       var eventOrg = cache.eventData[showList[i].id];
       if (eventOrg != null) {
-        LOG('--> eventOrg.sponsorData [${showList[i].title}] : ${eventOrg.sponsorData}');
-        if (LIST_NOT_EMPTY(eventOrg.sponsorData)) {
-          for (var item in eventOrg.sponsorData!) {
-            LOG('--> sponsorData item : ${item.toJson()}');
+        LOG('--> eventOrg.recommendData [${showList[i].title}] : ${eventOrg.recommendData}');
+        if (LIST_NOT_EMPTY(eventOrg.recommendData)) {
+          for (var item in eventOrg.recommendData!) {
+            LOG('--> recommendData item : ${item.toJson()}');
           }
         }
-        showList[i].sponsorData = eventOrg.sponsorData;
+        showList[i].recommendData = eventOrg.recommendData;
       }
-      showList[i] = eventRepo.setSponsorCount(showList[i], AppData.currentDate);
+      showList[i] = eventRepo.setRecommendCount(showList[i], AppData.currentDate);
     }
     LOG('--> eventShowList result : ${showList.length}');
     showList = EVENT_SORT_HOT(showList);
@@ -335,19 +336,20 @@ class EventViewModel extends ChangeNotifier {
 
   showEventList(itemHeight) {
     List<Widget> tmpList = [];
-    // sponsor count..
+    // recommend count..
     for (var i=0; i<showList.length; i++) {
       var eventOrg = cache.eventData[showList[i].id];
       if (eventOrg != null) {
-        showList[i].sponsorData = eventOrg.sponsorData;
+        showList[i].recommendData = eventOrg.recommendData;
       }
-      showList[i] = eventRepo.setSponsorCount(showList[i], AppData.currentDate);
+      showList[i] = eventRepo.setRecommendCount(showList[i], AppData.currentDate);
     }
     showList = EVENT_SORT_HOT(showList);
     for (var eventItem in showList) {
       var addItem = cache.eventListItemData[eventItem.id];
       addItem ??= EventCardItem(
         eventItem,
+        isShowDesc: true,
         itemHeight: itemHeight,
         onShowDetail: (key, status) {
           showEventItemDetail(eventItem);
@@ -373,6 +375,7 @@ class EventViewModel extends ChangeNotifier {
   }
 
   showMapList() {
+    var itemHeight = 220.0;
     return Container(
       color: Colors.white,
       child: Stack(
@@ -406,6 +409,7 @@ class EventViewModel extends ChangeNotifier {
   }
 
   showMainList() {
+    var itemHeight = 200.0;
     var itemWidth  = itemHeight * 0.6;
     return Container(
       padding: EdgeInsets.fromLTRB(0, UI_LIST_TOP_HEIGHT, 0, UI_MENU_HEIGHT),
@@ -437,6 +441,28 @@ class EventViewModel extends ChangeNotifier {
           }
         },
       ),
+    );
+  }
+
+  showEventMain() {
+    return ChangeNotifierProvider<EventViewModel>.value(
+        value: AppData.eventViewModel,
+        child: Consumer<EventViewModel>(builder: (context, viewModel, _) {
+          return Stack(
+              children: [
+                IndexedStack(
+                  index: eventListType == EventListType.map ? 0 : 1,
+                  children: [
+                    showMapList(),
+                    showMainList()
+                  ],
+                ),
+                showDatePicker(),
+                showTopMenuBar(),
+              ]
+          );
+        }
+      )
     );
   }
 

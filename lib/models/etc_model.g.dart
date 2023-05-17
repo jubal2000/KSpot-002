@@ -190,7 +190,7 @@ Map<String, dynamic> _$MemberDataToJson(MemberData instance) =>
       'createTime': instance.createTime.toIso8601String(),
     };
 
-SponsorData _$SponsorDataFromJson(Map<String, dynamic> json) => SponsorData(
+RecommendData _$RecommendDataFromJson(Map<String, dynamic> json) => RecommendData(
       id: json['id'] as String,
       creditQty: json['creditQty'] as int,
       userId: json['userId'] as String,
@@ -201,7 +201,7 @@ SponsorData _$SponsorDataFromJson(Map<String, dynamic> json) => SponsorData(
       endTime: DateTime.parse(json['endTime'] as String),
     );
 
-Map<String, dynamic> _$SponsorDataToJson(SponsorData instance) =>
+Map<String, dynamic> _$RecommendDataToJson(RecommendData instance) =>
     <String, dynamic>{
       'id': instance.id,
       'creditQty': instance.creditQty,

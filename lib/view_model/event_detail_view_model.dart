@@ -135,9 +135,8 @@ class EventDetailViewModel extends ChangeNotifier {
       case DropdownItemType.delete:
         deleteEvent();
         break;
-      case DropdownItemType.promotion:
-        // Navigator.push(Get.context!, MaterialPageRoute(builder: (context) =>
-        //     PromotionTabScreen('event', targetInfo: widget.eventInfo)));
+      case DropdownItemType.recommend:
+        startRecommend();
         break;
       case DropdownItemType.report:
         final reportInfo = cache.reportData['report'] != null ? cache.reportData['report'][eventInfo!.id] : null;
@@ -195,12 +194,39 @@ class EventDetailViewModel extends ChangeNotifier {
         }),
         SizedBox(width: 5),
         RecommendWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onSelected: (recommendCount) {
-          if (recommendCount > 0) {
-            showRecommendBox();
-          }
+          showRecommendBox().then((result) {
+            if (result == 'recommend') {
+              startRecommend();
+            }
+          });
         }),
       ]
     );
+  }
+
+  startRecommend() {
+    if (AppData.userInfo.creditCount > 0) {
+      showEventRecommendDialog(Get.context!, eventInfo!, AppData.userInfo.creditCount, '').then((dResult) {
+        if (dResult != null) {
+          LOG('--> showEventRecommendDialog result : ${dResult.toJson()}');
+          sponRepo.addRecommendItem(dResult).then((addItem) {
+            if (addItem != null) {
+              var recommendItem = RecommendData.fromRecommendModel(RecommendModel.fromJson(addItem));
+              cache.eventData[eventInfo!.id]!.recommendData ??= [];
+              cache.eventData[eventInfo!.id]!.recommendData!.add(recommendItem);
+              cache.eventData[eventInfo!.id] = eventRepo.setRecommendCount(cache.eventData[eventInfo!.id]!, AppData.currentDate);
+              LOG('--> recommendData Success : $recommendItem / ${addItem.toString()}');
+              ShowToast('Event Recommend Success'.tr);
+              notifyListeners();
+            } else {
+              ShowToast('Event Recommend Failed'.tr);
+            }
+          });
+        }
+      });
+    } else {
+      // TODO: show credit buy shop
+    }
   }
 
   showRecommendBox() async {
@@ -295,32 +321,7 @@ class EventDetailViewModel extends ChangeNotifier {
           )
         );
       }
-    ).then((result) {
-      if (result == 'recommend') {
-        if (AppData.userInfo.creditCount > 0) {
-          showEventRecommendDialog(Get.context!, eventInfo!, AppData.userInfo.creditCount, '').then((dResult) {
-            if (dResult != null) {
-              LOG('--> showEventRecommendDialog result : ${dResult.toJson()}');
-              sponRepo.addRecommendItem(dResult).then((addItem) {
-                if (addItem != null) {
-                  var recommendItem = RecommendData.fromRecommendModel(RecommendModel.fromJson(addItem));
-                  cache.eventData[eventInfo!.id]!.recommendData ??= [];
-                  cache.eventData[eventInfo!.id]!.recommendData!.add(recommendItem);
-                  cache.eventData[eventInfo!.id] = eventRepo.setRecommendCount(cache.eventData[eventInfo!.id]!, AppData.currentDate);
-                  LOG('--> recommendData Success : $recommendItem / ${addItem.toString()}');
-                  ShowToast('Event Recommend Success'.tr);
-                  notifyListeners();
-                } else {
-                  ShowToast('Event Recommend Failed'.tr);
-                }
-              });
-            }
-          });
-        } else {
-          // TODO: show credit buy shop
-        }
-      }
-    });
+    );
   }
 
   updateEventInfo() {

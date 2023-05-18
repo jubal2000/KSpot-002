@@ -183,6 +183,7 @@ class SearchWidgetState extends State<SearchWidget> {
                                   setState(() {
                                     _searchTextController.clear();
                                     _searchText = '';
+                                    unFocusAll(context);
                                     if (widget.onEdited != null) widget.onEdited!('', -1);
                                   });
                                 },

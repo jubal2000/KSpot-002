@@ -60,7 +60,7 @@ class _StoryEditScreenState extends State<StoryEditScreen> {
             top: false,
             child: Scaffold(
               appBar: AppBar(
-                title: TopTitleText(context, viewModel.isEditMode ? 'Story Edit'.tr : 'Story Add'.tr),
+                title: TopTitleText(context, viewModel.isEditMode ? 'Story edit'.tr : 'Story add'.tr),
                 titleSpacing: 0,
                 toolbarHeight: UI_APPBAR_TOOL_HEIGHT,
               ),

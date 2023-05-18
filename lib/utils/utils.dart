@@ -1186,6 +1186,8 @@ enum DropdownItemType {
   indexDown,
 
   promotion,
+  recommend,
+
   stop,
   pay,
 
@@ -1323,9 +1325,9 @@ class DropdownItems {
   static const List<DropdownItem> homeAddItem11   = [placeGroup, place];
   static const List<DropdownItem> homeAddItem2    = [event];
   static const List<DropdownItem> homeAddItem3    = [talent, goods];
-  static const List<DropdownItem> placeItems0     = [disable, edit, delete, promotion];
+  static const List<DropdownItem> placeItems0     = [disable, edit, delete, recommend];
   static const List<DropdownItem> placeItems1     = [enable, edit, delete];
-  static const List<DropdownItem> placeItems2     = [report];
+  static const List<DropdownItem> placeItems2     = [recommend, report];
   static const List<DropdownItem> contentAddItems = [content, talent, goods/*, live*/];
   static const List<DropdownItem> bannerEditItems = [historyLink, goodsLink, update, delete];
   static const List<DropdownItem> storyItems0     = [disable, edit, delete];
@@ -1375,10 +1377,13 @@ class DropdownItems {
   static const disable      = DropdownItem(DropdownItemType.disable, text: 'DISABLE', icon: Icons.visibility_off_outlined);
 
   static const report       = DropdownItem(DropdownItemType.report, text: 'REPORT', icon: Icons.report_gmailerrorred);
+
   static const promotion    = DropdownItem(DropdownItemType.promotion, text: 'PROMOTION', icon: Icons.star_border, color: true);
   static const promotionList    = DropdownItem(DropdownItemType.list, text: 'PROMOTION RECORD', icon: Icons.playlist_add_check);
   static const promotionPay     = DropdownItem(DropdownItemType.pay, text: 'PAYMENT OK', icon: Icons.attach_money, color: true);
   static const promotionStop    = DropdownItem(DropdownItemType.stop, text: 'PAYMENT CANCEL', icon: Icons.cancel, color: true);
+
+  static const recommend    = DropdownItem(DropdownItemType.recommend, text: 'RECOMMEND', icon: Icons.star);
 
   static const cancel       = DropdownItem(DropdownItemType.cancel, text: 'CANCEL', icon: Icons.cancel_outlined);
   static const confirm      = DropdownItem(DropdownItemType.confirm, text: 'CONFIRM', icon: Icons.done);
@@ -1972,11 +1977,12 @@ TagTextEditField(List<String>? tagList, String hintText, String disabledHeadText
   );
 }
 
-unFocusAll(BuildContext context) {
-  FocusScopeNode currentFocus = FocusScope.of(context);
-  if (!currentFocus.hasPrimaryFocus) {
-    currentFocus.unfocus();
-  }
+unFocusAll([BuildContext? context]) {
+  FocusScope.of(context ?? Get.context!).unfocus();
+  // FocusScopeNode currentFocus = FocusScope.of(context);
+  // if (!currentFocus.hasPrimaryFocus) {
+  //   currentFocus.unfocus();
+  // }
   // for (var item in AppData.searchWidgetKey) {
   //   if (item.currentState != null) {
   //     var state = item.currentState as SearchWidgetState;

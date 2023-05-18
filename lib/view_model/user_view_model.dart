@@ -37,6 +37,7 @@ import '../widget/event_item.dart';
 import '../view/profile/profile_content_sceen.dart';
 import '../view/profile/profile_tab_screen.dart';
 import '../view/story/story_item.dart';
+import '../widget/search_widget.dart';
 
 enum ProfileMainTab {
   profile,
@@ -63,6 +64,7 @@ class UserViewModel extends ChangeNotifier {
   final placeRepo = PlaceRepository();
 
   final cache     = Get.find<CacheService>();
+  final searchFocus = GlobalKey();
 
   final msgTextController = TextEditingController();
   final scrollController = List.generate(ProfileContentType.max.index, (index) => ScrollController());
@@ -72,6 +74,7 @@ class UserViewModel extends ChangeNotifier {
   var currentTab = 0;
   var isMyProfile = false;
   var isDisableOpen = false;
+  var searchText = '';
 
   // event, story list..
   final listItemShowMax = 5;
@@ -161,10 +164,10 @@ class UserViewModel extends ChangeNotifier {
       showLastTime[ProfileContentType.story.index] = DateTime.now();
     }
     LOG('---> getStoryData : ${storyData.length} - ${showLastTime[ProfileContentType.story.index].toString()}');
-    var storyNewData = await repo.getStoryFromUserId(userInfo!.id,
+    var newData = await repo.getStoryFromUserId(userInfo!.id,
         isAuthor: isMyProfile, lastTime: showLastTime[ProfileContentType.story.index]);
-    if (storyNewData.isNotEmpty) {
-      storyData.addAll(storyNewData);
+    if (newData.isNotEmpty) {
+      storyData.addAll(newData);
     } else {
       isLastContent[ProfileContentType.story.index] = true;
       if (isShowEmpty) {
@@ -184,9 +187,32 @@ class UserViewModel extends ChangeNotifier {
 
   getRecommendData([bool isShowEmpty = false]) async {
     // LOG('--> getRecommendData : ${recommendData.length}');
-    recommendData.clear();
-    var newData = await repo.getRecommendFromUserId(userInfo!.id, isAuthor: isMyProfile);
-    recommendData.addAll(newData);
+    var countIndex = ProfileContentType.recommend.index;
+    if (JSON_NOT_EMPTY(recommendData)) {
+      for (var item in recommendData.entries) {
+        var checkTime = item.value.createTime;
+        if (showLastTime[countIndex] == null ||
+            checkTime.isBefore(showLastTime[countIndex]!)) {
+          showLastTime[countIndex] = checkTime;
+        }
+      }
+    } else {
+      showLastTime[countIndex] = DateTime.now();
+    }
+    LOG('---> getStoryData : ${recommendData.length} - ${showLastTime[countIndex].toString()}');
+    var newData = await repo.getRecommendFromUserId(userInfo!.id,
+        isAuthor: isMyProfile, lastTime: showLastTime[countIndex]);
+    if (newData.isNotEmpty) {
+      recommendData.addAll(newData);
+    } else {
+      isLastContent[countIndex] = true;
+      if (isShowEmpty) {
+        ShowErrorToast('No more list'.tr);
+      }
+    }
+    // recommendData.clear();
+    // var newData = await repo.getRecommendFromUserId(userInfo!.id, isAuthor: isMyProfile);
+    // recommendData.addAll(newData);
     return recommendData;
   }
 
@@ -492,29 +518,31 @@ class UserViewModel extends ChangeNotifier {
     // sort status..
     List<Widget> showItemList = [];
     for (var item in eventData.entries) {
-      var isExpired = eventRepo.checkIsExpired(item.value);
-      var showItem = showWidgetList[ProfileContentType.event.index][item.key];
-      // LOG('-->  eventData [${showItem == null ? 'null' : '-'}] : ${item.value.toJson()}');
-      showItem ??= EventCardItem(
-        item.value,
-        isMyItem: isMyProfile,
-        isExpired: isExpired,
-        isShowUser: false,
-        isShowHomeButton: false,
-        isShowLike: false,
-        isShowBookmark: !isMyProfile,
-        itemHeight: UI_CONTENT_ITEM_HEIGHT.w,
-        itemPadding: EdgeInsets.only(top: 10),
-        onRefresh: (updateData) {
-          eventData[updateData['id']] = EventModel.fromJson(updateData);
-          notifyListeners();
-        },
-        onShowDetail: (key, status) {
-          showEventItemDetail(item.value);
-        },
-      );
-      if (item.value.status > 0) {
-        showItemList.add(showItem);
+      if (searchText.isEmpty || item.value.title.contains(searchText) || item.value.desc.contains(searchText)) {
+        var isExpired = eventRepo.checkIsExpired(item.value);
+        var showItem = showWidgetList[ProfileContentType.event.index][item.key];
+        // LOG('-->  eventData [${showItem == null ? 'null' : '-'}] : ${item.value.toJson()}');
+        showItem ??= EventCardItem(
+          item.value,
+          isMyItem: isMyProfile,
+          isExpired: isExpired,
+          isShowUser: false,
+          isShowHomeButton: false,
+          isShowLike: false,
+          isShowBookmark: !isMyProfile,
+          itemHeight: UI_CONTENT_ITEM_HEIGHT.w,
+          itemPadding: EdgeInsets.only(top: 10),
+          onRefresh: (updateData) {
+            eventData[updateData['id']] = EventModel.fromJson(updateData);
+            notifyListeners();
+          },
+          onShowDetail: (key, status) {
+            showEventItemDetail(item.value);
+          },
+        );
+        if (item.value.status > 0) {
+          showItemList.add(showItem);
+        }
       }
     }
     return Column(
@@ -526,25 +554,27 @@ class UserViewModel extends ChangeNotifier {
     final space = 10.w;
     List<Widget> showItemList = [];
     for (var item in storyData.entries) {
-      var showItem = showWidgetList[ProfileContentType.story.index][item.key];
-      showItem ??= ClipRRect(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-          child: StoryVerImageItem(
-            item.value,
-            // itemHeight: Get.width.w / 3 - space * 2,
-            isShowUser: false,
-            onRefresh: (updateData) {
-              LOG('--> onRefresh : ${updateData['id']} / ${updateData['status']}');
-              storyData[updateData['id']] = StoryModel.fromJson(updateData);
-              notifyListeners();
-            },
-            onShowDetail: (_) {
-              showStoryItemDetail(item.value);
-            },
-          )
-      );
-      if (item.value.status > 0) {
-        showItemList.add(showItem);
+      if (searchText.isEmpty || item.value.desc.contains(searchText)) {
+        var showItem = showWidgetList[ProfileContentType.story.index][item.key];
+        showItem ??= ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+            child: StoryVerImageItem(
+              item.value,
+              // itemHeight: Get.width.w / 3 - space * 2,
+              isShowUser: false,
+              onRefresh: (updateData) {
+                LOG('--> onRefresh : ${updateData['id']} / ${updateData['status']}');
+                storyData[updateData['id']] = StoryModel.fromJson(updateData);
+                notifyListeners();
+              },
+              onShowDetail: (_) {
+                showStoryItemDetail(item.value);
+              },
+            )
+        );
+        if (item.value.status > 0) {
+          showItemList.add(showItem);
+        }
       }
     }
 
@@ -609,8 +639,9 @@ class UserViewModel extends ChangeNotifier {
   showRecommendList() {
     List<Widget> showItemList = [];
     for (var item in recommendData.entries) {
-      var showItem = showWidgetList[ProfileContentType.story.index][item.key];
-      showItem ??= ClipRRect(
+      if (searchText.isEmpty || item.value.targetTitle.contains(searchText) || item.value.desc.contains(searchText)) {
+        var showItem = showWidgetList[ProfileContentType.story.index][item.key];
+        showItem ??= ClipRRect(
           borderRadius: BorderRadius.all(Radius.circular(8)),
           child: RecommendCardItem(
             item.value,
@@ -621,16 +652,21 @@ class UserViewModel extends ChangeNotifier {
               notifyListeners();
             },
             onShowDetail: (key, status) {
-
+              eventRepo.getEventFromId(item.value.targetId).then((result) {
+                if (result != null) {
+                  showEventItemDetail(result);
+                }
+              });
             },
           )
-      );
-      if (item.value.status > 0) {
-        showItemList.add(showItem);
+        );
+        if (item.value.status > 0) {
+          showItemList.add(showItem);
+        }
       }
     }
     return Column(
-        children: showItemList
+      children: showItemList
     );
   }
 
@@ -694,6 +730,9 @@ class UserViewModel extends ChangeNotifier {
       case ProfileContentType.story:
         await getStoryData(isShowEmpty);
         break;
+      case ProfileContentType.recommend:
+        await getRecommendData(isShowEmpty);
+        break;
     }
     AppData.isMainActive = true;
     scrollController[type.index].animateTo(scrollController[type.index].position.maxScrollExtent - 1,
@@ -702,8 +741,30 @@ class UserViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  showContentSearchBar() {
+    return SearchWidget(
+      key: searchFocus,
+      initialText: searchText,
+      isShowList: true,
+      padding: EdgeInsets.zero,
+      onEdited: (result, status) {
+        LOG('--> SearchWidget edited : $result / $status');
+        if (status < 0) {
+          searchText = '';
+          // isSearched = false;
+          // if (isSearched) {
+          //   unFocusAll(context);
+          // }
+        } else {
+          searchText = result;
+        }
+        notifyListeners();
+      },
+    );
+  }
+
   showContentList(ProfileContentType type) {
-    if (type == ProfileContentType.story) {
+    if (type == ProfileContentType.story || type == ProfileContentType.recommend) {
       scrollController[type.index].addListener(() {
         if (scrollController[type.index].position.pixels == scrollController[type.index].position.maxScrollExtent) {
           reloadContentData(type);
@@ -783,9 +844,10 @@ class UserViewModel extends ChangeNotifier {
         break;
       case ProfileContentType.recommend:
         Get.to(() => EventListScreen(isMyProfile, isSelectable: true))!.then((result) {
-          if (result != null) {
-            LOG('--> EventListScreen result : ${result.toJson()}');
-            showEventRecommendDialog(Get.context!, result, AppData.userInfo.creditCount, '').then((dResult) {
+          LOG('--> EventListScreen result : ${result.toString()}');
+          if (result != null && result.isNotEmpty) {
+            EventModel eventInfo = result.first;
+            showEventRecommendDialog(Get.context!, eventInfo, AppData.userInfo.creditCount, '').then((dResult) {
               if (dResult != null) {
                 LOG('--> showEventRecommendDialog result : ${dResult.toJson()}');
                 sponRepo.addRecommendItem(dResult).then((addItem) {

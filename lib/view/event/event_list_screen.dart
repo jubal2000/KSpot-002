@@ -39,7 +39,8 @@ class EventListState extends State<EventListScreen> {
   final _viewModel = EventViewModel();
 
   List<EventListTab> _tabList = [];
-  List<String> selectList = [];
+  List<String>     selectIdList = [];
+  List<EventModel> selectList = [];
 
   refreshTabData() {
     _tabList = [
@@ -50,11 +51,21 @@ class EventListState extends State<EventListScreen> {
 
   onSelected(EventModel eventItem) {
     LOG('--> onSelected : ${eventItem.id} / ${selectList.length}');
-    if (!selectList.contains(eventItem.id) && selectList.length < widget.selectMax) {
-      selectList.add(eventItem.id);
+    // unselect..
+    if (selectIdList.contains(eventItem.id)) {
+      selectIdList.remove(eventItem.id);
+      for (var item in selectList) {
+        if (item.id == eventItem.id) {
+          selectList.remove(item);
+          break;
+        }
+      }
+    } else if (selectIdList.length < widget.selectMax) {
+      selectIdList.add(eventItem.id);
+      selectList.add(eventItem);
     }
     if (widget.selectMax == 1) {
-      Get.back(result: eventItem);
+      Get.back(result: selectList);
     } else {
       setState(() {});
     }
@@ -247,10 +258,7 @@ class EventListTabState extends State<EventListTab> {
                       setState(() {
                         if (status < 0) {
                           searchText = '';
-                          isSearched = false;
-                          if (isSearched) {
-                            unFocusAll(context);
-                          }
+                          unFocusAll(context);
                         } else {
                           searchText = result;
                           isSearched = result.isNotEmpty;

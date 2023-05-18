@@ -350,6 +350,8 @@ class Words extends Translations {
       'END TIME': '종료 시간',
 
       // story_edit_screen
+      'Story add': '스토리 작성',
+      'Story edit': '스토리 편집',
       'SELECT CONTENT TYPE': '컨텐츠 타입 선택',
       'VIDEO': '비디오',
       'Delete completed': '삭제 완료',

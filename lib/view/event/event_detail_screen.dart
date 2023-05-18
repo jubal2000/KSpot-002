@@ -76,8 +76,7 @@ class _EventDetailState extends State<EventDetailScreen> {
             titleSpacing: 0,
             toolbarHeight: UI_EVENT_TOOL_HEIGHT,
             actions: [
-              if (!viewModel.isManager)...[
-                SizedBox(width: 15),
+              if (!viewModel.isManager && !AppData.IS_ADMIN)...[
                 DropdownButtonHideUnderline(
                   child: DropdownButton2(
                     customButton: SizedBox(
@@ -106,7 +105,6 @@ class _EventDetailState extends State<EventDetailScreen> {
                 ),
               ],
               if (viewModel.isManager || AppData.IS_ADMIN)...[
-                SizedBox(width: 15),
                 GestureDetector(
                   child: Icon(viewModel.eventInfo!.status == 1 ? Icons.visibility : Icons.visibility_off),
                   onTap: () {

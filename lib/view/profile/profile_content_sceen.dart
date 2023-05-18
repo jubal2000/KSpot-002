@@ -58,7 +58,14 @@ class ProfileContentScreen extends StatelessWidget {
                   if (snapshot.hasData) {
                     return Container(
                       padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
-                      child: viewModel.showContentList(type),
+                      child: Column(
+                        children:[
+                          viewModel.showContentSearchBar(),
+                          Expanded(
+                            child: viewModel.showContentList(type),
+                          )
+                        ]
+                      )
                     );
                   } else {
                     return showLoadingFullPage(context);

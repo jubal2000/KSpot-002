@@ -73,24 +73,24 @@ class StoryViewModel extends ChangeNotifier {
     // await Future.delayed(Duration(milliseconds: 300));
     // await cache.sortStoryDataCreateTimeDesc();
     List<Widget> showList = [];
-    for (var item in cache.storyData!.entries) {
+    for (var item in cache.storyData.entries) {
       LOG('--> refreshShowList : ${item.value.toJson()}');
       if (JSON_EMPTY(cache.reportData['report']) || !cache.reportData['report'].containsKey(item.key)) {
         var addItem = cache.storyListItemData[item.key];
         addItem ??= MainStoryItem(
           item.value,
-          index: count++,
+          index: count,
           onItemVisible: (index, status) {
-            if (status) LOG('--> MainStoryItem visible : $index - $status / $lastIndex - ${item.key}');
-            if (status && index < cache.storyData!.length) {
-              if (index == cache.storyData!.length - FREE_LOADING_STORY_MAX && lastIndex != index) {
+            if (status && index < cache.storyData.length) {
+              LOG('--> MainStoryItem visible : $index / $lastIndex - ${cache.storyData.length - FREE_LOADING_STORY_MAX}');
+              if (index == cache.storyData.length - FREE_LOADING_STORY_MAX && lastIndex != index) {
                 lastIndex = index;
-                getStoryListNext(cache.storyData!.entries.last.value);
+                getStoryListNext(cache.storyData.entries.last.value);
                 notifyListeners();
               }
               // loading next video..
-              if (index+1 < cache.storyData!.length) {
-                // LOG('------> MainStoryItem loadVideoData : ${index + 1}');
+              if (index+1 < cache.storyData.length) {
+                LOG('------> MainStoryItem loadVideoData : ${index + 1}');
                 // if (storyKeyList[index+1].currentState != null) {
                 //   var state = storyKeyList[index+1].currentState as MainStoryItemState;
                 //   state.loadVideoData();
@@ -102,11 +102,11 @@ class StoryViewModel extends ChangeNotifier {
             // var item = _showData[_currentTab][index];
             LOG('--> onItemDeleted : $key');
             // _storyData.remove(item['id']);
-            cache.storyData!.remove(key);
+            cache.storyData.remove(key);
             notifyListeners();
           },
           onRefresh: (updateItem) {
-            cache.storyData![updateItem['id']] = StoryModel.fromJson(updateItem);
+            cache.storyData[updateItem['id']] = StoryModel.fromJson(updateItem);
             cache.storyListItemData.clear();
             notifyListeners();
           },
@@ -114,6 +114,7 @@ class StoryViewModel extends ChangeNotifier {
         cache.storyListItemData[item.key] = addItem;
         showList.add(addItem);
       }
+      count++;
     }
     // LOG('------> refreshShowList : ${showList.length} ${cache.storyData!.entries.length}');
     return sortDataCreateTimeDesc(showList);
@@ -187,7 +188,7 @@ class StoryViewModel extends ChangeNotifier {
                     MasonryGridView.count(
                       shrinkWrap: true,
                       itemCount: showList.length,
-                      crossAxisCount: 2,
+                      crossAxisCount: 3,
                       mainAxisSpacing: 0,
                       crossAxisSpacing: 0,
                       itemBuilder: (BuildContext context, int index) {

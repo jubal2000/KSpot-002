@@ -39,7 +39,8 @@ class StoryEditViewModel extends ChangeNotifier {
     JSON result = {};
     if (editItem != null) {
       for (var item in editItem!.getOptionDataMap.entries) {
-        result[item.key] = item.value['value'];
+        LOG('--> story edit : ${item.value}');
+        result[item.key] = item.value;
       }
     }
     return result;

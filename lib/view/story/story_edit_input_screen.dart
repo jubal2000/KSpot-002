@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/app_data.dart';
+import 'package:kspot_002/view/event/event_list_screen.dart';
 import 'package:kspot_002/view_model/event_edit_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -83,13 +84,13 @@ class _StoryEditInputScreenState extends State<StoryEditInputScreen> {
                   'EVENT\nSELECT'.tr,
                   icon: Icons.settings,
                   onPressed: (_) {
-                    Map<String, EventModel> list = {};
-                    if (_viewModel.eventInfo != null) {
-                      list[_viewModel.eventInfo!.id] = _viewModel.eventInfo!;
-                    }
-                    Get.to(() => PlaceListScreen(isSelectable: true, listSelectData: list))!.then((result) {
+                    // Map<String, EventModel> list = {};
+                    // if (_viewModel.eventInfo != null) {
+                    //   list[_viewModel.eventInfo!.id] = _viewModel.eventInfo!;
+                    // }
+                    Navigator.of(context).push(createAniRoute(EventListScreen(false, selectMax: 1, listSelectData: []))).then((result) {
                       if (result != null && result.isNotEmpty) {
-                        EventModel eventInfo = result.entries.first.value;
+                        EventModel eventInfo = result.first;
                         LOG('--> PlaceListScreen result : ${eventInfo.toJson()}');
                         _viewModel.setEventInfo(eventInfo);
                       } else {

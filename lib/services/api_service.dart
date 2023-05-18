@@ -999,18 +999,18 @@ class ApiService extends GetxService {
   }
 
   Stream getStoryStreamFromGroup(String groupId, String country, [String countryState = '']) {
-    LOG('------> getStoryStreamFromGroup : $groupId');
+    LOG('------> getStoryStreamFromGroup : $groupId / $country / $countryState');
     var ref = firestore!.collection(StoryCollection);
     var query = ref
         .where('status', isEqualTo: 1)
         .where('groupId', isEqualTo: groupId);
 
-    // if (country.isNotEmpty) {
-    //   query = query.where('country', isEqualTo: country);
-    //   if (countryState.isNotEmpty) {
-    //     query = query.where('countryState', isEqualTo: countryState);
-    //   }
-    // }
+    if (country.isNotEmpty) {
+      query = query.where('country', isEqualTo: country);
+      if (countryState.isNotEmpty) {
+        query = query.where('countryState', isEqualTo: countryState);
+      }
+    }
     return query.orderBy('createTime', descending: true).limit(FREE_LOADING_STORY_MAX).snapshots();
   }
 
@@ -1022,12 +1022,13 @@ class ApiService extends GetxService {
         .where('status', isEqualTo: 1)
         .where('groupId', isEqualTo: groupId)
         .where('createTime', isLessThan: startTime);
-    // if (country.isNotEmpty) {
-    //   query = query.where('country', isEqualTo: country);
-    //   if (countryState.isNotEmpty) {
-    //     query = query.where('countryState', isEqualTo: countryState);
-    //   }
-    // }
+
+    if (country.isNotEmpty) {
+      query = query.where('country', isEqualTo: country);
+      if (countryState.isNotEmpty) {
+        query = query.where('countryState', isEqualTo: countryState);
+      }
+    }
     return query.orderBy('createTime', descending: true).limit(FREE_LOADING_STORY_MAX).snapshots();
   }
 
@@ -1458,26 +1459,12 @@ class ApiService extends GetxService {
       case 'user':
         targetDB = UserCollection;
         break;
+      case 'place':
+        targetDB = PlaceCollection;
+        break;
       default:
         return null;
     }
-    // var isEdited = false;
-    // AppData.userInfo[infoField] ??= [];
-    // if (status) {
-    //   if (!AppData.userInfo[infoField].contains(targetId)) {
-    //     AppData.userInfo[infoField].add(targetId);
-    //     isEdited = true;
-    //   }
-    // } else {
-    //   if (AppData.userInfo[infoField].contains(targetId)) {
-    //     AppData.userInfo[infoField].remove(targetId);
-    //     isEdited = true;
-    //   }
-    // }
-    // if (isEdited) {
-    //   var userResult = await setUserInfoItem(AppData.userInfo, infoField);
-    //   LOG('--> setUserInfoItem $infoField result : $userResult');
-    // }
     // set target like count..
     var targetRef = firestore!.collection(targetDB);
     var snapshot = await targetRef.doc(targetId).get();
@@ -1488,7 +1475,7 @@ class ApiService extends GetxService {
       if (countNow > 99999999) countNow = 99999999;
       await targetRef.doc(targetId).update({type: countNow});
       data[type] = countNow;
-      LOG('--> setCountData : $type, $targetType, $targetId, $status');
+      LOG('--> setCountData result : $type, $targetType, $targetId, $status');
       return data;
     }
     return null;

@@ -603,6 +603,10 @@ showLoadingDialog(BuildContext context, String message) {
 Future showCountryLogSelectDialog(BuildContext mainContext, String title, List<JSON> countryLogData) {
   List<Widget> _countryList = [];
   BuildContext? _context;
+  var countryFlag   = AppData.currentCountryFlag;
+  var country       = AppData.currentCountry;
+  var countryCode   = AppData.currentCountryCode;
+  var countryState  = AppData.currentState;
 
   for (var i=1; i<countryLogData.length; i++) {
     var item = countryLogData[i];
@@ -612,6 +616,7 @@ Future showCountryLogSelectDialog(BuildContext mainContext, String title, List<J
               AppData.currentCountryFlag  = STR(item['countryFlag']);
               AppData.currentCountry      = STR(item['country']);
               AppData.currentState        = STR(item['countryState']);
+              AppData.currentCountryCode  = CountryCodeSmall(country);
               writeCountryLocal();
               Navigator.of(_context!).pop();
             },
@@ -638,54 +643,65 @@ Future showCountryLogSelectDialog(BuildContext mainContext, String title, List<J
         child: AlertDialog(
           title: Text(title, style: DialogTitleStyle(context)),
           scrollable: true,
-          insetPadding: EdgeInsets.zero,
-          contentPadding: EdgeInsets.all(20.w),
+          contentPadding: EdgeInsets.fromLTRB(20, 20, 20, 10),
+          actionsPadding: EdgeInsets.fromLTRB(10, 0, 10, 10),
           backgroundColor: DialogBackColor(context),
           content: Container(
-              child: Column(
-                  children: [
-                    CSCPicker(
-                      showCities: false,
-                      layout: Layout.vertical,
-                      currentCountry: AppData.currentCountryFlag,
-                      currentState: AppData.currentState,
-                      selectedItemStyle: TextStyle(fontSize: 14.sp),
-                      dropdownItemStyle: TextStyle(fontSize: 14.sp),
-                      dropdownDecoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                        border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 2),
-                      ),
-                      disabledDropdownDecoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                        border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 2),
-                      ),
-                      onCountryChanged: (value) {
-                        AppData.currentCountryFlag = value;
-                        AppData.currentCountry     = GET_COUNTRY_EXCEPT_FLAG(value);
-                        AppData.currentCountryCode = CountryCodeSmall(value);
-                      },
-                      onStateChanged:(value) {
-                        AppData.currentState = value ?? '';
-                        if (AppData.currentState == 'State') AppData.currentState = '';
-                      },
-                      onCityChanged: (value) {
-                      },
-                    ),
-                    if (_countryList.isNotEmpty)...[
-                      SubTitle(context, 'SELECT LOG'.tr, height: 40.w, topPadding: 20.w),
-                      Column(
-                        children: _countryList,
-                      ),
-                    ]
-                  ]
-              )
+            width: Get.width,
+            child: Column(
+              children: [
+                CSCPicker(
+                  showCities: false,
+                  layout: Layout.vertical,
+                  currentCountry: countryFlag,
+                  currentState:   AppData.currentState,
+                  selectedItemStyle: TextStyle(fontSize: 14.sp),
+                  dropdownItemStyle: TextStyle(fontSize: 14.sp),
+                  dropdownDecoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 2),
+                  ),
+                  disabledDropdownDecoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 2),
+                  ),
+                  onCountryChanged: (value) {
+                    countryFlag   = value;
+                    country       = GET_COUNTRY_EXCEPT_FLAG(value);
+                    countryCode   = CountryCodeSmall(value);
+                  },
+                  onStateChanged:(value) {
+                    countryState = value ?? '';
+                    if (countryState == 'State') countryState = '';
+                  },
+                  onCityChanged: (value) {
+                  },
+                ),
+                if (_countryList.isNotEmpty)...[
+                  SubTitle(context, 'SELECT LOG'.tr, height: 40.w, topPadding: 20.w),
+                  Column(
+                    children: _countryList,
+                  ),
+                ]
+              ]
+            )
           ),
           actions: [
             TextButton(
-              child: Text('DONE'),
+              child: Text('Cancel'.tr),
               onPressed: () {
-                writeCountryLocal();
                 Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('OK'.tr),
+              onPressed: () {
+                AppData.currentCountry      = country;
+                AppData.currentCountryCode  = countryCode;
+                AppData.currentState        = countryState;
+                AppData.currentCountryFlag  = countryFlag;
+                writeCountryLocal();
+                Navigator.of(context).pop(country);
               },
             ),
           ],

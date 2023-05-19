@@ -92,7 +92,7 @@ class StoryViewModel extends ChangeNotifier {
               if (index+1 < cache.storyData.length) {
                 LOG('------> MainStoryItem loadVideoData : ${index + 1}');
                 // if (storyKeyList[index+1].currentState != null) {
-                //   var state = storyKeyList[index+1].currentState as MainStoryItemState;
+                //   var state = storyKeyList[index+1].currentState as MainStoryItemState;a
                 //   state.loadVideoData();
                 // }
               }
@@ -231,19 +231,19 @@ class StoryViewModel extends ChangeNotifier {
         //     SizedBox(height: UI_BOTTOM_HEIGHT + 20),
         //   ],
         // ),
-        TopCenterAlign(
-          child: SizedBox(
-            height: UI_APPBAR_HEIGHT,
-            child: HomeTopMenuBar(
-              MainMenuID.story,
-              isShowDatePick: false,
-              onCountryChanged: () {
-                refreshModel();
-                notifyListeners();
-              },
-            ),
-          )
-        ),
+        // TopCenterAlign(
+        //   child: SizedBox(
+        //     height: UI_APPBAR_HEIGHT,
+        //     child: HomeTopMenuBar(
+        //       MainMenuID.story,
+        //       isShowDatePick: false,
+        //       onCountryChanged: () {
+        //         refreshModel();
+        //         notifyListeners();
+        //       },
+        //     ),
+        //   )
+        // ),
       ]
     );
   }

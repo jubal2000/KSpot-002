@@ -115,20 +115,20 @@ class ChattingScreen extends StatelessWidget {
               )
             ),
           ),
-          TopCenterAlign(
-            child: SizedBox(
-              height: UI_APPBAR_HEIGHT,
-                child: HomeTopMenuBar(
-                  MainMenuID.chat,
-                  isShowDatePick: false,
-                  onCountryChanged: () {
-
-                  },
-                  onDateChange: (state) {
-                  }
-                )
-              )
-            ),
+          // TopCenterAlign(
+          //   child: SizedBox(
+          //     height: UI_APPBAR_HEIGHT,
+          //       child: HomeTopMenuBar(
+          //         MainMenuID.chat,
+          //         isShowDatePick: false,
+          //         onCountryChanged: () {
+          //
+          //         },
+          //         onDateChange: (state) {
+          //         }
+          //       )
+          //     )
+          //   ),
           ]
         )
       )

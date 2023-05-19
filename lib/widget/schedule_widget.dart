@@ -214,7 +214,7 @@ Appointment? setCalendarDaySource(String timeId, String eventId, String placeId,
 
 DataSource? getCalendarDataSource(JSON timeList) {
   List<Appointment> appointments = <Appointment>[];
-  var _defaultBgColor = Colors.blueGrey;
+  var _defaultBgColor = Colors.yellow;
   for (var item in timeList.entries) {
     var eventId = item.value['eventId'] ?? '';
     var placeId = item.value['placeId'] ?? '';
@@ -235,21 +235,47 @@ DataSource? getCalendarDataSource(JSON timeList) {
       if (STR(item.value['endDate']).isEmpty) item.value['endDate'] = startDate.add(Duration(days: 364)).toString().split(' ').first;
       var endDate = DateTime.parse(STR(item.value['endDate']));
       var duration  = endDate.difference(startDate).inDays + 1;
+      var weekCheck0 = -1;
+      var weekCheck1 = 0;
+      var weekList   = 0;
       LOG('--> Date Range : ${item.value['startDate']} ~ ${item.value['endDate']} => $duration / ${item.value['week']}');
       for (var i=0; i<duration; i++) {
-        var day = startDate.add(Duration(days: i));
+        var day = startDate.add(Duration(days: i)).toLocal();
         var dayStr = day.toString().split(' ').first;
-        var isShow = item.value['exceptDay'] == null || !item.value['exceptDay'].contains(dayStr);
+        var wm = day.weekOfMonth;
+        var wm2 = wm;
+        var wd = day.weekday;
+        // for first month..
+        if (i == 0) {
+          weekList   = day.day - 1;
+          weekCheck0 = day.month;
+          weekCheck1 = DateTime(day.year, day.month + 1, 0).weekday;
+          // LOG('--> week list first [${day.day}] : $wm / $wd / $weekList');
+        }
+        // start mon to sun..
+        if (wd < 1) {
+          wd = 7;
+          wm--;
+        }
+        // month changed..
+        if (weekCheck0 != day.month) {
+          weekCheck0 = day.month;
+          weekCheck1 = DateTime(day.year, day.month + 1, 0).weekday;
+          weekList = 0;
+        }
+        if (wm > 1 && weekList < 7 * (wm-1)) {
+          wm--;
+        }
+        weekList++;
+        var isShow = LIST_EMPTY(item.value['exceptDay']) || !item.value['exceptDay'].contains(dayStr);
         if (isShow && LIST_NOT_EMPTY(item.value['week']) && !item.value['week'].contains(weekText.first)) {
-          var wm = day.weekOfMonth;
-          isShow = ((wm < weekText.length && item.value['week'].contains(weekText[wm])) || wm >= weekText.length) &&
-              (wm == day.lastWeek && item.value['week'].contains(weekText.last) || wm != day.lastWeek);
-          LOG('--> week [$dayStr / ${day.weekday}] : $wm / ${day.lastWeek} => $isShow');
+          isShow = (wm >= 0 && wm < weekText.length && item.value['week'].contains(weekText[wm])) ||
+                   (item.value['week'].contains(weekText.last) && (wm2 == day.lastWeek || (wd > weekCheck1 && wm2+1 == day.lastWeek)));
+          // LOG('--> week [$dayStr / $wd] : $wm($wm2) / ${day.lastWeek} => $isShow');
         }
         if (isShow && LIST_NOT_EMPTY(item.value['dayWeek']) && !item.value['dayWeek'].contains(dayWeekText.first)) {
-          var wm = day.weekday;
-          isShow = item.value['dayWeek'].contains(dayWeekText[wm]);
-          LOG('--> weekday [$dayStr] : $wm / ${dayWeekText[wm]} => $isShow');
+          isShow = item.value['dayWeek'].contains(dayWeekText[wd]);
+          // LOG('--> weekday [$dayStr] : $wd / ${dayWeekText[wd]} => $isShow');
         }
         if (isShow) {
           var markColor = COL(item.value['themeColor'], defaultValue:_defaultBgColor).withOpacity(0.75);

@@ -92,6 +92,7 @@ class HomeScreen extends StatelessWidget {
                       children: pages,
                     ),
                     // pages[viewModel.menuIndex],
+                    viewModel.showMainTopMenu(),
                     BottomCenterAlign(
                       child: Container(
                         height: UI_MENU_BG_HEIGHT,

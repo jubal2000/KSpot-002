@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/view/follow/follow_screen.dart';
 import 'package:kspot_002/view/story/story_edit_screen.dart';
 import 'package:kspot_002/view_model/user_view_model.dart';
@@ -12,6 +13,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:store_redirect/store_redirect.dart';
 import '../data/app_data.dart';
+import '../data/common_sizes.dart';
 import '../data/dialogs.dart';
 import '../data/themes.dart';
 import '../models/etc_model.dart';
@@ -24,6 +26,7 @@ import '../repository/user_repository.dart';
 import '../services/api_service.dart';
 import '../services/local_service.dart';
 import '../view/event/event_edit_screen.dart';
+import '../view/home/home_top_menu.dart';
 import '../view/message/message_talk_screen.dart';
 import '../widget/event_group_dialog.dart';
 import 'chat_view_model.dart';
@@ -93,6 +96,23 @@ class AppViewModel extends ChangeNotifier {
       statusBarBrightness: statusColorDark ? Brightness.dark : Brightness.light, // Set the text color to be dark
     ));
     notifyListeners();
+  }
+
+  showMainTopMenu() {
+    return TopCenterAlign(
+      child: SizedBox(
+        height: UI_APPBAR_HEIGHT,
+        child: HomeTopMenuBar(
+          MainMenuID.chat,
+          isShowDatePick: false,
+          onCountryChanged: () {
+
+          },
+          onDateChange: (state) {
+          }
+        )
+      )
+    );
   }
 
   setStatusBarColor() {

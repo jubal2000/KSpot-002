@@ -65,6 +65,7 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
     return ListView(
         shrinkWrap: true,
         children: [
+          SizedBox(height: UI_LIST_TEXT_SPACE_L),
           if (_viewModel.isEditMode)...[
             SubTitle(context, 'EVENT PLACE SELECT'.tr),
             Row(
@@ -72,12 +73,12 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
                 if (_viewModel.placeInfo != null)...[
                   Expanded(
                     child: ContentItem(_viewModel.placeInfo!.toJson(),
-                        padding: EdgeInsets.zero,
-                        showType: GoodsItemCardType.normal,
-                        descMaxLine: 2,
-                        isShowExtra: false,
-                        outlineColor: Theme.of(context).colorScheme.tertiary,
-                        titleStyle: ItemTitleLargeStyle(context), descStyle: ItemDescStyle(context)),
+                      padding: EdgeInsets.zero,
+                      showType: GoodsItemCardType.normal,
+                      descMaxLine: 2,
+                      isShowExtra: false,
+                      outlineColor: Theme.of(context).colorScheme.tertiary,
+                      titleStyle: ItemTitleLargeStyle(context), descStyle: ItemDescStyle(context)),
                   ),
                 ],
                 contentAddButton(context,
@@ -101,12 +102,16 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
                 ),
               ]
             ),
-            SizedBox(height: UI_LIST_TEXT_SPACE_S),
+            SizedBox(height: UI_LIST_TEXT_SPACE),
+            showHorizontalDivider(Size(Get.width, 1))
           ],
+          SizedBox(height: UI_LIST_TEXT_SPACE_S),
           _viewModel.showImageSelector(),
+          SizedBox(height: UI_LIST_TEXT_SPACE),
+          showHorizontalDivider(Size(Get.width, 1)),
           SizedBox(height: UI_LIST_TEXT_SPACE_S),
           SubTitle(context, 'INFO'.tr),
-          SizedBox(height: UI_LIST_TEXT_SPACE_S),
+          SizedBox(height: UI_LIST_TEXT_SPACE),
           EditTextField(context, 'TITLE'.tr, _viewModel.editItem!.title, hint: 'Event Title *'.tr, maxLength: TITLE_LENGTH,
             maxLines: 1, keyboardType: TextInputType.multiline, onChanged: (value) {
               _viewModel.editItem!.title = value;
@@ -118,16 +123,24 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
           TagTextField(_viewModel.editItem!.tagData, (value) {
             _viewModel.editItem!.tagData = value;
           }),
+          SizedBox(height: UI_LIST_TEXT_SPACE),
+          showHorizontalDivider(Size(Get.width, 1)),
           SizedBox(height: UI_LIST_TEXT_SPACE_S),
           EditListWidget(_viewModel.editManagerToJSON, title:'MANAGER *', EditListType.manager, _viewModel.onItemAdd,
               _viewModel.onItemSelected),
           SizedBox(height: UI_LIST_TEXT_SPACE),
+          showHorizontalDivider(Size(Get.width, 1)),
+          SizedBox(height: UI_LIST_TEXT_SPACE_S),
           EditListSortWidget(_viewModel.editEventToJSON, title:'TIME SETTING *', EditListType.timeRange, _viewModel.onItemAdd,
               _viewModel.onItemSelected),
           SizedBox(height: UI_LIST_TEXT_SPACE),
+          showHorizontalDivider(Size(Get.width, 1)),
+          SizedBox(height: UI_LIST_TEXT_SPACE_S),
           EditListSortWidget(_viewModel.editCustomToJSON, EditListType.customField, _viewModel.onItemAdd,
               _viewModel.onItemSelected, onListItemChanged: _viewModel.onItemChanged),
           SizedBox(height: UI_LIST_TEXT_SPACE),
+          showHorizontalDivider(Size(Get.width, 1)),
+          SizedBox(height: UI_LIST_TEXT_SPACE_S),
           EditSetupWidget('OPTIONS'.tr, _viewModel.editOptionToJSON, AppData.INFO_EVENT_OPTION,
               key:_setupKey,
               customData: _viewModel.editCustomToJSON,

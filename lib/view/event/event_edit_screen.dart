@@ -69,7 +69,7 @@ class _EventEditScreenState extends State<EventEditScreen> {
                   title: TopTitleText(context, viewModel.isEditMode ? 'Event Edit'.tr : viewModel.titleN[viewModel.stepIndex].tr),
                   titleSpacing: 0,
                   toolbarHeight: UI_EDIT_TOOL_HEIGHT.w,
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: Theme.of(context).backgroundColor,
                 ),
                 body: Container(
                   child: Column(
@@ -77,7 +77,7 @@ class _EventEditScreenState extends State<EventEditScreen> {
                       if (viewModel.isEditMode)...[
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE_L),
+                            padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
                             child: EventEditInputScreen(parentViewModel: viewModel)
                           ),
                         ),
@@ -92,7 +92,7 @@ class _EventEditScreenState extends State<EventEditScreen> {
                         ),
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE_L.w, UI_TOP_SPACE.w, UI_HORIZONTAL_SPACE_L.w, 0),
+                            padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE, UI_TOP_SPACE.w, UI_HORIZONTAL_SPACE, 0),
                             child: IndexedStack(
                               key: ValueKey(viewModel.stepIndex),
                               index: viewModel.stepIndex,

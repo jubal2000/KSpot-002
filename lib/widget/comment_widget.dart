@@ -104,9 +104,9 @@ class CommenetTabState extends State<CommentTabWidget> {
         length: widget.tabList.length,
         child: Column(
           children: [
-            showHorizontalDivider(Size(double.infinity, 20), color: Colors.grey.withOpacity(0.25)),
+            // showHorizontalDivider(Size(double.infinity, 20), color: Colors.grey.withOpacity(0.25)),
             SizedBox(
-              height: 40,
+              height: 50,
               child: TabBar(
                 labelPadding: EdgeInsets.zero,
                 onTap: (index) {

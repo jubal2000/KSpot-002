@@ -32,6 +32,7 @@ class _ScheduleState extends State<ScheduleWidget> {
   final _monthNames = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
+  final colorList = [Colors.yellow, Colors.orange, Colors.purple, Colors.blue, Colors.teal, Colors.greenAccent];
 
   DataSource? dayData;
 
@@ -55,6 +56,115 @@ class _ScheduleState extends State<ScheduleWidget> {
         widget.onInitialSelected!(AppData.calenderController!.view!, widget.currentDate, firstDayData);
       }
     });
+  }
+
+  Appointment? setCalendarDaySource(String timeId, String eventId, String placeId, String date, JSON timeData, Color color) {
+    try {
+      // LOG('--> _setCalendarDaySource init : $date / ${timeData['startTime']} >> ${STR(timeData['endTime'])}');
+      if (STR(timeData['startTime']) == '24:00') timeData['startTime'] = '00:00';
+      if (STR(timeData['endTime'  ]) == '24:00') timeData['endTime'  ] = '23:59';
+      var startTime = DateTime.parse('$date ${STR(timeData['startTime'], defaultValue: '00:00')}:00');
+      var endTime   = DateTime.parse('$date ${STR(timeData['endTime'  ], defaultValue: '23:59')}:59');
+      // LOG('--> _setCalendarDaySource : $startTime ~ $endTime / ${DateTime.now()} - ${DateTime.now().isBefore(endTime)}');
+      // if (DateTime.now().compareTo(endTime).isNegative) {
+      return Appointment(
+        startTime: startTime,
+        endTime: endTime,
+        isAllDay: false,
+        subject: STR(timeData['titleEx']).isNotEmpty ? STR(timeData['titleEx']) : STR(timeData['title']),
+        // notes: DESC(timeData['desc']),
+        notes: '{"key":"$timeId", "eventId":"$eventId", "placeId":"$placeId", "startTime":"${timeData['startTime']}", "endTime":"${timeData['endTime']}"}',
+        color: color,
+        startTimeZone: '',
+        endTimeZone: '',
+      );
+      // }
+    } catch (e) {
+      LOG('--> _setCalendarDaySource error : $e');
+    }
+    return null;
+  }
+
+  DataSource? getCalendarDataSource(JSON timeList) {
+    List<Appointment> appointments = <Appointment>[];
+    var count = 0;
+    for (var item in timeList.entries) {
+      var defaultBgColor = colorList[count];
+      var eventId = item.value['eventId'] ?? '';
+      var placeId = item.value['placeId'] ?? '';
+      LOG('--> timeList.entries item : $eventId / $placeId => $item');
+      if (LIST_NOT_EMPTY(item.value['day'])) {
+        for (var time in item.value['day']) {
+          // LOG('--> Day Data : ${item.value['dayData'][i]} / $duration');
+          var startDate = DateTime.parse(time);
+          var dayStr = startDate.toString().split(' ').first;
+          var markColor = COL(item.value['themeColor'], defaultValue:defaultBgColor);
+          var appoint = setCalendarDaySource(item.key, eventId, placeId, dayStr, item.value, markColor);
+          if (appoint != null) appointments.add(appoint);
+        }
+      } else {
+        // LOG('--> Date Range init : ${item.value['startDate']} ~ ${item.value['endDate']}');
+        if (STR(item.value['startDate']).isEmpty) item.value['startDate'] = DateTime.now().toString().split(' ').first;
+        var startDate = DateTime.parse(STR(item.value['startDate']));
+        if (STR(item.value['endDate']).isEmpty) item.value['endDate'] = startDate.add(Duration(days: 364)).toString().split(' ').first;
+        var endDate    = DateTime.parse(STR(item.value['endDate']));
+        var duration   = endDate.difference(startDate).inDays + 1;
+        var weekCheck0 = -1;
+        var weekCheck1 = 0;
+        var weekList   = 0;
+        LOG('--> Date Range : ${item.value['startDate']} ~ ${item.value['endDate']} => $duration / ${item.value['week']}');
+        for (var i=0; i<duration; i++) {
+          var day = startDate.add(Duration(days: i));
+          var dayStr = day.toString().split(' ').first;
+          var wm = day.weekOfMonth;
+          var wm2 = wm;
+          var wd = day.weekday;
+          // for first month..
+          if (i == 0) {
+            weekList   = day.day - 1;
+            weekCheck0 = day.month;
+            weekCheck1 = DateTime(day.year, day.month + 1, 0).weekday;
+            // LOG('--> week list first [${day.day}] : $wm / $wd / $weekList');
+          }
+          // start mon to sun..
+          if (wd < 1) {
+            wd = 7;
+            wm--;
+          }
+          // month changed..
+          if (weekCheck0 != day.month) {
+            weekCheck0 = day.month;
+            weekCheck1 = DateTime(day.year, day.month + 1, 0).weekday;
+            weekList = 0;
+          }
+          if (wm > 1 && weekList < 7 * (wm-1)) {
+            wm--;
+          }
+          weekList++;
+          var isShow = LIST_EMPTY(item.value['exceptDay']) || !item.value['exceptDay'].contains(dayStr);
+          if (isShow && LIST_NOT_EMPTY(item.value['week']) && !item.value['week'].contains(weekText.first)) {
+            isShow = (wm >= 0 && wm < weekText.length && item.value['week'].contains(weekText[wm])) ||
+                (item.value['week'].contains(weekText.last) && (wm2 == day.lastWeek || (wd > weekCheck1 && wm2+1 == day.lastWeek)));
+            // LOG('--> week [$dayStr / $wd] : $wm($wm2) / ${day.lastWeek} => $isShow');
+          }
+          if (isShow && LIST_NOT_EMPTY(item.value['dayWeek']) && !item.value['dayWeek'].contains(dayWeekText.first)) {
+            isShow = item.value['dayWeek'].contains(dayWeekText[wd]);
+            // LOG('--> weekday [$dayStr] : $wd / ${dayWeekText[wd]} => $isShow');
+          }
+          if (isShow) {
+            var markColor = COL(item.value['themeColor'], defaultValue:defaultBgColor).withOpacity(0.75);
+            var appoint = setCalendarDaySource(item.key, eventId, placeId, dayStr, item.value, markColor);
+            if (appoint != null) {
+              appointments.add(appoint);
+            }
+          } else {
+            // LOG('--> exceptDayData : $dayStr');
+          }
+        }
+      }
+      count = (count+1) % colorList.length;
+    }
+    return appointments.isNotEmpty ? DataSource(appointments) : null;
   }
 
   @override
@@ -122,9 +232,8 @@ class _ScheduleState extends State<ScheduleWidget> {
                 var jsonItem = jsonDecode(item.notes.toString());
                 jsonData[jsonItem['key']] = jsonItem;
               }
-              // jsonData = jsonDecode(detail.appointments!.toString());
             }
-            // LOG('--> onSelected json: $jsonData');
+            LOG('--> onSelected json: $jsonData');
             if (widget.onSelected != null) widget.onSelected!(AppData.calenderController!.view!, detail.date, jsonData);
           },
         ),
@@ -183,111 +292,4 @@ class _ScheduleState extends State<ScheduleWidget> {
       ]
     );
   }
-}
-
-Appointment? setCalendarDaySource(String timeId, String eventId, String placeId, String date, JSON timeData, Color color) {
-  try {
-    // LOG('--> _setCalendarDaySource init : $date / ${timeData['startTime']} >> ${STR(timeData['endTime'])}');
-    if (STR(timeData['startTime']) == '24:00') timeData['startTime'] = '00:00';
-    if (STR(timeData['endTime'  ]) == '24:00') timeData['endTime'  ] = '23:59';
-    var startTime = DateTime.parse('$date ${STR(timeData['startTime'], defaultValue: '00:00')}:00');
-    var endTime   = DateTime.parse('$date ${STR(timeData['endTime'  ], defaultValue: '23:59')}:59');
-    // LOG('--> _setCalendarDaySource : $startTime ~ $endTime / ${DateTime.now()} - ${DateTime.now().isBefore(endTime)}');
-    // if (DateTime.now().compareTo(endTime).isNegative) {
-      return Appointment(
-        startTime: startTime,
-        endTime: endTime,
-        isAllDay: false,
-        subject: STR(timeData['titleEx']).isNotEmpty ? STR(timeData['titleEx']) : STR(timeData['title']),
-        // notes: DESC(timeData['desc']),
-        notes: '{"key":"$timeId", "eventId":"$eventId", "placeId":"$placeId", "startTime":"${timeData['startTime']}", "endTime":"${timeData['endTime']}"}',
-        color: color,
-        startTimeZone: '',
-        endTimeZone: '',
-      );
-    // }
-  } catch (e) {
-    LOG('--> _setCalendarDaySource error : $e');
-  }
-  return null;
-}
-
-DataSource? getCalendarDataSource(JSON timeList) {
-  List<Appointment> appointments = <Appointment>[];
-  var _defaultBgColor = Colors.yellow;
-  for (var item in timeList.entries) {
-    var eventId = item.value['eventId'] ?? '';
-    var placeId = item.value['placeId'] ?? '';
-    LOG('--> timeList.entries item : $eventId / $placeId => $item');
-    if (LIST_NOT_EMPTY(item.value['day'])) {
-      for (var time in item.value['day']) {
-        // LOG('--> Day Data : ${item.value['dayData'][i]} / $duration');
-        var startDate = DateTime.parse(time);
-        var dayStr = startDate.toString().split(' ').first;
-        var markColor = COL(item.value['themeColor'], defaultValue:_defaultBgColor);
-        var appoint = setCalendarDaySource(item.key, eventId, placeId, dayStr, item.value, markColor);
-        if (appoint != null) appointments.add(appoint);
-      }
-    } else {
-      // LOG('--> Date Range init : ${item.value['startDate']} ~ ${item.value['endDate']}');
-      if (STR(item.value['startDate']).isEmpty) item.value['startDate'] = DateTime.now().toString().split(' ').first;
-      var startDate = DateTime.parse(STR(item.value['startDate']));
-      if (STR(item.value['endDate']).isEmpty) item.value['endDate'] = startDate.add(Duration(days: 364)).toString().split(' ').first;
-      var endDate = DateTime.parse(STR(item.value['endDate']));
-      var duration  = endDate.difference(startDate).inDays + 1;
-      var weekCheck0 = -1;
-      var weekCheck1 = 0;
-      var weekList   = 0;
-      LOG('--> Date Range : ${item.value['startDate']} ~ ${item.value['endDate']} => $duration / ${item.value['week']}');
-      for (var i=0; i<duration; i++) {
-        var day = startDate.add(Duration(days: i)).toLocal();
-        var dayStr = day.toString().split(' ').first;
-        var wm = day.weekOfMonth;
-        var wm2 = wm;
-        var wd = day.weekday;
-        // for first month..
-        if (i == 0) {
-          weekList   = day.day - 1;
-          weekCheck0 = day.month;
-          weekCheck1 = DateTime(day.year, day.month + 1, 0).weekday;
-          // LOG('--> week list first [${day.day}] : $wm / $wd / $weekList');
-        }
-        // start mon to sun..
-        if (wd < 1) {
-          wd = 7;
-          wm--;
-        }
-        // month changed..
-        if (weekCheck0 != day.month) {
-          weekCheck0 = day.month;
-          weekCheck1 = DateTime(day.year, day.month + 1, 0).weekday;
-          weekList = 0;
-        }
-        if (wm > 1 && weekList < 7 * (wm-1)) {
-          wm--;
-        }
-        weekList++;
-        var isShow = LIST_EMPTY(item.value['exceptDay']) || !item.value['exceptDay'].contains(dayStr);
-        if (isShow && LIST_NOT_EMPTY(item.value['week']) && !item.value['week'].contains(weekText.first)) {
-          isShow = (wm >= 0 && wm < weekText.length && item.value['week'].contains(weekText[wm])) ||
-                   (item.value['week'].contains(weekText.last) && (wm2 == day.lastWeek || (wd > weekCheck1 && wm2+1 == day.lastWeek)));
-          // LOG('--> week [$dayStr / $wd] : $wm($wm2) / ${day.lastWeek} => $isShow');
-        }
-        if (isShow && LIST_NOT_EMPTY(item.value['dayWeek']) && !item.value['dayWeek'].contains(dayWeekText.first)) {
-          isShow = item.value['dayWeek'].contains(dayWeekText[wd]);
-          // LOG('--> weekday [$dayStr] : $wd / ${dayWeekText[wd]} => $isShow');
-        }
-        if (isShow) {
-          var markColor = COL(item.value['themeColor'], defaultValue:_defaultBgColor).withOpacity(0.75);
-          var appoint = setCalendarDaySource(item.key, eventId, placeId, dayStr, item.value, markColor);
-          if (appoint != null) {
-            appointments.add(appoint);
-          }
-        } else {
-          // LOG('--> exceptDayData : $dayStr');
-        }
-      }
-    }
-  }
-  return appointments.isNotEmpty ? DataSource(appointments) : null;
 }

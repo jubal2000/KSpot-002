@@ -29,21 +29,24 @@ class ShowTimeList extends StatefulWidget {
 
 class _ShowTimeListState extends State<ShowTimeList> {
   List<Widget> _itemList = [];
+  final colorList = [Colors.yellow, Colors.orange, Colors.purple, Colors.blue, Colors.teal, Colors.greenAccent];
 
   refreshData() {
     widget._itemShowFlag.clear();
     _itemList.clear();
 
-    for (var i = 0; i < 2; i++) {
+    // for (var i = 0; i < 2; i++) {
+    var count = 0;
       for (var item in widget.timeList.entries) {
         if (!widget._itemShowFlag.containsKey(item.key)) {
-          var isAdd = i != 0;
-          if (i == 0) {
-            LOG('--> _selectEventTime [$i] : ${item.key} / ${AppData.selectEventTime}');
-            isAdd = AppData.selectEventTime.containsKey(item.key);
-          }
-          if (isAdd) {
-            LOG('--> ShowTimeList add [$i] : ${item.value}');
+          // var isAdd = i != 0;
+          // if (i == 0) {
+          //   LOG('--> _selectEventTime : ${item.key} / ${AppData.selectEventTime}');
+          //   isAdd = AppData.selectEventTime.containsKey(item.key);
+          // }
+          // if (isAdd) {
+          var isAdd = AppData.selectEventTime.containsKey(item.key);
+            LOG('--> ShowTimeList add : ${item.value}');
             widget._itemShowFlag[item.key] = item;
             JSON customData = {};
             if (LIST_NOT_EMPTY(item.value['customData'])) {
@@ -56,7 +59,7 @@ class _ShowTimeListState extends State<ShowTimeList> {
                 onTap: () {
                   if (JSON_NOT_EMPTY(item.value['day'])) {
                     var currentDate = DateTime.parse(STR(item.value['day'].first));
-                    LOG('--> select [$i] : ${item.value['day'].first} => $currentDate');
+                    LOG('--> select : ${item.value['day'].first} => $currentDate');
                     AppData.currentDate = currentDate;
                   }
                 },
@@ -68,18 +71,24 @@ class _ShowTimeListState extends State<ShowTimeList> {
                       color: Theme.of(context).backgroundColor.withOpacity(0.35),
                       borderRadius: BorderRadius.all(Radius.circular(8)),
                       border: Border.all(
-                        color: i == 0 ? Theme.of(context).primaryColor : OutLineColor(context),
-                        width: i == 0 ? 3.0 : 1.0,
+                        color: isAdd ? Theme.of(context).primaryColor : OutLineColor(context),
+                        width: isAdd ? 2.0 : 1.0,
+                        // color: i == 0 ? Theme.of(context).primaryColor : OutLineColor(context),
+                        // width: i == 0 ? 3.0 : 1.0,
                       ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (STR(item.value['title']).isNotEmpty)...[
-                          Text(STR(item.value['title']), style: DescTitleStyle(context)),
-                          SizedBox(height: 5),
-                        ],
+                        Row(
+                          children: [
+                            Icon(Icons.circle, color: colorList[count], size: 14),
+                            SizedBox(width: 5),
+                            Text(STR(item.value['title']), style: DescTitleStyle(context)),
+                          ]
+                        ),
                         if (STR(item.value['startDate']).isNotEmpty || STR(item.value['endDate']).isNotEmpty)...[
+                          SizedBox(height: 5),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -160,9 +169,10 @@ class _ShowTimeListState extends State<ShowTimeList> {
                 )
             ));
           }
+          count = (count + 1) % colorList.length;
         }
-      }
-    }
+      // }
+    // }
   }
 
   @override

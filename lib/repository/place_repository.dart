@@ -47,11 +47,11 @@ class PlaceRepository {
       // LOG('--> getPlaceFromId cacheItem : ${cacheItem != null ? cacheItem.toJson() : 'null'}');
       if (cacheItem != null) return cacheItem;
       final response = await api.getPlaceFromId(placeId);
-      // LOG('--> getPlaceFromId response : ${response.toString()}');
+      LOG('--> getPlaceFromId response : ${response.toString()}');
       if (response != null) {
         final addItem = PlaceModel.fromJson(response);
         cache.setPlaceItem(addItem);
-        // LOG('--> getPlaceFromId result : ${addItem.toJson()}');
+        LOG('--> getPlaceFromId result : ${addItem.toJson()}');
         return addItem;
       } else {
         // TODO: place 가 삭제됬거나 없을경우 처리..

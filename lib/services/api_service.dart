@@ -182,7 +182,6 @@ class ApiService extends GetxService {
       final infoDB = [
         'info_notice',
         'info_faq',
-        'info_refund',
         'info_contentType',
         'info_promotion',
         'info_option',
@@ -195,7 +194,6 @@ class ApiService extends GetxService {
       final outName = [
         'notice',
         'faq',
-        'refund',
         'contentType',
         'promotion',
         'option',

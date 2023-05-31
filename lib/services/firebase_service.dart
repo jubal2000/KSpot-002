@@ -62,7 +62,7 @@ class FirebaseService extends GetxService {
 
     final result = await Firebase.initializeApp();
     firestore = FirebaseFirestore.instance;
-    fireAuth  = FirebaseAuth.instance;
+    fireAuth = FirebaseAuth.instance;
     messaging = FirebaseMessaging.instance;
     LOG('--> initService: ${result.toString()} / $firestore');
 
@@ -84,8 +84,8 @@ class FirebaseService extends GetxService {
     token = await messaging!.getToken();
     LOG('--> firebase init token : $token');
 
-    await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(channel);
+    // await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+    //     ?.createNotificationChannel(channel);
 
     // alert permission..
     await messaging!.requestPermission(
@@ -104,15 +104,11 @@ class FirebaseService extends GetxService {
       badge: true,
       sound: true,
     );
-    // FirebaseMessaging.onMessage.listen(onMessageListener);
-    // FirebaseMessaging.onMessageOpenedApp.listen(onMessageOpenedAppListener);
-    // onBackgroundMessage 동작 안함
-    // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
     // dynamic link ready..
     initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
 
-    initCacheData();
+    initPush();
+    initDeepLink();
 
     if (AppData.isDevMode) {
       FirebaseAuth.instance.setSettings(
@@ -120,32 +116,41 @@ class FirebaseService extends GetxService {
           forceRecaptchaFlow: true
       );
     }
+
+    // if (!initLink) {
+    //   LOG('--> initDataLink');
+    //   initLink = true;
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     initPush();
+    //     initDeepLink();
+    //   });
+    // }
     // this.subscribeTopic();
   }
 
-  void showReceiveLocalNotificationDialog(
-      BuildContext context, int id, String title, String body, String payload) async {
-
+  void showReceiveLocalNotificationDialog(BuildContext context, int id, String title, String body,
+      String payload) async {
     // display a dialog with the notification details, tap ok to go to another page
     showDialog(
       context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
-        title: Text(title),
-        content: Row(
-          children: [
-            Text(body),
-          ],
-        ),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: Text('Ok'),
-            onPressed: () async {
-              Navigator.of(context, rootNavigator: true).pop();
-            },
-          )
-        ],
-      ),
+      builder: (BuildContext context) =>
+          CupertinoAlertDialog(
+            title: Text(title),
+            content: Row(
+              children: [
+                Text(body),
+              ],
+            ),
+            actions: [
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                child: Text('Ok'),
+                onPressed: () async {
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+              )
+            ],
+          ),
     );
   }
 
@@ -159,39 +164,30 @@ class FirebaseService extends GetxService {
     }
   }
 
-  initDataLink(BuildContext context) {
-    if (initLink) return;
-    LOG('--> initDataLink');
-    initLink = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      initPush(context);
-      initDeepLink(context);
-    });
-  }
-
-  initPush(BuildContext context) async {
+  initPush() async {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      LOG('--> FirebaseMessaging.onMessage : $message');
       showPush(message, false);
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       LOG('--> FirebaseMessaging.onMessageOpenedApp.listen : $message');
       Navigator.pushNamed(
-        context,
+        Get.context!,
         '/message',
         arguments: MessageArguments(message, true),
       );
     });
   }
 
-  initDeepLink(BuildContext context) {
+  initDeepLink() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (initialLink != null) {
-        deepLinkProcess(context, initialLink);
+        deepLinkProcess(Get.context!, initialLink);
       }
       // when app running..
       FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) {
-        deepLinkProcess(context, dynamicLinkData);
+        deepLinkProcess(Get.context!, dynamicLinkData);
       }).onError((error) {
         // Handle errors
         LOG('--> dynamicLinkData.link error : $error');
@@ -246,38 +242,10 @@ class FirebaseService extends GetxService {
     // }
   }
 
-  sendTestPushMessage(String type) async {
-    var _key = Uuid().v1();
-    JSON _addItem = {
-      "id": _key,
-      "status": 1,
-      "senderId":   STR(AppData.USER_ID),
-      "senderName": STR(AppData.USER_NICKNAME),
-      "senderPic":  STR(AppData.USER_PIC),
-      "targetId":   '',
-      "targetName": '',
-      "targetPic":  '',
-      "imageData":  [],
-      "desc": "Hi! this is $type!!",
-      "createTime": CURRENT_SERVER_TIME(),
-    };
-    _addItem = FROM_SERVER_DATA(_addItem);
-    sendFcmData(
-        'AppData.testToken',
-        AppData.USER_NICKNAME,
-        _addItem['desc'],
-        {
-          'type'  : type,
-          'data'  : _addItem,
-        }
-    );
-    ShowToast('send: ${_addItem['desc']}');
-  }
-
   showPush(RemoteMessage message, bool isBackground) {
     RemoteNotification? notification = message.notification;
     if (notification != null && !kIsWeb) {
-      print('--> FirebaseMessaging android : ${notification.title} / ${notification.body}');
+      LOG('--> FirebaseMessaging : ${notification.title} / ${notification.body}');
       var customData = message.data;
       var isShowPush = false;
       var title = notification.title;
@@ -288,17 +256,17 @@ class FirebaseService extends GetxService {
         String targetId = STR(itemData['id']) ?? Uuid().v1();
         switch (STR(customData['type'])) {
           case 'message':
-            // isShowPush = AppData.userInfo.optionPush.isEmpty || BOL(AppData.userInfo!.optionPush['message_on']);
-            // AppData.messageData[targetId] = itemData;
-            // var state = AppData.messagesListKey.currentState;
-            // if (state != null && state.mounted) {
-            //   state.refresh(itemData);
-            //   isShowPush = false;
-            // }
-            // LOG('--> messageData add [$targetId] : ${AppData.messageData}');
+          // isShowPush = AppData.userInfo.optionPush.isEmpty || BOL(AppData.userInfo!.optionPush['message_on']);
+          // AppData.messageData[targetId] = itemData;
+          // var state = AppData.messagesListKey.currentState;
+          // if (state != null && state.mounted) {
+          //   state.refresh(itemData);
+          //   isShowPush = false;
+          // }
+          // LOG('--> messageData add [$targetId] : ${AppData.messageData}');
             break;
           case 'comment':
-            // isShowPush = AppData.userInfo!.optionPush.isEmpty || BOL(AppData.userInfo!.optionPush['comment_on']);
+          // isShowPush = AppData.userInfo!.optionPush.isEmpty || BOL(AppData.userInfo!.optionPush['comment_on']);
             break;
         }
       }
@@ -367,55 +335,14 @@ class FirebaseService extends GetxService {
         break;
     }
   }
+}
 
-  Future<String> createShareContentDynamicLink(String type, String targetId) async {
-    var link = 'https://kspot001.jhfactory.com/share_content/?data=$type,$targetId';
-    var androidParameters = '&apn=com.jhfactory.kspot001&amv=1';
-    var iosParameters = '&ibi=com.jhfactory.kspot001&isi=1643924418&imv=1';
-    var result = 'https://kspot001.page.link/?link=$link$androidParameters$iosParameters';
-    return result;
-  }
-
-  Future<bool> sendPushMessageFromUser(String userId, String title, String desc, {JSON userData = const {}}) async {
-    // send push..
-    final userRepo = UserRepository();
-    var targetUserInfo = await userRepo.getUserInfo(userId);
-    if (targetUserInfo != null) {
-      var pushToken = STR(targetUserInfo.pushToken);
-      LOG('------> send push : ${targetUserInfo.nickName} => ${targetUserInfo.optionPush} / $pushToken');
-      // if (pushToken.isNotEmpty && (targetUserInfo.optionPush.isEmpty || BOL(targetUserInfo.optionPush['message_on']))) {
-      //   try {
-      //     return sendFcmData(
-      //         pushToken,
-      //         title,
-      //         desc,
-      //         userData
-      //       // {
-      //       //   'type': 'message', // link
-      //       //   'data': userData.toString(),
-      //       // }
-      //     );
-      //   } catch (e) {
-      //     LOG('--> sendFcmData error : $e');
-      //   }
-      // }
-    }
-    return false;
-  }
-
-  JSON firestoreCacheData = {};
-
-  initCacheData() {
-    firestoreCacheData['goodsData'] = {};
-    firestoreCacheData['goodsLink'] = {};
-    firestoreCacheData['simpleGoods'] = {};
-    firestoreCacheData['historyComment'] = {};
-    firestoreCacheData['goodsComment'] = {};
-    firestoreCacheData['placeComment'] = {};
-    firestoreCacheData['placeEventComment'] = {};
-    firestoreCacheData['goodsQnA'] = {};
-    firestoreCacheData['follow'] = {};
-  }
+Future<String> createShareContentDynamicLink(String type, String targetId) async {
+  var link = 'https://kspot001.jhfactory.com/share_content/?data=$type,$targetId';
+  var androidParameters = '&apn=com.jhfactory.kspot001&amv=1';
+  var iosParameters = '&ibi=com.jhfactory.kspot001&isi=1643924418&imv=1';
+  var result = 'https://kspot001.page.link/?link=$link$androidParameters$iosParameters';
+  return result;
 }
 
 Future<String?> uploadMP4(XFile? file, String targetPath, String targetFileName) async {

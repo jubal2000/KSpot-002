@@ -75,7 +75,8 @@ class ChatEditViewModel extends ChangeNotifier {
                 'id': item.key,
                 'status': 1,
                 'nickName': STR(item.value['nickName']),
-                'pic': STR(item.value['pic'])
+                'pic': STR(item.value['pic']),
+                'createTime': DateTime.now().toString(),
               };
               memberData[item.key] = addItem;
               LOG("--> memberData add [${item.key}] : ${memberData.length}");
@@ -257,6 +258,7 @@ class ChatEditViewModel extends ChangeNotifier {
       )
     );
     for (var item in memberData.entries) {
+      LOG('---> memberData item : ${item.toString()}');
       editItem!.memberList.add(item.key);
       editItem!.memberData.add(MemberData.fromJson(item.value));
     }

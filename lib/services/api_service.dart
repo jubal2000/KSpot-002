@@ -16,6 +16,7 @@ import 'package:kspot_002/models/upload_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+import '../utils/push_utils.dart';
 import '../utils/utils.dart';
 import 'firebase_service.dart';
 
@@ -2232,12 +2233,36 @@ class ApiService extends GetxService {
       addItem['id'] = key;
       addItem['createTime'] = CURRENT_SERVER_TIME();
     }
-    addItem['updateTime'] = CURRENT_SERVER_TIME();
+    var memberList = [];
     if (LIST_NOT_EMPTY(addItem['memberData'])) {
       for (var item in addItem['memberData']) {
-        item['createTime'] = CURRENT_SERVER_TIME();
+        var userInfo = await getUserInfoFromId(item['targetId']);
+        if (userInfo != null && INT(userInfo['status']) > 0) {
+          item['createTime'] = CURRENT_SERVER_TIME();
+          if (LIST_NOT_EMPTY(userInfo['pushOption'])) {
+            for (var pushItem in userInfo['pushOption']) {
+              LOG('--> pushOption item : $pushItem');
+              if (pushItem['id'] == 'chatting_on') {
+                item['pushToken'] = userInfo['pushToken'];
+                LOG('-----------> set push token : ${item['pushToken']}');
+                break;
+              }
+            }
+          }
+          if (firebase != null && STR(item['pushToken']).isNotEmpty) {
+            await sendFcmData(
+              STR(item['pushToken']),
+              'KSpot'.tr,
+              'Chatting invited : ${STR(addItem['title'])}',
+              {},
+            );
+          }
+          memberList.add(item);
+        }
       }
     }
+    addItem['memberData'] = memberList;
+    addItem['updateTime'] = CURRENT_SERVER_TIME();
 
     await dataRef.doc(key).set(Map<String, dynamic>.from(addItem));
     var result = FROM_SERVER_DATA(addItem);

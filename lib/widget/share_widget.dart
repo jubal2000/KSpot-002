@@ -20,7 +20,7 @@ Widget ShareWidget(BuildContext context, String type, JSON targetInfo,
         return Center(
             child:  GestureDetector(
               onTap: () {
-                FirebaseService().createShareContentDynamicLink(type, targetInfo['id']).then((result) {
+                createShareContentDynamicLink(type, targetInfo['id']).then((result) {
                   var targetTitle = type == 'story' ? STR(targetInfo['desc']) : STR(targetInfo['title']);
                   Share.share(result, subject: 'KSpot - $targetTitle');
                   // addShareCount(type, STR(targetInfo['id']), 1, targetTitle: targetTitle, targetPic: '').then((result) async {

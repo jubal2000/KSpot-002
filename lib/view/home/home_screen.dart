@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import '../../data/app_data.dart';
 import '../../data/dialogs.dart';
 import '../../data/theme_manager.dart';
+import '../../utils/push_utils.dart';
 import '../../utils/utils.dart';
 import '../../view_model/app_view_model.dart';
 import '../../widget/event_group_dialog.dart';
@@ -181,6 +182,12 @@ class HomeScreen extends StatelessWidget {
                       )
                     ),
                   ]
+                ),
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () {
+                    sendFcmTestData();
+                  },
+                  child: Icon(Icons.send),
                 ),
               )
             );

@@ -190,7 +190,8 @@ Map<String, dynamic> _$MemberDataToJson(MemberData instance) =>
       'createTime': instance.createTime.toIso8601String(),
     };
 
-RecommendData _$RecommendDataFromJson(Map<String, dynamic> json) => RecommendData(
+RecommendData _$RecommendDataFromJson(Map<String, dynamic> json) =>
+    RecommendData(
       id: json['id'] as String,
       showStatus: json['showStatus'] as int,
       creditQty: json['creditQty'] as int,

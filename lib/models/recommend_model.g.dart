@@ -6,7 +6,8 @@ part of 'recommend_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-RecommendModel _$RecommendModelFromJson(Map<String, dynamic> json) => RecommendModel(
+RecommendModel _$RecommendModelFromJson(Map<String, dynamic> json) =>
+    RecommendModel(
       id: json['id'] as String,
       status: json['status'] as int,
       showStatus: json['showStatus'] as int,
@@ -32,8 +33,8 @@ Map<String, dynamic> _$RecommendModelToJson(RecommendModel instance) =>
       'id': instance.id,
       'status': instance.status,
       'showStatus': instance.showStatus,
-      'desc': instance.desc,
       'creditQty': instance.creditQty,
+      'desc': instance.desc,
       'securityCode': instance.securityCode,
       'targetType': instance.targetType,
       'targetGroupId': instance.targetGroupId,

@@ -1,40 +1,68 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:kspot_002/services/firebase_service.dart';
 import 'package:kspot_002/utils/utils.dart';
 
+import '../data/app_data.dart';
+
 sendFcmTestData() {
+  final firebase = Get.find<FirebaseService>();
   return sendFcmData(
-    'dMclWMkzTayOBZ0NG5QgIy:APA91bEy9N1FaSsCxQr3z6fhp5BhpisIab6ZvoAh8c1NBdwEs5BHiGqa3LMkWio-FhkbB3fq529lFt2kg2kW1SdQOl6xfTBNFTEQzUMOIaIA4roXaoRqfqiCCeRRe2Ro6TfrQewBbaYi',
-    'KSpot', 'Test Push Message', {'id': 'test', 'title': 'title', 'message': 'message'});
+    firebase.token!,
+    'KSpot', 'Test Push Message', {'id': 'test', 'title': 'KSpot test', 'message': 'KSpot test message'});
 }
 
 sendFcmData(String token, String title, String desc, JSON data) async {
+  if (token.isEmpty) {
+    LOG('--> sendFcmData error : Unable to send FCM message, no token exists.');
+    return false;
+  }
   try {
     var bodyData = {
-      'notification': <String, dynamic>{
-        'body':  desc,
-        'title': title,
-      },
-      'data': data,
-      'to': token
+      "message": {
+        "token" : token,
+        // "topic": "news",
+        "notification": {
+          "title": "Breaking News",
+          "body": "New news story available."
+        },
+        "data": {
+          "story_id": "story_12345"
+        },
+        "android": {
+          "notification": {
+            "click_action": "TOP_STORY_ACTIVITY",
+            "body": "Check out the Top Story"
+          }
+        },
+        "apns": {
+          "payload": {
+            "aps": {
+              "category" : "NEW_MESSAGE_CATEGORY"
+            }
+          }
+        }
+      }
+      // 'notification': <String, dynamic>{
+      //   'body':  desc,
+      //   'title': title,
+      // },
+      // 'data': data,
+      // 'to': token
     };
     LOG('-------------> sendFcmData bodyData : $bodyData');
-    if (token.isEmpty) {
-      LOG('--> sendFcmData : Unable to send FCM message, no token exists.');
-      return false;
-    }
-
     try {
       //Send  Message
-      http.Response response = await http.post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
-          headers: <String, String>{
-            'Content-Type': 'application/json',
-            'Authorization': 'key=BBC7AG0ikKyRoE9BLjkK4FVYp80odw1S8zZqQP6Mu0Yu6iD7IbbDODPc2ZKxNYrw1wcSku6r2oamo8bT2wELlBs',
-          },
-          body: jsonEncode(bodyData));
-      LOG("--> sendFcmData result : ${response.statusCode} | Message Sent Successfully!");
+      http.Response response = await http.post(Uri.parse('https://fcm.googleapis.com/v1/projects/kspot-002/messages:send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ya29.a0AWY7CkkQJHsblzyzqjZcE1wh_1l0LamGxIkILSLMwv6z5Ffw_g1JmSlxJSdcNCLNJMiEMd_mVDmA61X9Hs9RBX82pW78R3WQXNea-muYr7ozWdDeMS91fx13fswaXaKZ6nhFctL6kc3jdAem90DF6Xg2dMNbaCgYKAWESARESFQG1tDrpnhdxwwg50aDGpT7bvuvUKQ0163',
+        },
+        body: jsonEncode(bodyData));
+      LOG("--> sendFcmData result : ${response.statusCode} | ${response.body}");
     } catch (e) {
       LOG("--> error push notification : $e");
     }

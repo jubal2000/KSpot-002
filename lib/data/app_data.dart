@@ -126,6 +126,7 @@ class AppData {
   static var currentContentType = '';
   static var currentCurrency = '';
   static var dynamicLinkPath = '';
+  static var loginToken = '';
 
   static List<CountryData> countrySelectList = [];
   static CalendarController? calenderController;

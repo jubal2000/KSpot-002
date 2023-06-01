@@ -49,7 +49,7 @@ class FirebaseService extends GetxService {
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   final userRepo = UserRepository();
 
-  AndroidNotificationChannel channel = AndroidNotificationChannel(
+  AndroidNotificationChannel FCM_TopicChannel = AndroidNotificationChannel(
     'alert_channel_00', // id
     'Alert Notifications', // title
     description: 'This channel is used for alert notifications.', // description
@@ -84,8 +84,8 @@ class FirebaseService extends GetxService {
     token = await messaging!.getToken();
     LOG('--> firebase init token : $token');
 
-    // await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-    //     ?.createNotificationChannel(channel);
+    await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(FCM_TopicChannel);
 
     // alert permission..
     await messaging!.requestPermission(
@@ -166,18 +166,40 @@ class FirebaseService extends GetxService {
 
   initPush() async {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      LOG('--> FirebaseMessaging.onMessage : $message');
+      LOG('--> FirebaseMessaging.onMessage : ${message.toString()}');
       showPush(message, false);
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      LOG('--> FirebaseMessaging.onMessageOpenedApp.listen : $message');
-      Navigator.pushNamed(
-        Get.context!,
-        '/message',
-        arguments: MessageArguments(message, true),
-      );
+      LOG('--> FirebaseMessaging.onMessageOpenedApp.listen : ${message.toString()}');
+      RemoteNotification?  notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+
+      // If `onMessage` is triggered with a notification, construct our own
+      // local notification to show to users using the created channel.
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              FCM_TopicChannel.id,
+              FCM_TopicChannel.name,
+              icon: android.smallIcon,
+              // other properties...
+            ),
+          )
+        );
+      }
+      // Navigator.pushNamed(
+      //   Get.context!,
+      //   '/message',
+      //   arguments: MessageArguments(message, true),
+      // );
     });
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
 
   initDeepLink() {
@@ -193,6 +215,11 @@ class FirebaseService extends GetxService {
         LOG('--> dynamicLinkData.link error : $error');
       });
     });
+  }
+
+  Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+    await Firebase.initializeApp();
+    LOG("--> Handling a background message: ${message.messageId}");
   }
 
   deepLinkProcess(BuildContext context, dynamicLinkData) {
@@ -247,7 +274,7 @@ class FirebaseService extends GetxService {
     if (notification != null && !kIsWeb) {
       LOG('--> FirebaseMessaging : ${notification.title} / ${notification.body}');
       var customData = message.data;
-      var isShowPush = false;
+      var isShowPush = true;
       var title = notification.title;
       var desc = notification.body;
       if (customData['data'] != null) {
@@ -278,9 +305,9 @@ class FirebaseService extends GetxService {
           desc,
           NotificationDetails(
               android: AndroidNotificationDetails(
-                channel.id,
-                channel.name,
-                channelDescription: channel.description,
+                FCM_TopicChannel.id,
+                FCM_TopicChannel.name,
+                channelDescription: FCM_TopicChannel.description,
                 icon: '@mipmap/ic_launcher',
                 // largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
                 // icon: 'push_icon',

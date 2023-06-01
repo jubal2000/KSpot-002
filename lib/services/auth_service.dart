@@ -45,8 +45,9 @@ class AuthService extends GetxService {
         Get.offAllNamed(Routes.INTRO);
         if (onSignOut != null) onSignOut!();
       } else {
-        LOG('--> User is signed in! / isSignUpMode: ${AppData.isSignUpMode}');
         setLoginUserInfo(user);
+        AppData.loginToken = await user.getIdToken();
+        LOG('--> User is signed in! / isSignUpMode: ${AppData.isSignUpMode} / ${AppData.loginToken}');
 
         if (!AppData.isSignUpMode) {
           final result = await userRepo.getStartUserInfo(AppData.loginInfo.loginId);

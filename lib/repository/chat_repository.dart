@@ -120,7 +120,7 @@ class ChatRepository {
   }
 
   addRoomItem(ChatRoomModel room) async {
-    return await api.addRoomItem(room.toJson());
+    return await api.addChatRoomItem(room.toJson());
   }
 
   Future<String?> uploadImageInfo(JSON imageInfo, [String path = 'chat_room_img']) async {

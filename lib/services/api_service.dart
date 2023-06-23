@@ -2165,8 +2165,9 @@ class ApiService extends GetxService {
   //    Chat info..
   //
 
-  final ChatRoomCollection = 'data_chatRoom';
-  final ChatCollection = 'data_chat';
+  final ChatRoomCollection    = 'data_chatRoom';
+  final ChatInviteCollection  = 'data_chatInvite';
+  final ChatCollection        = 'data_chat';
 
   Future<JSON> getChatOpenRoomData(String userId, String groupId, String country, [String countryState = '']) async {
     LOG('------> getChatOpenRoomData : $userId / $groupId [ $country / $countryState ]');
@@ -2225,7 +2226,7 @@ class ApiService extends GetxService {
         .snapshots();
   }
 
-  Future<JSON?> addRoomItem(JSON addItem) async {
+  Future<JSON?> addChatRoomItem(JSON addItem) async {
     var dataRef = firestore!.collection(ChatRoomCollection);
     var key = STR(addItem['id']).toString();
     if (key.isEmpty) {
@@ -2267,6 +2268,11 @@ class ApiService extends GetxService {
     await dataRef.doc(key).set(Map<String, dynamic>.from(addItem));
     var result = FROM_SERVER_DATA(addItem);
     return result;
+  }
+
+  Future<JSON?> addChatInvite(JSON memberItem) async {
+    var dataRef = firestore!.collection(ChatInviteCollection);
+
   }
 
   Stream getChatStreamData(String userId) {

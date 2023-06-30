@@ -1,5 +1,4 @@
 
-import 'package:date_picker_timeline_fixed/date_picker_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,6 +22,7 @@ import '../utils/utils.dart';
 import '../view/home/home_top_menu.dart';
 import '../view/event/event_detail_screen.dart';
 import '../widget/content_item_card.dart';
+import '../widget/date_picker_timeline/date_picker_widget.dart';
 import '../widget/google_map_widget.dart';
 import 'app_view_model.dart';
 

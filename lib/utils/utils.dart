@@ -12,7 +12,6 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:helpers/helpers.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -22,6 +21,7 @@ import 'package:image/image.dart' as IMG;
 import 'package:kspot_002/services/api_service.dart';
 import 'package:material_tag_editor/tag_editor.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:show_network_image/show_network_image.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import '../data/app_data.dart';
@@ -924,21 +924,20 @@ Widget showImageWidget(dynamic imagePath, BoxFit fit, {Color? color}) {
           );
         }
         if (url.contains("http")) {
-          return CachedNetworkImage(
-              fit: fit,
-              color: color,
-              imageUrl: url,
-              cacheKey: url
-                  .split('=')
-                  .last,
-              progressIndicatorBuilder: (context, url, progress) =>
-                  Center(
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(value: progress.progress),
-                    ),
-                  )
+          return ShowNetworkImage(
+            mobileBoxFit: fit,
+              // color: color,
+            imageSrc: url,
+              // cacheKey: url
+              //     .split('=')
+              //     .last,
+            //   loadingBuilder: (context) =>
+            //       Center(
+            //         child: SizedBox(
+            //           child: CircularProgressIndicator(strokeWidth: 2),
+            //         ),
+            //       ),
+            // errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
           );
         } else if (url.contains('/cache')) {
           return Image.file(File(url), fit: fit, color: color);

@@ -20,7 +20,7 @@ class SlideTimePickerScreen extends StatefulWidget {
 }
 
 class _SlideTimePickerScreenState extends State<SlideTimePickerScreen> {
-  final _clockTimeFormat = ClockTimeFormat.TWENTYFOURHOURS;
+  final _clockTimeFormat = ClockTimeFormat.twentyFourHours;
   final _topHeight = 50.0;
   final _pickerKey = GlobalKey();
 

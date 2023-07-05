@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,7 +30,13 @@ import 'data/themes.dart';
 import 'utils/utils.dart';
 import 'data/words.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+}
+
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   await GetStorage.init();
   final cache = await Get.putAsync(() => CacheService().init());
   final api   = await Get.putAsync(() => ApiService().init());
@@ -37,6 +45,7 @@ Future<void> main() async {
   final local = await Get.putAsync(() => LocalService().init());
 
   api.initFirebase();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   Future getInfoData() async {
     return api.getInfoData();

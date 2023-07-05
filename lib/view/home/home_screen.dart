@@ -181,13 +181,17 @@ class HomeScreen extends StatelessWidget {
                         )
                       )
                     ),
+                    BottomRightAlign(
+                      widthFactor: 7.2,
+                      heightFactor: 14,
+                      child: FloatingActionButton(
+                        onPressed: () {
+                          sendFcmTestData();
+                        },
+                        child: Icon(Icons.send),
+                      ),
+                    )
                   ]
-                ),
-                floatingActionButton: FloatingActionButton(
-                  onPressed: () {
-                    sendFcmTestData();
-                  },
-                  child: Icon(Icons.send),
                 ),
               )
             );

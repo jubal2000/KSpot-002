@@ -600,7 +600,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                     skinToneDialogBgColor: Colors.white,
                     skinToneIndicatorColor: Colors.grey,
                     enableSkinTones: true,
-                    showRecentsTab: true,
+                    // showRecentsTab: true,
                     recentsLimit: 28,
                     noRecents: const Text(
                       'No Recents',

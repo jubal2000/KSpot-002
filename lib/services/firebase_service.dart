@@ -32,7 +32,6 @@ import 'api_service.dart';
 class FirebaseService extends GetxService {
   Future<FirebaseService> init() async {
     await initService();
-    await initMessaging();
     return this;
   }
 
@@ -46,8 +45,14 @@ class FirebaseService extends GetxService {
   bool initLink = false;
   bool isInit = false;
 
-  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  String? accessToken;
+  DateTime? accessTokenTime;
+
   final userRepo = UserRepository();
+  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  bool isFlutterLocalNotificationsInitialized = false;
+
+  late AndroidNotificationChannel channel;
 
   AndroidNotificationChannel FCM_TopicChannel = AndroidNotificationChannel(
     'alert_channel_00', // id
@@ -61,31 +66,15 @@ class FirebaseService extends GetxService {
     isInit = true;
 
     final result = await Firebase.initializeApp();
+    LOG('--> initService: ${result.toString()}');
+
     firestore = FirebaseFirestore.instance;
     fireAuth = FirebaseAuth.instance;
     messaging = FirebaseMessaging.instance;
-    LOG('--> initService: ${result.toString()} / $firestore');
 
-    // init firebase..
-    // if (defaultTargetPlatform == TargetPlatform.android) {
-    //   await Firebase.initializeApp(
-    //       options: DefaultFirebaseOptions.currentPlatform
-    //   );
-    // } else {
-    //   await Firebase.initializeApp(
-    //       name: 'KSpot_00',
-    //       options: DefaultFirebaseOptions.currentPlatform
-    //   );
-    // }
-  }
-
-  initMessaging() async {
     // get firebase token..
     token = await messaging!.getToken();
     LOG('--> firebase init token : $token');
-
-    await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(FCM_TopicChannel);
 
     // alert permission..
     await messaging!.requestPermission(
@@ -98,17 +87,24 @@ class FirebaseService extends GetxService {
       sound: true,
     );
 
-    // alert option..
-    await messaging!.setForegroundNotificationPresentationOptions(
-      alert: true, // Required to display a heads up notification
-      badge: true,
-      sound: true,
-    );
+    await setupFlutterNotifications();
+    initPush();
+
     // dynamic link ready..
     initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
 
-    initPush();
-    initDeepLink();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (initialLink != null) {
+        deepLinkProcess(Get.context!, initialLink);
+      }
+      // when app running..
+      FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) {
+        deepLinkProcess(Get.context!, dynamicLinkData);
+      }).onError((error) {
+        // Handle errors
+        LOG('--> dynamicLinkData.link error : $error');
+      });
+    });
 
     if (AppData.isDevMode) {
       FirebaseAuth.instance.setSettings(
@@ -116,7 +112,6 @@ class FirebaseService extends GetxService {
           forceRecaptchaFlow: true
       );
     }
-
     // if (!initLink) {
     //   LOG('--> initDataLink');
     //   initLink = true;
@@ -164,10 +159,20 @@ class FirebaseService extends GetxService {
     }
   }
 
-  initPush() async {
+  @pragma('vm:entry-point')
+  Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+    await Firebase.initializeApp();
+    await setupFlutterNotifications();
+    showFlutterNotification(message);
+    LOG('--> Handling a background message ${message.messageId}');
+  }
+
+  initPush() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       LOG('--> FirebaseMessaging.onMessage : ${message.toString()}');
-      showPush(message, false);
+      if (Platform.isAndroid) {
+        showPush(message, false);
+      }
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
@@ -175,8 +180,6 @@ class FirebaseService extends GetxService {
       RemoteNotification?  notification = message.notification;
       AndroidNotification? android = message.notification?.android;
 
-      // If `onMessage` is triggered with a notification, construct our own
-      // local notification to show to users using the created channel.
       if (notification != null && android != null) {
         flutterLocalNotificationsPlugin.show(
           notification.hashCode,
@@ -198,28 +201,52 @@ class FirebaseService extends GetxService {
       //   arguments: MessageArguments(message, true),
       // );
     });
-
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
 
-  initDeepLink() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (initialLink != null) {
-        deepLinkProcess(Get.context!, initialLink);
-      }
-      // when app running..
-      FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) {
-        deepLinkProcess(Get.context!, dynamicLinkData);
-      }).onError((error) {
-        // Handle errors
-        LOG('--> dynamicLinkData.link error : $error');
-      });
-    });
+  Future<void> setupFlutterNotifications() async {
+    if (isFlutterLocalNotificationsInitialized) {
+      return;
+    }
+
+    /// Create an Android Notification Channel.
+    ///
+    /// We use this channel in the `AndroidManifest.xml` file to override the
+    /// default FCM channel to enable heads up notifications.
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(FCM_TopicChannel);
+
+    /// Update the iOS foreground notification presentation options to allow
+    /// heads up notifications.
+    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    isFlutterLocalNotificationsInitialized = true;
   }
 
-  Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-    await Firebase.initializeApp();
-    LOG("--> Handling a background message: ${message.messageId}");
+  void showFlutterNotification(RemoteMessage message) {
+    RemoteNotification? notification = message.notification;
+    AndroidNotification? android = message.notification?.android;
+    if (notification != null && android != null && !kIsWeb) {
+      flutterLocalNotificationsPlugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            channel.id,
+            channel.name,
+            channelDescription: channel.description,
+            // TODO add a proper drawable resource to android, for now using
+            //      one that already exists in example app.
+            icon: 'launch_background',
+          ),
+        ),
+      );
+    }
   }
 
   deepLinkProcess(BuildContext context, dynamicLinkData) {

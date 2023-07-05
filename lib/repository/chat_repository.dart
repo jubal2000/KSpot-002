@@ -54,8 +54,8 @@ class ChatRepository {
     return await api.getChatRoomFromId(roomId);
   }
 
-  getChatRoomStreamData() {
-    return api.getChatRoomStreamData(AppData.USER_ID);
+  getChatInviteStreamData() {
+    return api.getChatInviteStreamData(AppData.USER_ID);
   }
 
   getChatStreamData() {

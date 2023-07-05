@@ -10,74 +10,62 @@ import '../data/app_data.dart';
 
 sendFcmTestData() {
   final firebase = Get.find<FirebaseService>();
-  return sendFcmData(
-    firebase.token!,
-    'KSpot', 'Test Push Message', {'id': 'test', 'title': 'KSpot test', 'message': 'KSpot test message'});
+  return sendFcmMessage(
+    // firebase.token!,
+    'c1eEei1fvUzZqS27nJsqon:APA91bGO3zX3N0uhkTdVaq7tdjJgtYhOuyBCZi0r1E0zlNHndLr_WF8w1BJKzqYbfNjiCTB4B-dHjS4iyTngC4B06SxPI7b2IRb5loOSqZ62iJ5YYkz6yy8dRCEObl0zDUz3OlVV9IMN',
+    'KSpot', 'Test Push Message', data: {'id': 'test', 'name': 'KSpot name', 'desc': 'KSpot test desc'});
 }
 
-sendFcmData(String token, String title, String desc, JSON data) async {
+sendFcmMessage(String token, String title, String body, {JSON? data}) async {
   if (token.isEmpty) {
     LOG('--> sendFcmData error : Unable to send FCM message, no token exists.');
     return false;
   }
+  final fire = Get.find<FirebaseService>();
+  if (fire.accessToken == null || fire.accessTokenTime == null || fire.accessTokenTime!.isBefore(DateTime.now())) {
+    var accessResult = await http.get(Uri.parse('http://kspot002.cafe24app.com/fcm_token'));
+    var accessJson = jsonDecode(accessResult.body);
+    for (var item in accessJson['response'].entries) {
+      LOG('--> json key [${item.key}] : ${item.value}');
+    }
+    fire.accessToken = STR(accessJson['response']['access_token']);
+    fire.accessTokenTime = DateTime.fromMillisecondsSinceEpoch(INT(accessJson['response']['expiry_date']));
+    LOG('--> accessToken refresh : ${accessJson.toString()}');
+  }
+  LOG('--> accessToken : ${fire.accessTokenTime} / ${DateTime.now()}');
+
   try {
     var bodyData = {
       "message": {
         "token" : token,
-        // "topic": "news",
         "notification": {
-          "title": "Breaking News",
-          "body": "New news story available."
+          "title": title,
+          "body": body
         },
-        "data": {
-          "story_id": "story_12345"
-        },
-        "android": {
-          "notification": {
-            "click_action": "TOP_STORY_ACTIVITY",
-            "body": "Check out the Top Story"
-          }
-        },
-        "apns": {
-          "payload": {
-            "aps": {
-              "category" : "NEW_MESSAGE_CATEGORY"
-            }
-          }
-        }
+        "data": data,
+        // "android": {
+        //   "notification": {
+        //     "click_action": "TOP_STORY_ACTIVITY",
+        //   }
+        // },
+        // "apns": {
+        //   "payload": {
+        //     "aps": {
+        //       "category" : "NEW_MESSAGE_CATEGORY"
+        //     }
+        //   }
+        // }
       }
-      // 'notification': <String, dynamic>{
-      //   'body':  desc,
-      //   'title': title,
-      // },
-      // 'data': data,
-      // 'to': token
     };
     LOG('-------------> sendFcmData bodyData : $bodyData');
-    try {
-      //Send  Message
-      http.Response response = await http.post(Uri.parse('https://fcm.googleapis.com/v1/projects/kspot-002/messages:send'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ya29.a0AWY7CkkQJHsblzyzqjZcE1wh_1l0LamGxIkILSLMwv6z5Ffw_g1JmSlxJSdcNCLNJMiEMd_mVDmA61X9Hs9RBX82pW78R3WQXNea-muYr7ozWdDeMS91fx13fswaXaKZ6nhFctL6kc3jdAem90DF6Xg2dMNbaCgYKAWESARESFQG1tDrpnhdxwwg50aDGpT7bvuvUKQ0163',
-        },
-        body: jsonEncode(bodyData));
-      LOG("--> sendFcmData result : ${response.statusCode} | ${response.body}");
-    } catch (e) {
-      LOG("--> error push notification : $e");
-    }
-
-    // var result = await http.post(
-    //   // Uri.parse('https://www.langscoffeework.com/oman/push.php?target=$target&title=$title&desc=$desc'),
-    //   Uri.parse('https://www.push.com/oman/push.php'),
-    //   headers: {
-    //     'Content-Type': 'application/json; charset=UTF-8',
-    //   },
-    //   body: jsonEncode(bodyData),
-    // );
-    // LOG('--> sendFcmData result : ${result.statusCode}');
-    // // ShowToast('${result.statusCode} / ${result.body}', Colors.blueAccent); // for Test..
-    return true;
+    http.Response response = await http.post(Uri.parse('https://fcm.googleapis.com/v1/projects/kspot-002/messages:send'),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${fire.accessToken}',
+      },
+      body: jsonEncode(bodyData));
+    LOG("--> sendFcmData result : ${response.statusCode} | ${response.body}");
+    return INT(response.statusCode) == 200;
   } catch (e) {
     LOG('--> sendFcmData error : $e');
   }

@@ -49,6 +49,7 @@ class Words extends Translations {
       'CLOSED CHAT': '비공개 대화',
       'Alert On': '알림 켜기',
       'Alert Off': '알림 끄기',
+      'Chatting invited': '채팅 초대',
 
       // intro_screen
       'SIGN IN': '로그인',
@@ -476,7 +477,6 @@ class Words extends Translations {
       'PROMOTION START': '홍보 시작',
 
       // promotion_screen
-      'PROMOTION': '홍보하기',
       'CANCEL & REFUND': '취소 & 환불',
       'CANCEL': '취소',
       'It will be processed after confirmation by the person in charge': '담당자 확인후 처리됩니다',
@@ -696,7 +696,6 @@ class Words extends Translations {
       'MOVE DOWN': '아래로 이동',
       'Comment +': '댓글 +',
       'Image size edit': '이미지 사이즈 설정',
-      'Story edit': '스토리 편집',
       'Report type': '신고 종류',
       'Please write what you want to report': '신고 내용을 작성해 주세요',
       'Please add supporting documents': '본인이 소유자임을 증명하는 자료를 첨부해 주세요\n(사업자등록증 사본등)',

@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "662991987486-f26q555oehqllm2se6vkojnhm9m6adsn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jhfactory.kspot002",
+            "certificate_hash": "fb438841ddc60686cf1a491debf3c9bebade62e6"
+          }
+        },
+        {
           "client_id": "662991987486-bo1g21mhmmj0ihb23pb2r9tiu0ss9fcg.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

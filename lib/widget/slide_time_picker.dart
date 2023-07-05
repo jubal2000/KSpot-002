@@ -76,24 +76,24 @@ class SlideTimePickerState extends State<SlideTimePicker> {
   initData() {
     _init = pickedTimeToDivision(
         pickedTime: widget.initTime,
-        clockTimeFormat: ClockTimeFormat.TWENTYFOURHOURS,
-        clockIncrementTimeFormat: ClockIncrementTimeFormat.SIXTYMIN);
+        clockTimeFormat: ClockTimeFormat.twentyFourHours,
+        clockIncrementTimeFormat: ClockIncrementTimeFormat.sixtyMin);
     _end = pickedTimeToDivision(
         pickedTime: widget.endTime,
-        clockTimeFormat: ClockTimeFormat.TWENTYFOURHOURS,
-        clockIncrementTimeFormat: ClockIncrementTimeFormat.SIXTYMIN);
+        clockTimeFormat: ClockTimeFormat.twentyFourHours,
+        clockIncrementTimeFormat: ClockIncrementTimeFormat.sixtyMin);
   }
 
   refreshData(PickedTime startTime, PickedTime endTime) {
     setState(() {
       _init = pickedTimeToDivision(
           pickedTime: startTime,
-          clockTimeFormat: ClockTimeFormat.TWENTYFOURHOURS,
-          clockIncrementTimeFormat: ClockIncrementTimeFormat.SIXTYMIN);
+          clockTimeFormat: ClockTimeFormat.twentyFourHours,
+          clockIncrementTimeFormat: ClockIncrementTimeFormat.sixtyMin);
       _end = pickedTimeToDivision(
           pickedTime: endTime,
-          clockTimeFormat: ClockTimeFormat.TWENTYFOURHOURS,
-          clockIncrementTimeFormat: ClockIncrementTimeFormat.SIXTYMIN);
+          clockTimeFormat: ClockTimeFormat.twentyFourHours,
+          clockIncrementTimeFormat: ClockIncrementTimeFormat.sixtyMin);
     });
   }
 
@@ -161,8 +161,8 @@ class SlideTimePickerState extends State<SlideTimePicker> {
         secondarySectors: widget.secondarySectors ?? 0,
         child: widget.child ?? Container(),
         onSelectionChange: (newInit, newEnd, status) {
-          var inTime = formatTime(time: newInit, incrementTimeFormat: ClockIncrementTimeFormat.SIXTYMIN);
-          var outTime = formatTime(time: newEnd, incrementTimeFormat: ClockIncrementTimeFormat.SIXTYMIN);
+          var inTime = formatTime(time: newInit, incrementTimeFormat: ClockIncrementTimeFormat.sixtyMin);
+          var outTime = formatTime(time: newEnd, incrementTimeFormat: ClockIncrementTimeFormat.sixtyMin);
 
           widget.onSelectionChange(inTime, outTime, status);
 
@@ -172,14 +172,15 @@ class SlideTimePickerState extends State<SlideTimePicker> {
           });
         },
         onSelectionEnd: (newInit, newEnd, status) {
-          var inTime = formatTime(time: newInit, incrementTimeFormat: ClockIncrementTimeFormat.SIXTYMIN);
-          var outTime = formatTime(time: newEnd, incrementTimeFormat: ClockIncrementTimeFormat.SIXTYMIN);
+          var inTime = formatTime(time: newInit, incrementTimeFormat: ClockIncrementTimeFormat.sixtyMin);
+          var outTime = formatTime(time: newEnd, incrementTimeFormat: ClockIncrementTimeFormat.sixtyMin);
 
           widget.onSelectionEnd(inTime, outTime, status);
         },
         pickerDecoration: widget.decoration ?? getDefaultPickerDecorator(),
         isInitHandlerSelectable: widget.isInitHandlerSelectable,
         isEndHandlerSelectable: widget.isEndHandlerSelectable,
+        isSelectableHandlerMoveAble: true,
       ),
     );
   }

@@ -380,7 +380,7 @@ class EventViewModel extends ChangeNotifier {
       color: Colors.white,
       child: Stack(
         children: [
-          showGoogleWidget(height: Get.height - 47),
+          showGoogleWidget(height: Get.height - 15),
           BottomLeftAlign(
             child: Container(
               height: itemHeight,

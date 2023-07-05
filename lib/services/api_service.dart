@@ -144,8 +144,8 @@ class ApiService extends GetxService {
   FirebaseFirestore? firestore;
 
   initFirebase() {
-    firebase      = Get.find<FirebaseService>();
-    firestore     = firebase!.firestore;
+    firebase = Get.find<FirebaseService>();
+    firestore = firebase!.firestore;
   }
 
   final StartInfoCollection = 'info_start';
@@ -1169,7 +1169,7 @@ class ApiService extends GetxService {
         result.add(item);
       }
     }
-    LOG('--> getRecommendFromTargetId Result [$eventId] : ${result.length}');
+    // LOG('--> getRecommendFromTargetId Result [$eventId] : ${result.length}');
     return result;
   }
 
@@ -2217,15 +2217,6 @@ class ApiService extends GetxService {
     return result;
   }
 
-  Stream getChatRoomStreamData(String userId) {
-    LOG('------> getChatRoomStreamData : $userId');
-    return firestore!.collection(ChatRoomCollection)
-        .where('status', isEqualTo: 1)
-        .where('memberList', arrayContainsAny: [userId])
-        .orderBy('updateTime', descending: true)
-        .snapshots();
-  }
-
   Future<JSON?> addChatRoomItem(JSON addItem) async {
     var dataRef = firestore!.collection(ChatRoomCollection);
     var key = STR(addItem['id']).toString();
@@ -2237,25 +2228,26 @@ class ApiService extends GetxService {
     var memberList = [];
     if (LIST_NOT_EMPTY(addItem['memberData'])) {
       for (var item in addItem['memberData']) {
-        var userInfo = await getUserInfoFromId(item['targetId']);
+        var userInfo = await getUserInfoFromId(item['id']);
         if (userInfo != null && INT(userInfo['status']) > 0) {
           item['createTime'] = CURRENT_SERVER_TIME();
-          if (LIST_NOT_EMPTY(userInfo['pushOption'])) {
-            for (var pushItem in userInfo['pushOption']) {
-              LOG('--> pushOption item : $pushItem');
-              if (pushItem['id'] == 'chatting_on') {
-                item['pushToken'] = userInfo['pushToken'];
-                LOG('-----------> set push token : ${item['pushToken']}');
-                break;
-              }
-            }
-          }
+          item['pushToken']  = STR(userInfo['pushToken']);
+          LOG('--> addChatRoom user : ${item['pushToken']}');
+          // if (LIST_NOT_EMPTY(userInfo['pushOption'])) {
+          //   for (var pushItem in userInfo['pushOption']) {
+          //     LOG('--> pushOption item : $pushItem');
+          //     // if (pushItem['id'] == 'chatting_on') {
+          //       item['pushToken'] = userInfo['pushToken'];
+          //       LOG('-----------> set push token : ${item['pushToken']}');
+          //       break;
+          //     // }
+          //   }
+          // }
           if (firebase != null && STR(item['pushToken']).isNotEmpty) {
-            await sendFcmData(
+            await sendFcmMessage(
               STR(item['pushToken']),
               'KSpot'.tr,
-              'Chatting invited : ${STR(addItem['title'])}',
-              {},
+              '${'Chatting invited'.tr} : ${STR(addItem['title'])}',
             );
           }
           memberList.add(item);
@@ -2264,15 +2256,67 @@ class ApiService extends GetxService {
     }
     addItem['memberData'] = memberList;
     addItem['updateTime'] = CURRENT_SERVER_TIME();
-
+    // var inviteResult = await addChatInviteList(addItem);
+    // LOG('--> invite result : ${inviteResult.toString()}');
     await dataRef.doc(key).set(Map<String, dynamic>.from(addItem));
     var result = FROM_SERVER_DATA(addItem);
     return result;
   }
 
-  Future<JSON?> addChatInvite(JSON memberItem) async {
-    var dataRef = firestore!.collection(ChatInviteCollection);
+  Stream getChatInviteStreamData(String userId) {
+    LOG('------> getChatInviteStreamData : $userId');
+    return firestore!.collection(ChatInviteCollection)
+        .where('status', isEqualTo: 1)
+        .snapshots();
+  }
 
+  Future<bool> addChatInviteList(JSON roomInfo) async {
+    LOG('--> addChatInviteList : ${roomInfo.toString()}');
+    var result = false;
+    JSON senderInfo = {};
+    for (var member in roomInfo['memberData']) {
+      if (INT(member['status']) == 2) {
+        senderInfo = member as JSON;
+        break;
+      }
+    }
+    for (var member in roomInfo['memberData']) {
+      if (INT(member['status']) == 1) {
+        LOG('--> invite add : ${member.toString()}');
+        var mResult = await addChatInviteItem(roomInfo, senderInfo, member);
+        result = result || mResult != null;
+      }
+    }
+    return result;
+  }
+
+  Future<JSON?> addChatInviteItem(JSON roomInfo, JSON senderInfo, JSON member) async {
+    var ref = firestore!.collection(ChatInviteCollection);
+    final userId = STR(member['id']);
+    JSON addList = {};
+    var orgItem = await ref.doc(userId).get();
+    if (orgItem.data() != null) {
+      addList = FROM_SERVER_DATA(orgItem.data() as JSON);
+    } else {
+      addList['id'] = userId;
+      addList['status'] = 1;
+      addList['roomList'] = {};
+    }
+    final roomId = STR(roomInfo['id']);
+    addList['roomList'][roomId] = {
+      'id': roomInfo['id'],
+      'status': 1,
+      'type': roomInfo['type'],
+      'title': roomInfo['title'],
+      'createTime': roomInfo['createTime'],
+      'senderId': senderInfo['id'],
+      'senderName': senderInfo['nickName'],
+      'senderPic': senderInfo['pic'],
+    };
+    await ref.doc(userId).set(Map<String, dynamic>.from(addList));
+    LOG('--> addChatInviteItem  result: ${addList.toString()}');
+    var result = FROM_SERVER_DATA(addList);
+    return result;
   }
 
   Stream getChatStreamData(String userId) {

@@ -80,7 +80,7 @@ class ChatRoomModel {
   String  userId;
   DateTime updateTime;     // 수신 시간
   DateTime createTime;     // 수신 시간
-  List<String> memberList;      // 채팅 맴버 ID 목록 (for Search)
+  List<String> memberList;      // 채팅 맴버 ID 목록 (invite accepted)
   List<MemberData> memberData;  // 채팅 맴버 목록
 
   String? groupId;        // 이벤트 그룹 Id

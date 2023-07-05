@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -6,6 +9,7 @@ import 'package:kspot_002/services/cache_service.dart';
 import '../repository/chat_repository.dart';
 import '../repository/message_repository.dart';
 import 'firebase_service.dart';
+import 'package:oauth2/oauth2.dart' as oauth2;
 
 import '../data/app_data.dart';
 import '../data/dialogs.dart';
@@ -23,6 +27,7 @@ class AuthService extends GetxService {
   final userRepo  = UserRepository();
   final msgRepo   = MessageRepository();
   final chatRepo  = ChatRepository();
+
   Function? onSignIn;
   Function? onSignOut;
   Function(int)? onError;
@@ -46,17 +51,18 @@ class AuthService extends GetxService {
         if (onSignOut != null) onSignOut!();
       } else {
         setLoginUserInfo(user);
-        AppData.loginToken = await user.getIdToken();
-        LOG('--> User is signed in! / isSignUpMode: ${AppData.isSignUpMode} / ${AppData.loginToken}');
-
         if (!AppData.isSignUpMode) {
           final result = await userRepo.getStartUserInfo(AppData.loginInfo.loginId);
           if (result != null) {
             AppData.userInfo = result;
             AppData.userViewModel.initUserModel(AppData.userInfo);
-            LOG('--> getStartUserInfo done! : ${AppData.userInfo.id}');
+            LOG('--> getStartUserInfo done! : ${result.pushToken}');
             // get user ex data..
             await getStartData();
+            if (result.pushToken != fire.token) {
+              AppData.userInfo.pushToken = fire.token ?? '';
+              userRepo.setUserInfoItem(AppData.userInfo, 'pushToken');
+            }
             Get.offAllNamed(Routes.HOME);
           } else {
             LOG('--> getStartUserInfo failed! : ${AppData.loginInfo.loginId} / ${AppData.loginInfo.loginType}');

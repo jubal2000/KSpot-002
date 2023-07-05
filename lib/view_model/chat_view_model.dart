@@ -46,6 +46,7 @@ class ChatViewModel extends ChangeNotifier {
   final userRepo = UserRepository();
   final cache = Get.find<CacheService>();
   final api   = Get.find<ApiService>();
+  Stream? inviteStream;
   Stream? stream;
   int currentTab = 0;
 
@@ -56,6 +57,7 @@ class ChatViewModel extends ChangeNotifier {
 
   init() {
     initMessageTab();
+    // getChatInviteStreamData();
     getChatStreamData();
   }
 
@@ -76,6 +78,10 @@ class ChatViewModel extends ChangeNotifier {
     final roomData = await chatRepo.getChatRoomData();
     cache.chatRoomData.addAll(roomData);
     return roomData;
+  }
+
+  getChatInviteStreamData() {
+    inviteStream ??= chatRepo.getChatInviteStreamData();
   }
 
   getChatStreamData() {
@@ -150,7 +156,6 @@ class ChatViewModel extends ChangeNotifier {
       // set reported room..
       cache.reportData['report'] ??= {};
       var reportData = cache.reportData['report'][item.key];
-
       if (item.value.type == currentTab &&
           !cache.blockData.containsKey(item.value.userId) &&
          ((item.value.type == ChatType.public && COMPARE_GROUP_COUNTRY(item.value.toJson()) && (
@@ -170,24 +175,11 @@ class ChatViewModel extends ChangeNotifier {
         // add group item..
         var addGroup = ChatGroupItem(item.value, isBlocked: reportData != null, roomType: roomType,
           unOpenCount: unOpen, onSelected: (key) {
-          if (!item.value.memberList.contains(AppData.USER_ID)) {
-            if (item.value.checkBanUser(AppData.USER_ID)) {
-              ShowToast('You can not enter now'.tr);
-              return;
-            }
-            showAlertYesNoCheckDialog(Get.context!, item.value.title, 'Would you like to enter the chat room?'.tr,
-              'Enter quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
-              if (result > 0) {
-                enterRoom(key, item.value, result == 1);
-              }
-            });
-          } else {
-            showTalkScreen(item.value);
-          }
-        }, onMenuSelected: (menu, key) {
-          LOG('--> onMenuSelected [$key] : $menu');
-          switch(menu) {
-            case DropdownItemType.enter:
+            // click enter open room..
+            var isMember = item.value.memberList.contains(AppData.USER_ID);
+            // if (roomType != ChatType.private || !isMember) {
+            if (!isMember) {
+              // check ban from room..
               if (item.value.checkBanUser(AppData.USER_ID)) {
                 ShowToast('You can not enter now'.tr);
                 return;
@@ -198,51 +190,69 @@ class ChatViewModel extends ChangeNotifier {
                   enterRoom(key, item.value, result == 1);
                 }
               });
-              break;
-            case DropdownItemType.exit:
-              if (item.value.userId == AppData.USER_ID) {
-                ShowToast('You are currently an admin'.tr);
-                return;
-              }
-              showAlertYesNoCheckDialog(Get.context!, item.value.title, 'Would you like to leave the chat room?'.tr,
-                'Leave quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
-                if (result > 0) {
-                  chatRepo.exitChatRoom(key, result == 1).then((result2) {
-                    LOG('--> result2 $result2');
-                    if (result2 != null && JSON_EMPTY(result2['error'])) {
-                      notifyListeners();
-                    }
-                  });
-               }
-              });
-              break;
-            case DropdownItemType.report:
-              userRepo.addReportItem(Get.context!, 'chatRoom', item.value.toJson(), (_) {
-                  notifyListeners();
-              });
-              break;
-            case DropdownItemType.unReport:
-              if (reportData != null) {
-                userRepo.removeReportItem(Get.context!, reportData['id'], item.key, () {
-                  LOG('--> unReport done : ${reportData.toString()}');
-                  notifyListeners();
+            } else {
+              showTalkScreen(item.value);
+            }
+          }, onMenuSelected: (menu, key) {
+            LOG('--> onMenuSelected [$key] : $menu');
+            switch(menu) {
+              case DropdownItemType.enter:
+                if (item.value.checkBanUser(AppData.USER_ID)) {
+                  ShowToast('You can not enter now'.tr);
+                  return;
+                }
+                showAlertYesNoCheckDialog(Get.context!, item.value.title, 'Would you like to enter the chat room?'.tr,
+                  'Enter quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
+                  if (result > 0) {
+                    enterRoom(key, item.value, result == 1);
+                  }
                 });
-              }
-              break;
-            case DropdownItemType.alarmOn:
-              break;
-            case DropdownItemType.alarmOff:
-              break;
-            case DropdownItemType.bookmarkOn:
-              cache.setRoomIndexTop(roomType, item.key);
-              notifyListeners();
-              break;
-            case DropdownItemType.bookmarkOff:
-              cache.removeRoomIndexTop(roomType, item.key);
-              notifyListeners();
-              break;
+                break;
+              case DropdownItemType.exit:
+                if (item.value.userId == AppData.USER_ID) {
+                  ShowToast('You are currently an admin'.tr);
+                  return;
+                }
+                showAlertYesNoCheckDialog(Get.context!, item.value.title, 'Would you like to leave the chat room?'.tr,
+                  'Leave quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
+                  if (result > 0) {
+                    chatRepo.exitChatRoom(key, result == 1).then((result2) {
+                      LOG('--> result2 $result2');
+                      if (result2 != null && JSON_EMPTY(result2['error'])) {
+                        notifyListeners();
+                      }
+                    });
+                 }
+                });
+                break;
+              case DropdownItemType.report:
+                userRepo.addReportItem(Get.context!, 'chatRoom', item.value.toJson(), (_) {
+                    notifyListeners();
+                });
+                break;
+              case DropdownItemType.unReport:
+                if (reportData != null) {
+                  userRepo.removeReportItem(Get.context!, reportData['id'], item.key, () {
+                    LOG('--> unReport done : ${reportData.toString()}');
+                    notifyListeners();
+                  });
+                }
+                break;
+              case DropdownItemType.alarmOn:
+                break;
+              case DropdownItemType.alarmOff:
+                break;
+              case DropdownItemType.bookmarkOn:
+                cache.setRoomIndexTop(roomType, item.key);
+                notifyListeners();
+                break;
+              case DropdownItemType.bookmarkOff:
+                cache.removeRoomIndexTop(roomType, item.key);
+                notifyListeners();
+                break;
+            }
           }
-        });
+        );
         showList.add(addGroup);
         showListKey.add(item.key);
       }

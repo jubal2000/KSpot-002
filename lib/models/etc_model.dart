@@ -204,8 +204,8 @@ class AddressData {
 
 @JsonSerializable()
 class MemberData {
-  String    id;            // user id
-  int       status;
+  String    id;       // user id
+  int       status;   // 0: exit or invite denied, 1: enter room, 2: invite call
   String    nickName;
   String    pic;
   DateTime  createTime;

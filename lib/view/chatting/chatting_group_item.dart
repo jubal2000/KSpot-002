@@ -46,16 +46,16 @@ class ChatGroupItem extends StatelessWidget {
   List<MemberData> showList = [];
 
   initData() {
-    isEnter = groupItem!.memberList.contains(AppData.USER_ID);
-    itemHeight = roomType == ChatRoomType.public ? 50 : 65;
-    fixIndex = cache.getRoomIndexTop(roomType, groupItem!.id);
-    isAdmin = groupItem!.userId == AppData.USER_ID;
+    isEnter     = groupItem!.memberList.contains(AppData.USER_ID);
+    itemHeight  = roomType == ChatRoomType.public ? 50 : 65;
+    fixIndex    = cache.getRoomIndexTop(roomType, groupItem!.id);
+    isAdmin     = groupItem!.userId == AppData.USER_ID;
     showList.clear();
     for (var i=0; i<groupItem!.memberData.length; i++) {
       if (i > showMemberMax) return;
       showList.add(groupItem!.memberData[i]);
     }
-    // LOG('--> ChatGroupItem initData [${groupItem!.id}] : $fixIndex / $itemHeight');
+    LOG('--> ChatGroupItem initData [${groupItem!.id}] : $fixIndex / $itemHeight');
   }
 
   @override
@@ -196,6 +196,10 @@ class ChatGroupItem extends StatelessWidget {
                                     color: Theme.of(context).cardColor)),
                           ),
                         ],
+                        if (!cache.getChatRoomAlarmOn(groupItem!.id))...[
+                          SizedBox(width: 5),
+                          Icon(Icons.notifications_off_outlined, size: 18),
+                        ],
                         if (fixIndex >= 0)...[
                           SizedBox(width: 5),
                           Icon(Icons.bookmark_border, color: Theme.of(context).colorScheme.tertiary, size: 18),
@@ -254,9 +258,9 @@ class ChatGroupItem extends StatelessWidget {
                         child: DropdownItems.buildItem(context, item),
                       )),
                     if (roomType != ChatRoomType.public)
-                      ...alarmMenu(context),
+                      ...alarmMenu(),
                   ],
-                  ...indexMenu(context),
+                  ...indexMenu(),
                 ],
               ],
               onChanged: (value) {
@@ -270,19 +274,19 @@ class ChatGroupItem extends StatelessWidget {
     );
   }
 
-  List<DropdownMenuItem> alarmMenu(context) {
-    var item = cache.roomAlarmData.contains(groupItem!.id) ? dropMenuAlarmOff : dropMenuAlarmOn;
+  List<DropdownMenuItem> alarmMenu() {
+    var item = cache.getChatRoomAlarmOn(groupItem!.id) ? dropMenuAlarmOff : dropMenuAlarmOn;
     return [
-        DropdownMenuItem<DropdownItem>(value: item, child: DropdownItems.buildItem(context, item)),
+      DropdownMenuItem<DropdownItem>(value: item, child: DropdownItems.buildItem(Get.context!, item)),
     ];
   }
 
-  List<DropdownMenuItem> indexMenu(context) {
+  List<DropdownMenuItem> indexMenu() {
     return [
       if (fixIndex != 0)
-        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOn, child: DropdownItems.buildItem(context, dropMenuIndexBkOn)),
+        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOn, child: DropdownItems.buildItem(Get.context!, dropMenuIndexBkOn)),
       if (fixIndex >= 0)
-        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOff, child: DropdownItems.buildItem(context, dropMenuIndexBkOff)),
+        DropdownMenuItem<DropdownItem>(value: dropMenuIndexBkOff, child: DropdownItems.buildItem(Get.context!, dropMenuIndexBkOff)),
     ];
   }
 }

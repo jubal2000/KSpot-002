@@ -99,6 +99,8 @@ class Words extends Translations {
       'Chat room create failed': '대화방 생성 실패',
       'Chat room create complete': '대화방 생성 완료',
       'Chat room create': '대화방 생성',
+      'Invite chatting': '채팅초대',
+
       'This event has expired': '기간이 종료된 이벤트입니다',
       'This recommended event has expired': '기간이 종료된 후원입니다',
       'Please change the period\nin the \'Event edit\'': '\'이벤트 수정\'에서 기간을\n변경해 주세요',

@@ -45,7 +45,6 @@ class CacheService extends GetxService {
   JSON blockData = {};
   JSON chatItemData = {};
 
-  List<String> roomAlarmData = [];
   List<String> publicMyRoomIndexData = [];
   List<String> publicIndexData = [];
   List<String> privateIndexData = [];
@@ -53,7 +52,7 @@ class CacheService extends GetxService {
 
   Future<CacheService> init() async {
     initData();
-    await loadChatRoomFlag(); // from local..
+    loadChatRoomFlag(); // from local..
     return this;
   }
 
@@ -298,12 +297,7 @@ class CacheService extends GetxService {
     // LOG('--> setChatItem : ${addData.length} / ${chatData!.length}');
   }
 
-  setChatRoomFlag(String roomId, {var isNoticeShow = true}) {
-    var addItem = {'id': roomId, 'noticeShow': isNoticeShow};
-    chatRoomFlagData[roomId] = addItem;
-    var localData = List<String>.from(chatRoomFlagData.entries.map((e) => jsonEncode(e.value))).toList();
-    StorageManager.saveData('chatRoomFlag', localData);
-   }
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   loadChatRoomFlag() async {
     chatRoomFlagData.clear();
@@ -316,6 +310,46 @@ class CacheService extends GetxService {
     }
     LOG('--> loadChatRoomFlag : ${chatRoomFlagData.toString()}');
   }
+
+  setChatRoomNoticeOff(String roomId, bool isNoticeOff) {
+    var roomInfo = chatRoomFlagData[roomId];
+    if (roomInfo == null) {
+      roomInfo = {'id': roomId, 'noticeOff': isNoticeOff};
+    } else {
+      roomInfo['noticeOff'] = isNoticeOff;
+    }
+    chatRoomFlagData[roomId] = roomInfo;
+    var localData = List<String>.from(chatRoomFlagData.entries.map((e) => jsonEncode(e.value))).toList();
+    StorageManager.saveData('chatRoomFlag', localData);
+  }
+
+  getChatRoomNoticeOn(String roomId) {
+    var roomInfo = chatRoomFlagData[roomId];
+    if (roomInfo == null) return true;
+    return roomInfo['noticeOff'] == null || !BOL(roomInfo['noticeOff']);
+  }
+
+
+  setChatRoomAlarmOff(String roomId, bool isAlarmOff) {
+    var roomInfo = chatRoomFlagData[roomId];
+    if (roomInfo == null) {
+      roomInfo = {'id': roomId, 'alarmOff': isAlarmOff};
+    } else {
+      roomInfo['alarmOff'] = isAlarmOff;
+    }
+    chatRoomFlagData[roomId] = roomInfo;
+    LOG('--> chatRoomFlagData[$roomId] : ${chatRoomFlagData[roomId].toString()}');
+    var localData = List<String>.from(chatRoomFlagData.entries.map((e) => jsonEncode(e.value))).toList();
+    StorageManager.saveData('chatRoomFlag', localData);
+  }
+
+  getChatRoomAlarmOn(String roomId) {
+    var roomInfo = chatRoomFlagData[roomId];
+    if (roomInfo == null) return true;
+    return roomInfo['alarmOff'] == null || !BOL(roomInfo['alarmOff']);
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   readRoomIndexData() async {
     publicMyRoomIndexData = List<String>.from(await StorageManager.readData('publicMyRoomIndexData') ?? []);

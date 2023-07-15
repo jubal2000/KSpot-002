@@ -167,16 +167,16 @@ class UserRepository {
   }
 
   Future<UserModel?> getStartUserInfo(String loginId) async {
-    // try {
+    try {
       final response = await api.getStartUserInfo(loginId);
       LOG("--> getStartUserInfo result: $response");
       if (response != null) {
         final result = UserModel.fromJson(FROM_SERVER_DATA(response));
         return result;
       }
-    // } catch (e) {
-    //   LOG("--> getStartUserInfo error: $e");
-    // }
+    } catch (e) {
+      LOG("--> getStartUserInfo error: $e");
+    }
     return null;
   }
 

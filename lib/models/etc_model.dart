@@ -205,10 +205,11 @@ class AddressData {
 @JsonSerializable()
 class MemberData {
   String    id;       // user id
-  int       status;   // 0: exit or invite denied, 1: enter room, 2: invite call
+  int       status;   // 0: exit or invite denied, 1: enter room, 2: manager
   String    nickName;
   String    pic;
   DateTime  createTime;
+  String?   pushToken;
 
   MemberData({
     required this.id,
@@ -216,18 +217,11 @@ class MemberData {
     required this.nickName,
     required this.pic,
     required this.createTime,
+    this.pushToken,
   });
 
   factory MemberData.fromJson(JSON json) => _$MemberDataFromJson(json);
   JSON toJson() => _$MemberDataToJson(this);
-
-  setFromUserModel(UserModel user) {
-    id          = user.id;
-    status      = 1;
-    nickName    = user.nickName;
-    pic         = user.pic;
-    createTime  = DateTime.now();
-  }
 }
 
 @JsonSerializable()

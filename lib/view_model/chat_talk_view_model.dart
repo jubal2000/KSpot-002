@@ -551,8 +551,10 @@ class ChatTalkViewModel extends ChangeNotifier {
                         if (uploadFileData.isNotEmpty) {
                           showLoadingDialog(Get.context!, 'Uploading now...'.tr);
                         }
-                        chatRepo.createChatItem(roomInfo!, '', textController.text, 1, 0, uploadFileData).then((result) {
-                          hideLoadingDialog();
+                        chatRepo.createChatItem(roomInfo!, '', textController.text, false, 1, 0, uploadFileData).then((result) {
+                          if (uploadFileData.isNotEmpty) {
+                            hideLoadingDialog();
+                          }
                           clearData();
                         });
                       },
@@ -665,7 +667,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                             GestureDetector(
                               onTap: () {
                                 isNoticeShow.value = false;
-                                cache.setChatRoomFlag(roomInfo!.id, isNoticeShow: false);
+                                cache.setChatRoomNoticeOff(roomInfo!.id, true);
                               },
                               child: Icon(Icons.highlight_remove, size: 24),
                             ),
@@ -924,7 +926,7 @@ class ChatTalkViewModel extends ChangeNotifier {
         break;
       case DropdownItemType.noticeShow:
         isNoticeShow.value = true;
-        cache.setChatRoomFlag(roomInfo!.id, isNoticeShow: true);
+        cache.setChatRoomNoticeOff(roomInfo!.id, false);
         break;
       case DropdownItemType.noticeAdd:
         if (JSON_EMPTY(roomInfo!.noticeData) || roomInfo!.noticeData!.length < CHAT_NOTICE_MAX) {
@@ -932,6 +934,12 @@ class ChatTalkViewModel extends ChangeNotifier {
         } else {
           ShowToast('Notice is the maximum number'.tr);
         }
+        break;
+      case DropdownItemType.alarmOn:
+        cache.setChatRoomAlarmOff(roomInfo!.id, false);
+        break;
+      case DropdownItemType.alarmOff:
+        cache.setChatRoomAlarmOff(roomInfo!.id, true);
         break;
     }
   }

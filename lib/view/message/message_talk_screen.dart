@@ -10,10 +10,12 @@ import '../../data/app_data.dart';
 import '../../data/dialogs.dart';
 import '../../data/theme_manager.dart';
 import '../../models/message_model.dart';
+import '../../models/user_model.dart';
 import '../../repository/message_repository.dart';
 import '../../services/api_service.dart';
 import '../../services/cache_service.dart';
 import '../../utils/local_utils.dart';
+import '../../utils/push_utils.dart';
 import '../../utils/utils.dart';
 import '../../widget/card_scroll_viewer.dart';
 import '../../widget/chat_item.dart';
@@ -294,6 +296,12 @@ class MessageTalkScreenState extends State<MessageTalkScreen> {
                                                           LOG('----> upload thumb result : $upCount / ${addItem['thumbData']}');
                                                           api.addMessageItem(addItem, targetUser).then((result) {
                                                             AppData.isMainActive = true;
+                                                            var targetInfo = UserModel.fromJson(targetUser);
+                                                            if (targetInfo.checkOption('message_on')) {
+                                                              sendFcmMessage(targetInfo.pushToken, AppData.USER_NICKNAME, sendText, data: {
+                                                                'targetId': AppData.USER_ID
+                                                              });
+                                                            }
                                                           });
                                                           widget.textController.text = '';
                                                           sendText = '';

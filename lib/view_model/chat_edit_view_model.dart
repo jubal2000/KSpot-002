@@ -71,11 +71,13 @@ class ChatEditViewModel extends ChangeNotifier {
           memberData = {};
           if (value.isNotEmpty) {
             for (var item in value.entries) {
+              UserModel userInfo = UserModel.fromJson(item.value);
               final addItem = {
-                'id': item.key,
+                'id': userInfo.id,
                 'status': 1,
-                'nickName': STR(item.value['nickName']),
-                'pic': STR(item.value['pic']),
+                'nickName': userInfo.nickName,
+                'pic': userInfo.pic,
+                'pushToken': userInfo.checkOption('message_on') ? userInfo.pushToken : '',
                 'createTime': DateTime.now().toString(),
               };
               memberData[item.key] = addItem;
@@ -246,17 +248,13 @@ class ChatEditViewModel extends ChangeNotifier {
         return;
       }
     }
+    var manager = MemberData.fromJson(AppData.userInfo.toJson());
+    manager.status = 2;
+
     editItem!.memberList = [];
     editItem!.memberData = [];
-    editItem!.memberList.add(AppData.USER_ID);
-    editItem!.memberData.add(MemberData(
-        id: AppData.USER_ID,
-        status: 2, // 1: normal 2: room manager..
-        nickName: AppData.USER_NICKNAME,
-        pic: AppData.USER_PIC,
-        createTime: DateTime.now()
-      )
-    );
+    editItem!.memberList.add(manager.id);
+    editItem!.memberData.add(manager);
     for (var item in memberData.entries) {
       LOG('---> memberData item : ${item.toString()}');
       editItem!.memberList.add(item.key);
@@ -268,13 +266,14 @@ class ChatEditViewModel extends ChangeNotifier {
     editItem!.groupId = AppData.currentEventGroup!.id;
     editItem!.country = AppData.currentCountry;
     editItem!.countryState = AppData.currentState;
-
+    editItem!.lastMessage  = inviteMessage;
     LOG('---> upload editItem: ${editItem!.toJson()}');
 
-    repo.addRoomItem(editItem!).then((result) {
-      LOG('---> addRoomItem result: ${result.toString()}');
+    repo.addChatRoomItem(editItem!).then((result) {
+      LOG('---> addChatRoomItem result: ${result.toString()}');
       editItem!.id = result['id'];
-      repo.createChatItem(editItem!, '', inviteMessage);
+      // send first message..
+      repo.createChatItem(editItem!, '', inviteMessage, true);
       hideLoadingDialog();
       AppData.isMainActive = true;
       showAlertDialog(Get.context!, 'Chat room create'.tr, 'Chat room create complete'.tr, '', 'OK'.tr).then((_) {

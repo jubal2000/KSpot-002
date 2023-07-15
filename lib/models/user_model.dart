@@ -176,11 +176,23 @@ class UserModel {
   }
 
   checkOption(String optionId) {
-    if (LIST_EMPTY(optionData)) return;
+    if (LIST_EMPTY(optionData)) return false;
     for (var item in optionData!) {
       if (item.id == optionId) return true;
     }
     return false;
+  }
+
+  checkPushOption(String optionId) {
+    if (LIST_EMPTY(optionPush)) return false;
+    for (var item in optionPush!) {
+      if (item.id == optionId) return true;
+    }
+    return false;
+  }
+
+  get checkPushON {
+    return checkPushOption('chatting_on') && STR(pushToken).length > 10;
   }
 
   //------------------------------------------------------------------------------------------------------

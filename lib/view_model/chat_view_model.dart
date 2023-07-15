@@ -239,8 +239,12 @@ class ChatViewModel extends ChangeNotifier {
                 }
                 break;
               case DropdownItemType.alarmOn:
+                cache.setChatRoomAlarmOff(item.value.id, false);
+                notifyListeners();
                 break;
               case DropdownItemType.alarmOff:
+                cache.setChatRoomAlarmOff(item.value.id, true);
+                notifyListeners();
                 break;
               case DropdownItemType.bookmarkOn:
                 cache.setRoomIndexTop(roomType, item.key);

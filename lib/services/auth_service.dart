@@ -56,7 +56,7 @@ class AuthService extends GetxService {
           if (result != null) {
             AppData.userInfo = result;
             AppData.userViewModel.initUserModel(AppData.userInfo);
-            LOG('--> getStartUserInfo done! : ${result.pushToken}');
+            LOG('--> getStartUserInfo done! : ${result.pushToken} / ${fire.token}');
             // get user ex data..
             await getStartData();
             if (result.pushToken != fire.token) {

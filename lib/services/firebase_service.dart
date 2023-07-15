@@ -28,6 +28,7 @@ import '../utils/utils.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'api_service.dart';
+import 'cache_service.dart';
 
 class FirebaseService extends GetxService {
   Future<FirebaseService> init() async {
@@ -123,11 +124,10 @@ class FirebaseService extends GetxService {
     // this.subscribeTopic();
   }
 
-  void showReceiveLocalNotificationDialog(BuildContext context, int id, String title, String body,
-      String payload) async {
+  void showReceiveLocalNotificationDialog(String title, String body) async {
     // display a dialog with the notification details, tap ok to go to another page
     showDialog(
-      context: context,
+      context: Get.context!,
       builder: (BuildContext context) =>
           CupertinoAlertDialog(
             title: Text(title),
@@ -169,32 +169,43 @@ class FirebaseService extends GetxService {
 
   initPush() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      LOG('--> FirebaseMessaging.onMessage : ${message.toString()}');
-      if (Platform.isAndroid) {
-        showPush(message, false);
-      }
+      LOG('--> FirebaseMessaging.onMessage : ${message.toMap().toString()}');
+      showPush(message, false);
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       LOG('--> FirebaseMessaging.onMessageOpenedApp.listen : ${message.toString()}');
       RemoteNotification?  notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
-
-      if (notification != null && android != null) {
-        flutterLocalNotificationsPlugin.show(
-          notification.hashCode,
-          notification.title,
-          notification.body,
-          NotificationDetails(
-            android: AndroidNotificationDetails(
-              FCM_TopicChannel.id,
-              FCM_TopicChannel.name,
-              icon: android.smallIcon,
-              // other properties...
-            ),
-          )
-        );
+      // AndroidNotification? android = message.notification?.android;
+      if (notification != null) {
+        var customData = message.data;
+        if (customData != null) {
+          LOG('--> customData : ${customData.toString()}');
+          var action = STR(customData['action']);
+          switch (action) {
+            case 'inviteRoom':
+              var targetId = STR(customData['id']);
+              LOG('--> touch push [invite] : $targetId');
+              break;
+          }
+        }
       }
+
+      // if (notification != null && android != null) {
+      //   flutterLocalNotificationsPlugin.show(
+      //     notification.hashCode,
+      //     notification.title,
+      //     notification.body,
+      //     NotificationDetails(
+      //       android: AndroidNotificationDetails(
+      //         FCM_TopicChannel.id,
+      //         FCM_TopicChannel.name,
+      //         icon: android.smallIcon,
+      //         // other properties...
+      //       ),
+      //     )
+      //   );
+      // }
       // Navigator.pushNamed(
       //   Get.context!,
       //   '/message',
@@ -297,27 +308,25 @@ class FirebaseService extends GetxService {
   }
 
   showPush(RemoteMessage message, bool isBackground) {
+    final cache = Get.find<CacheService>();
     RemoteNotification? notification = message.notification;
     if (notification != null && !kIsWeb) {
-      LOG('--> FirebaseMessaging : ${notification.title} / ${notification.body}');
-      var customData = message.data;
       var isShowPush = true;
-      var title = notification.title;
-      var desc = notification.body;
-      if (customData['data'] != null) {
-        var itemData = jsonDecode(customData['data'].toString());
-        LOG('--> customData : ${STR(customData['type'])} / $itemData');
-        String targetId = STR(itemData['id']) ?? Uuid().v1();
-        switch (STR(customData['type'])) {
-          case 'message':
-          // isShowPush = AppData.userInfo.optionPush.isEmpty || BOL(AppData.userInfo!.optionPush['message_on']);
-          // AppData.messageData[targetId] = itemData;
-          // var state = AppData.messagesListKey.currentState;
-          // if (state != null && state.mounted) {
-          //   state.refresh(itemData);
-          //   isShowPush = false;
-          // }
-          // LOG('--> messageData add [$targetId] : ${AppData.messageData}');
+      var title = STR(notification.title);
+      var desc  = STR(notification.body);
+      var customData = message.data;
+      if (customData != null) {
+        final action = STR(customData['action']);
+        final targetId = STR(customData['id']);
+        LOG('--> showPush customData : ${customData.toString()}');
+        switch (action) {
+          case 'invite_room':
+            LOG('--> showPush [invite_room] : $targetId => $isShowPush');
+            break;
+          case 'chat_message':
+            final targetId = STR(customData['id']);
+            isShowPush = cache.getChatRoomAlarmOn(targetId);
+            LOG('--> showPush [chat_message] : $targetId => $isShowPush');
             break;
           case 'comment':
           // isShowPush = AppData.userInfo!.optionPush.isEmpty || BOL(AppData.userInfo!.optionPush['comment_on']);
@@ -325,7 +334,8 @@ class FirebaseService extends GetxService {
         }
       }
 
-      if (isShowPush || isBackground) {
+      if (Platform.isAndroid && isShowPush) {
+        // showReceiveLocalNotificationDialog(title, desc);
         flutterLocalNotificationsPlugin.show(
           notification.hashCode,
           title,
@@ -336,7 +346,8 @@ class FirebaseService extends GetxService {
                 FCM_TopicChannel.name,
                 channelDescription: FCM_TopicChannel.description,
                 icon: '@mipmap/ic_launcher',
-                // largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+                ongoing: true,
+                largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
                 // icon: 'push_icon',
               ),
               iOS: DarwinNotificationDetails(
@@ -443,4 +454,5 @@ Future<String?> uploadFile(XFile? file, String type, String targetPath, String t
     return null;
   }
 }
+
 

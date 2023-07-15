@@ -69,7 +69,8 @@ class ChatRepository {
     stream = api.startChatStreamData(roomId, startTime, onChanged);
   }
 
-  createChatItem(ChatRoomModel roomInfo, String id, String sendText, [int status = 1, int action = 0, Map<String, UploadFileModel>? fileData]) async {
+  createChatItem(ChatRoomModel roomInfo, String id, String sendText, bool isFirstMessage,
+    [int status = 1, int action = 0, Map<String, UploadFileModel>? fileData]) async {
     var addItem = {
       'id':         id,
       'status':     status,
@@ -104,12 +105,13 @@ class ChatRepository {
         addItem['fileData'].add(upItem);
       }
     }
-    LOG('--> createChatItem : ${addItem.toString()}');
-    return await addChatItem(addItem);
+    LOG('--> createChatItem : $isFirstMessage / ${addItem.toString()}');
+    var result = await addChatItem(addItem, isFirstMessage);
+    return result;
   }
 
-  addChatItem(JSON addItem) async {
-    return await api.addChatItem(addItem);
+  addChatItem(JSON addItem, [var isFirstMessage = false]) async {
+    return await api.addChatItem(addItem, isFirstMessage);
   }
 
   setChatItemState(String roomId, String chatId, int status) async {
@@ -119,7 +121,7 @@ class ChatRepository {
     }
   }
 
-  addRoomItem(ChatRoomModel room) async {
+  addChatRoomItem(ChatRoomModel room) async {
     return await api.addChatRoomItem(room.toJson());
   }
 

@@ -321,6 +321,9 @@ class CacheService extends GetxService {
     chatRoomFlagData[roomId] = roomInfo;
     var localData = List<String>.from(chatRoomFlagData.entries.map((e) => jsonEncode(e.value))).toList();
     StorageManager.saveData('chatRoomFlag', localData);
+    if (isNoticeOff) {
+      ShowToast('Room notice OFF'.tr);
+    }
   }
 
   getChatRoomNoticeOn(String roomId) {
@@ -341,6 +344,7 @@ class CacheService extends GetxService {
     LOG('--> chatRoomFlagData[$roomId] : ${chatRoomFlagData[roomId].toString()}');
     var localData = List<String>.from(chatRoomFlagData.entries.map((e) => jsonEncode(e.value))).toList();
     StorageManager.saveData('chatRoomFlag', localData);
+    ShowToast('Room alarm ${isAlarmOff ? 'OFF' : 'ON'}'.tr);
   }
 
   getChatRoomAlarmOn(String roomId) {

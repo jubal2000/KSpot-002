@@ -77,7 +77,6 @@ class ChatEditViewModel extends ChangeNotifier {
                 'status': 1,
                 'nickName': userInfo.nickName,
                 'pic': userInfo.pic,
-                'pushToken': userInfo.checkOption('message_on') ? userInfo.pushToken : '',
                 'createTime': DateTime.now().toString(),
               };
               memberData[item.key] = addItem;

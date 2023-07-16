@@ -70,7 +70,7 @@ class FirebaseService extends GetxService {
     LOG('--> initService: ${result.toString()}');
 
     firestore = FirebaseFirestore.instance;
-    fireAuth = FirebaseAuth.instance;
+    fireAuth  = FirebaseAuth.instance;
     messaging = FirebaseMessaging.instance;
 
     // get firebase token..
@@ -89,7 +89,6 @@ class FirebaseService extends GetxService {
     );
 
     await setupFlutterNotifications();
-    initPush();
 
     // dynamic link ready..
     initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
@@ -124,32 +123,6 @@ class FirebaseService extends GetxService {
     // this.subscribeTopic();
   }
 
-  void showReceiveLocalNotificationDialog(String title, String body) async {
-    // display a dialog with the notification details, tap ok to go to another page
-    showDialog(
-      context: Get.context!,
-      builder: (BuildContext context) =>
-          CupertinoAlertDialog(
-            title: Text(title),
-            content: Row(
-              children: [
-                Text(body),
-              ],
-            ),
-            actions: [
-              CupertinoDialogAction(
-                isDefaultAction: true,
-                child: Text('Ok'),
-                onPressed: () async {
-                  Navigator.of(context, rootNavigator: true).pop();
-                },
-              )
-            ],
-          ),
-    );
-  }
-
-
   getToken() async {
     try {
       AppData.userInfo.pushToken = await FirebaseMessaging.instance.getToken() ?? '';
@@ -167,7 +140,21 @@ class FirebaseService extends GetxService {
     LOG('--> Handling a background message ${message.messageId}');
   }
 
-  initPush() {
+  Future<void> setupFlutterNotifications() async {
+    if (isFlutterLocalNotificationsInitialized) {
+      return;
+    }
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(FCM_TopicChannel);
+
+    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       LOG('--> FirebaseMessaging.onMessage : ${message.toMap().toString()}');
       showPush(message, false);
@@ -175,7 +162,7 @@ class FirebaseService extends GetxService {
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       LOG('--> FirebaseMessaging.onMessageOpenedApp.listen : ${message.toString()}');
-      RemoteNotification?  notification = message.notification;
+      var notification = message.notification;
       // AndroidNotification? android = message.notification?.android;
       if (notification != null) {
         var customData = message.data;
@@ -190,51 +177,7 @@ class FirebaseService extends GetxService {
           }
         }
       }
-
-      // if (notification != null && android != null) {
-      //   flutterLocalNotificationsPlugin.show(
-      //     notification.hashCode,
-      //     notification.title,
-      //     notification.body,
-      //     NotificationDetails(
-      //       android: AndroidNotificationDetails(
-      //         FCM_TopicChannel.id,
-      //         FCM_TopicChannel.name,
-      //         icon: android.smallIcon,
-      //         // other properties...
-      //       ),
-      //     )
-      //   );
-      // }
-      // Navigator.pushNamed(
-      //   Get.context!,
-      //   '/message',
-      //   arguments: MessageArguments(message, true),
-      // );
     });
-  }
-
-  Future<void> setupFlutterNotifications() async {
-    if (isFlutterLocalNotificationsInitialized) {
-      return;
-    }
-
-    /// Create an Android Notification Channel.
-    ///
-    /// We use this channel in the `AndroidManifest.xml` file to override the
-    /// default FCM channel to enable heads up notifications.
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(FCM_TopicChannel);
-
-    /// Update the iOS foreground notification presentation options to allow
-    /// heads up notifications.
-    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
     isFlutterLocalNotificationsInitialized = true;
   }
 
@@ -309,37 +252,34 @@ class FirebaseService extends GetxService {
 
   showPush(RemoteMessage message, bool isBackground) {
     final cache = Get.find<CacheService>();
-    RemoteNotification? notification = message.notification;
-    if (notification != null && !kIsWeb) {
-      var isShowPush = true;
-      var title = STR(notification.title);
-      var desc  = STR(notification.body);
-      var customData = message.data;
-      if (customData != null) {
-        final action = STR(customData['action']);
-        final targetId = STR(customData['id']);
-        LOG('--> showPush customData : ${customData.toString()}');
-        switch (action) {
-          case 'invite_room':
-            LOG('--> showPush [invite_room] : $targetId => $isShowPush');
-            break;
-          case 'chat_message':
-            final targetId = STR(customData['id']);
-            isShowPush = cache.getChatRoomAlarmOn(targetId);
-            LOG('--> showPush [chat_message] : $targetId => $isShowPush');
-            break;
-          case 'comment':
-          // isShowPush = AppData.userInfo!.optionPush.isEmpty || BOL(AppData.userInfo!.optionPush['comment_on']);
-            break;
-        }
+    if (!kIsWeb) {
+      var   isShowPush = true;
+      var   customData = message.data;
+      final action    = STR(customData['action']);
+      final title     = STR(customData['title']);
+      final body      = STR(customData['body']);
+      final targetId  = STR(customData['id']);
+      LOG('--> showPush customData : ${customData.toString()}');
+      switch (action) {
+        case 'invite_room':
+          LOG('--> showPush [invite_room] : $targetId => $isShowPush');
+          break;
+        case 'chat_message':
+          final targetId = STR(customData['id']);
+          isShowPush = cache.getChatRoomAlarmOn(targetId);
+          LOG('--> showPush [chat_message] : $targetId => $isShowPush');
+          break;
+        case 'comment':
+        // isShowPush = AppData.userInfo!.optionPush.isEmpty || BOL(AppData.userInfo!.optionPush['comment_on']);
+          break;
       }
 
-      if (Platform.isAndroid && isShowPush) {
+      if (isShowPush) {
         // showReceiveLocalNotificationDialog(title, desc);
         flutterLocalNotificationsPlugin.show(
-          notification.hashCode,
+          0,
           title,
-          desc,
+          body,
           NotificationDetails(
               android: AndroidNotificationDetails(
                 FCM_TopicChannel.id,

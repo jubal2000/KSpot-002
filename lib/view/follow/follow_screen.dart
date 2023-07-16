@@ -25,6 +25,7 @@ class FollowScreen extends StatefulWidget {
     this.topTitle = '',
     this.selectMax = 9,
     this.selectData,
+    this.exceptData,
   }) : super(key: key);
 
   UserModel userInfo;
@@ -35,6 +36,7 @@ class FollowScreen extends StatefulWidget {
   int  selectMax;
 
   JSON? selectData;
+  JSON? exceptData;
 
   @override
   FollowScreenState createState() => FollowScreenState();
@@ -47,9 +49,9 @@ class FollowScreenState extends State<FollowScreen> {
 
   refreshTab() {
     _tabList = [
-      FollowTab(0, Icon(Icons.star, size: 16), "FOLLOWING".tr, AppData.followData, selectData: widget.selectData,
+      FollowTab(0, Icon(Icons.star, size: 16), "FOLLOWING".tr, AppData.followData, selectData: widget.selectData, exceptData: widget.exceptData,
           isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
-      FollowTab(1, Icon(Icons.star_border, size: 16), "FOLLOWER".tr, AppData.followData, selectData: widget.selectData,
+      FollowTab(1, Icon(Icons.star_border, size: 16), "FOLLOWER".tr, AppData.followData, selectData: widget.selectData, exceptData: widget.exceptData,
           isShowMe: widget.isShowMe, isSelectable: widget.isSelectable, selectMax: widget.selectMax, onSelected: onSelected),
     ];
   }
@@ -136,7 +138,8 @@ class FollowScreenState extends State<FollowScreen> {
 class FollowTab extends StatefulWidget {
   final api = Get.find<ApiService>();
   FollowTab(this.selectedTab, this.icon, this.title, this.followData, {
-    Key? key, this.isSelectable = false, this.isShowMe = false, this.selectMax = 9, this.selectData, this.onSelected
+    Key? key, this.isSelectable = false, this.isShowMe = false, this.selectMax = 9,
+    this.selectData, this.exceptData, this.onSelected
   }) : super(key: key);
 
   int selectedTab;
@@ -148,6 +151,7 @@ class FollowTab extends StatefulWidget {
   int selectMax;
 
   JSON? selectData;
+  JSON? exceptData;
   Function(JSON)? onSelected;
 
   Widget getTab() {
@@ -164,6 +168,11 @@ class FollowTabState extends State<FollowTab> {
   final _scrollController = PageController(viewportFraction: 1, keepPage: true);
   List<JSON> _itemList = [];
   String _searchText = '';
+
+  checkExceptList(String userId) {
+    if (JSON_EMPTY(widget.exceptData)) return true;
+    return !widget.exceptData!.containsKey(userId);
+  }
 
   onSearchEdited(String text, int status) {
     setState(() {
@@ -192,7 +201,8 @@ class FollowTabState extends State<FollowTab> {
     if (widget.followData.isNotEmpty) {
       for (var item in widget.followData.entries) {
         var isOwner = AppData.userInfo.checkOwner(item.value.userId);
-        if (!AppData.blockUserData.containsKey(STR(item.value.targetId)) &&
+        if (checkExceptList(item.key) &&
+            !AppData.blockUserData.containsKey(STR(item.value.targetId)) &&
             !AppData.blockUserData.containsKey(STR(item.value.userId))) {
           if ((widget.selectedTab == 0 && isOwner) || (widget.selectedTab == 1 && !isOwner)) {
             LOG('--> _searchText : $_searchText / $isOwner : ${item.value.targetId}');

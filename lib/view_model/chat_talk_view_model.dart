@@ -11,6 +11,8 @@ import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/common_sizes.dart';
+import 'package:kspot_002/view/follow/follow_screen.dart';
+import 'package:kspot_002/widget/rounded_button.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart' as foundation;
 
@@ -20,6 +22,7 @@ import '../data/theme_manager.dart';
 import '../models/chat_model.dart';
 import '../models/etc_model.dart';
 import '../models/upload_model.dart';
+import '../models/user_model.dart';
 import '../repository/chat_repository.dart';
 import '../repository/user_repository.dart';
 import '../services/api_service.dart';
@@ -30,8 +33,8 @@ import '../widget/chat_item.dart';
 import 'chat_view_model.dart';
 
 class ChatTalkViewModel extends ChangeNotifier {
-  final chatRepo = ChatRepository();
-  final userRepo = UserRepository();
+  final repo      = ChatRepository();
+  final userRepo  = UserRepository();
   final cache = Get.find<CacheService>();
   final api   = Get.find<ApiService>();
 
@@ -58,6 +61,12 @@ class ChatTalkViewModel extends ChangeNotifier {
   var  isEmojiShow  = false.obs;
 
   var sendText = '';
+
+  get isSendReady {
+    LOG('--> isSendReady : ${textController.text}');
+    return AppData.isMainActive && (textController.text.isNotEmpty ||
+      fileData.isNotEmpty) && sendText != textController.text;
+  }
 
   initData(ChatRoomModel room) {
     roomInfo = room;
@@ -107,7 +116,7 @@ class ChatTalkViewModel extends ChangeNotifier {
   }
 
   getChatData() {
-    chatRepo.startChatStreamData(roomInfo!.id, startTime ?? DateTime.now(), (result) {
+    repo.startChatStreamData(roomInfo!.id, startTime ?? DateTime.now(), (result) {
       if (result.isNotEmpty) {
         // var orgCount = showList.length;
         // LOG('--> orgCount : $orgCount / ${result.length}');
@@ -238,8 +247,22 @@ class ChatTalkViewModel extends ChangeNotifier {
       memberStr += i > 0 ? ', ${memberList[i]}' : memberList[i];
     }
     return Container(
-      width: Get.width * 0.65,
+      width: Get.width,
       child: Text(memberStr, style: ItemDescStyle(Get.context!)),
+    );
+  }
+
+  showTopIconList() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+      child: Row(
+        children: [
+          if (!cache.getChatRoomAlarmOn(roomInfo!.id))...[
+            SizedBox(width: 5),
+            Icon(Icons.notifications_off_outlined, size: 18),
+          ],
+        ]
+      )
     );
   }
 
@@ -332,7 +355,7 @@ class ChatTalkViewModel extends ChangeNotifier {
   refreshRoomInfo([bool isNew = false]) async {
     LOG('--> refreshRoomInfo : $isNew');
     if (isNew) {
-      var result = await chatRepo.getChatRoomInfo(roomInfo!.id);
+      var result = await repo.getChatRoomInfo(roomInfo!.id);
       if (result != null) {
         roomInfo = ChatRoomModel.fromJson(result);
         cache.setChatRoomItem(roomInfo!, true);
@@ -429,7 +452,7 @@ class ChatTalkViewModel extends ChangeNotifier {
         case DropdownItemType.delete:
           showAlertYesNoDialog(Get.context!, 'Delete'.tr, 'Are you sure you want to delete?'.tr, '', 'Cancel'.tr, 'OK'.tr).then((result) {
             if (result == 1) {
-              chatRepo.setChatItemState(roomInfo!.id, key, 0);
+              repo.setChatItemState(roomInfo!.id, key, 0);
             }
           });
           break;
@@ -531,44 +554,34 @@ class ChatTalkViewModel extends ChangeNotifier {
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Theme.of(Get.context!).primaryColor),
                     onChanged: (value) {
                       scrollController.jumpTo(0);
+                      notifyListeners();
                     },
                   )
                 ),
-                Container(
-                  width: 80,
-                  height: 40,
-                  padding: EdgeInsets.only(left: 10),
-                  child: ElevatedButton(
-                      onPressed: () async {
-                        if (!AppData.isMainActive || (textController.text.isEmpty && fileData.isEmpty)) return;
-                        if (sendText == textController.text) return; // block spam message..
-                        if (fileData.length > UPLOAD_FILE_MAX) {
-                          showAlertDialog(Get.context!, 'Upload'.tr,
-                              'You can\'t add any more'.tr, '${'Max'.tr}: $UPLOAD_FILE_MAX', 'OK'.tr);
-                          return;
-                        }
-                        AppData.isMainActive = false;
-                        if (uploadFileData.isNotEmpty) {
-                          showLoadingDialog(Get.context!, 'Uploading now...'.tr);
-                        }
-                        chatRepo.createChatItem(roomInfo!, '', textController.text, false, 1, 0, uploadFileData).then((result) {
-                          if (uploadFileData.isNotEmpty) {
-                            hideLoadingDialog();
-                          }
-                          clearData();
-                        });
-                      },
-                      style: ButtonStyle(
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                            )
-                        ),
-                        backgroundColor: MaterialStateProperty.all<Color>(Theme.of(Get.context!).primaryColor),
-                      ),
-                      child: Text('Send'.tr,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
-                          color: Theme.of(Get.context!).colorScheme.inversePrimary))
+                GestureDetector(
+                  onTap: () async {
+                    if (!isSendReady) return;
+                    if (fileData.length > UPLOAD_FILE_MAX) {
+                      showAlertDialog(Get.context!, 'Upload'.tr,
+                          'You can\'t add any more'.tr, '${'Max'.tr}: $UPLOAD_FILE_MAX', 'OK'.tr);
+                      return;
+                    }
+                    AppData.isMainActive = false;
+                    if (uploadFileData.isNotEmpty) {
+                      showLoadingDialog(Get.context!, 'Uploading now...'.tr);
+                    }
+                    repo.createChatItem(roomInfo!, '', textController.text, false, 1, 0, uploadFileData).then((result) {
+                      if (uploadFileData.isNotEmpty) {
+                        hideLoadingDialog();
+                      }
+                      clearData();
+                    });
+                  },
+                  child: Container(
+                    height: 40,
+                    padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                    child: Icon(Icons.send, size: 30, color: isSendReady ? Theme.of(Get.context!).primaryColor :
+                      Theme.of(Get.context!).disabledColor),
                   )
                 )
               ]
@@ -581,6 +594,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                   onEmojiSelected: (Category? category, Emoji emoji) {
                     // Do something when emoji is tapped (optional)
                     textController.selection = TextSelection.fromPosition(TextPosition(offset: textController.text.length));
+                    notifyListeners();
                   },
                   // onBackspacePressed: () {
                   //   // Do something when the user taps the backspace button (optional)
@@ -776,6 +790,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                 ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
                 if (cdata != null) {
                   textController.text = cdata.text.toString();
+                  notifyListeners();
                 }
               },
               child: Icon(Icons.paste, size: iconSize,
@@ -836,7 +851,7 @@ class ChatTalkViewModel extends ChangeNotifier {
         addItem['userId'     ] = AppData.USER_ID;
         addItem['userName'   ] = AppData.USER_NICKNAME;
         addItem['createTime' ] = DateTime.now().toString();
-        chatRepo.setChatRoomNotice(roomInfo!.id, NoticeModel.fromJson(addItem), BOL(result['isFirst']));
+        repo.setChatRoomNotice(roomInfo!.id, NoticeModel.fromJson(addItem), BOL(result['isFirst']));
       }
     });
   }
@@ -847,6 +862,7 @@ class ChatTalkViewModel extends ChangeNotifier {
         value: item,
         child: DropdownItems.buildItem(Get.context!, item),
       )),
+      alarmMenu(),
       if (isAdmin.value)...[
         if (roomInfo!.type == ChatType.public)...[
           if (LIST_NOT_EMPTY(roomInfo!.banData))
@@ -875,6 +891,11 @@ class ChatTalkViewModel extends ChangeNotifier {
     ];
   }
 
+  DropdownMenuItem<DropdownItem> alarmMenu() {
+    var item = cache.getChatRoomAlarmOn(roomInfo!.id) ? dropMenuAlarmOff : dropMenuAlarmOn;
+    return DropdownMenuItem<DropdownItem>(value: item, child: DropdownItems.buildItem(Get.context!, item));
+  }
+
   onRoomMenuAction(DropdownItemType type) {
     switch(type) {
       case DropdownItemType.exit:
@@ -885,7 +906,7 @@ class ChatTalkViewModel extends ChangeNotifier {
         showAlertYesNoCheckDialog(Get.context!, 'Room Exit'.tr, 'Would you like to leave the chat room?'.tr,
             'Leave quietly'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
           if (result > 0) {
-            chatRepo.exitChatRoom(roomInfo!.id, result == 1).then((result2) {
+            repo.exitChatRoom(roomInfo!.id, result == 1).then((result2) {
               if (result2 != null && JSON_EMPTY(result2['error'])) {
                 Get.back();
               }
@@ -894,7 +915,31 @@ class ChatTalkViewModel extends ChangeNotifier {
         });
         break;
       case DropdownItemType.invite:
-        // TODO: user invite..
+        Get.to(() => FollowScreen(AppData.userInfo, exceptData: roomInfo!.getMemberDataMap,
+            isSelectable: true))!.then((result) {
+          if (JSON_NOT_EMPTY(result)) {
+            List<JSON> newMemberList = [];
+            for (var item in result.entries) {
+              UserModel userInfo = UserModel.fromJson(item.value);
+              final addItem = {
+                'id': userInfo.id,
+                'status': 1,
+                'nickName': userInfo.nickName,
+                'pic': userInfo.pic,
+                'createTime': DateTime.now().toString(),
+              };
+              LOG("--> memberData invite [${item.key}] : ${addItem.toString()}");
+              newMemberList.add(addItem);
+            }
+            api.addChatRoomMember(roomInfo!.id, newMemberList).then((newRoomInfo) {
+              if (newRoomInfo != null) {
+                roomInfo = newRoomInfo;
+                repo.createChatItem(newRoomInfo, '', roomInfo!.lastMessage, true, 1, 1, null);
+                notifyListeners();
+              }
+            });
+          }
+        });
         break;
       case DropdownItemType.title:
         JSON? imageInfo = roomInfo!.type == ChatType.public ? {roomInfo!.id: {'id': roomInfo!.id, 'url': roomInfo!.pic}} : null;
@@ -902,7 +947,7 @@ class ChatTalkViewModel extends ChangeNotifier {
           if (JSON_NOT_EMPTY(result['desc'])) {
             JSON? imageResult = JSON_NOT_EMPTY(result['imageInfo']) ? result['imageInfo'].entries.toList()[0].value : null;
             if (roomInfo!.title != STR(result['desc']) || (JSON_NOT_EMPTY(imageResult) && BOL(imageResult!['imageChanged']))) {
-              chatRepo.setChatRoomTitle(roomInfo!.id, STR(result['desc']), imageResult);
+              repo.setChatRoomTitle(roomInfo!.id, STR(result['desc']), imageResult);
             }
           }
         });
@@ -916,7 +961,7 @@ class ChatTalkViewModel extends ChangeNotifier {
           showJsonMultiSelectDialog(Get.context!, 'Ban List'.tr, banList, 'Ban cancel'.tr).then((result) async {
             if (result != null) {
               for (var item in result.entries) {
-                await chatRepo.setChatRoomKickUser(roomInfo!.id, item.key, item.value['title'], 1);
+                await repo.setChatRoomKickUser(roomInfo!.id, item.key, item.value['title'], 1);
               }
               initData(cache.chatRoomData[roomInfo!.id] ?? roomInfo!);
               notifyListeners();
@@ -937,9 +982,11 @@ class ChatTalkViewModel extends ChangeNotifier {
         break;
       case DropdownItemType.alarmOn:
         cache.setChatRoomAlarmOff(roomInfo!.id, false);
+        notifyListeners();
         break;
       case DropdownItemType.alarmOff:
         cache.setChatRoomAlarmOff(roomInfo!.id, true);
+        notifyListeners();
         break;
     }
   }

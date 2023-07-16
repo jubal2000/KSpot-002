@@ -92,6 +92,7 @@ class ChatTalkScreenState extends State<ChatTalkScreen> {
                     if (widget.roomInfo.type == ChatType.private)...[
                       viewModel.showMemberListText(),
                     ],
+                    viewModel.showTopIconList(),
                   ],
                 ),
                 actions: [

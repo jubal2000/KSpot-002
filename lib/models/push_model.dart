@@ -3,45 +3,38 @@ import '../utils/utils.dart';
 
 part 'push_model.g.dart';
 
+// "android":{
+// "ttl":"86400s",
+// "notification"{
+// "click_action":"OPEN_ACTIVITY_1"
+// }
+// },
+// "apns": {
+// "headers": {
+// "apns-priority": "5",
+// },
+// "payload": {
+// "aps": {
+// "category": "NEW_MESSAGE_CATEGORY"
+// }
+// }
+
 @JsonSerializable(
   explicitToJson: true,
 )
 class PushModel {
-  PushNotificationModel notification;
   List<String> tokens;
   JSON? data;
 
   PushModel({
-    required this.notification,
     required this.tokens,
     this.data,
   });
 
   static create() {
-    return PushModel(notification: PushNotificationModel.create(), tokens: []);
+    return PushModel(tokens: []);
   }
 
   factory PushModel.fromJson(JSON json) => _$PushModelFromJson(json);
   JSON toJson() => _$PushModelToJson(this);
-}
-
-@JsonSerializable()
-class PushNotificationModel {
-  String      title;
-  String      body;
-
-  PushNotificationModel({
-    required this.title,
-    required this.body,
-  });
-
-  static create() {
-    return PushNotificationModel(
-      title: '',
-      body: ''
-    );
-  }
-
-  factory PushNotificationModel.fromJson(JSON json) => _$PushNotificationModelFromJson(json);
-  JSON toJson() => _$PushNotificationModelToJson(this);
 }

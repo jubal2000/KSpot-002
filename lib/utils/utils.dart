@@ -1309,13 +1309,13 @@ const dropMenuNoticeAdd   = DropdownItem(DropdownItemType.noticeAdd, text: 'NOTI
 const dropMenuCopy        = DropdownItem(DropdownItemType.copy, text: 'COPY MESSAGE', icon: Icons.copy);
 const dropMenuDelete      = DropdownItem(DropdownItemType.delete, text: 'DELETE IT', icon: Icons.delete_forever);
 const dropMenuToNotice    = DropdownItem(DropdownItemType.toNotice, text: 'TO NOTICE', icon: Icons.campaign, manager: true);
-const dropMenuInvite      = DropdownItem(DropdownItemType.invite, text: 'USER INVITE', icon: Icons.person_add_alt_1_outlined, manager: true);
+const dropMenuInvite      = DropdownItem(DropdownItemType.invite, text: 'INVITE USER', icon: Icons.person_add_alt_1_outlined, manager: true);
 const dropMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
 
 
 class DropdownItems {
   static const List<DropdownItem> eventAddItem    = [placeGroup, place, event];
-  static const List<DropdownItem> chatAddItem     = [chatOpen, chatClose, message];
+  static const List<DropdownItem> chatAddItem     = [chatOpen, chatClose];
   static const List<DropdownItem> messageAddItem  = [message];
   static const List<DropdownItem> storyAddItem    = [story];
   static const List<DropdownItem> homeAddItems    = [placeGroup, place, event];

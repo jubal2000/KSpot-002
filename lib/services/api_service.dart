@@ -2194,19 +2194,17 @@ class ApiService extends GetxService {
           break;
       }
       var push = PushModel(
-        notification: PushNotificationModel(
-          title: title,
-          body: body,
-        ),
         tokens: List<String>.from(tokens),
         data: {
           'action': action,
+          "title" : title,
+          "body"  : body,
           'id'    : targetId,
           'type'  : STR(info['type']),
           'desc'  : STR(info['lastMessage']),
         },
       );
-      LOG('--> sendChatRoomPush : ${push.toJson()}');
+      LOG('--> sendChatRoomPush data : ${push.toJson()}');
       return await sendMultiFcmMessage(push.toJson());
     }
     return null;
@@ -2593,6 +2591,47 @@ class ApiService extends GetxService {
       }
     } catch (e) {
       LOG('--> setChatRoomKickUser error : $e');
+    }
+    return null;
+  }
+
+  addChatRoomMember(String roomId, List<JSON> memberList) async {
+    LOG('--> addChatRoomMember : $roomId / ${memberList.length}');
+    try {
+      var ref = firestore!.collection(ChatRoomCollection);
+      var snapshot = await ref.doc(roomId).get();
+      if (snapshot.data() != null) {
+        var roomInfo = snapshot.data() as JSON;
+        var roomAddInfo = {
+          'id': roomId,
+          'type': roomInfo['type'],
+          'lastMessage': roomInfo['lastMessage'],
+          'memberList': [],
+        };
+        for (var user in memberList) {
+          var isEnterAlready = false;
+          for (var item in roomInfo['memberData']) {
+            if (STR(item['id']) == user['id']) {
+              isEnterAlready = true;
+              break;
+            }
+          }
+          if (!isEnterAlready) {
+            roomInfo['memberData'].add(user);
+            roomInfo['memberList'].add(user['id']);
+            roomAddInfo['memberList'].add(user['id']);
+            await ref.doc(roomId).update(Map<String, dynamic>.from({
+              'memberData': roomInfo['memberData'],
+              'memberList': roomInfo['memberList'],
+            }));
+          }
+        }
+        LOG('--> addChatRoomMember result : ${roomInfo.toString()}');
+        sendChatRoomPush(roomAddInfo, 'invite_room', roomId);
+        return roomInfo;
+      }
+    } catch (e) {
+      LOG('--> addChatRoomMember error : $e');
     }
     return null;
   }

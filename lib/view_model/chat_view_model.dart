@@ -75,6 +75,7 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   getChatRoomData() async {
+    cache.chatRoomData.clear();
     final roomData = await chatRepo.getChatRoomData();
     cache.chatRoomData.addAll(roomData);
     return roomData;
@@ -91,7 +92,7 @@ class ChatViewModel extends ChangeNotifier {
   createNewRoom(roomId) async {
     final result = await chatRepo.getChatRoomInfo(roomId);
     if (result != null) {
-      LOG('-----> new Room !! [$roomId] : ${result.toString()}');
+      LOG('-----> createNewRoom !! [$roomId] : ${result.toString()}');
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
     }
   }
@@ -105,8 +106,13 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   showTalkScreen(item) {
-    LOG('--> showTalkScreen');
-    Get.to(() => ChatTalkScreen(item))!.then((_) {
+    LOG('--> showTalkScreen : ${item.id}');
+    Get.to(() => ChatTalkScreen(item))!.then((result) {
+      LOG('--> ChatTalkScreen exit : $result');
+      if (result == ChatActionType.close) {
+        showAlertDialog(Get.context!, 'Room exit'.tr, 'Chat room has ended'.tr, item.title, 'OK'.tr);
+        chatRepo.cleanChatRoom(item.id);
+      }
       notifyListeners();
     });
   }
@@ -127,7 +133,7 @@ class ChatViewModel extends ChangeNotifier {
       for (var item in cache.chatData.entries) {
         final roomId = item.value.roomId;
         // get last message..
-        if (item.value.status > 0 && item.value.action == 0) {
+        if (item.value.action == 0) {
           var desc = descList[roomId];
           if (desc == null || desc.updateTime.isBefore(item.value.updateTime)) {
             descList[roomId] = item.value;
@@ -324,13 +330,18 @@ class ChatViewModel extends ChangeNotifier {
       case ConnectionState.waiting:
         break;
       case ConnectionState.active:
+        LOG('--> ConnectionState.active : ${snapshot.data.docs.length}');
         for (var item in snapshot.data.docs) {
           var data = FROM_SERVER_DATA(item.data() as JSON);
           final chatItem = ChatModel.fromJson(data);
-          cache.setChatItem(chatItem);
-          // LOG('--> chatItem [${chatItem.id}] : ${chatItem.roomId} / ${chatItem.toJson()}');
-          if (chatItem.roomId.isNotEmpty && !cache.chatRoomData.containsKey(chatItem.roomId)) {
-            await createNewRoom(chatItem.roomId);
+          LOG('--> chatItem [${chatItem.id}] : ${chatItem.action} / ${chatItem.toJson()}');
+          if (chatItem.roomStatus > 0) {
+            cache.setChatItem(chatItem);
+            // LOG('--> chatItem [${chatItem.id}] : ${chatItem.roomId} / ${chatItem.toJson()}');
+            if (chatItem.roomId.isNotEmpty && chatItem.action == 0 &&
+                !cache.chatRoomData.containsKey(chatItem.roomId)) {
+              await createNewRoom(chatItem.roomId);
+            }
           }
         }
         return true;
@@ -342,7 +353,8 @@ class ChatViewModel extends ChangeNotifier {
   onChattingNew(type) {
     Get.to(() => ChattingEditScreen(type))!.then((result) {
       if (result != null) {
-        Get.to(() => ChatTalkScreen(result));
+        showTalkScreen(result);
+        // Get.to(() => ChatTalkScreen(result));
       }
     });
   }

@@ -3827,11 +3827,13 @@ showChattingMenu(BuildContext context, {List<JSON> menuList = const [
   return await showJsonButtonSelectExDialog(context, 'Chatting type'.tr, menuList, null, itemHeight: 60.0);
 }
 
-Future<String> showJsonButtonSelectDialog(BuildContext context, String title, List<JSON> jsonData) async {
-  return await showJsonButtonSelectExDialog(context, title, jsonData, null);
+Future<String?> showJsonButtonSelectDialog(BuildContext context, String title, List<JSON> jsonData,
+  {String? message, double itemHeight = 70.0}) async {
+  return await showJsonButtonSelectExDialog(context, title, jsonData, null, itemHeight: itemHeight, message: message);
 }
 
-Future<String> showJsonButtonSelectExDialog(BuildContext context, String title, List<JSON> jsonData, List<JSON>? exButton, {var itemHeight = 70.0}) async {
+Future<String?> showJsonButtonSelectExDialog(BuildContext context, String title, List<JSON> jsonData, List<JSON>? exButton,
+  {String? message, double itemHeight = 70.0}) async {
   return await showDialog(
       context: context,
       builder: (BuildContext _context) {
@@ -3844,17 +3846,27 @@ Future<String> showJsonButtonSelectExDialog(BuildContext context, String title, 
                     contentPadding: EdgeInsets.symmetric(vertical: 5),
                     backgroundColor: DialogBackColor(context),
                     content: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
                       constraints: BoxConstraints(
                         minWidth: 400,
-                        maxHeight: jsonData.length * (itemHeight + 10) + 10,
+                        maxHeight: jsonData.length * (itemHeight + 10) + 10 + (message != null ? 50 : 0),
                       ),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (message != null)...[
+                          Container(
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                            child: Text(message, style: DialogDescExStyle(context)),
+                          )
+                        ],
+                      Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: jsonData.map((item) =>
                             Container(
                               height: itemHeight,
                               width: double.infinity,
-                              margin: EdgeInsets.fromLTRB(15, 5, 15, 5),
+                              margin: EdgeInsets.symmetric(vertical: 5),
                               child: ElevatedButton(
                                 onPressed: () {
                                   if (!BOL(item['disabled'])) {
@@ -3864,7 +3876,7 @@ Future<String> showJsonButtonSelectExDialog(BuildContext context, String title, 
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Theme.of(context).primaryColor.withOpacity(0.2),
                                     minimumSize: Size.zero, // Set this
-                                    padding: EdgeInsets.all(15), // and this
+                                    padding: EdgeInsets.all(itemHeight / 5), // and this
                                     shadowColor: Colors.transparent,
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10),
@@ -3882,7 +3894,7 @@ Future<String> showJsonButtonSelectExDialog(BuildContext context, String title, 
                                         if (item['icon'] == 'image')
                                           Icon(Icons.photo_size_select_actual_outlined, size: itemHeight * 0.5, color: Theme.of(context).primaryColor),
                                         if (item['icon'] != 'video' && item['icon'] != 'image')
-                                          showImage(item['icon'], Size(30,30)),
+                                          showImage(item['icon'], Size(itemHeight * 0.8, itemHeight * 0.8)),
                                         SizedBox(width: 10),
                                       ],
                                       Column(
@@ -3910,6 +3922,8 @@ Future<String> showJsonButtonSelectExDialog(BuildContext context, String title, 
                             )
                         ).toList(),
                       ),
+                      ]
+                      )
                     ),
                     actions: [
                       if (exButton != null)...[

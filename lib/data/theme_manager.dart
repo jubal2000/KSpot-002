@@ -362,11 +362,11 @@ DialogDescErrorStyle(BuildContext context) {
 }
 
 DialogDescExStyle(BuildContext context) {
-  return TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.secondary, fontWeight: FontWeight.w600);
+  return TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.secondary, fontWeight: FontWeight.w600);
 }
 
 DialogDescExErrorStyle(BuildContext context) {
-  return TextStyle(fontSize: 13, color: Theme.of(context).errorColor, fontWeight: FontWeight.w600);
+  return TextStyle(fontSize: 12, color: Theme.of(context).errorColor, fontWeight: FontWeight.w600);
 }
 
 DialogLoadingDescStyle(BuildContext context) {

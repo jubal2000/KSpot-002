@@ -12,6 +12,7 @@ part 'chat_model.g.dart';
 class ChatModel {
   String  id;
   int     status;   // 상태 (0:removed, 1:active, 2:disable, 3:ready)
+  int     roomStatus; // room 상태 (0:closed, 1:open)
   int     action;   // 액션 (0:normal, 1:room in, 2:room exit 3:room s exit)
   String  desc;
   String  roomId;
@@ -31,6 +32,7 @@ class ChatModel {
   ChatModel({
     required this.id,
     required this.status,
+    required this.roomStatus,
     required this.action,
     required this.desc,
     required this.roomId,
@@ -72,7 +74,7 @@ class ChatRoomModelEx extends ChatRoomModel {
 class ChatRoomModel {
   String  id;
   int     status;
-  int     type;     // 0: public  1: private
+  int     type;            // 0: public  1: private
   String  title;
   String  password;
   String  pic;

@@ -700,7 +700,7 @@ class Words extends Translations {
       'Room alarm ON': '채팅룸 알림 켜짐',
       'Room alarm OFF': '채팅룸 알림 꺼짐',
       'Room notice ON': '채팅룸 알림 켜짐',
-      'Room notice OFF': '채팅룸 알림 꺼짐',
+      'Room notice OFF': '채팅룸 공지 꺼짐',
       'Members': '참가인원',
 
       'Comment +': '댓글 +',
@@ -745,6 +745,8 @@ class Words extends Translations {
       'Yes, Cancel report': '예,신고를 취소합니다',
       'Report has been canceled': '신고가 취소되었습니다',
       'You are currently an admin': '현재 관리자 상태입니다',
+      'Do you want to close room?': '채팅방을 종료하시겠습니까?',
+      'Chat room has ended': '채팅방이 종료되었습니다',
 
       // main_top
       'COUNTRY SELECT': '지역 선택',

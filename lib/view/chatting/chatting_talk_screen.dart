@@ -92,7 +92,9 @@ class ChatTalkScreenState extends State<ChatTalkScreen> {
                     if (widget.roomInfo.type == ChatType.private)...[
                       viewModel.showMemberListText(),
                     ],
-                    viewModel.showTopIconList(),
+                    if (!viewModel.cache.getChatRoomAlarmOn(viewModel.roomInfo!.id))...[
+                      viewModel.showTopIconList(),
+                    ],
                   ],
                 ),
                 actions: [
@@ -135,7 +137,8 @@ class ChatTalkScreenState extends State<ChatTalkScreen> {
                         ]
                       ),
                       viewModel.showChatButtonBox(),
-                      if (LIST_NOT_EMPTY(viewModel.roomInfo!.noticeData))
+                      if (LIST_NOT_EMPTY(viewModel.roomInfo!.noticeData) &&
+                        viewModel.cache.getChatRoomNoticeOn(viewModel.roomInfo!.id))
                         viewModel.showChatNotice(),
                     ]
                   )

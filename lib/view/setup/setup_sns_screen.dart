@@ -108,10 +108,10 @@ class SetupSNSState extends State<SetupSNSScreen> {
                             // add SNS..
                             refreshLinkInfo();
                             showJsonButtonSelectDialog(context, 'SNS Link add'.tr, snsLinkInfo).then((key) {
-                              if (key.isNotEmpty) {
+                              if (STR(key).isNotEmpty) {
                                 for (var item in snsLinkInfo) {
                                   if (item['id'] == key) {
-                                    _snsLinkData[key] = {'id': key, 'icon':item['icon'], 'link': ''};
+                                    _snsLinkData[key!] = {'id': key, 'icon':item['icon'], 'link': ''};
                                     showTextInputDialog(context, 'SNS Link add'.tr, '${item['title']}', _snsLinkData[key]['link'], 1, null).then((result2) {
                                       setState(() {
                                         if (result2.isNotEmpty) {

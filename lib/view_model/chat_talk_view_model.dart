@@ -121,8 +121,12 @@ class ChatTalkViewModel extends ChangeNotifier {
         // var orgCount = showList.length;
         // LOG('--> orgCount : $orgCount / ${result.length}');
         showList.clear();
-        showList.addAll(result);
-        cache.setChatItemData(result);
+        for (var item in result.entries) {
+          if (INT(item.value['roomStatus']) > 0) {
+            showList[item.key] = item.value;
+          }
+        }
+        cache.setChatItemData(showList);
         // var updateCount = cache.setChatItemData(result);
         // LOG('--> startChatStreamData check : $orgCount / ${result.length} / $updateCount');
         // var lastItem = showList.entries.last.value as JSON;
@@ -247,7 +251,7 @@ class ChatTalkViewModel extends ChangeNotifier {
       memberStr += i > 0 ? ', ${memberList[i]}' : memberList[i];
     }
     return Container(
-      width: Get.width,
+      width: Get.width * 0.65,
       child: Text(memberStr, style: ItemDescStyle(Get.context!)),
     );
   }
@@ -269,8 +273,8 @@ class ChatTalkViewModel extends ChangeNotifier {
   setChatAction() {
     final reverseM = JSON.from(LinkedHashMap.fromEntries(showList.entries.toList().reversed));
     for (var item in reverseM.entries) {
-      // LOG('--> reverseM item : ${item.value.toString()}');
       var action = INT(item.value['action']);
+      LOG('--> setChatAction item : [$action] / ${item.value.toString()}');
       if (action != 0) {
         // refresh member list..
         if (JSON_NOT_EMPTY(item.value['memberData'])) {
@@ -289,6 +293,9 @@ class ChatTalkViewModel extends ChangeNotifier {
           roomTitle.value = roomInfo!.title;
           roomPic.value   = roomInfo!.pic;
           LOG('--> ChatActionType.title ! : ${roomInfo!.title} / ${roomInfo!.pic}');
+        } else if (action == ChatActionType.close) {
+          Get.back(result: action);
+          // showAlertDialog(Get.context!, 'Room exit'.tr, 'Chat room has ended'.tr, '', 'OK'.tr);
         } else {
           if (action == ChatActionType.notice) {
             if (JSON_NOT_EMPTY(item.value['noticeData'])) {
@@ -560,6 +567,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                 ),
                 GestureDetector(
                   onTap: () async {
+                    // send message...
                     if (!isSendReady) return;
                     if (fileData.length > UPLOAD_FILE_MAX) {
                       showAlertDialog(Get.context!, 'Upload'.tr,
@@ -570,7 +578,7 @@ class ChatTalkViewModel extends ChangeNotifier {
                     if (uploadFileData.isNotEmpty) {
                       showLoadingDialog(Get.context!, 'Uploading now...'.tr);
                     }
-                    repo.createChatItem(roomInfo!, '', textController.text, false, 1, 0, uploadFileData).then((result) {
+                    repo.sendChatMessage(roomInfo!, '', textController.text, false, 1, 0, uploadFileData).then((result) {
                       if (uploadFileData.isNotEmpty) {
                         hideLoadingDialog();
                       }
@@ -900,7 +908,16 @@ class ChatTalkViewModel extends ChangeNotifier {
     switch(type) {
       case DropdownItemType.exit:
         if (isAdmin.value) {
-          ShowToast('You are currently an admin'.tr);
+          showAlertYesNoDialog(Get.context!, 'Room Exit'.tr, 'You are currently an admin'.tr,
+            'Do you want to close room?'.tr, 'Cancel'.tr, 'OK'.tr).then((result) {
+            if (result > 0) {
+              repo.closeChatRoom(roomInfo!.id).then((result2) {
+                if (result2) {
+                  Get.back();
+                }
+              });
+            }
+          });
           return;
         }
         showAlertYesNoCheckDialog(Get.context!, 'Room Exit'.tr, 'Would you like to leave the chat room?'.tr,
@@ -934,7 +951,7 @@ class ChatTalkViewModel extends ChangeNotifier {
             api.addChatRoomMember(roomInfo!.id, newMemberList).then((newRoomInfo) {
               if (newRoomInfo != null) {
                 roomInfo = newRoomInfo;
-                repo.createChatItem(newRoomInfo, '', roomInfo!.lastMessage, true, 1, 1, null);
+                repo.sendChatMessage(newRoomInfo, '', roomInfo!.lastMessage, true, 1, 1, null);
                 notifyListeners();
               }
             });
@@ -972,6 +989,7 @@ class ChatTalkViewModel extends ChangeNotifier {
       case DropdownItemType.noticeShow:
         isNoticeShow.value = true;
         cache.setChatRoomNoticeOff(roomInfo!.id, false);
+        notifyListeners();
         break;
       case DropdownItemType.noticeAdd:
         if (JSON_EMPTY(roomInfo!.noticeData) || roomInfo!.noticeData!.length < CHAT_NOTICE_MAX) {

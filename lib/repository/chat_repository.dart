@@ -14,7 +14,6 @@ import '../services/cache_service.dart';
 import '../utils/utils.dart';
 
 class ChatActionType {
-  static int get hide   => -1;
   static int get normal => 0;
   static int get enter  => 1;
   static int get exit   => 2;
@@ -22,7 +21,10 @@ class ChatActionType {
   static int get kick   => 4;
   static int get title  => 5;
   static int get notice => 6;
+
+  static int get hide   => -1;
   static int get delete => -7;
+  static int get close  => -9;
 }
 
 class ChatRepository {
@@ -69,17 +71,18 @@ class ChatRepository {
     stream = api.startChatStreamData(roomId, startTime, onChanged);
   }
 
-  createChatItem(ChatRoomModel roomInfo, String id, String sendText, bool isFirstMessage,
+  sendChatMessage(ChatRoomModel roomInfo, String id, String sendText, bool isFirstMessage,
     [int status = 1, int action = 0, Map<String, UploadFileModel>? fileData]) async {
     var addItem = {
       'id':         id,
       'status':     status,
+      'roomStatus': roomInfo.status,
       'action':     action,
+      'desc':       sendText,
       'roomId':     roomInfo.id,
       'senderId':   STR(AppData.USER_ID),
       'senderName': STR(AppData.USER_NICKNAME),
       'senderPic':  STR(AppData.USER_PIC),
-      'desc':       sendText,
       'createTime': CURRENT_SERVER_TIME(),
     };
     if (fileData != null && fileData.isNotEmpty) {
@@ -106,12 +109,8 @@ class ChatRepository {
       }
     }
     LOG('--> createChatItem : $isFirstMessage / ${addItem.toString()}');
-    var result = await addChatItem(addItem, isFirstMessage);
+    var result = api.addChatItem(addItem, isFirstMessage);
     return result;
-  }
-
-  addChatItem(JSON addItem, [var isFirstMessage = false]) async {
-    return await api.addChatItem(addItem, isFirstMessage);
   }
 
   setChatItemState(String roomId, String chatId, int status) async {
@@ -140,6 +139,7 @@ class ChatRepository {
     JSON addItem = {
       'id': '',
       'status'    : 1,
+      'roomStatus': 1,
       'action'    : action,
       'desc'      : desc,
       'roomId'    : roomId,
@@ -215,5 +215,33 @@ class ChatRepository {
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
     }
     return result;
+  }
+
+  closeChatRoom(String roomId) async {
+    final result = await api.closeChatRoom(roomId);
+    if (result != null) {
+      addChatActionItem(roomId, -9, 'room closed');
+      cleanChatRoom(roomId, result);
+      return true;
+    }
+    return false;
+  }
+
+  cleanChatRoom(String roomId, [List? chatList]) {
+    LOG('--> cleanChatRoom : $roomId / $chatList');
+    cache.chatRoomData.remove(roomId);
+    if (chatList == null) {
+      chatList = [];
+      for (var item in cache.chatData.entries) {
+        LOG('--> cache.chatItemData check : ${item.value.toJson()} / $roomId');
+        if (item.value.roomId == roomId) {
+          chatList.add(item.value.toJson());
+        }
+      }
+    }
+    for (var item in chatList) {
+      LOG('--> cache.chatData removed : ${item['id']} / ${cache.chatData.length}');
+      cache.chatData.remove(item['id']);
+    }
   }
 }

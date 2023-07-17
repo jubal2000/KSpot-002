@@ -2335,6 +2335,7 @@ class ApiService extends GetxService {
     LOG('------> getChatStreamData : $userId');
     return firestore!.collection(ChatCollection)
         .where('status', isEqualTo: 1)
+        .where('roomStatus', isEqualTo: 1)
         .where('memberList', arrayContainsAny: [userId])
         .orderBy('updateTime', descending: true)
         .snapshots();
@@ -2346,8 +2347,9 @@ class ApiService extends GetxService {
         .doc(roomId)
         .get();
 
-    if (snapshot.data() != null) {
-      return FROM_SERVER_DATA(snapshot.data() as JSON);
+    var result = snapshot.data();
+    if (result != null) {
+      return FROM_SERVER_DATA(result);
     }
     return null;
   }
@@ -2423,6 +2425,30 @@ class ApiService extends GetxService {
       }
     } catch (e) {
       LOG('--> exitChatRoom error : $e');
+    }
+    return null;
+  }
+
+  closeChatRoom(String roomId) async {
+    var ref  = firestore!.collection(ChatRoomCollection);
+    var ref2 = firestore!.collection(ChatCollection);
+    try {
+      await ref.doc(roomId).update(Map<String, dynamic>.from({
+        'status': 0,
+      }));
+      var snapshot = await ref2.where('status', isEqualTo: 1)
+          .where('roomStatus', isEqualTo: 1)
+          .where('roomId', isEqualTo: roomId)
+          .get();
+      for (var doc in snapshot.docs) {
+        LOG('--> closeChatRoom doc : $doc');
+        ref2.doc(doc['id']).update(Map<String, dynamic>.from({
+          'roomStatus': 0,
+        }));
+      }
+      return snapshot.docs;
+    } catch (e) {
+      LOG('--> closeChatRoom error : $e');
     }
     return null;
   }
@@ -2641,6 +2667,7 @@ class ApiService extends GetxService {
     JSON result = {};
     var ref = firestore!.collection(ChatCollection)
         .where('status', isEqualTo: 1)
+        .where('roomStatus', isEqualTo: 1)
         .where('roomId', isEqualTo: roomId);
 
     if (startTime != null) {
@@ -2689,15 +2716,13 @@ class ApiService extends GetxService {
   }
 
   Future<JSON?> addChatItem(JSON addItem, [var isFirstMessage = false]) async {
-    LOG('------> addChatItem : $isFirstMessage / ${INT(addItem['action'])} / $addItem');
     var roomInfo = await getChatRoomFromId(STR(addItem['roomId']));
-    if (roomInfo != null) {
+    LOG('------> addChatItem : ${INT(addItem['action'])} / ${INT(roomInfo['status'])}');
+    if (roomInfo != null && (INT(roomInfo['status']) > 0 || INT(addItem['action']) != 0)) {
       var dataRef = firestore!.collection(ChatCollection);
       var key = STR(addItem['id']).toString();
       if (key.isEmpty) {
-        key = dataRef
-            .doc()
-            .id;
+        key = dataRef.doc().id;
         addItem['id'] = key;
         addItem['createTime'] = CURRENT_SERVER_TIME();
       }
@@ -2708,7 +2733,7 @@ class ApiService extends GetxService {
         addItem['noticeData'] = roomInfo['noticeData'];
         addItem['banData'   ] = roomInfo['banData'   ];
       } else {
-        if (!isFirstMessage) {
+        if (!isFirstMessage && INT(addItem['action']) == 0) {
           sendChatRoomPush(addItem, 'chat_message', STR(addItem['roomId']));
         }
       }

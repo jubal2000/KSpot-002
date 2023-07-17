@@ -272,7 +272,7 @@ class ChatEditViewModel extends ChangeNotifier {
       LOG('---> addChatRoomItem result: ${result.toString()}');
       editItem!.id = result['id'];
       // send first message..
-      repo.createChatItem(editItem!, '', inviteMessage, true);
+      repo.sendChatMessage(editItem!, '', inviteMessage, true);
       hideLoadingDialog();
       AppData.isMainActive = true;
       showAlertDialog(Get.context!, 'Chat room create'.tr, 'Chat room create complete'.tr, '', 'OK'.tr).then((_) {

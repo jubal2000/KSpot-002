@@ -373,6 +373,7 @@ class ApiService extends GetxService {
     LOG('--> setUserInfoJSON : $userId / $items');
     if (userId.isEmpty) return false;
     var ref = firestore!.collection(UserCollection);
+    items['updateTime'] = CURRENT_SERVER_TIME();
     return ref.doc(userId).update(Map<String, dynamic>.from(items)).then((result) {
       return true;
     }).onError((e, stackTrace) {

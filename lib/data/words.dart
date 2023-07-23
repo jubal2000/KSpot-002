@@ -747,6 +747,7 @@ class Words extends Translations {
       'You are currently an admin': '현재 관리자 상태입니다',
       'Do you want to close room?': '채팅방을 종료하시겠습니까?',
       'Chat room has ended': '채팅방이 종료되었습니다',
+      'Cant find room': '채팅방이 없습니다',
 
       // main_top
       'COUNTRY SELECT': '지역 선택',

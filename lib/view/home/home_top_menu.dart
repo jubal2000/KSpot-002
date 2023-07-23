@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_dropdown_alert/dropdown_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -29,11 +30,19 @@ import '../../widget/user_item_widget.dart';
 import '../event/event_edit_screen.dart';
 
 class HomeTopMenuBar extends StatefulWidget {
-  HomeTopMenuBar(this.menuMode, {Key? key, this.isShowDatePick = true, this.isDateOpen = true, this.height = UI_TOP_MENU_HEIGHT, this.onCountryChanged, this.onDateChange}) : super(key: key);
+  HomeTopMenuBar(this.menuMode,
+    {Key? key,
+      this.isShowDatePick = true,
+      this.isHideMenu = false,
+      this.isDateOpen = true,
+      this.height = UI_TOP_MENU_HEIGHT,
+      this.onCountryChanged,
+      this.onDateChange}) : super(key: key);
   int menuMode;
   double height;
   bool isShowDatePick;
   bool isDateOpen;
+  bool isHideMenu;
   Function()? onCountryChanged;
   Function(bool)? onDateChange;
 
@@ -52,13 +61,11 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
     final isLongState = AppData.currentState.length > 12;
 
     return Container(
-      height: widget.height,
-      padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE, 30, UI_HORIZONTAL_SPACE, 0),
       child: Visibility(
         visible: AppData.appViewModel.appbarMenuMode != MainMenuID.hide,
         child: Stack(
           children: [
-            if (AppData.appViewModel.appbarMenuMode == MainMenuID.back)
+            if (!widget.isHideMenu && AppData.appViewModel.appbarMenuMode == MainMenuID.back)
               GestureDetector(
                 onTap: () {
                   Get.back();
@@ -75,104 +82,92 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                   )
                 )
               ),
-              if (AppData.appViewModel.appbarMenuMode != MainMenuID.back)
-                Row(
-                  children: [
-                    if (AppData.appViewModel.appbarMenuMode != MainMenuID.my)...[
-                      GestureDetector(
-                        child: Container(
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10.w : 0),
-                          constraints: BoxConstraints(
-                            maxHeight: widget.height * 0.8,
-                            minWidth: widget.height * 0.8,
-                            maxWidth: isLongState ? Get.width * 0.35 : double.infinity,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
-                            color: Colors.black26,
-                          ),
-                          child: Row(
-                            children: [
-                              Text(STR_FLAG_ONLY(AppData.currentCountryFlag), style: TextStyle(fontSize: 26)),
-                              if (AppData.currentState.isNotEmpty)...[
-                                SizedBox(width: 5),
-                                if (isLongState)
-                                  Expanded(child:
-                                    Text(AppData.currentState, style: ItemDescStyle(context), maxLines: 3)),
-                                if (!isLongState)
-                                Text(AppData.currentState, style: ItemTitleBoldStyle(context), maxLines: 3),                                                              ],
-                            ]
-                          )
-                        ),
-                        onTap: () {
-                          LOG('--> showCountrySelect');
-                          AppData.appViewModel.showCountrySelect(context, widget.onCountryChanged);
-                        },
-                      ),
-                      if (widget.isShowDatePick && widget.isDateOpen)
+              if (!widget.isHideMenu && AppData.appViewModel.appbarMenuMode != MainMenuID.back)
+                Container(
+                  height: widget.height,
+                  margin: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE, 30, UI_HORIZONTAL_SPACE, 0),
+                  child: Row(
+                    children: [
+                      if (AppData.appViewModel.appbarMenuMode != MainMenuID.my)...[
                         GestureDetector(
                           child: Container(
                             alignment: Alignment.center,
-                            height: widget.height * 0.8,
-                            margin: EdgeInsets.only(left: 5),
-                            padding: EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
-                              color: AppData.currentDate.isToday() ? Theme.of(context).primaryColor : Colors.black26,
-                            ),
-                            child: Text('TODAY', style: ItemDescStyle(context)),
-                          ),
-                          onTap: () {
-                            setState(() {
-                              AppData.currentDate = DateTime.now();
-                              if (widget.onDateChange != null) widget.onDateChange!(widget.isDateOpen);
-                            });
-                          },
-                        ),
-                      if (widget.isShowDatePick)
-                        GestureDetector(
-                          child: Container(
-                            alignment: Alignment.center,
-                            margin: EdgeInsets.only(left: 5),
-                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10.w : 0),
                             constraints: BoxConstraints(
                               maxHeight: widget.height * 0.8,
                               minWidth: widget.height * 0.8,
+                              maxWidth: isLongState ? Get.width * 0.35 : double.infinity,
                             ),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
                               color: Colors.black26,
                             ),
-                            child: widget.isDateOpen ? Icon(Icons.close, size: 24) : showDatePickerText(context, AppData.currentDate),
+                            child: Row(
+                              children: [
+                                Text(STR_FLAG_ONLY(AppData.currentCountryFlag), style: TextStyle(fontSize: 26)),
+                                if (AppData.currentState.isNotEmpty)...[
+                                  SizedBox(width: 5),
+                                  if (isLongState)
+                                    Expanded(child:
+                                      Text(AppData.currentState, style: ItemDescStyle(context), maxLines: 3)),
+                                  if (!isLongState)
+                                  Text(AppData.currentState, style: ItemTitleBoldStyle(context), maxLines: 3),                                                              ],
+                              ]
+                            )
                           ),
                           onTap: () {
-                            setState(() {
-                              widget.isDateOpen = !widget.isDateOpen;
-                              if (widget.onDateChange != null) widget.onDateChange!(widget.isDateOpen);
-                            });
+                            LOG('--> showCountrySelect');
+                            AppData.appViewModel.showCountrySelect(context, widget.onCountryChanged);
                           },
                         ),
-                      Expanded(
-                        child: Container(
-                          color: Colors.transparent,
-                        )
-                      ),
-                      Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),
-                        constraints: BoxConstraints(
-                          maxHeight: widget.height * 0.8,
-                          minWidth: widget.height * 0.8,
+                        if (widget.isShowDatePick && widget.isDateOpen)
+                          GestureDetector(
+                            child: Container(
+                              alignment: Alignment.center,
+                              height: widget.height * 0.8,
+                              margin: EdgeInsets.only(left: 5),
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
+                                color: AppData.currentDate.isToday() ? Theme.of(context).primaryColor : Colors.black26,
+                              ),
+                              child: Text('TODAY', style: ItemDescStyle(context)),
+                            ),
+                            onTap: () {
+                              setState(() {
+                                AppData.currentDate = DateTime.now();
+                                if (widget.onDateChange != null) widget.onDateChange!(widget.isDateOpen);
+                              });
+                            },
+                          ),
+                        if (widget.isShowDatePick)
+                          GestureDetector(
+                            child: Container(
+                              alignment: Alignment.center,
+                              margin: EdgeInsets.only(left: 5),
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              constraints: BoxConstraints(
+                                maxHeight: widget.height * 0.8,
+                                minWidth: widget.height * 0.8,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
+                                color: Colors.black26,
+                              ),
+                              child: widget.isDateOpen ? Icon(Icons.close, size: 24) : showDatePickerText(context, AppData.currentDate),
+                            ),
+                            onTap: () {
+                              setState(() {
+                                widget.isDateOpen = !widget.isDateOpen;
+                                if (widget.onDateChange != null) widget.onDateChange!(widget.isDateOpen);
+                              });
+                            },
+                          ),
+                        Expanded(
+                          child: Container(
+                            color: Colors.transparent,
+                          )
                         ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
-                          color: Colors.black26,
-                        ),
-                        child: AppData.appViewModel.showAddMenu(iconSize),
-                      ),
-                      SizedBox(width: 5),
-                      if (AppData.appViewModel.appbarMenuMode == MainMenuID.event)
                         Container(
                           alignment: Alignment.center,
                           padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),
@@ -184,61 +179,81 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                             borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
                             color: Colors.black26,
                           ),
-                          child: AppData.eventViewModel.showEventListType(),
+                          child: AppData.appViewModel.showAddMenu(iconSize),
                         ),
-                      // if (AppData.appViewModel.appbarMenuMode == MainMenuID.story)
+                        SizedBox(width: 5),
+                        if (AppData.appViewModel.appbarMenuMode == MainMenuID.event)
+                          Container(
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),
+                            constraints: BoxConstraints(
+                              maxHeight: widget.height * 0.8,
+                              minWidth: widget.height * 0.8,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
+                              color: Colors.black26,
+                            ),
+                            child: AppData.eventViewModel.showEventListType(),
+                          ),
+                        // if (AppData.appViewModel.appbarMenuMode == MainMenuID.story)
+                        //   Container(
+                        //     alignment: Alignment.center,
+                        //     padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),
+                        //     constraints: BoxConstraints(
+                        //       maxHeight: widget.height * 0.8,
+                        //       minWidth: widget.height * 0.8,
+                        //     ),
+                        //     decoration: BoxDecoration(
+                        //       borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
+                        //       color: Theme.of(context).canvasColor.withOpacity(0.55),
+                        //     ),
+                        //     child: AppData.storyViewModel.showStoryListType(),
+                        //   ),
+                      ],
+                      // if (AppData.appViewModel.appbarMenuMode == MainMenuID.my)...[
                       //   Container(
-                      //     alignment: Alignment.center,
-                      //     padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),
-                      //     constraints: BoxConstraints(
-                      //       maxHeight: widget.height * 0.8,
-                      //       minWidth: widget.height * 0.8,
-                      //     ),
-                      //     decoration: BoxDecoration(
-                      //       borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
-                      //       color: Theme.of(context).canvasColor.withOpacity(0.55),
-                      //     ),
-                      //     child: AppData.storyViewModel.showStoryListType(),
+                      //     // color: Colors.red,
+                      //     height: iconSize,
+                      //     width: iconSize,
+                      //     child: IconButton(
+                      //       icon: Icon(Icons.mail_outline_outlined, color: iconColor),
+                      //       onPressed: () {
+                      //         Get.to(() => MessageScreen());
+                      //       },
+                      //     )
                       //   ),
+                      //   SizedBox(width: 5),
+                      //   if (APP_STORE_OPEN)...[
+                      //     Container(
+                      //       height: iconSize,
+                      //       width: iconSize,
+                      //       child: IconButton(
+                      //         icon: Icon(Icons.store_outlined, color: iconColor),
+                      //         onPressed: () {
+                      //         },
+                      //       )
+                      //     ),
+                      //     SizedBox(width: 5),
+                      //   ],
+                      //   Container(
+                      //     // color: Colors.red,
+                      //     height: iconSize,
+                      //     width: iconSize,
+                      //     child: IconButton(
+                      //       icon: Icon(Icons.settings, color: iconColor),
+                      //       onPressed: () {
+                      //       },
+                      //     )
+                      //   ),
+                      // ],
                     ],
-                    // if (AppData.appViewModel.appbarMenuMode == MainMenuID.my)...[
-                    //   Container(
-                    //     // color: Colors.red,
-                    //     height: iconSize,
-                    //     width: iconSize,
-                    //     child: IconButton(
-                    //       icon: Icon(Icons.mail_outline_outlined, color: iconColor),
-                    //       onPressed: () {
-                    //         Get.to(() => MessageScreen());
-                    //       },
-                    //     )
-                    //   ),
-                    //   SizedBox(width: 5),
-                    //   if (APP_STORE_OPEN)...[
-                    //     Container(
-                    //       height: iconSize,
-                    //       width: iconSize,
-                    //       child: IconButton(
-                    //         icon: Icon(Icons.store_outlined, color: iconColor),
-                    //         onPressed: () {
-                    //         },
-                    //       )
-                    //     ),
-                    //     SizedBox(width: 5),
-                    //   ],
-                    //   Container(
-                    //     // color: Colors.red,
-                    //     height: iconSize,
-                    //     width: iconSize,
-                    //     child: IconButton(
-                    //       icon: Icon(Icons.settings, color: iconColor),
-                    //       onPressed: () {
-                    //       },
-                    //     )
-                    //   ),
-                    // ],
-                  ],
-                )
+                  ),
+                ),
+              DropdownAlert(
+                successImage: 'assets/ui/app_icon_01.png',
+                successBackground: Theme.of(context).dialogBackgroundColor,
+              ),
             ]
           )
         )

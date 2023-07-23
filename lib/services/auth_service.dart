@@ -59,9 +59,13 @@ class AuthService extends GetxService {
             LOG('--> getStartUserInfo done! : ${result.pushToken} / ${fire.token}');
             // get user ex data..
             await getStartData();
-            if (result.pushToken != fire.token) {
-              AppData.userInfo.pushToken = fire.token ?? '';
-              userRepo.setUserInfoItem(AppData.userInfo, 'pushToken');
+            if (result.pushToken != fire.token || result.deviceType != (Platform.isAndroid ? 'android' : 'ios')) {
+              AppData.userInfo.pushToken  = fire.token ?? '';
+              AppData.userInfo.deviceType = Platform.isAndroid ? 'android' : 'ios';
+              userRepo.setUserInfoJSON(AppData.USER_ID, {
+                'pushToken' : AppData.userInfo.pushToken,
+                'deviceType': AppData.userInfo.deviceType,
+              });
             }
             Get.offAllNamed(Routes.HOME);
           } else {

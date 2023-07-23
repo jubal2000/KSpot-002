@@ -334,7 +334,7 @@ class ChatViewModel extends ChangeNotifier {
         for (var item in snapshot.data.docs) {
           var data = FROM_SERVER_DATA(item.data() as JSON);
           final chatItem = ChatModel.fromJson(data);
-          LOG('--> chatItem [${chatItem.id}] : ${chatItem.action} / ${chatItem.toJson()}');
+          // LOG('--> chatItem [${chatItem.id}] : ${chatItem.action} / ${chatItem.toJson()}');
           if (chatItem.roomStatus > 0) {
             cache.setChatItem(chatItem);
             // LOG('--> chatItem [${chatItem.id}] : ${chatItem.roomId} / ${chatItem.toJson()}');

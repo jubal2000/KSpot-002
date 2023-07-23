@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dropdown_alert/alert_controller.dart';
+import 'package:flutter_dropdown_alert/model/data_alert.dart';
 import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/view/follow/follow_screen.dart';
 import 'package:kspot_002/view/story/story_edit_screen.dart';
@@ -29,6 +31,7 @@ import '../view/event/event_edit_screen.dart';
 import '../view/home/home_top_menu.dart';
 import '../view/message/message_talk_screen.dart';
 import '../widget/event_group_dialog.dart';
+import '../widget/top_notify_view.dart';
 import 'chat_view_model.dart';
 import 'event_view_model.dart';
 
@@ -98,7 +101,7 @@ class AppViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  showMainTopMenu() {
+  showMainTopMenu([var isHideMenu = false]) {
     return TopCenterAlign(
       child: SizedBox(
         height: UI_APPBAR_HEIGHT,
@@ -388,6 +391,31 @@ class AppViewModel extends ChangeNotifier {
         ],
       );
     });
+  }
+
+  showTopNotifyView(String title, String desc, JSON payload, Function(JSON) onAction) {
+    LOG('--> showTopNotifyView: $title / $desc / ${payload.toString()}');
+    // var alert = AlertController.instance;
+    // alert!.setShow(AlertController.show);
+    AlertController.show(title, desc, TypeAlert.success, payload);
+    AlertController.onTabListener((p0, p1) {
+      if (p0 != null) {
+        onAction(p0);
+        AlertController.hide();
+      }
+    });
+    // if (topNotifyView != null) {
+    //   topNotifyView?.dismiss();
+    // }
+    // topNotifyView = Notify();
+    // topNotifyView!.show(
+    //   Get.context!,
+    //   TopNotifyView(title, desc, targetId, onAction: (targetId) {
+    //     topNotifyView?.dismiss(false);
+    //     topNotifyView = null;
+    //   }),
+    //   keepDuration: 0,
+    // );
   }
 
   @override

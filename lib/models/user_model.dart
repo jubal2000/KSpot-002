@@ -14,6 +14,7 @@ class UserModel {
   int       status;
   String    loginId;
   String    loginType;  // 로그인 방식 ('', 'phone'..)
+
   String    nickName;
   @JsonKey(defaultValue: '')
   String    realName;

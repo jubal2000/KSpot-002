@@ -274,7 +274,7 @@ class ChatTalkViewModel extends ChangeNotifier {
     final reverseM = JSON.from(LinkedHashMap.fromEntries(showList.entries.toList().reversed));
     for (var item in reverseM.entries) {
       var action = INT(item.value['action']);
-      LOG('--> setChatAction item : [$action] / ${item.value.toString()}');
+      // LOG('--> setChatAction item : [$action] / ${item.value.toString()}');
       if (action != 0) {
         // refresh member list..
         if (JSON_NOT_EMPTY(item.value['memberData'])) {
@@ -351,7 +351,7 @@ class ChatTalkViewModel extends ChangeNotifier {
           var imageItem = {'id': addItem.id, 'url': FILE_ICON(addItem.extension)};
           fileData[addItem.id] = imageItem;
         }
-        LOG('--> addItem : ${addItem.toJson()}');
+        // LOG('--> addItem : ${addItem.toJson()}');
         uploadFileData[addItem.id] = addItem;
       }
       notifyListeners();
@@ -409,7 +409,7 @@ class ChatTalkViewModel extends ChangeNotifier {
         ChatItem? addItem = cache.chatItemData[item.key];
         // LOG('-----> showList check [${STR(item.value['desc'])}] : $isOwner / $isOpened / [$openCount / ${addItem != null} ? ${addItem != null ? addItem.openCount : 0}]');
         if (addItem == null || addItem.openCount != openCount) {
-          LOG('--> addItem : ${isAdmin.value} / $isOpened => ${addItem != null} / ${addItem != null ? addItem.openCount : 0} / $openCount');
+          // LOG('--> addItem : ${isAdmin.value} / $isOpened => ${addItem != null} / ${addItem != null ? addItem.openCount : 0} / $openCount');
           addItem = ChatItem(
             item.value,
             openCount: openCount,

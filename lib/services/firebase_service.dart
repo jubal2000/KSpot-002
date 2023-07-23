@@ -16,17 +16,20 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/dialogs.dart';
+import 'package:kspot_002/models/chat_model.dart';
 import 'package:kspot_002/repository/user_repository.dart';
 import 'package:uuid/uuid.dart';
 import '../data/app_data.dart';
 import '../data/firebase_options.dart';
 import '../data/routes.dart';
 import '../models/user_model.dart';
+import '../repository/chat_repository.dart';
 import '../utils/message.dart';
 import '../utils/push_utils.dart';
 import '../utils/utils.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../view/chatting/chatting_talk_screen.dart';
 import 'api_service.dart';
 import 'cache_service.dart';
 
@@ -73,9 +76,11 @@ class FirebaseService extends GetxService {
     fireAuth  = FirebaseAuth.instance;
     messaging = FirebaseMessaging.instance;
 
-    // get firebase token..
-    token = await messaging!.getToken();
-    LOG('--> firebase init token : $token');
+    if (messaging != null) {
+      // get firebase token..
+      token = await messaging!.getToken();
+      LOG('--> firebase init token : $token');
+    }
 
     // alert permission..
     await messaging!.requestPermission(
@@ -144,8 +149,7 @@ class FirebaseService extends GetxService {
     if (isFlutterLocalNotificationsInitialized) {
       return;
     }
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
+    await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(FCM_TopicChannel);
 
@@ -178,6 +182,9 @@ class FirebaseService extends GetxService {
         }
       }
     });
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
     isFlutterLocalNotificationsInitialized = true;
   }
 
@@ -185,6 +192,7 @@ class FirebaseService extends GetxService {
     RemoteNotification? notification = message.notification;
     AndroidNotification? android = message.notification?.android;
     if (notification != null && android != null && !kIsWeb) {
+      // showPush(message, true);
       flutterLocalNotificationsPlugin.show(
         notification.hashCode,
         notification.title,
@@ -265,7 +273,6 @@ class FirebaseService extends GetxService {
           LOG('--> showPush [invite_room] : $targetId => $isShowPush');
           break;
         case 'chat_message':
-          final targetId = STR(customData['id']);
           isShowPush = cache.getChatRoomAlarmOn(targetId);
           LOG('--> showPush [chat_message] : $targetId => $isShowPush');
           break;
@@ -275,6 +282,7 @@ class FirebaseService extends GetxService {
       }
 
       if (isShowPush) {
+        // AppData.appViewModel.showTopNotifyView(title, body, customData, (result) => moveChatRoom(result['id']));
         // showReceiveLocalNotificationDialog(title, desc);
         flutterLocalNotificationsPlugin.show(
           0,
@@ -287,40 +295,50 @@ class FirebaseService extends GetxService {
                 channelDescription: FCM_TopicChannel.description,
                 icon: '@mipmap/ic_launcher',
                 ongoing: true,
-                largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+                fullScreenIntent: true,
+                // largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
                 // icon: 'push_icon',
               ),
               iOS: DarwinNotificationDetails(
               )
           ),
-        );
+        ).then((_) {
+          LOG('--> showPush action : $action');
+          switch (action) {
+            case 'invite_room':
+            case 'chat_message':
+              moveChatRoom(targetId);
+              break;
+            case 'comment':
+              break;
+          }
+        });
       }
     }
   }
 
+  moveChatRoom(String roomId) {
+    Get.find<ApiService>().getChatRoomFromId(roomId).then((roomInfo) {
+      if (roomInfo != null) {
+        AppData.appViewModel.menuIndex = 2;
+        Get.to(() => ChatTalkScreen(ChatRoomModel.fromJson(roomInfo)))!.then((result) {
+          LOG('--> ChatTalkScreen exit : $result');
+          if (result == ChatActionType.close) {
+            showAlertDialog(Get.context!, 'Room exit'.tr, 'Chat room has ended'.tr, roomInfo.title, 'OK'.tr);
+            Get.find<ChatRepository>().cleanChatRoom(roomInfo.id);
+          }
+        });
+      } else {
+        ShowErrorToast('Cant find room');
+      }
+    });
+  }
+
   onActionSelected(String value) async {
     switch (value) {
-      case 'subscribe':
-        {
-          LOG(
-            'FlutterFire Messaging Example: Subscribing to topic "fcm_test".',
-          );
-          await FirebaseMessaging.instance.subscribeToTopic('fcm_test');
-          LOG(
-            'FlutterFire Messaging Example: Subscribing to topic "fcm_test" successful.',
-          );
-        }
+      case 'invite_room':
         break;
-      case 'unsubscribe':
-        {
-          LOG(
-            'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test".',
-          );
-          await FirebaseMessaging.instance.unsubscribeFromTopic('fcm_test');
-          LOG(
-            'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test" successful.',
-          );
-        }
+      case 'chat_message':
         break;
       case 'get_apns_token':
         {

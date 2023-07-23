@@ -55,7 +55,7 @@ class ChatGroupItem extends StatelessWidget {
       if (i > showMemberMax) return;
       showList.add(groupItem!.memberData[i]);
     }
-    LOG('--> ChatGroupItem initData [${groupItem!.id}] : $fixIndex / $itemHeight');
+    // LOG('--> ChatGroupItem initData [${groupItem!.id}] : $fixIndex / $itemHeight');
   }
 
   @override

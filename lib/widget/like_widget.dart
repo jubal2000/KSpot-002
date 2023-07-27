@@ -15,7 +15,7 @@ Widget LikeSmallWidget(BuildContext context, String type, JSON targetInfo,
 
 Widget LikeWidget(BuildContext context, String type, JSON targetInfo,
     {
-      double iconSize = 24,
+      double iconSize = 20,
       String title = '',
       bool showCount = false,
       bool isEnabled = true,

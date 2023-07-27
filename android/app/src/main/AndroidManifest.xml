@@ -38,6 +38,7 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -58,5 +59,11 @@
 
         <!-- NAVER MAP -->
         <meta-data android:name="com.naver.maps.map.CLIENT_ID" android:value="@string/naver_client_id" />
+
+        <!-- FIREBASE NOTIFY -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id"/>
+
     </application>
 </manifest>

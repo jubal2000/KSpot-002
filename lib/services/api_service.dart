@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -2164,7 +2165,8 @@ class ApiService extends GetxService {
   final ChatCollection        = 'data_chat';
 
   Future sendChatRoomPush(JSON info, String action, String targetId) async {
-    var tokens = [];
+    var tokensIOS = []; // ios
+    var tokensAOS = []; // android
     LOG('--> sendChatRoomPush [$action] : $targetId / ${info.toString()}');
     if (LIST_NOT_EMPTY(info['memberList'])) {
       for (var memberId in info['memberList']) {
@@ -2174,41 +2176,54 @@ class ApiService extends GetxService {
             UserModel user = UserModel.fromJson(member);
             LOG('--> sendChatRoomPush check [$action] : ${user.status} - ${user.checkPushON} / ${user.pushToken}');
             if (user.status > 0 && user.checkPushON) {
-              LOG('--> pushToken add : ${user.pushToken}');
-              tokens.add(user.pushToken);
+              LOG('--> pushToken add : [${user.deviceType}] ${user.pushToken}');
+              if (user.deviceType == 'ios') {
+                tokensIOS.add(user.pushToken);
+              } else {
+                tokensAOS.add(user.pushToken);
+              }
             }
           }
         }
       }
     }
-    if (tokens.isNotEmpty) {
-      var title = '';
-      var body  = '';
-      switch(action) {
-        case 'invite_room':
-          title = 'Invite room'.tr;
-          body  = STR(info['lastMessage']);
-          break;
-        case 'chat_message':
-          title = STR(info['senderName']);
-          body  = STR(info['desc']);
-          break;
-      }
-      var push = PushModel(
-        tokens: List<String>.from(tokens),
-        data: {
-          'action': action,
-          "title" : title,
-          "body"  : body,
-          'id'    : targetId,
-          'type'  : STR(info['type']),
-          'desc'  : STR(info['lastMessage']),
-        },
-      );
-      LOG('--> sendChatRoomPush data : ${push.toJson()}');
-      return await sendMultiFcmMessage(push.toJson());
+    var title = '';
+    var body  = '';
+    switch(action) {
+      case 'invite_room':
+        title = 'Invite room'.tr;
+        body  = STR(info['lastMessage']);
+        break;
+      case 'chat_message':
+        title = STR(info['senderName']);
+        body  = STR(info['desc']);
+        break;
     }
-    return null;
+    var dataJson = {
+      'action': action,
+      "title" : title,
+      "body"  : body,
+      'id'    : targetId,
+      'type'  : STR(info['type']),
+      'desc'  : STR(info['lastMessage']),
+    };
+    if (tokensIOS.isNotEmpty) {
+      var push = PushModel(
+        tokens: List<String>.from(tokensIOS),
+        data: dataJson
+      );
+      LOG('--> sendChatRoomPush IOS data : ${push.toJson()}');
+      await sendMultiFcmMessage(push.toJson());
+    }
+    if (tokensAOS.isNotEmpty) {
+      var push = PushModel(
+          tokens: List<String>.from(tokensAOS),
+          notification: PushNotificationModel(title, body),
+          data: dataJson
+      );
+      LOG('--> sendChatRoomPush AOS data : ${push.toJson()}');
+      await sendMultiFcmMessage(push.toJson());
+    }
   }
 
   Future<JSON> getChatOpenRoomData(String userId, String groupId, String country, [String countryState = '']) async {

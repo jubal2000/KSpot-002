@@ -74,14 +74,41 @@ class FirebaseService extends GetxService {
 
     firestore = FirebaseFirestore.instance;
     fireAuth  = FirebaseAuth.instance;
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      LOG('--> FirebaseMessaging.onMessage : ${message.toMap().toString()}');
+      showPush(message, false);
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      LOG('--> FirebaseMessaging.onMessageOpenedApp.listen : ${message.toString()}');
+      var notification = message.notification;
+      // AndroidNotification? android = message.notification?.android;
+      if (notification != null) {
+        var customData = message.data;
+        if (customData != null) {
+          LOG('--> customData : ${customData.toString()}');
+          var action = STR(customData['action']);
+          switch (action) {
+            case 'inviteRoom':
+              var targetId = STR(customData['id']);
+              LOG('--> touch push [invite] : $targetId');
+              break;
+          }
+        }
+      }
+    });
+
+    await setupFlutterNotifications();
+
+    // dynamic link ready..
+    initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
+
     messaging = FirebaseMessaging.instance;
 
-    if (messaging != null) {
-      // get firebase token..
-      token = await messaging!.getToken();
-      LOG('--> firebase init token : $token');
-    }
-
+    // get firebase token..
+    token = await messaging!.getToken();
+    LOG('--> firebase init token : $token');
     // alert permission..
     await messaging!.requestPermission(
       alert: true,
@@ -92,11 +119,6 @@ class FirebaseService extends GetxService {
       provisional: false,
       sound: true,
     );
-
-    await setupFlutterNotifications();
-
-    // dynamic link ready..
-    initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (initialLink != null) {
@@ -137,53 +159,21 @@ class FirebaseService extends GetxService {
     }
   }
 
-  @pragma('vm:entry-point')
-  Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-    await Firebase.initializeApp();
-    await setupFlutterNotifications();
-    showFlutterNotification(message);
-    LOG('--> Handling a background message ${message.messageId}');
-  }
-
   Future<void> setupFlutterNotifications() async {
+    LOG('---> setupFlutterNotifications : $isFlutterLocalNotificationsInitialized');
     if (isFlutterLocalNotificationsInitialized) {
       return;
     }
-    await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(FCM_TopicChannel);
+
+    await flutterLocalNotificationsPlugin.
+      resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.
+      createNotificationChannel(FCM_TopicChannel);
 
     await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
     );
-
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      LOG('--> FirebaseMessaging.onMessage : ${message.toMap().toString()}');
-      showPush(message, false);
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      LOG('--> FirebaseMessaging.onMessageOpenedApp.listen : ${message.toString()}');
-      var notification = message.notification;
-      // AndroidNotification? android = message.notification?.android;
-      if (notification != null) {
-        var customData = message.data;
-        if (customData != null) {
-          LOG('--> customData : ${customData.toString()}');
-          var action = STR(customData['action']);
-          switch (action) {
-            case 'inviteRoom':
-              var targetId = STR(customData['id']);
-              LOG('--> touch push [invite] : $targetId');
-              break;
-          }
-        }
-      }
-    });
-
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     isFlutterLocalNotificationsInitialized = true;
   }
@@ -259,7 +249,6 @@ class FirebaseService extends GetxService {
   }
 
   showPush(RemoteMessage message, bool isBackground) {
-    final cache = Get.find<CacheService>();
     if (!kIsWeb) {
       var   isShowPush = true;
       var   customData = message.data;
@@ -273,7 +262,8 @@ class FirebaseService extends GetxService {
           LOG('--> showPush [invite_room] : $targetId => $isShowPush');
           break;
         case 'chat_message':
-          isShowPush = cache.getChatRoomAlarmOn(targetId);
+          // final cache = Get.find<CacheService>();
+          // isShowPush = cache.getChatRoomAlarmOn(targetId);
           LOG('--> showPush [chat_message] : $targetId => $isShowPush');
           break;
         case 'comment':
@@ -302,17 +292,7 @@ class FirebaseService extends GetxService {
               iOS: DarwinNotificationDetails(
               )
           ),
-        ).then((_) {
-          LOG('--> showPush action : $action');
-          switch (action) {
-            case 'invite_room':
-            case 'chat_message':
-              moveChatRoom(targetId);
-              break;
-            case 'comment':
-              break;
-          }
-        });
+        );
       }
     }
   }

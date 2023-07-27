@@ -282,7 +282,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               if (!userViewModel.isMyProfile)...[
-                                showSendMessageWidget(context, userViewModel.userInfo!, title: 'TALK'.tr),
+                                showSendMessageWidget(context, userViewModel.userInfo!, title: '1:1 TALK'.tr),
                                 SizedBox(width: 2),
                               ],
                               if (userViewModel.isMyProfile)...[

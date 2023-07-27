@@ -1,3 +1,6 @@
+import 'dart:isolate';
+import 'dart:ui';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -31,13 +34,16 @@ import 'data/themes.dart';
 import 'utils/utils.dart';
 import 'data/words.dart';
 
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  LOG('--> _firebaseMessagingBackgroundHandler : ${message.messageId}');
+  await FirebaseService().setupFlutterNotifications();
+  FirebaseService().showPush(message, true);
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  late ReceivePort receivePort;
 
   await GetStorage.init();
   final cache = await Get.putAsync(() => CacheService().init());
@@ -46,8 +52,8 @@ Future<void> main() async {
   final auth  = await Get.putAsync(() => AuthService().init());
   final local = await Get.putAsync(() => LocalService().init());
 
-  api.initFirebase();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  api.initFirebase();
 
   Future getInfoData() async {
     return api.getInfoData();

@@ -8,7 +8,7 @@
     <string name="naver_id">8iNdRT5D2LZbG_2v1JsF</string>
     <string name="naver_secret">8wBtabva0M</string>
     <string name="google_apikey">AIzaSyB4BgTVRI400uwFkTuH1YvSDfaKtdLpij8</string>
-    <string name="default_notification_channel_id" translatable="false">noti_channel_00</string>
+    <string name="default_notification_channel_id" translatable="false">alert_channel_00</string>
     <string name="naver_client_id">5hbndwcqsy</string>
     <string name="naver_client_key">zaRo5fO7IbJCaMu5cdhoXS64J3ICpCbV7tLhPID9</string>
 </resources>

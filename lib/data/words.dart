@@ -863,7 +863,8 @@ class Words extends Translations {
       // button
       'SHARE': '공유',
       'COMMENT+': '댓글+',
-      'TALK': '대화',
+      '1:1 TALK': '1:1 대화',
+      'Like': '좋아요',
       'EVENT ADD': '이벤트 추가',
       'CLASS ADD': '강습 추가',
       'SPOT\nSTORY ADD': '스팟\n스토리 추가',

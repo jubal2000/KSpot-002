@@ -179,6 +179,7 @@ MemberData _$MemberDataFromJson(Map<String, dynamic> json) => MemberData(
       nickName: json['nickName'] as String,
       pic: json['pic'] as String,
       createTime: DateTime.parse(json['createTime'] as String),
+      pushToken: json['pushToken'] as String?,
     );
 
 Map<String, dynamic> _$MemberDataToJson(MemberData instance) =>
@@ -188,6 +189,7 @@ Map<String, dynamic> _$MemberDataToJson(MemberData instance) =>
       'nickName': instance.nickName,
       'pic': instance.pic,
       'createTime': instance.createTime.toIso8601String(),
+      'pushToken': instance.pushToken,
     };
 
 RecommendData _$RecommendDataFromJson(Map<String, dynamic> json) =>

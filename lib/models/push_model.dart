@@ -21,13 +21,16 @@ part 'push_model.g.dart';
 
 @JsonSerializable(
   explicitToJson: true,
+  includeIfNull: false,
 )
 class PushModel {
   List<String> tokens;
+  PushNotificationModel? notification;
   JSON? data;
 
   PushModel({
     required this.tokens,
+    this.notification,
     this.data,
   });
 
@@ -37,4 +40,25 @@ class PushModel {
 
   factory PushModel.fromJson(JSON json) => _$PushModelFromJson(json);
   JSON toJson() => _$PushModelToJson(this);
+}
+
+@JsonSerializable()
+class PushNotificationModel {
+  String title;
+  String body;
+
+  PushNotificationModel(
+    this.title,
+    this.body,
+  );
+
+  static create() {
+    return PushNotificationModel(
+        '',
+        ''
+    );
+  }
+
+  factory PushNotificationModel.fromJson(JSON json) => _$PushNotificationModelFromJson(json);
+  JSON toJson() => _$PushNotificationModelToJson(this);
 }

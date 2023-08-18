@@ -14,7 +14,6 @@ const Color THEME_CARD_BG_COLOR = Color(0xFF58575B);
 final ThemeData lightTheme = ThemeData(
     scaffoldBackgroundColor: THEME_MAIN_BG_COLOR,
     primarySwatch: NAVY,
-    primaryColorBrightness: Brightness.light,
     appBarTheme: AppBarTheme(
       systemOverlayStyle: SystemUiOverlayStyle.dark,
       iconTheme: IconThemeData(color: Colors.black),
@@ -78,7 +77,6 @@ final ThemeData lightTheme = ThemeData(
 final ThemeData darkTheme = ThemeData(
     scaffoldBackgroundColor: Colors.white,
     primarySwatch: NAVY,
-    primaryColorBrightness: Brightness.light,
     appBarTheme: AppBarTheme(
       systemOverlayStyle: SystemUiOverlayStyle.dark,
       iconTheme: IconThemeData(color: Colors.black),

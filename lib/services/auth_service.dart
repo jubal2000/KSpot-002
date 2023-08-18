@@ -9,7 +9,6 @@ import 'package:kspot_002/services/cache_service.dart';
 import '../repository/chat_repository.dart';
 import '../repository/message_repository.dart';
 import 'firebase_service.dart';
-import 'package:oauth2/oauth2.dart' as oauth2;
 
 import '../data/app_data.dart';
 import '../data/dialogs.dart';

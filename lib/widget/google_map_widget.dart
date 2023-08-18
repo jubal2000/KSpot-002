@@ -8,10 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_google_map_polyline_point/flutter_polyline_point.dart';
-import 'package:flutter_google_map_polyline_point/point_lat_lng.dart';
-import 'package:flutter_google_map_polyline_point/utils/polyline_result.dart';
-import 'package:flutter_google_map_polyline_point/utils/request_enums.dart';
+import 'package:flutter_polyline_points_plus/flutter_polyline_points_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:helpers/helpers.dart';
@@ -69,7 +66,6 @@ class GoogleMapWidget extends StatefulWidget{
 }
 
 class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClientMixin<GoogleMapWidget> {
-
   PolylinePoints polylinePoints = PolylinePoints();
   Map<PolylineId, Polyline> polylines = {}; //polylines to show direction
   Set<Marker> markers = Set(); //markers for google map

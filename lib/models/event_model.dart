@@ -73,20 +73,22 @@ class EventModel {
   DateTime  updateTime;     // 수정 시간
   DateTime  createTime;     // 생성 시간
 
-  List<String>?         tagData;        // tag
-  List<String>?         searchData;     // 검색어 목록
-  List<PicData>?        picData;        // 메인 이미지 목록
-  List<TimeData>?       timeData;       // 시간 정보 목록
-  List<OptionData>?     optionData;     // 옵션 정보
-  List<CustomData>?     customData;     // 사용자 설정 정보
-  List<MemberData>?     managerData;    // 관리자 목록
+  List<String>?         tagData;          // tag
+  List<String>?         searchData;       // 검색어 목록
+  List<PicData>?        picData;          // 메인 이미지 목록
+  List<TimeData>?       timeData;         // 시간 정보 목록
+  List<OptionData>?     optionData;       // 옵션 정보
+  List<CustomData>?     customData;       // 사용자 설정 정보
+  List<MemberData>?     managerData;      // 관리자 목록
 
-  List<PromotionData>?  promotionData;  // 광고 정보
-  List<RecommendData>?  recommendData;  // 추천 정보
+  List<PromotionData>?  promotionData;    // 광고 정보
+  List<RecommendData>?  recommendData;    // 추천 정보
 
   PlaceModel?           placeInfo;
   Map<String, int>?     recommendCount;   // 추천 정보 카운트(선택된 날짜)
   String?               timeRange;
+  String?               themeColor;       // 대표 컬러
+
 
   @JsonKey(includeFromJson: false)
   int sortIndex = 0;

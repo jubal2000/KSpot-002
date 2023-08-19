@@ -38,7 +38,6 @@ class PlaceDetailScreen extends StatefulWidget {
 
 class PlaceDetailState extends State<PlaceDetailScreen> with TickerProviderStateMixin {
   final _viewModel = PlaceDetailViewModel();
-  final _scrollController = AutoScrollController();
 
   initData() {
     _viewModel.setPlaceData(widget.placeInfo);
@@ -75,47 +74,53 @@ class PlaceDetailState extends State<PlaceDetailScreen> with TickerProviderState
         body: ChangeNotifierProvider<PlaceDetailViewModel>.value(
           value: _viewModel,
           child: Consumer<PlaceDetailViewModel>(builder: (context, viewModel, _) {
-            return ListView(
-              controller: _scrollController,
-              children: [
-                if (JSON_NOT_EMPTY(widget.placeInfo.picData))...[
-                  viewModel.showImageList()
-                ],
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 20),
-                      Row(
-                        children: [
-                          viewModel.showPicture(),
-                          SizedBox(width: 15),
-                          Expanded(
-                            child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  viewModel.showTitle()
-                                ]
+            return Container(
+              child: ListView(
+                shrinkWrap: true,
+                controller: viewModel.scrollController,
+                children: [
+                  if (JSON_NOT_EMPTY(widget.placeInfo.picData))...[
+                    viewModel.showImageList()
+                  ],
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 20),
+                        Row(
+                          children: [
+                            viewModel.showPicture(),
+                            SizedBox(width: 15),
+                            Expanded(
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    viewModel.showTitle()
+                                  ]
+                              ),
                             ),
-                          ),
-                          if (!widget.isPreview)...[
-                            SizedBox(height: 20),
-                            viewModel.showShareBox(),
-                          ],
-                        ]
-                      ),
-                      SizedBox(height: 20),
-                      if (viewModel.placeInfo!.desc.isNotEmpty)...[
-                        viewModel.showDesc(),
-                      ],
-                      SizedBox(height: 10),
-                      showHorizontalDivider(Size(double.infinity * 0.9, 40), color: LineColor(context)),
-                      viewModel.showLocation(),
-                    ]
+                            if (!widget.isPreview)...[
+                              SizedBox(height: 20),
+                              viewModel.showShareBox(),
+                            ],
+                          ]
+                        ),
+                        SizedBox(height: 20),
+                        if (viewModel.placeInfo!.desc.isNotEmpty)...[
+                          viewModel.showDesc(),
+                        ],
+                        SizedBox(height: 10),
+                        showHorizontalDivider(Size(double.infinity * 0.9, 40), color: LineColor(context)),
+                        viewModel.showLocation(),
+                        showHorizontalDivider(Size(double.infinity * 0.9, 40), color: LineColor(context)),
+                        viewModel.showEventList(),
+                        SizedBox(height: 20),
+                      ]
+                    )
                   )
-                )
-              ]
+                ]
+              )
             );
           })
         )

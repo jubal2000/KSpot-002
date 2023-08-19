@@ -166,7 +166,7 @@ class PlaceListItemState extends State<PlaceListItem> {
           ),
           if (widget.isShowEvent && widget.selectEventList != null && widget.selectEventList!.isNotEmpty)...[
             FutureBuilder(
-                future: api.getEventListFromId(widget.itemData.id),
+                future: api.getEventListFromPlaceId(widget.itemData.id),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     var eventList = snapshot.data as JSON;

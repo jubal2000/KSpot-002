@@ -154,6 +154,23 @@ class EventRepository {
 
   /////////////////////////////////////////////////////////////////////////////////////////////
 
+  Future<Map<String, EventModel>> getEventListFromPlaceId(String placeId) async {
+    Map<String, EventModel> result = {};
+    try {
+      final response = await api.getEventListFromPlaceId(placeId);
+      for (var item in response.entries) {
+        var addItem = EventModel.fromJson(FROM_SERVER_DATA(item.value));
+        result[item.key] = addItem;
+      }
+      LOG("--> getEventListFromPlaceId result: $result");
+      return result;
+    } catch (e) {
+      LOG("--> getEventListFromPlaceId error: $e");
+      throw e.toString();
+    }
+  }
+
+
   Future<String?> uploadImageInfo(JSON imageInfo, [String path = 'event_img']) async {
     return await api.uploadImageData(imageInfo, path);
   }

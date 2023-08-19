@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
+import 'package:kspot_002/services/cache_service.dart';
 import 'package:kspot_002/view/place/place_detail_screen.dart';
 import 'package:kspot_002/view/place/place_edit_screen.dart';
+import 'package:kspot_002/widget/event_item.dart';
 import 'package:kspot_002/widget/google_map_widget.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -13,11 +15,15 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../data/app_data.dart';
 import '../data/theme_manager.dart';
+import '../models/event_model.dart';
 import '../models/place_model.dart';
+import '../repository/event_repository.dart';
 import '../repository/user_repository.dart';
 import '../utils/utils.dart';
+import '../view/event/event_detail_screen.dart';
 import '../widget/comment_widget.dart';
 import '../widget/content_item_card.dart';
+import '../widget/event_schedule_widget.dart';
 import '../widget/image_scroll_viewer.dart';
 import '../widget/like_widget.dart';
 import '../widget/share_widget.dart';
@@ -25,6 +31,8 @@ import '../widget/share_widget.dart';
 class PlaceDetailViewModel extends ChangeNotifier {
   final scrollController = AutoScrollController();
   final userRepo  = UserRepository();
+  final eventRepo = EventRepository();
+  final cache     = Get.find<CacheService>();
 
   final topHeight = 50.0;
   final botHeight = 70.0;
@@ -39,11 +47,21 @@ class PlaceDetailViewModel extends ChangeNotifier {
   var isShowMap = false;
 
   PlaceModel? placeInfo;
+  Map<String, EventModel> _eventData = {};
+  JSON _selectDateList = {};
+  JSON _selectEvent = {};
+
+  Future getEventData() async {
+    if (placeInfo != null) {
+      return await eventRepo.getEventListFromPlaceId(placeInfo!.id);
+    }
+    return [];
+  }
 
   setPlaceData(PlaceModel placeItem) {
     placeInfo = placeItem;
     isManager = CheckManager(placeInfo!.toJson());
-    LOG('--> setEventData : $isManager / ${placeInfo!.toJson()}');
+    LOG('--> setPlaceData : $isManager / ${placeInfo!.toJson()}');
   }
 
   moveToEdit() {
@@ -338,5 +356,91 @@ class PlaceDetailViewModel extends ChangeNotifier {
           ]
         ]
     );
+  }
+
+  showEventList() {
+    var isUpdated = false;
+    return FutureBuilder(
+      future: getEventData(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          _eventData = snapshot.data;
+          return StatefulBuilder(
+            builder: (context, setState) {
+            return Column(
+              children: [
+                EventScheduleList(_eventData,
+                  showAddButton: false,
+                  currentDate: AppData.currentDate,
+                  onInitialSelected: (view, dateTime, jsonData) {
+                    LOG('--> ShowEventTimeList onInitialSelected : $dateTime / $jsonData');
+                    if (!isUpdated) {
+                      isUpdated = true;
+                      setState(() {
+                        refreshCalendar(jsonData);
+                      });
+                    }
+                  },
+                  onSelected: (view, dateTime, jsonData) {
+                    LOG('--> ShowEventTimeList onSelected : $dateTime / $jsonData');
+                    AppData.currentDate = dateTime ?? DateTime.now();
+                    setState(() {
+                      refreshCalendar(jsonData, true);
+                    });
+                  },
+                ),
+                if (_selectEvent.isNotEmpty)...[
+                  SubTitleBarEx(context, 'Select event'.tr, child: Text(DATE_STR(AppData.currentDate))),
+                  ..._selectEvent.entries.map((item) =>
+                    EventCardItem(item.value, placeData: placeInfo)).toList(),
+                ],
+              ]
+            );
+          });
+          // return ListView(
+          //   shrinkWrap: true,
+          //   physics: NeverScrollableScrollPhysics(),
+          //   children: List<Widget>.from(snapshot.data.map((e) => EventCardItem(e, placeData: placeInfo,
+          //     onShowDetail: (id, status) {
+          //
+          //     }
+          //   )).toList()),
+          // );
+        } else {
+          return showLoadingCircleSquare(30);
+        }
+      }
+    );
+  }
+
+  refreshCalendar(jsonData, [var isMoveToBot = false]) {
+    _selectEvent.clear();
+    _selectDateList = jsonData ?? {};
+    if (_selectDateList.isNotEmpty) {
+      for (var item in _selectDateList.entries) {
+        LOG('--> initCalendar item : ${item.toString()}');
+        var eventId = STR(item.value['eventId']);
+        if (eventId.isNotEmpty) {
+          _selectEvent[eventId] = _eventData[eventId];
+        }
+      }
+    }
+    if (isMoveToBot) {
+      Future.delayed(Duration(milliseconds: 300)).then((_) {
+        scrollController.animateTo(scrollController.position.maxScrollExtent - 1,
+            curve: Curves.easeOut, duration: Duration(milliseconds: 200));
+      });
+    }
+  }
+
+  showEventItemDetail(EventModel item) {
+    Future.delayed(Duration(milliseconds: 500)).then((_) {
+      Get.to(() => EventDetailScreen(item, item.placeInfo))!.then((eventInfo) {
+        if (eventInfo != null) {
+          cache.setEventItem(eventInfo!);
+          notifyListeners();
+        }
+      });
+    });
   }
 }

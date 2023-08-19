@@ -687,8 +687,8 @@ class ApiService extends GetxService {
     return result;
   }
   
-  Future<JSON> getEventListFromId(String placeId) async {
-    // log('--> getPlaceEventList : placeId');
+  Future<JSON> getEventListFromPlaceId(String placeId) async {
+    // log('--> getEventListFromPlaceId : placeId');
     JSON result = {};
     var ref = firestore!.collection(EventCollection);
     var snapshot = await ref.where('status', isGreaterThan: 0)
@@ -699,10 +699,10 @@ class ApiService extends GetxService {
       result[doc.data()['id']] = FROM_SERVER_DATA(doc.data());
     }
     result = await cleanEventExpire(result);
-    LOG('--> getEventListFromId result [${result.length}] : $result');
+    LOG('--> getEventListFromPlaceId result [${result.length}] : $result');
     return result;
   }
-  
+
   Future<JSON> getEventListFromGroupId(String groupId) async {
     // LOG('--> getPlaceEventList : placeId');
     JSON result = {};

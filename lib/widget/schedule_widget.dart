@@ -32,7 +32,7 @@ class _ScheduleState extends State<ScheduleWidget> {
   final _monthNames = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
-  final colorList = [Colors.yellow, Colors.orange, Colors.purple, Colors.blue, Colors.teal, Colors.greenAccent];
+  // final colorList = [Colors.yellow, Colors.orange, Colors.purple, Colors.blue, Colors.teal, Colors.greenAccent];
 
   DataSource? dayData;
 
@@ -87,18 +87,16 @@ class _ScheduleState extends State<ScheduleWidget> {
 
   DataSource? getCalendarDataSource(JSON timeList) {
     List<Appointment> appointments = <Appointment>[];
-    var count = 0;
     for (var item in timeList.entries) {
-      var defaultBgColor = colorList[count];
       var eventId = item.value['eventId'] ?? '';
       var placeId = item.value['placeId'] ?? '';
-      LOG('--> timeList.entries item : $eventId / $placeId => $item');
+      LOG('--> timeList.entries item : $eventId / $placeId => ${item.value['startDate']}');
       if (LIST_NOT_EMPTY(item.value['day'])) {
         for (var time in item.value['day']) {
           // LOG('--> Day Data : ${item.value['dayData'][i]} / $duration');
           var startDate = DateTime.parse(time);
           var dayStr = startDate.toString().split(' ').first;
-          var markColor = COL(item.value['themeColor'], defaultValue:defaultBgColor);
+          var markColor = COL(item.value['color'], defaultValue:Colors.teal);
           var appoint = setCalendarDaySource(item.key, eventId, placeId, dayStr, item.value, markColor);
           if (appoint != null) appointments.add(appoint);
         }
@@ -152,7 +150,7 @@ class _ScheduleState extends State<ScheduleWidget> {
             // LOG('--> weekday [$dayStr] : $wd / ${dayWeekText[wd]} => $isShow');
           }
           if (isShow) {
-            var markColor = COL(item.value['themeColor'], defaultValue:defaultBgColor).withOpacity(0.75);
+            var markColor = COL(item.value['color'], defaultValue:Colors.teal);
             var appoint = setCalendarDaySource(item.key, eventId, placeId, dayStr, item.value, markColor);
             if (appoint != null) {
               appointments.add(appoint);
@@ -162,7 +160,6 @@ class _ScheduleState extends State<ScheduleWidget> {
           }
         }
       }
-      count = (count+1) % colorList.length;
     }
     return appointments.isNotEmpty ? DataSource(appointments) : null;
   }

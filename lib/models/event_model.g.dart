@@ -59,7 +59,8 @@ EventModel _$EventModelFromJson(Map<String, dynamic> json) => EventModel(
       ..recommendCount = (json['recommendCount'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as int),
       )
-      ..timeRange = json['timeRange'] as String?;
+      ..timeRange = json['timeRange'] as String?
+      ..themeColor = json['themeColor'] as String?;
 
 Map<String, dynamic> _$EventModelToJson(EventModel instance) =>
     <String, dynamic>{
@@ -94,4 +95,5 @@ Map<String, dynamic> _$EventModelToJson(EventModel instance) =>
       'placeInfo': instance.placeInfo?.toJson(),
       'recommendCount': instance.recommendCount,
       'timeRange': instance.timeRange,
+      'themeColor': instance.themeColor,
     };

@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/repository/user_repository.dart';
+import 'package:palette_generator/palette_generator.dart';
 import 'package:uuid/uuid.dart';
 
 import '../data/app_data.dart';
@@ -350,19 +352,28 @@ class EventEditViewModel extends ChangeNotifier {
     List<XFile> pickList = await ImagePicker().pickMultiImage(maxWidth: PIC_IMAGE_SIZE_MAX, maxHeight: PIC_IMAGE_SIZE_MAX);
     if (pickList.isNotEmpty) {
       for (var i=0; i<pickList.length; i++) {
-        var image = pickList[i];
-        var url   = await ShowImageCroper(image.path);
+        var imageFile = pickList[i];
+        var url   = await ShowImageCroper(imageFile.path);
         var data  = await ReadFileByte(url);
         var resizeData = await resizeImage(data!, IMAGE_SIZE_MAX) as Uint8List;
         var key = Uuid().v1();
         imageData[key] = {'id': key, 'type': 0, 'url': '', 'data': resizeData};
-        // LOG('----> picLocalImage: ${imageData[key]} / $key');
+        // LOG('----> picLocalImage: ${imageData[key]['color']}');
         if (titlePicKey.isEmpty) titlePicKey = key;
         // if (editItem!.pic.isEmpty) editItem!.pic = key;
       }
       setImageData();
       notifyListeners();
     }
+  }
+
+  Future<Color> getImagePalette (ImageProvider imageProvider) async {
+    final PaletteGenerator paletteGenerator = await PaletteGenerator
+        .fromImageProvider(imageProvider);
+    if (paletteGenerator.dominantColor != null) {
+      return paletteGenerator.dominantColor!.color;
+    }
+    return Colors.white;
   }
 
   showImageSelector() {
@@ -467,22 +478,26 @@ class EventEditViewModel extends ChangeNotifier {
               type: 0,
               url: result,
             ));
-            item.value['url'] = result;
+            item.value['url'  ] = result;
             upCount++;
           }
         } else if (JSON_NOT_EMPTY(item.value['url'])) {
           editItem!.picData!.add(PicData.fromJson(item.value));
         }
-        LOG('---> editItem key check : $titlePicKey / ${item.key}');
         // set title pic..
         if (titlePicKey == item.key) {
           editItem!.pic = STR(item.value['url']);
+          var color = await getImagePalette(Image.memory(item.value['data']).image);
+          editItem!.themeColor = color.hexCode;
         }
       }
-      LOG('---> image upload done : $upCount / ${editItem!.pic}');
       if (editItem!.pic.isEmpty) {
-        editItem!.pic = imageData.entries.first.value['url'];
+        var firstItem = imageData.entries.first.value;
+        editItem!.pic = firstItem['url'];
+        var color = await getImagePalette(Image.memory(firstItem['data']).image);
+        editItem!.themeColor = color.hexCode;
       }
+      LOG('----------> image upload done : $upCount / ${editItem!.themeColor}');
     }
     // upload customField image..
     if (editItem!.customData != null) {

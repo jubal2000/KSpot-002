@@ -7,6 +7,7 @@ import 'package:flutter_dropdown_alert/alert_controller.dart';
 import 'package:flutter_dropdown_alert/model/data_alert.dart';
 import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/view/follow/follow_screen.dart';
+import 'package:kspot_002/view/place/place_edit_screen.dart';
 import 'package:kspot_002/view/story/story_edit_screen.dart';
 import 'package:kspot_002/view_model/user_view_model.dart';
 import 'package:package_info/package_info.dart';
@@ -101,17 +102,40 @@ class AppViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // showTopMenuBar() {
+  //   return TopCenterAlign(
+  //       child: SizedBox(
+  //         height: UI_APPBAR_HEIGHT,
+  //         child: HomeTopMenuBar(
+  //             MainMenuID.event,
+  //             isDateOpen: isDateOpen,
+  //             onCountryChanged: () {
+  //               refreshModel();
+  //               refreshView();
+  //             },
+  //             onDateChange: (state) {
+  //               isDateOpen = state;
+  //               refreshView();
+  //               dateController.setDateAndAnimate(AppData.currentDate);
+  //               // viewModel.dateController.animateToSelection(duration: Duration(milliseconds: 10));
+  //             }
+  //         ),
+  //       )
+  //   );
+  // }
+
   showMainTopMenu([var isHideMenu = false]) {
     return TopCenterAlign(
       child: SizedBox(
         height: UI_APPBAR_HEIGHT,
         child: HomeTopMenuBar(
-          MainMenuID.chat,
-          isShowDatePick: false,
+          appbarMenuMode,
+          isShowDatePick: appbarMenuMode == MainMenuID.event,
+          isDateOpen: AppData.eventViewModel.isDateOpen,
           onCountryChanged: () {
-
           },
           onDateChange: (state) {
+            AppData.eventViewModel.setSelectDate(state);
           }
         )
       )
@@ -126,7 +150,7 @@ class AppViewModel extends ChangeNotifier {
     EventGroupSelectDialog(Get.context!,
         AppData.currentEventGroup!.id,
         AppData.currentEventGroup!.contentType).then((_) {
-          AppData.eventViewModel.refreshModel();
+          AppData.eventViewModel.initView();
           notifyListeners();
     });
   }
@@ -269,7 +293,17 @@ class AppViewModel extends ChangeNotifier {
           //   return;
           // }
           var selected = value as DropdownItem;
+          LOG('-----> selected : $selected');
           switch (selected.type) {
+            case DropdownItemType.place:
+              Get.to(() => PlaceEditScreen())!.then((result) {
+                if (result != null) {
+                  AppData.eventViewModel.isMapUpdate = true;
+                  cache.setPlaceItem(result);
+                  notifyListeners();
+                }
+              });
+              break;
             case DropdownItemType.event:
               Get.to(() => EventEditScreen())!.then((result) {
                 if (result != null) {

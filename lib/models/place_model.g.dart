@@ -14,6 +14,7 @@ PlaceModel _$PlaceModelFromJson(Map<String, dynamic> json) => PlaceModel(
       desc: json['desc'] as String,
       descKr: json['descKr'] as String?,
       pic: json['pic'] as String,
+      themeColor: json['themeColor'] as String?,
       groupId: json['groupId'] as String,
       userId: json['userId'] as String,
       country: json['country'] as String,
@@ -28,7 +29,17 @@ PlaceModel _$PlaceModelFromJson(Map<String, dynamic> json) => PlaceModel(
       picData: (json['picData'] as List<dynamic>?)
           ?.map((e) => PicData.fromJson(e as Map<String, dynamic>))
           .toList(),
-    );
+      managerData: (json['managerData'] as List<dynamic>?)
+          ?.map((e) => MemberData.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      optionData: (json['optionData'] as List<dynamic>?)
+          ?.map((e) => OptionData.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      tagData:
+          (json['tagData'] as List<dynamic>?)?.map((e) => e as String).toList(),
+    )..customData = (json['customData'] as List<dynamic>?)
+        ?.map((e) => CustomData.fromJson(e as Map<String, dynamic>))
+        .toList();
 
 Map<String, dynamic> _$PlaceModelToJson(PlaceModel instance) =>
     <String, dynamic>{
@@ -39,6 +50,7 @@ Map<String, dynamic> _$PlaceModelToJson(PlaceModel instance) =>
       'desc': instance.desc,
       'descKr': instance.descKr,
       'pic': instance.pic,
+      'themeColor': instance.themeColor,
       'groupId': instance.groupId,
       'userId': instance.userId,
       'country': instance.country,
@@ -49,4 +61,8 @@ Map<String, dynamic> _$PlaceModelToJson(PlaceModel instance) =>
       'createTime': instance.createTime.toIso8601String(),
       'phoneData': instance.phoneData,
       'picData': instance.picData?.map((e) => e.toJson()).toList(),
+      'managerData': instance.managerData?.map((e) => e.toJson()).toList(),
+      'customData': instance.customData?.map((e) => e.toJson()).toList(),
+      'optionData': instance.optionData?.map((e) => e.toJson()).toList(),
+      'tagData': instance.tagData,
     };

@@ -75,4 +75,8 @@ class PlaceRepository {
     }
     return null;
   }
+
+  Future<String?> uploadImageInfo(JSON imageInfo, [String path = 'place_img']) async {
+    return await api.uploadImageData(imageInfo, path);
+  }
 }

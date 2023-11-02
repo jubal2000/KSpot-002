@@ -28,7 +28,7 @@ class StoryScreen extends StatelessWidget {
           value: AppData.appViewModel,
           child: Consumer<AppViewModel>(
             builder: (context, appViewModel, _) {
-              LOG('--> AppViewModel refresh');
+              LOG('--> getStoryList');
               AppData.storyViewModel.getStoryList();
               return LayoutBuilder(
                 builder: (context, layout) {

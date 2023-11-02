@@ -181,6 +181,7 @@ class AppData {
   static JSON INFO_PLAY_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['autoPlay'] ??= {}) : {};
   static JSON INFO_SHOP_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['shop'] ??= {}) : {};
   static JSON INFO_EVENT_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['event'] ??= {}) : {};
+  static JSON INFO_PLACE_OPTION = infoData['option'] != null ? JSON.from(infoData['option']['place'] ??= {}) : {};
 
 
   static var mainListType = HomeListType.list;
@@ -254,7 +255,7 @@ class AppData {
   }
 
   static getStatusBarColor([bool isDark = false]) {
-    LOG('--> getStatusBarColor: $isDark');
+    // LOG('--> getStatusBarColor: $isDark');
     return SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: isDark ? Brightness.dark : Brightness.light,
@@ -263,7 +264,7 @@ class AppData {
   }
 
   static setStatusBarColor([bool isDark = false]) {
-    LOG('--> setStatusBarColor: $isDark');
+    // LOG('--> setStatusBarColor: $isDark');
     SystemChrome.setSystemUIOverlayStyle(getStatusBarColor(isDark));
   }
 }

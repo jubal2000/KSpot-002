@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
   final _fontSize = UI_FONT_SIZE_SS;
   final _radiusSize = 20.0;
 
-  List<Widget> pages = [
+  List<Widget> _mainPages = [
     EventScreen(),
     StoryScreen(),
     ChattingScreen(),
@@ -91,7 +91,7 @@ class HomeScreen extends StatelessWidget {
                     // ),
                     IndexedStack(
                       index: viewModel.menuIndex,
-                      children: pages,
+                      children: _mainPages,
                     ),
                     // pages[viewModel.menuIndex],
                     viewModel.showMainTopMenu(),

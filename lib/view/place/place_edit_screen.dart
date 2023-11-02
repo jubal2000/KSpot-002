@@ -1,109 +1,126 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:kspot_002/view_model/place_view_model.dart';
+import 'package:helpers/helpers.dart';
+import 'package:kspot_002/data/common_sizes.dart';
+import 'package:kspot_002/view/place/place_edit_group_screen.dart';
+import 'package:kspot_002/view_model/event_edit_view_model.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/app_data.dart';
-import '../../data/common_sizes.dart';
-import '../../data/dialogs.dart';
-import '../../data/theme_manager.dart';
-import '../../models/place_model.dart';
+import '../../models/event_model.dart';
 import '../../utils/utils.dart';
-import '../../widget/edit/edit_component_widget.dart';
-import '../../widget/edit/edit_list_widget.dart';
-import '../../widget/content_item_card.dart';
+import '../../view_model/place_edit_view_model.dart';
+import '../../widget/page_dot_widget.dart';
+import '../../widget/title_text_widget.dart';
+import '../../models/place_model.dart';
+import '../event/event_edit_place_screen.dart';
+import 'place_edit_input_screen.dart';
 
 class PlaceEditScreen extends StatefulWidget {
-  PlaceEditScreen({Key? key, this.placeItem}) : super(key: key);
+  PlaceEditScreen({Key? key, this.placeInfo}) : super(key: key);
 
-  PlaceModel? placeItem;
+  PlaceModel? placeInfo;
 
   @override
   _PlaceEditScreenState createState ()=> _PlaceEditScreenState();
 }
 
 class _PlaceEditScreenState extends State<PlaceEditScreen> {
-  final _viewModel = PlaceViewModel();
-  final isEdited = false;
+  final _viewModel = PlaceEditViewModel();
 
   @override
   void initState () {
-    widget.placeItem ??= PlaceModelEx.empty('', title: 'test title', desc: 'test desc..');
-    _viewModel.setPlaceInfo(widget.placeItem!);
-    super.initState ();
+    _viewModel.isEditMode = widget.placeInfo != null;
+    LOG('--> EventEditScreen : ${_viewModel.isEditMode}');
+    if (_viewModel.isEditMode) {
+      _viewModel.setEditItem(widget.placeInfo!);
+    } else {
+      _viewModel.setEditItem(PlaceModelEx.empty(''));
+    }
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-          onWillPop: () async {
-            if (isEdited) {
-              var result = await showBackAgreeDialog(context);
-              switch (result) {
-                case 1:
-                  break;
-                default:
-                  return false;
-              }
-            }
-            return true;
-          },
-          child: SafeArea(
-            top: false,
-            child: Scaffold(
-              appBar: AppBar(
-                title: Text(widget.placeItem == null ? 'PLACE ADD'.tr : 'PLACE EDIT'.tr, style: AppBarTitleStyle(context)),
-                titleSpacing: 0,
-                toolbarHeight: 50.w,
-              ),
-              body: ChangeNotifierProvider<PlaceViewModel>.value(
-              value: PlaceViewModel(),
-                child: Consumer<PlaceViewModel>(builder: (context, viewModel, _) {
-                  return ListView(
-                    padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w),
+    return  ChangeNotifierProvider<PlaceEditViewModel>.value(
+      value: _viewModel,
+      child: Consumer<PlaceEditViewModel>(
+        builder: (context, viewModel, _) {
+          return WillPopScope(
+            onWillPop: () async {
+              viewModel.moveBackStep();
+              return false;
+            },
+            child: SafeArea(
+              top: false,
+              child:Scaffold(
+                appBar: AppBar(
+                  title: TopTitleText(context, viewModel.isEditMode ? 'Place Edit'.tr : viewModel.titleN[viewModel.stepIndex].tr),
+                  titleSpacing: 0,
+                  toolbarHeight: UI_EDIT_TOOL_HEIGHT.w,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                ),
+                body: Container(
+                  child: Column(
                     children: [
-                      SubTitle(context, 'PLACE GROUP'.tr),
-                      Row(
-                        children: [
-                          if (JSON_NOT_EMPTY(AppData.currentEventGroup))
-                            Expanded(
-                              child: ContentItem(AppData.currentEventGroup!.toJson(),
-                                  padding: EdgeInsets.zero,
-                                  showType: GoodsItemCardType.placeGroup,
-                                  descMaxLine: 2,
-                                  isShowExtra: false,
-                                  titleStyle: ItemTitleLargeStyle(context), descStyle: ItemDescStyle(context)),
+                      if (viewModel.isEditMode)...[
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                            child: PlaceEditInputScreen(parentViewModel: viewModel)
+                          ),
+                        ),
+                      ],
+                      if (!viewModel.isEditMode)...[
+                        PageDotWidget(
+                          viewModel.stepIndex, viewModel.stepMax,
+                          dotType: PageDotType.line,
+                          height: 5.h,
+                          activeColor: Theme.of(context).primaryColor,
+                          width: Get.width - (UI_HORIZONTAL_SPACE.w * 2),
+                        ),
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.fromLTRB(UI_HORIZONTAL_SPACE, UI_TOP_SPACE.w, UI_HORIZONTAL_SPACE, 0),
+                            child: IndexedStack(
+                              key: ValueKey(viewModel.stepIndex),
+                              index: viewModel.stepIndex,
+                              children: [
+                                showAgreeStep(context, viewModel),
+                                // PlaceEditGroupSelectScreen(parentViewModel: viewModel),
+                                PlaceEditInputScreen(parentViewModel: viewModel),
+                              ],
                             ),
-                          // showEventGroupAddButton(context, Size(80,60), () {
-                          //   setState(() {
-                          //     if (AppData.listSelectData.isNotEmpty) {
-                          //       widget.placeItem!.groupId = AppData.listSelectData.entries.first.key;
-                          //     }
-                          //   });
-                          // }),
-                        ],
-                      ),
-                      viewModel.showImageSelector(),
-                      SizedBox(height: UI_LIST_TEXT_SPACE_S.w),
-                      SubTitle(context, 'INFO'.tr),
-                      SizedBox(height: UI_LIST_TEXT_SPACE_S.w),
-                      EditTextField(context, 'TITLE'.tr, viewModel.placeInfo!.title, hint: 'TITLE'.tr, maxLength: TITLE_LENGTH,
-                      onChanged: (value) {
-
-                      }),
-                      EditTextField(context, 'DESC'.tr, viewModel.placeInfo!.desc, hint: 'DESC'.tr, maxLength: DESC_LENGTH,
-                      maxLines: null, keyboardType: TextInputType.multiline, onChanged: (value) {
-
-                      }),
+                          ),
+                        ),
+                      ],
+                      if (!viewModel.isShowOnly)...[
+                        SizedBox(height: UI_LIST_TEXT_SPACE_S),
+                        BottomCenterAlign(
+                          child: GestureDetector(
+                            onTap: () {
+                              // if (!viewModel.isNextEnable) return; // disabled for Dev..
+                              viewModel.moveNextStep();
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              height: UI_BOTTOM_HEIGHT.w,
+                              color: viewModel.isNextEnable ? Theme.of(context).primaryColor : Colors.black45,
+                              alignment: Alignment.center,
+                              child: Text('Next'.tr, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w600,
+                                  color: Theme.of(context).colorScheme.inversePrimary)),
+                            )
+                          )
+                        ),
+                      ]
                     ],
-                  );
-                }
+                  )
+                )
+              )
             )
-          )
-        )
-      ),
+          );
+        }
+      )
     );
   }
 }

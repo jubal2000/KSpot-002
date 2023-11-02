@@ -34,7 +34,7 @@ class HomeTopMenuBar extends StatefulWidget {
     {Key? key,
       this.isShowDatePick = true,
       this.isHideMenu = false,
-      this.isDateOpen = true,
+      this.isDateOpen = false,
       this.height = UI_TOP_MENU_HEIGHT,
       this.onCountryChanged,
       this.onDateChange}) : super(key: key);
@@ -120,26 +120,26 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                             AppData.appViewModel.showCountrySelect(context, widget.onCountryChanged);
                           },
                         ),
-                        if (widget.isShowDatePick && widget.isDateOpen)
-                          GestureDetector(
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: widget.height * 0.8,
-                              margin: EdgeInsets.only(left: 5),
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
-                                color: AppData.currentDate.isToday() ? Theme.of(context).primaryColor : Colors.black26,
-                              ),
-                              child: Text('TODAY', style: ItemDescStyle(context)),
-                            ),
-                            onTap: () {
-                              setState(() {
-                                AppData.currentDate = DateTime.now();
-                                if (widget.onDateChange != null) widget.onDateChange!(widget.isDateOpen);
-                              });
-                            },
-                          ),
+                        // if (widget.isShowDatePick && widget.isDateOpen)
+                        //   GestureDetector(
+                        //     child: Container(
+                        //       alignment: Alignment.center,
+                        //       height: widget.height * 0.8,
+                        //       margin: EdgeInsets.only(left: 5),
+                        //       padding: EdgeInsets.symmetric(horizontal: 12),
+                        //       decoration: BoxDecoration(
+                        //         borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
+                        //         color: AppData.currentDate.isToday() ? Theme.of(context).primaryColor : Colors.black26,
+                        //       ),
+                        //       child: Text('TODAY'.tr, style: ItemDescStyle(context)),
+                        //     ),
+                        //     onTap: () {
+                        //       setState(() {
+                        //         AppData.currentDate = DateTime.now();
+                        //         if (widget.onDateChange != null) widget.onDateChange!(widget.isDateOpen);
+                        //       });
+                        //     },
+                        //   ),
                         if (widget.isShowDatePick)
                           GestureDetector(
                             child: Container(
@@ -196,57 +196,7 @@ class HomeTopMenuBarState extends State<HomeTopMenuBar> {
                             ),
                             child: AppData.eventViewModel.showEventListType(),
                           ),
-                        // if (AppData.appViewModel.appbarMenuMode == MainMenuID.story)
-                        //   Container(
-                        //     alignment: Alignment.center,
-                        //     padding: EdgeInsets.symmetric(horizontal: AppData.currentState.isNotEmpty ? 10 : 0),
-                        //     constraints: BoxConstraints(
-                        //       maxHeight: widget.height * 0.8,
-                        //       minWidth: widget.height * 0.8,
-                        //     ),
-                        //     decoration: BoxDecoration(
-                        //       borderRadius: BorderRadius.all(Radius.circular(widget.height * 0.5)),
-                        //       color: Theme.of(context).canvasColor.withOpacity(0.55),
-                        //     ),
-                        //     child: AppData.storyViewModel.showStoryListType(),
-                        //   ),
                       ],
-                      // if (AppData.appViewModel.appbarMenuMode == MainMenuID.my)...[
-                      //   Container(
-                      //     // color: Colors.red,
-                      //     height: iconSize,
-                      //     width: iconSize,
-                      //     child: IconButton(
-                      //       icon: Icon(Icons.mail_outline_outlined, color: iconColor),
-                      //       onPressed: () {
-                      //         Get.to(() => MessageScreen());
-                      //       },
-                      //     )
-                      //   ),
-                      //   SizedBox(width: 5),
-                      //   if (APP_STORE_OPEN)...[
-                      //     Container(
-                      //       height: iconSize,
-                      //       width: iconSize,
-                      //       child: IconButton(
-                      //         icon: Icon(Icons.store_outlined, color: iconColor),
-                      //         onPressed: () {
-                      //         },
-                      //       )
-                      //     ),
-                      //     SizedBox(width: 5),
-                      //   ],
-                      //   Container(
-                      //     // color: Colors.red,
-                      //     height: iconSize,
-                      //     width: iconSize,
-                      //     child: IconButton(
-                      //       icon: Icon(Icons.settings, color: iconColor),
-                      //       onPressed: () {
-                      //       },
-                      //     )
-                      //   ),
-                      // ],
                     ],
                   ),
                 ),

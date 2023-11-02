@@ -1,30 +1,18 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
-import '../../models/place_model.dart';
-import 'event_edit_input_screen.dart';
-import 'event_screen.dart';
-import 'package:kspot_002/view/story/story_screen.dart';
 import 'package:kspot_002/view_model/event_edit_view_model.dart';
-import 'package:kspot_002/view_model/signup_view_model.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/app_data.dart';
-import '../../data/theme_manager.dart';
 import '../../models/event_model.dart';
-import '../../models/user_model.dart';
 import '../../utils/utils.dart';
-import '../../view_model/app_view_model.dart';
-import '../../widget/dropdown_widget.dart';
 import '../../widget/page_dot_widget.dart';
 import '../../widget/title_text_widget.dart';
-import '../../widget/verify_phone_widget.dart';
+import '../../models/place_model.dart';
 import 'event_edit_place_screen.dart';
+import 'event_edit_input_screen.dart';
 
 class EventEditScreen extends StatefulWidget {
   EventEditScreen({Key? key, this.eventInfo, this.placeInfo}) : super(key: key);
@@ -48,7 +36,7 @@ class _EventEditScreenState extends State<EventEditScreen> {
     } else {
       _viewModel.setEditItem(EventModelEx.empty('', 0), null);
     }
-    super.initState ();
+    super.initState();
   }
 
   @override
@@ -69,7 +57,7 @@ class _EventEditScreenState extends State<EventEditScreen> {
                   title: TopTitleText(context, viewModel.isEditMode ? 'Event Edit'.tr : viewModel.titleN[viewModel.stepIndex].tr),
                   titleSpacing: 0,
                   toolbarHeight: UI_EDIT_TOOL_HEIGHT.w,
-                  backgroundColor: Theme.of(context).backgroundColor,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 ),
                 body: Container(
                   child: Column(

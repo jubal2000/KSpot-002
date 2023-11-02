@@ -17,6 +17,7 @@ class PlaceModelEx extends PlaceModel {
     desc: desc,
     descKr: '',
     pic: '',
+    themeColor: '',
     groupId: '',
     userId: '',
     country: '',
@@ -30,9 +31,6 @@ class PlaceModelEx extends PlaceModel {
     email: '',
     updateTime: DateTime.now(),
     createTime: DateTime.now(),
-
-    phoneData: [],
-    picData: [],
   );
 }
 
@@ -48,6 +46,7 @@ class PlaceModel {
   String      desc;
   String?     descKr;
   String      pic;            // title image
+  String?     themeColor;
   String      groupId;        // group id
   String      userId;         // create user id
   String      country;        // 국가
@@ -59,6 +58,10 @@ class PlaceModel {
 
   List<String>?        phoneData;      // 전화번호 목록
   List<PicData>?       picData;        // 메인 이미지 목록
+  List<MemberData>?    managerData;    // 관리자 목록
+  List<CustomData>?    customData;     // 사용자 설정 정보
+  List<OptionData>?    optionData;     // 옵션 정보
+  List<String>?        tagData;        // 옵션 정보
 
   @JsonKey(includeFromJson: false)
   DateTime? cacheTime;    // for local cache refresh time..
@@ -71,6 +74,7 @@ class PlaceModel {
     required this.desc,
     this.descKr,
     required this.pic,
+    required this.themeColor,
     required this.groupId,
     required this.userId,
     required this.country,
@@ -82,6 +86,9 @@ class PlaceModel {
 
     this.phoneData,
     this.picData,
+    this.managerData,
+    this.optionData,
+    this.tagData,
   });
 
   factory PlaceModel.fromJson(JSON json) => _$PlaceModelFromJson(json);
@@ -101,4 +108,87 @@ class PlaceModel {
     return result;
   }
 
+  //------------------------------------------------------------------------------------------------------
+  //  ManagerData
+  //
+
+  get getManagerDataMap {
+    JSON result = {};
+    if (managerData != null) {
+      for (var item in managerData!) {
+        result[item.id] = item.toJson();
+      }
+    }
+    return result;
+  }
+
+  removeManagerData(String key) {
+    if (managerData != null) {
+      for (var item in managerData!) {
+        if (item.id.toLowerCase() == key.toLowerCase()) {
+          managerData!.remove(item);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  setManagerDataMap(JSON map) {
+    managerData ??= [];
+    managerData!.clear();
+    if (map.isNotEmpty) {
+      for (var item in map.entries) {
+        managerData!.add(MemberData.fromJson(item.value));
+      }
+    }
+    return managerData;
+  }
+
+  //------------------------------------------------------------------------------------------------------
+  //  OptionData
+  //
+
+  get getOptionDataMap {
+    JSON result = {};
+    if (optionData != null) {
+      for (var item in optionData!) {
+        result[item.id] = item.toJson();
+      }
+    }
+    return result;
+  }
+
+  getOptionValue(String key) {
+    final optionMap = getOptionDataMap;
+    return optionMap[key] != null && optionMap[key]['value'] == '1';
+  }
+
+  setOptionDataMap(JSON map) {
+    optionData ??= [];
+    optionData!.clear();
+    if (map.isNotEmpty) {
+      for (var item in map.entries) {
+        optionData!.add(OptionData(
+          id: item.key,
+          value: item.value['value'],
+        ));
+      }
+    }
+    return optionData;
+  }
+
+  //------------------------------------------------------------------------------------------------------
+  //  OptionData
+  //
+
+  get getCustomDataMap {
+    JSON result = {};
+    if (customData != null) {
+      for (var item in customData!) {
+        result[item.id] = item.toJson();
+      }
+    }
+    return result;
+  }
 }

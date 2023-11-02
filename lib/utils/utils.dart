@@ -50,7 +50,8 @@ LOG(String msg) {
 
 // ignore: non_constant_identifier_names
 BOL(dynamic value, {bool defaultValue = false}) {
-  return value.runtimeType != Null && value != 'null' && value.toString().isNotEmpty ? value.toString() == '1' || value.toString() == 'on' || value.toString() == 'true' : defaultValue;
+  return value != null && value.runtimeType != Null && value != 'null' && value.toString().isNotEmpty ?
+    value.toString() == '1' || value.toString() == 'on' || value.toString() == 'true' : defaultValue;
 }
 
 // ignore: non_constant_identifier_names

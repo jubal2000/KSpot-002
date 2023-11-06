@@ -77,24 +77,21 @@ class EventViewModel extends ChangeNotifier {
 
   setSelectDate(bool state) async {
     LOG('--> setSelectDate : $isDateOpen / $state - $currentDateTime / ${AppData.currentDate}');
-    var isUpdate = false;
     if (isDateOpen.value != state) {
       isDateOpen.value = state;
-      isUpdate = state;
+      if (state) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Future.delayed(Duration(milliseconds: 200)).then((_) {
+            LOG('---> setSelectDate currentDate : ${AppData.currentDate}');
+            dateController.setDateAndAnimate(
+                AppData.currentDate, duration: Duration(milliseconds: 100));
+          });
+        });
+      }
     } else if (currentDateTime != AppData.currentDate) {
       currentDateTime = AppData.currentDate;
-      isUpdate = true;
       showList = await setShowList();
       refreshView();
-    }
-    if (isUpdate) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Future.delayed(Duration(milliseconds: 200)).then((_) {
-          LOG('---> setSelectDate currentDate : ${AppData.currentDate}');
-          dateController.setDateAndAnimate(
-              AppData.currentDate, duration: Duration(milliseconds: 100));
-        });
-      });
     }
     return true;
   }
@@ -197,7 +194,6 @@ class EventViewModel extends ChangeNotifier {
         LOG('--> onDateChange : $date');
         AppData.currentDate = date;
         onMapDayChanged();
-        setSelectDate(isDateOpen.value);
       },
     );
     return datePicker;
@@ -232,9 +228,10 @@ class EventViewModel extends ChangeNotifier {
     return true;
   }
 
-  onMapDayChanged() async {
+  onMapDayChanged() {
     mapBounds = null;
     isMapUpdate = true;
+    setSelectDate(isDateOpen.value);
     return true;
   }
 
@@ -403,37 +400,27 @@ class EventViewModel extends ChangeNotifier {
   showMainList() {
     var itemHeight = 200.0;
     var itemWidth  = itemHeight * 0.6;
-    return Container(
+    return Obx(() => Container(
       padding: EdgeInsets.fromLTRB(0, UI_LIST_TOP_HEIGHT, 0, UI_MENU_HEIGHT),
-      child: FutureBuilder(
-        future: setShowList(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            showList = snapshot.data!;
-            return Column(
+      child: Column(
+        children: [
+          if (isDateOpen.value)
+            SizedBox(height: UI_DATE_PICKER_HEIGHT.h + 5.h),
+          Expanded(
+            child: ListView(
+              shrinkWrap: true,
+              padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
               children: [
                 if (isDateOpen.value)
-                  SizedBox(height: UI_DATE_PICKER_HEIGHT.h + 5.h),
-                Expanded(
-                  child: ListView(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                      children: [
-                        if (isDateOpen.value)
-                          SizedBox(height: 10.h),
-                        ...showEventList(itemWidth),
-                        SizedBox(height: 10.h),
-                      ]
-                  ),
-                )
-              ],
-            );
-          } else {
-            return Container();
-          }
-        },
+                  SizedBox(height: 10.h),
+                ...showEventList(itemWidth),
+                SizedBox(height: 10.h),
+              ]
+            ),
+          )
+        ],
       ),
-    );
+    ));
   }
 
   showEventMain() {

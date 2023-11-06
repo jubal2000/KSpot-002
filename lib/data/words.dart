@@ -748,6 +748,8 @@ class Words extends Translations {
       'Do you want to close room?': '채팅방을 종료하시겠습니까?',
       'Chat room has ended': '채팅방이 종료되었습니다',
       'Cant find room': '채팅방이 없습니다',
+      'has kicked': '추방 완료',
+      'change admin': '운영자 변경 완료',
 
       // main_top
       'COUNTRY SELECT': '지역 선택',

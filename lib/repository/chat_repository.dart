@@ -36,8 +36,11 @@ class ChatRepository {
   getChatRoomData() async {
     Map<String, ChatRoomModel> result = {};
     try {
-      final openData = await api.getChatOpenRoomData(AppData.USER_ID,
-          AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
+      final openData = await api.getChatOpenRoomData(
+          AppData.USER_ID,
+          AppData.currentEventGroup!.id,
+          AppData.currentCountry,
+          AppData.currentState);
       for (var item in openData.entries) {
         result[item.key] = ChatRoomModel.fromJson(item.value);
       }
@@ -64,15 +67,18 @@ class ChatRepository {
     return api.getChatStreamData(AppData.USER_ID);
   }
 
-  startChatStreamData(String roomId, DateTime? startTime, Function(JSON) onChanged) {
+  startChatStreamData(String roomId, DateTime? startTime,
+      Function(JSON) onChanged) {
     if (stream != null) {
       stopChatStreamData();
     }
     stream = api.startChatStreamData(roomId, startTime, onChanged);
   }
 
-  sendChatMessage(ChatRoomModel roomInfo, String id, String sendText, bool isFirstMessage,
-    [int status = 1, int action = 0, Map<String, UploadFileModel>? fileData]) async {
+  sendChatMessage(ChatRoomModel roomInfo, String id, String sendText,
+      bool isFirstMessage,
+    [int status = 1, int action = 0, Map<String, UploadFileModel>? fileData])
+  async {
     var addItem = {
       'id':         id,
       'status':     status,
@@ -89,16 +95,19 @@ class ChatRepository {
       for (var item in fileData.entries) {
         // LOG('--> fileData item : ${item.value.toJson()}');
         if (item.value.data != null) {
-          var result = await api.uploadData(item.value.data, item.key, 'chat_img');
+          var result = await api.uploadData(
+              item.value.data, item.key, 'chat_img');
           if (result != null && item.value.thumbData != null) {
-            var thumbResult = await api.uploadData(item.value.thumbData, item.key, 'chat_img_thumb');
+            var thumbResult = await api.uploadData(
+                item.value.thumbData, item.key, 'chat_img_thumb');
             if (thumbResult != null) {
               item.value.url = result;
               item.value.thumb = thumbResult;
             }
           }
         } else {
-          var result = await api.uploadFile(File.fromUri(Uri.parse(item.value.path!)), 'chat_file', item.key);
+          var result = await api.uploadFile(
+              File.fromUri(Uri.parse(item.value.path!)), 'chat_file', item.key);
           if (result != null) {
             item.value.url = result;
           }
@@ -116,7 +125,8 @@ class ChatRepository {
   setChatItemState(String roomId, String chatId, int status) async {
     var result = await api.setChatInfo(chatId, {'status': status});
     if (result) {
-      addChatActionItem(roomId, ChatActionType.delete, 'deleted chat item', chatId: chatId);
+      addChatActionItem(roomId, ChatActionType.delete, 'deleted chat item',
+          chatId: chatId);
     }
   }
 
@@ -124,7 +134,8 @@ class ChatRepository {
     return await api.addChatRoomItem(room.toJson());
   }
 
-  Future<String?> uploadImageInfo(JSON imageInfo, [String path = 'chat_room_img']) async {
+  Future<String?> uploadImageInfo(JSON imageInfo,
+      [String path = 'chat_room_img']) async {
     return await api.uploadImageData(imageInfo, path);
   }
 
@@ -135,7 +146,8 @@ class ChatRepository {
     stream = null;
   }
 
-  addChatActionItem(String roomId, int action, String desc, {String? chatId, String? userId, String? userName, String? userPic, String? roomPic}) {
+  addChatActionItem(String roomId, int action, String desc, {String? chatId,
+      String? userId, String? userName, String? userPic, String? roomPic}) {
     JSON addItem = {
       'id': '',
       'status'    : 1,
@@ -170,7 +182,8 @@ class ChatRepository {
         imageURL = result;
       }
     }
-    var result = await api.setChatRoomTitle(roomId, title, AppData.USER_ID, imageURL);
+    var result = await api.setChatRoomTitle(roomId, title,
+        AppData.USER_ID, imageURL);
     if (result != null) {
       addChatActionItem(roomId, ChatActionType.title, title, roomPic: imageURL);
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
@@ -178,8 +191,10 @@ class ChatRepository {
     return result;
   }
 
-  setChatRoomNotice(String roomId, NoticeModel notice, [bool isFirst = false]) async {
-    var result = await api.setChatRoomNotice(roomId, notice.toJson(), AppData.USER_ID, isFirst);
+  setChatRoomNotice(String roomId, NoticeModel notice,
+      [bool isFirst = false]) async {
+    var result = await api.setChatRoomNotice(roomId, notice.toJson(),
+        AppData.USER_ID, isFirst);
     if (result != null) {
       addChatActionItem(roomId, ChatActionType.notice, notice.desc);
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
@@ -187,12 +202,15 @@ class ChatRepository {
     return result;
   }
 
-  setChatRoomKickUser(String roomId, String targetId, String targetName, [int status = 0]) async {
-    var result = await api.setChatRoomKickUser(roomId, targetId, targetName, status, AppData.USER_ID);
+  setChatRoomKickUser(String roomId, String targetId, String targetName,
+      [int status = 0]) async {
+    var result = await api.setChatRoomKickUser(roomId, targetId, targetName,
+        status, AppData.USER_ID);
     if (result != null) {
       if (status == 0) {
         addChatActionItem(
-            roomId, ChatActionType.kick, '$targetName has kicked', userId: targetId, userName: targetName, userPic: '');
+            roomId, ChatActionType.kick, '$targetName has kicked',
+            userId: targetId, userName: targetName, userPic: '');
       }
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
     }
@@ -202,7 +220,8 @@ class ChatRepository {
   enterChatRoom(String roomId, bool isEnterShow) async {
     final result = await api.enterChatRoom(roomId, AppData.userInfo.toJson());
     if (result != null && JSON_EMPTY(result['error'])) {
-      addChatActionItem(roomId, isEnterShow ? ChatActionType.enter : -1, '${AppData.USER_NICKNAME} enter');
+      addChatActionItem(roomId, isEnterShow ? ChatActionType.enter : -1,
+          '${AppData.USER_NICKNAME} enter');
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
     }
     return result;
@@ -211,7 +230,8 @@ class ChatRepository {
   exitChatRoom(String roomId, bool isExitShow) async {
     final result = await api.exitChatRoom(roomId, AppData.USER_ID);
     if (result != null && JSON_EMPTY(result['error'])) {
-      addChatActionItem(roomId, isExitShow ? ChatActionType.exit : -2, '${AppData.USER_NICKNAME} leave');
+      addChatActionItem(roomId, isExitShow ? ChatActionType.exit : -2,
+          '${AppData.USER_NICKNAME} leave');
       cache.setChatRoomItem(ChatRoomModel.fromJson(result));
     }
     return result;
@@ -240,7 +260,6 @@ class ChatRepository {
       }
     }
     for (var item in chatList) {
-      LOG('--> cache.chatData removed : ${item['id']} / ${cache.chatData.length}');
       cache.chatData.remove(item['id']);
     }
   }

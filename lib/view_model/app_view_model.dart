@@ -131,7 +131,7 @@ class AppViewModel extends ChangeNotifier {
         child: HomeTopMenuBar(
           appbarMenuMode,
           isShowDatePick: appbarMenuMode == MainMenuID.event,
-          isDateOpen: AppData.eventViewModel.isDateOpen,
+          isDateOpen: AppData.eventViewModel.isDateOpen.value,
           onCountryChanged: () {
           },
           onDateChange: (state) {

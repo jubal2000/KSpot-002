@@ -53,7 +53,7 @@ class EventViewModel extends ChangeNotifier {
   var cameraPos = CameraPosition(target: LatLng(0,0));
   var eventListType = EventListType.map;
   var currentDateTime = DateTime(0);
-  var isDateOpen      = false;
+  var isDateOpen      = false.obs;
   var isMapUpdate     = true;
   var isManagerMode   = false; // 유저의 이벤트목록 일 경우 메니저이면, 기간이 지난 이벤트들도 표시..
   var isRefreshMap    = false;
@@ -75,14 +75,18 @@ class EventViewModel extends ChangeNotifier {
 
   setSelectDate(bool state) {
     LOG('--> setSelectDate : $isDateOpen / $state - $currentDateTime / ${AppData.currentDate}');
-    isDateOpen = state;
-    refreshView();
+    if (isDateOpen.value != state) {
+      isDateOpen.value = state;
+    } else if (currentDateTime != AppData.currentDate) {
+      refreshView();
+    }
     if (state) {
       currentDateTime = AppData.currentDate;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Future.delayed(Duration(milliseconds: 200)).then((_) {
           LOG('---> setSelectDate currentDate : ${AppData.currentDate}');
-          dateController.setDateAndAnimate(AppData.currentDate, duration: Duration(milliseconds: 100));
+          dateController.setDateAndAnimate(
+              AppData.currentDate, duration: Duration(milliseconds: 100));
         });
       });
     }
@@ -199,20 +203,21 @@ class EventViewModel extends ChangeNotifier {
   }
 
   showDatePicker() {
-    return Align(
+    return Obx(() => Align(
       widthFactor: 1.25,
       heightFactor: 3.0,
       child: Row(
         children: [
-          Container(
-            width: Get.width,
-            height: UI_DATE_PICKER_HEIGHT.h,
-            color: Theme.of(Get.context!).canvasColor.withOpacity(0.5),
-            child: initDatePicker(),
-          ),
+          if (isDateOpen.value)
+            Container(
+              width: Get.width,
+              height: UI_DATE_PICKER_HEIGHT.h,
+              color: Theme.of(Get.context!).canvasColor.withOpacity(0.5),
+              child: initDatePicker(),
+            ),
         ]
       ),
-    );
+    ));
   }
 
   onMapRegionChanged(region) async {
@@ -417,14 +422,14 @@ class EventViewModel extends ChangeNotifier {
             showList = snapshot.data!;
             return Column(
               children: [
-                if (isDateOpen)
+                if (isDateOpen.value)
                   SizedBox(height: UI_DATE_PICKER_HEIGHT.h + 5.h),
                 Expanded(
                   child: ListView(
                       shrinkWrap: true,
                       padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
                       children: [
-                        if (isDateOpen)
+                        if (isDateOpen.value)
                           SizedBox(height: 10.h),
                         ...showEventList(itemWidth),
                         SizedBox(height: 10.h),
@@ -449,8 +454,7 @@ class EventViewModel extends ChangeNotifier {
             showMapList(),
         if (eventListType == EventListType.list)
             showMainList(),
-        if (isDateOpen)
-          showDatePicker(),
+        showDatePicker(),
       ]
     );
   }

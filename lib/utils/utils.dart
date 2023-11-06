@@ -1315,14 +1315,14 @@ const dropMenuLine        = DropdownItem(DropdownItemType.none, isLine: true);
 
 
 class DropdownItems {
-  static const List<DropdownItem> eventAddItem    = [placeGroup, place, event];
+  static const List<DropdownItem> eventAddItem    = [place, event];
   static const List<DropdownItem> chatAddItem     = [chatOpen, chatClose];
   static const List<DropdownItem> messageAddItem  = [message];
   static const List<DropdownItem> storyAddItem    = [story];
-  static const List<DropdownItem> homeAddItems    = [placeGroup, place, event];
+  static const List<DropdownItem> homeAddItems    = [place, event];
   static const List<DropdownItem> homeAddItem0    = [event, story];
   static const List<DropdownItem> homeAddItem10   = [place];
-  static const List<DropdownItem> homeAddItem11   = [placeGroup, place];
+  static const List<DropdownItem> homeAddItem11   = [place];
   static const List<DropdownItem> homeAddItem2    = [event];
   static const List<DropdownItem> homeAddItem3    = [talent, goods];
   static const List<DropdownItem> placeItems0     = [disable, edit, delete, recommend];

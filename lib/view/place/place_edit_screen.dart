@@ -87,7 +87,7 @@ class _PlaceEditScreenState extends State<PlaceEditScreen> {
                               index: viewModel.stepIndex,
                               children: [
                                 showAgreeStep(context, viewModel),
-                                // PlaceEditGroupSelectScreen(parentViewModel: viewModel),
+                                PlaceEditGroupSelectScreen(parentViewModel: viewModel),
                                 PlaceEditInputScreen(parentViewModel: viewModel),
                               ],
                             ),

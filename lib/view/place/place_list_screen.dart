@@ -345,7 +345,7 @@ class _PlaceListScreenState extends State<PlaceListScreen> with TickerProviderSt
                                       scrollDirection: Axis.vertical,
                                       children: [
                                         if (_placeSelectList.isNotEmpty)...[
-                                          SubTitleBarEx(context, 'SELECT PLACE'.tr,
+                                          SubTitleBarEx(context, 'SELECT SPOT'.tr,
                                               child: Text(AppData.mainListType == HomeListType.calendar && AppData.currentDate != null ? DATE_STR(AppData.currentDate!) : '')),
                                           Container(
                                               padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE, vertical: 5),
@@ -354,18 +354,9 @@ class _PlaceListScreenState extends State<PlaceListScreen> with TickerProviderSt
                                               )
                                           ),
                                         ],
-                                        // if (_placeMyList.isNotEmpty)...[
-                                        //   SubTitleBarEx(context, 'MY SPOT'),
-                                        //   Container(
-                                        //       padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
-                                        //       child: Column(
-                                        //           children: _placeMyList
-                                        //       )
-                                        //   ),
-                                        // ],
                                         if (AppData.mainListType != HomeListType.calendar)...[
                                           if (_placePromotionList.isNotEmpty || _placeLikeList.isNotEmpty || _placeAllList.isNotEmpty)
-                                            SubTitleBarEx(context, 'PLACE LIST'.tr),
+                                            SubTitleBarEx(context, 'SPOT LIST'.tr),
                                           SizedBox(height: 5),
                                           if (_placePromotionList.isNotEmpty)...[
                                             Container(

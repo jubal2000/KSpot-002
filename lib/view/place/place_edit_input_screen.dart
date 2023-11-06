@@ -68,66 +68,53 @@ class _PlaceEditInputScreenState extends State<PlaceEditInputScreen> {
     return ListView(
       shrinkWrap: true,
       children: [
-        SizedBox(height: UI_LIST_TEXT_SPACE_L),
-        // if (_viewModel.isEditMode)...[
-        //   SubTitle(context, 'PLACE GROUP SELECT'.tr),
-        //   Row(
-        //       children: [
-        //         if (_viewModel.groupInfo != null)...[
-        //           Expanded(
-        //             child: ContentItem(_viewModel.groupInfo!.toJson(),
-        //                 padding: EdgeInsets.zero,
-        //                 showType: GoodsItemCardType.normal,
-        //                 descMaxLine: 2,
-        //                 isShowExtra: false,
-        //                 outlineColor: Theme.of(context).colorScheme.tertiary,
-        //                 titleStyle: ItemTitleLargeStyle(context), descStyle: ItemDescStyle(context)),
-        //           ),
-        //         ],
-        //         contentAddButton(context,
-        //             'PLACE\nGROUP\nSELECT'.tr,
-        //             icon: Icons.settings,
-        //             onPressed: (_) {
-        //               Map<String, EventGroupModel> list = {};
-        //               if (_viewModel.groupInfo != null) {
-        //                 list[_viewModel.groupInfo!.id] = _viewModel.groupInfo!;
-        //               }
-        //               EventGroupSelectDialog(context,
-        //                   AppData.currentEventGroup != null ? AppData.currentEventGroup!.id : '',
-        //                   AppData.currentContentType).then((result) {
-        //                 if (result != null) {
-        //                   LOG('--> EventGroupSelectDialog result : ${result.toJson()}');
-        //                   _viewModel.setEventGroupInfo(result);
-        //                 }
-        //               });
-        //               // Get.to(() => EventGroupSelectDialog(isSelectable: true, listSelectData: list))!.then((result) {
-        //               //   if (result != null && result.isNotEmpty) {
-        //               //     PlaceModel placeInfo = result.entries.first.value;
-        //               //     LOG('--> PlaceListScreen result : ${placeInfo.toJson()}');
-        //               //     _viewModel.setEventGroupInfo(placeInfo);
-        //               //   } else {
-        //               //     _viewModel.setEventGroupInfo(null);
-        //               //   }
-        //               // });
-        //             }
-        //         ),
-        //       ]
-        //   ),
-        //   SizedBox(height: UI_LIST_TEXT_SPACE),
-        //   showHorizontalDivider(Size(Get.width, 1))
-        // ],
-        // SizedBox(height: UI_LIST_TEXT_SPACE_S),
+        SizedBox(height: UI_ITEM_SPACE.h),
+          SubTitle(context, 'SPOT GROUP'.tr),
+          Row(
+            children: [
+              if (_viewModel.groupInfo != null)...[
+                Expanded(
+                  child: ContentItem(_viewModel.groupInfo!.toJson(),
+                    padding: EdgeInsets.zero,
+                    showType: GoodsItemCardType.normal,
+                    descMaxLine: 2,
+                    isShowExtra: false,
+                    outlineColor: Theme.of(context).colorScheme.tertiary,
+                    titleStyle: ItemTitleLargeStyle(context), descStyle: ItemDescStyle(context)),
+                ),
+              ],
+              contentAddButton(context,
+                'SELECT\nGROUP'.tr,
+                icon: Icons.settings,
+                onPressed: (_) {
+                  EventGroupSelectDialog(context,
+                      _viewModel.groupInfo!.id,
+                      _viewModel.groupInfo!.contentType).then((result) {
+                    if (result != null) {
+                      LOG('--> EventGroupSelectDialog result : ${result.toJson()}');
+                      _viewModel.setEventGroupInfo(result);
+                    }
+                  });
+                }
+            ),
+          ]
+        ),
+        SizedBox(height: UI_LIST_TEXT_SPACE),
+        showHorizontalDivider(Size(Get.width, 1)),
+        SizedBox(height: UI_LIST_TEXT_SPACE_S),
         _viewModel.showImageSelector(),
         SizedBox(height: UI_LIST_TEXT_SPACE),
         showHorizontalDivider(Size(Get.width, 1)),
         SizedBox(height: UI_LIST_TEXT_SPACE_S),
         SubTitle(context, 'INFO'.tr),
         SizedBox(height: UI_LIST_TEXT_SPACE),
-        EditTextField(context, 'TITLE'.tr, _viewModel.editItem!.title, hint: 'Place Title *'.tr, maxLength: TITLE_LENGTH,
+        EditTextField(context, 'TITLE'.tr, _viewModel.editItem!.title,
+            hint: 'Spot title *'.tr, maxLength: TITLE_LENGTH,
             maxLines: 1, keyboardType: TextInputType.multiline, onChanged: (value) {
               _viewModel.editItem!.title = value;
             }),
-        EditTextField(context, 'DESC'.tr, _viewModel.editItem!.desc, hint: 'Place Description'.tr, maxLength: DESC_LENGTH,
+        EditTextField(context, 'DESC'.tr, _viewModel.editItem!.desc,
+            hint: 'Spot message'.tr, maxLength: DESC_LENGTH,
             maxLines: null, keyboardType: TextInputType.multiline, onChanged: (value) {
               _viewModel.editItem!.desc = value;
             }),
@@ -135,6 +122,8 @@ class _PlaceEditInputScreenState extends State<PlaceEditInputScreen> {
           _viewModel.editItem!.tagData = value;
         }),
         SizedBox(height: UI_LIST_TEXT_SPACE),
+
+        SizedBox(height: UI_LIST_TEXT_SPACE_S),
         showHorizontalDivider(Size(Get.width, 1)),
         SizedBox(height: UI_LIST_TEXT_SPACE_S),
         EditListWidget(_viewModel.editManagerToJSON, title:'MANAGER *', EditListType.manager, _viewModel.onItemAdd,

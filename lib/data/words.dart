@@ -265,8 +265,11 @@ class Words extends Translations {
       // place_edit_screen
       'SPOT ADD': '스팟 추가',
       'SPOT EDIT': '스팟 편집',
+      'Spot edit': '스팟 편집',
+      'SPOT PHOTO *': '스팟 사진 *',
       '[FIRST]': '[대표]',
-      'Title *': '제목 *',
+      'Spot title *': '스팟 이름 *',
+      'Spot message' : '스팟 소개',
       'COUNTRY / STATE, CITY *': '국가 / 도시 *',
       'Address *': '주소 *',
       'Address detail *': '상세 주소 *',
@@ -277,7 +280,7 @@ class Words extends Translations {
       'CONTACT': '연락처',
 
       // place_list_screen
-      'PLACE LIST': '장소 목록',
+      'SPOT LIST': '스팟 목록',
 
       // place_group_edit_screen
       'SPOT GROUP ADD': '스팟 그룹 추가',
@@ -474,7 +477,7 @@ class Words extends Translations {
       'Storage permission denied!': '저장소 권한이 없습니다',
       'Downloading...': '다운로드중입니다...',
 
-      // promotion_list_screen
+      // promotion_list_screen소
       'PROMOTION RECORD': '홍보 기록',
       'PROMOTION START': '홍보 시작',
 

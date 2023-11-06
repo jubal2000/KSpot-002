@@ -35,7 +35,7 @@ class PlaceEditViewModel extends ChangeNotifier {
 
   final userRepo  = UserRepository();
   final placeRepo = PlaceRepository();
-  final titleN = ['Agree to Terms and Conditions', 'Place Setting', 'Event Information'];
+  final titleN = ['Agree to Terms and Conditions', 'Spot group select', 'Spot edit'];
 
   // for Edit..
   final _imageGalleryKey  = GlobalKey();
@@ -56,7 +56,7 @@ class PlaceEditViewModel extends ChangeNotifier {
   get isNextEnable {
     switch(stepIndex) {
       case 0: return agreeChecked;
-      case 1: return groupInfo != null;
+      case 1: return editItem!.groupId.isNotEmpty;
     }
     return checkEditDone(false);
   }
@@ -189,6 +189,10 @@ class PlaceEditViewModel extends ChangeNotifier {
     isEdited = true;
   }
 
+  refreshView() {
+    notifyListeners();
+  }
+
   refreshOption() {
     final optionMap = editItem!.getOptionDataMap;
     for (var item in AppData.INFO_PLACE_OPTION.entries) {
@@ -248,7 +252,7 @@ class PlaceEditViewModel extends ChangeNotifier {
     return ImageEditScrollViewer(
         imageData,
         key: _imageGalleryKey,
-        title: 'PLACE PHOTO *'.tr,
+        title: 'SPOT PHOTO *'.tr,
         addText: 'Photo Add'.tr,
         selectedId: titlePicKey,
         selectText: '[first]'.tr,

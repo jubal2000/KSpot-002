@@ -175,8 +175,8 @@ class EventRepository {
     return await api.uploadImageData(imageInfo, path);
   }
 
-  checkIsExpired(EventModel event) {
-    return api.checkEventExpired(event.toJson());
+  checkIsExpired(EventModel event, [DateTime? checkDay]) {
+    return api.checkEventExpired(event.toJson(), checkDay: checkDay);
   }
 
   EventModel setRecommendCount(EventModel event, [DateTime? targetTime]) {

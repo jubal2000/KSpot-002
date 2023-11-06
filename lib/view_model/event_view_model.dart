@@ -52,8 +52,10 @@ class EventViewModel extends ChangeNotifier {
 
   var cameraPos = CameraPosition(target: LatLng(0,0));
   var eventListType = EventListType.map;
-  var currentDateTime = DateTime(0);
+  DateTime? currentDateTime;
+
   var isDateOpen      = false.obs;
+  var isFirstShow     = true;
   var isMapUpdate     = true;
   var isManagerMode   = false; // 유저의 이벤트목록 일 경우 메니저이면, 기간이 지난 이벤트들도 표시..
   var isRefreshMap    = false;
@@ -73,15 +75,19 @@ class EventViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  setSelectDate(bool state) {
+  setSelectDate(bool state) async {
     LOG('--> setSelectDate : $isDateOpen / $state - $currentDateTime / ${AppData.currentDate}');
+    var isUpdate = false;
     if (isDateOpen.value != state) {
       isDateOpen.value = state;
+      isUpdate = state;
     } else if (currentDateTime != AppData.currentDate) {
+      currentDateTime = AppData.currentDate;
+      isUpdate = true;
+      showList = await setShowList();
       refreshView();
     }
-    if (state) {
-      currentDateTime = AppData.currentDate;
+    if (isUpdate) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Future.delayed(Duration(milliseconds: 200)).then((_) {
           LOG('---> setSelectDate currentDate : ${AppData.currentDate}');
@@ -90,6 +96,7 @@ class EventViewModel extends ChangeNotifier {
         });
       });
     }
+    return true;
   }
 
   Future getEventData() {
@@ -142,7 +149,7 @@ class EventViewModel extends ChangeNotifier {
     List<EventModel> result = [];
     if (JSON_NOT_EMPTY(cache.eventData)) {
       for (var item in cache.eventData.entries) {
-        final isExpired = eventRepo.checkIsExpired(item.value);
+        final isExpired = eventRepo.checkIsExpired(item.value, AppData.currentDate);
         if (isManagerMode || (!isExpired && item.value.status == 1)) {
           var placeInfo = item.value.placeInfo;
           placeInfo ??= await placeRepo.getPlaceFromId(item.value.placeId);
@@ -169,12 +176,12 @@ class EventViewModel extends ChangeNotifier {
         }
       }
     }
-    LOG('--> eventShowList : ${result.length} / ${cache.eventData.length} / ${AppData.currentDate.toString()}');
+    LOG('--> eventShowList : ${result.length} / ${cache.eventData.length} / ${currentDateTime.toString()}');
     return result;
   }
 
   initDatePicker() {
-    LOG('----> initDatePicker : $datePicker');
+    LOG('----> initDatePicker : $datePicker / ${AppData.currentDate}');
     datePicker ??= DatePicker(
       DateTime.now().subtract(Duration(days: 30)),
       width:  60.0,
@@ -188,15 +195,9 @@ class EventViewModel extends ChangeNotifier {
       locale: Get.locale.toString(),
       onDateChange: (date) {
         LOG('--> onDateChange : $date');
-        // New date selected
-        if (AppData.currentDate != date) {
-        // } else {
-          AppData.currentDate = date;
-          onMapDayChanged();
-        // }
-        // AppData.appViewModel.refresh();
-          refreshView();
-        }
+        AppData.currentDate = date;
+        onMapDayChanged();
+        setSelectDate(isDateOpen.value);
       },
     );
     return datePicker;
@@ -226,7 +227,8 @@ class EventViewModel extends ChangeNotifier {
     if (compareShowList(tmpList)) {
       return false;
     }
-    notifyListeners();
+    showList = tmpList;
+    refreshView();
     return true;
   }
 
@@ -264,7 +266,7 @@ class EventViewModel extends ChangeNotifier {
       }
       showList[i] = eventRepo.setRecommendCount(showList[i], AppData.currentDate);
     }
-    LOG('--> eventShowList result : ${showList.length}');
+    // LOG('--> eventShowList result : ${showList.length}');
     showList = EVENT_SORT_HOT(showList);
     for (var eventItem in showList) {
       var addItem = cache.eventMapItemData[eventItem.id];
@@ -288,25 +290,6 @@ class EventViewModel extends ChangeNotifier {
           }
         },
       );
-      // addItem ??= Container(
-      //   width:  itemWidth,
-      //   height: itemHeight,
-      //   margin: EdgeInsets.symmetric(horizontal: 3),
-      //   child: PlaceEventMapCardItem(
-      //     item,
-      //     backgroundColor: Theme.of(Get.context!).cardColor,
-      //     faceOutlineColor: Theme.of(Get.context!).colorScheme.secondary,
-      //     padding: EdgeInsets.zero,
-      //     imageHeight: itemWidth,
-      //     titleMaxLine: 2,
-      //     descMaxLine: 0,
-      //     titleStyle: CardTitleStyle(Get.context!),
-      //     descStyle: CardDescStyle(Get.context!),
-      //     onShowDetail: (key, status) {
-      //       showEventItemDetail(item);
-      //     },
-      //   )
-      // );
       cache.eventMapItemData[eventItem.id] = addItem;
       tmpList.add(addItem);
     }
@@ -319,10 +302,10 @@ class EventViewModel extends ChangeNotifier {
             List<JSON> markerList = [];
             for (var e in showList) {
               if (e.placeInfo != null) {
-                // LOG('--> addList : ${addList.length} / ${e.placeInfo!.id}');
                 if (!addList.contains(e.placeInfo!.id)) {
                   markerList.add(e.placeInfo!.toJson());
                   addList.add(e.placeInfo!.id);
+                  LOG('--> add markerList : ${addList.length} / ${e.placeInfo!.id}');
                 }
               }
             }
@@ -387,11 +370,13 @@ class EventViewModel extends ChangeNotifier {
             child: Container(
               height: itemHeight,
               margin: EdgeInsets.only(bottom: UI_MENU_BG_HEIGHT - 10),
-              child: FutureBuilder(
+              child: isFirstShow ?
+              FutureBuilder(
                 future: setShowList(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     showList = snapshot.data!;
+                    isFirstShow = false;
                     return ListView(
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,
@@ -402,6 +387,11 @@ class EventViewModel extends ChangeNotifier {
                     return Container();
                   }
                 }
+              ) : ListView(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                  children: showEventMap()
               ),
             ),
           ),

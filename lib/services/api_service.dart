@@ -799,9 +799,9 @@ class ApiService extends GetxService {
     return result;
   }
   
-  checkEventExpired(JSON item) {
+  checkEventExpired(JSON item, {DateTime? checkDay}) {
     var addCount = 0;
-    var today = DateTime.parse(DATE_STR(DateTime.now()));
+    var today = checkDay ?? DateTime.parse(DATE_STR(DateTime.now()));
     if (JSON_NOT_EMPTY(item['timeData'])) {
       for (var time in item['timeData']) {
         // LOG('--> checkIsExpired item dayData [${item['id']}] / ${time.value['dayData']}');

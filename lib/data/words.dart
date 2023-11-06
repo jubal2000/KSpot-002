@@ -200,8 +200,8 @@ class Words extends Translations {
       'Fri':'금',
       'Sat':'토',
       'Sun':'일',
-      'SELECT DAYS *': '날짜 선택 *',
-      'SELECT PERIOD *': '기간 선택 *',
+      'SELECT DAYS': '날짜 선택',
+      'SELECT PERIOD': '기간 선택',
       'Are you sure you want to delete that date?': '해당 날짜를 삭제 하시겠습니까?',
       'Are you sure you want to delete that field?': '해당 필드를 삭제 하시겠습니까?',
       'ADD TIME': '시간 추가',
@@ -877,7 +877,7 @@ class Words extends Translations {
       'User data does not exist': '유저정보가 존재하지 않습니다',
       'Can not find user information': '해당 유저정보를 찾을 수 없습니다',
       'Upload failed': '업로드가 실패했습니다',
-      'No date information': '날짜 정보가 없습니다',
+      'Please select a date': '날짜를 선택해 주세요',
       'List does not exist': '목록이 존재하지 않습니다',
     }
   };

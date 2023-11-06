@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/widget/rounded_button.dart';
 import 'package:progressive_time_picker/progressive_time_picker.dart';
 import 'package:uuid/uuid.dart';
 
@@ -40,7 +41,7 @@ final dayWeekText  = ['Every', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 class _EventTimeSelectState extends State<EventTimeSelectWidget> {
   final _textController  = List<TextEditingController>.generate(TextType.values.length, (index) => TextEditingController());
-  final _tabText        = ['SELECT DAYS *'.tr, 'SELECT PERIOD *'.tr];
+  final _tabText        = ['SELECT DAYS', 'SELECT PERIOD'];
   final _selectColor    = Colors.purple;
   final _bottomHeight   = 50.0;
   final _lineSpace      = 30.0;
@@ -327,7 +328,8 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                             },
                           ),
                           SizedBox(height: _lineSpace),
-                          SubTitle(context, 'TYPE SELECT'.tr, child: SubTitleSmall(context, '(You can choose only one type)'.tr, height: 15)),
+                          SubTitle(context, 'TYPE SELECT'.tr,
+                              child: SubTitleSmall(context, '(You can choose only one type)'.tr, height: 15)),
                           SizedBox(height: 10),
                           Row(
                             children: _tabText.map((item) => Expanded(
@@ -356,19 +358,30 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                                       bottomRight:Radius.circular(10)
                                   ),
                                   border: Border.all(
-                                      color: _selectTab == item ? Theme.of(context).colorScheme.tertiary.withOpacity(0.8) :
-                                        Theme.of(context).colorScheme.primary.withOpacity(0.5), width: _selectTab == item ? 2.0 : 1.0),
+                                    color: _selectTab == item ?
+                                      Theme.of(context).colorScheme.tertiary.withOpacity(0.8) :
+                                      Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                                        width: _selectTab == item ? 2.0 : 1.0),
                                 ),
-                                child: Text(item,
-                                    style: _selectTab == item ? ItemTitleHotStyle(context) : ItemTitleStyle(context),
+                                child: Text(item.tr,
+                                    style: _selectTab == item ?
+                                      ItemTitleHotStyle(context) : ItemTitleStyle(context),
                                     textAlign: TextAlign.center),
                               )
                             )
                           )).toList(),
                         ),
+                          if (_selectTab == _tabText.first)...[
+                            SizedBox(height: UI_LIST_TEXT_SPACE),
+                            SubTitle(context, '${_tabText[0].tr} *', height: 60,
+                                textColor: THEME_ALERT_COLOR),
+                            EditListWidget(_timeData['dayMap'], EditListType.day,
+                                isTitleShow: false, onItemAdd, onItemSelected),
+                          ],
                         if (_selectTab != _tabText.first)...[
                           SizedBox(height: UI_LIST_TEXT_SPACE),
-                          SubTitle(context, _tabText[1], height: 60),
+                          SubTitle(context, '${_tabText[1].tr} *', height: 60,
+                              textColor: THEME_ALERT_COLOR),
                           Row(
                             children: [
                               Expanded(
@@ -499,10 +512,6 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                           SizedBox(height: UI_LIST_TEXT_SPACE),
                           EditListWidget(_timeData['exceptDayMap'], EditListType.exDay, onItemAdd, onItemSelected),
                         ],
-                        if (_selectTab == _tabText.first)...[
-                          SizedBox(height: UI_LIST_TEXT_SPACE),
-                          EditListWidget(_timeData['dayMap'], EditListType.day, onItemAdd, onItemSelected),
-                        ],
                         SizedBox(height: UI_LIST_TEXT_SPACE),
                         SubTitle(context, 'TIME SELECT *'.tr, height: 60.0),
                         Row(
@@ -572,7 +581,9 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                     width: MediaQuery.of(context).size.width,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        primary: Theme.of(context).primaryColor,
+                        primary: _selectTab == _tabText.first &&
+                          JSON_EMPTY(_timeData['day']) ? Colors.grey :
+                          Theme.of(context).primaryColor,
                         shadowColor: Colors.transparent,
                         minimumSize: Size(double.infinity, _bottomHeight),
                         shape: RoundedRectangleBorder(
@@ -582,7 +593,7 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                       child: Text('Done'.tr, style: ItemTitleLargeInverseStyle(context)),
                       onPressed: () {
                         if (_selectTab == _tabText.first && JSON_EMPTY(_timeData['day'])) {
-                          ShowToast('No date information'.tr);
+                          ShowToast('Please select a date'.tr);
                           return;
                         // } else if (_selectTab == _tabText[1]) {
                         //   if (STR(_timeData['startDate']).isEmpty) {

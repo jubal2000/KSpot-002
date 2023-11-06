@@ -54,7 +54,8 @@ class EventEditViewModel extends ChangeNotifier {
   get isNextEnable {
     switch(stepIndex) {
       case 0: return agreeChecked;
-      case 1: return placeInfo != null;
+      case 1: return true;
+      // case 1: return placeInfo != null;
     }
     return checkEditDone(false);
   }

@@ -82,7 +82,7 @@ dependencies:
   image_picker: ^0.8.5
   image: ^3.2.1
   material_tag_editor: ^0.1.2
-  syncfusion_flutter_calendar: ^20.4.52
+  syncfusion_flutter_calendar: ^23.1.43
   progressive_time_picker: ^0.0.4
   image_editor: ^1.0.2
   image_gallery_saver: ^1.7.1

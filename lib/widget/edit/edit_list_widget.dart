@@ -59,6 +59,7 @@ class EditListWidget extends StatefulWidget {
         this.padding = const EdgeInsets.only(top: 0),
         this.enabled = true,
         this.isCanMove = false,
+        this.isTitleShow = true,
         this.onChanged,
         this.onListItemChanged}) : super(key: key);
 
@@ -69,6 +70,7 @@ class EditListWidget extends StatefulWidget {
   EdgeInsets padding;
   bool enabled;
   bool isCanMove;
+  bool isTitleShow;
   Function(EditListType, JSON)? onAddAction;
   Function(EditListType, String, int)? onSelected;
   Function(EditListType, List<String>)? onChanged;
@@ -287,7 +289,8 @@ class _EditListSortState extends State<EditListWidget> {
       padding: widget.padding,
       child: Column(
         children: [
-          SubTitle(context, title.tr),
+          if (widget.isTitleShow)
+            SubTitle(context, title.tr),
           ReorderableListView(
             shrinkWrap: true,
             buildDefaultDragHandles: false,
@@ -318,7 +321,8 @@ class _EditListSortState extends State<EditListWidget> {
             },
             children: _itemList,
           ),
-          SizedBox(height: 5.w),
+          if (widget.isTitleShow)
+            SizedBox(height: 5.w),
           Container(
             height: descText[widget.type.index].isNotEmpty ? 50.w : 40.w,
             child: ElevatedButton(

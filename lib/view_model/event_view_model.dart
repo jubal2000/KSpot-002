@@ -51,7 +51,7 @@ class EventViewModel extends ChangeNotifier {
   final mapKey    = GlobalKey();
 
   var cameraPos = CameraPosition(target: LatLng(0,0));
-  var eventListType = EventListType.map;
+  var eventListType = EventListType.map.obs;
   DateTime? currentDateTime;
 
   var isDateOpen      = false.obs;
@@ -133,13 +133,13 @@ class EventViewModel extends ChangeNotifier {
   }
 
   showEventListType() {
-    return GestureDetector(
+    return Obx(() => GestureDetector(
       onTap: () {
-        eventListType = eventListType == EventListType.map ? EventListType.list : EventListType.map;
+        eventListType.value = eventListType.value == EventListType.map ? EventListType.list : EventListType.map;
         notifyListeners();
       },
-      child: Icon(eventListType == EventListType.map ? Icons.view_list_sharp : Icons.map_outlined),
-    );
+      child: Icon(eventListType.value == EventListType.map ? Icons.view_list_sharp : Icons.map_outlined),
+    ));
   }
 
   Future<List<EventModel>> setShowList() async {

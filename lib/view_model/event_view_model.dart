@@ -39,7 +39,7 @@ enum EventListTopicType {
 }
 
 class EventViewModel extends ChangeNotifier {
-  List<EventModel> eventList = [];
+  List<EventModel> showList = [];
   LatLngBounds? mapBounds;
   GoogleMapWidget? googleWidget;
 
@@ -53,12 +53,10 @@ class EventViewModel extends ChangeNotifier {
   var cameraPos = CameraPosition(target: LatLng(0,0));
   var eventListType = EventListType.map;
   var currentDateTime = DateTime(0);
-  var eventShowList   = <Widget> [];
   var isDateOpen      = false;
   var isMapUpdate     = true;
   var isManagerMode   = false; // 유저의 이벤트목록 일 경우 메니저이면, 기간이 지난 이벤트들도 표시..
   var isRefreshMap    = false;
-  var isRefreshList   = true;
 
   DatePicker? datePicker;
 
@@ -68,11 +66,10 @@ class EventViewModel extends ChangeNotifier {
     // googleWidget = null;
     cache.eventMapItemData.clear();
     cache.eventListItemData.clear();
-    eventList.clear();
+    showList.clear();
   }
 
-  refreshView([var refreshList = true]) {
-    isRefreshList = refreshList;
+  refreshView() {
     notifyListeners();
   }
 
@@ -95,7 +92,7 @@ class EventViewModel extends ChangeNotifier {
     LOG('--> getEventData : ${AppData.currentEventGroup!.id} / ${AppData.currentCountry} / ${AppData.currentState}');
     mapBounds = null;
     isMapUpdate = true;
-    eventList.clear();
+    showList.clear();
     cache.eventData.clear();
     return eventRepo.getEventListFromCountry(AppData.currentEventGroup!.id, AppData.currentCountry, AppData.currentState);
   }
@@ -109,9 +106,9 @@ class EventViewModel extends ChangeNotifier {
   }
 
   showGoogleWidget({var height = 300.0}) {
-    LOG('--> showGoogleWidget : ${googleWidget == null ? 'none' : 'ready'} / ${eventList.length}');
+    LOG('--> showGoogleWidget : ${googleWidget == null ? 'none' : 'ready'} / ${showList.length}');
     googleWidget ??= GoogleMapWidget(
-      eventList.map((e) => e.toJson()).toList(),
+      showList.map((e) => e.toJson()).toList(),
       key: mapKey,
       mapHeight: height - UI_MENU_HEIGHT + 6,
       onMarkerSelected: (selectItem) {
@@ -131,7 +128,7 @@ class EventViewModel extends ChangeNotifier {
     return GestureDetector(
       onTap: () {
         eventListType = eventListType == EventListType.map ? EventListType.list : EventListType.map;
-        refreshView();
+        notifyListeners();
       },
       child: Icon(eventListType == EventListType.map ? Icons.view_list_sharp : Icons.map_outlined),
     );
@@ -224,7 +221,7 @@ class EventViewModel extends ChangeNotifier {
     if (compareShowList(tmpList)) {
       return false;
     }
-    refreshView();
+    notifyListeners();
     return true;
   }
 
@@ -235,22 +232,22 @@ class EventViewModel extends ChangeNotifier {
   }
 
   compareShowList(List<EventModel> checkList) {
-    if (checkList.length != eventList.length) return false;
+    if (checkList.length != showList.length) return false;
     var checkCount = 0;
-    for (var eItem in eventList) {
+    for (var eItem in showList) {
       for (var cItem in checkList) {
         if (eItem.id == cItem.id) checkCount++;
       }
     }
-    return eventList.length > checkList.length ? checkCount == eventList.length : checkCount == checkList.length;
+    return showList.length > checkList.length ? checkCount == showList.length : checkCount == checkList.length;
   }
 
   showEventMap() {
-    eventShowList.clear();
     var itemHeight = 220.0;
+    List<Widget> tmpList = [];
     // recommend count..
-    for (var i=0; i<eventList.length; i++) {
-      var eventOrg = cache.eventData[eventList[i].id];
+    for (var i=0; i<showList.length; i++) {
+      var eventOrg = cache.eventData[showList[i].id];
       if (eventOrg != null) {
         // LOG('--> eventOrg.recommendData [${showList[i].title}] : ${eventOrg.recommendData}');
         // if (LIST_NOT_EMPTY(eventOrg.recommendData)) {
@@ -258,13 +255,13 @@ class EventViewModel extends ChangeNotifier {
         //     LOG('--> recommendData item : ${item.toJson()}');
         //   }
         // }
-        eventList[i].recommendData = eventOrg.recommendData;
+        showList[i].recommendData = eventOrg.recommendData;
       }
-      eventList[i] = eventRepo.setRecommendCount(eventList[i], AppData.currentDate);
+      showList[i] = eventRepo.setRecommendCount(showList[i], AppData.currentDate);
     }
-    LOG('--> eventShowList result : ${eventList.length}');
-    eventList = EVENT_SORT_HOT(eventList);
-    for (var eventItem in eventList) {
+    LOG('--> eventShowList result : ${showList.length}');
+    showList = EVENT_SORT_HOT(showList);
+    for (var eventItem in showList) {
       var addItem = cache.eventMapItemData[eventItem.id];
       // LOG('--> showEventMap : ${item.id} / ${item.title} / ${addItem != null ? 'OK': 'none'}');
       addItem ??= PlaceEventMapCardItem(
@@ -306,16 +303,16 @@ class EventViewModel extends ChangeNotifier {
       //   )
       // );
       cache.eventMapItemData[eventItem.id] = addItem;
-      eventShowList.add(addItem);
+      tmpList.add(addItem);
     }
-    LOG('----> showEventMap : $isMapUpdate / ${eventShowList.length} / ${eventList.length}');
+    LOG('----> showEventMap : $isMapUpdate / ${tmpList.length} / ${showList.length}');
     if (isMapUpdate) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Future.delayed(const Duration(milliseconds: 500), () async {
           if (mapKey.currentState != null) {
             List addList = [];
             List<JSON> markerList = [];
-            for (var e in eventList) {
+            for (var e in showList) {
               if (e.placeInfo != null) {
                 // LOG('--> addList : ${addList.length} / ${e.placeInfo!.id}');
                 if (!addList.contains(e.placeInfo!.id)) {
@@ -331,21 +328,21 @@ class EventViewModel extends ChangeNotifier {
         });
       });
     }
-    return eventShowList;
+    return tmpList;
   }
 
   showEventList(itemHeight) {
     List<Widget> tmpList = [];
     // recommend count..
-    for (var i=0; i<eventList.length; i++) {
-      var eventOrg = cache.eventData[eventList[i].id];
+    for (var i=0; i<showList.length; i++) {
+      var eventOrg = cache.eventData[showList[i].id];
       if (eventOrg != null) {
-        eventList[i].recommendData = eventOrg.recommendData;
+        showList[i].recommendData = eventOrg.recommendData;
       }
-      eventList[i] = eventRepo.setRecommendCount(eventList[i], AppData.currentDate);
+      showList[i] = eventRepo.setRecommendCount(showList[i], AppData.currentDate);
     }
-    eventList = EVENT_SORT_HOT(eventList);
-    for (var eventItem in eventList) {
+    showList = EVENT_SORT_HOT(showList);
+    for (var eventItem in showList) {
       var addItem = cache.eventListItemData[eventItem.id];
       addItem ??= EventCardItem(
         eventItem,
@@ -366,9 +363,9 @@ class EventViewModel extends ChangeNotifier {
       Get.to(() => EventDetailScreen(item, item.placeInfo))!.then((eventInfo) {
         if (eventInfo != null) {
           isMapUpdate = true;
-          eventList.clear();
+          showList.clear();
           cache.setEventItem(eventInfo!);
-          refreshView();
+          notifyListeners();
         }
       });
     });
@@ -385,11 +382,11 @@ class EventViewModel extends ChangeNotifier {
             child: Container(
               height: itemHeight,
               margin: EdgeInsets.only(bottom: UI_MENU_BG_HEIGHT - 10),
-              child: isRefreshList ? FutureBuilder(
+              child: FutureBuilder(
                 future: setShowList(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
-                    eventList = snapshot.data!;
+                    showList = snapshot.data!;
                     return ListView(
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,
@@ -400,12 +397,7 @@ class EventViewModel extends ChangeNotifier {
                     return Container();
                   }
                 }
-              ) : ListView(
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                children: eventShowList,
-              )
+              ),
             ),
           ),
         ],
@@ -422,7 +414,7 @@ class EventViewModel extends ChangeNotifier {
         future: setShowList(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            eventList = snapshot.data!;
+            showList = snapshot.data!;
             return Column(
               children: [
                 if (isDateOpen)

@@ -68,44 +68,39 @@ class _PlaceEditInputScreenState extends State<PlaceEditInputScreen> {
     return ListView(
       shrinkWrap: true,
       children: [
-        SizedBox(height: UI_ITEM_SPACE.h),
-          SubTitle(context, 'SPOT GROUP'.tr),
-          Row(
-            children: [
-              if (_viewModel.groupInfo != null)...[
-                Expanded(
-                  child: ContentItem(_viewModel.groupInfo!.toJson(),
-                    padding: EdgeInsets.zero,
-                    showType: GoodsItemCardType.normal,
-                    descMaxLine: 2,
-                    isShowExtra: false,
-                    outlineColor: Theme.of(context).colorScheme.tertiary,
-                    titleStyle: ItemTitleLargeStyle(context), descStyle: ItemDescStyle(context)),
-                ),
-              ],
-              contentAddButton(context,
-                'SELECT\nGROUP'.tr,
-                icon: Icons.settings,
-                onPressed: (_) {
-                  EventGroupSelectDialog(context,
-                      _viewModel.groupInfo!.id,
-                      _viewModel.groupInfo!.contentType).then((result) {
-                    if (result != null) {
-                      LOG('--> EventGroupSelectDialog result : ${result.toJson()}');
-                      _viewModel.setEventGroupInfo(result);
-                    }
-                  });
-                }
+        SubTitle(context, 'SPOT GROUP'.tr),
+        Row(
+          children: [
+            if (_viewModel.groupInfo != null)...[
+              Expanded(
+                child: ContentItem(_viewModel.groupInfo!.toJson(),
+                  padding: EdgeInsets.zero,
+                  showType: GoodsItemCardType.normal,
+                  descMaxLine: 2,
+                  isShowExtra: false,
+                  outlineColor: Theme.of(context).colorScheme.tertiary,
+                  titleStyle: ItemTitleLargeStyle(context), descStyle: ItemDescStyle(context)),
+              ),
+            ],
+            contentAddButton(context,
+              'GROUP\nSELECT'.tr,
+              icon: Icons.settings,
+              onPressed: (_) {
+                EventGroupSelectDialog(context,
+                    _viewModel.groupInfo!.id,
+                    _viewModel.groupInfo!.contentType).then((result) {
+                  if (result != null) {
+                    LOG('--> EventGroupSelectDialog result : ${result.toJson()}');
+                    _viewModel.setEventGroupInfo(result);
+                  }
+                });
+              }
             ),
           ]
         ),
         SizedBox(height: UI_LIST_TEXT_SPACE),
-        showHorizontalDivider(Size(Get.width, 1)),
-        SizedBox(height: UI_LIST_TEXT_SPACE_S),
         _viewModel.showImageSelector(),
         SizedBox(height: UI_LIST_TEXT_SPACE),
-        showHorizontalDivider(Size(Get.width, 1)),
-        SizedBox(height: UI_LIST_TEXT_SPACE_S),
         SubTitle(context, 'INFO'.tr),
         SizedBox(height: UI_LIST_TEXT_SPACE),
         EditTextField(context, 'TITLE'.tr, _viewModel.editItem!.title,
@@ -122,15 +117,15 @@ class _PlaceEditInputScreenState extends State<PlaceEditInputScreen> {
           _viewModel.editItem!.tagData = value;
         }),
         SizedBox(height: UI_LIST_TEXT_SPACE),
-
-        SizedBox(height: UI_LIST_TEXT_SPACE_S),
-        showHorizontalDivider(Size(Get.width, 1)),
-        SizedBox(height: UI_LIST_TEXT_SPACE_S),
+        _viewModel.showCountrySelect(context),
+        SizedBox(height: UI_LIST_TEXT_SPACE),
+        _viewModel.showAddressInput(context),
+        SizedBox(height: UI_LIST_TEXT_SPACE),
+        _viewModel.showContactInput(context),
+        SizedBox(height: UI_LIST_TEXT_SPACE),
         EditListWidget(_viewModel.editManagerToJSON, title:'MANAGER *', EditListType.manager, _viewModel.onItemAdd,
             _viewModel.onItemSelected),
         SizedBox(height: UI_LIST_TEXT_SPACE),
-        showHorizontalDivider(Size(Get.width, 1)),
-        SizedBox(height: UI_LIST_TEXT_SPACE_S),
         EditSetupWidget('OPTIONS'.tr, _viewModel.editOptionToJSON, AppData.INFO_EVENT_OPTION,
             key:_setupKey,
             customData: _viewModel.editCustomToJSON,

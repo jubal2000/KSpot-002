@@ -67,7 +67,7 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
         children: [
           SizedBox(height: UI_LIST_TEXT_SPACE_L),
           if (_viewModel.isEditMode)...[
-            SubTitle(context, 'EVENT PLACE SELECT'.tr),
+            SubTitle(context, 'EVENT SPOT SELECT'.tr),
             Row(
               children: [
                 if (_viewModel.placeInfo != null)...[
@@ -82,7 +82,7 @@ class _EventEditInputScreenState extends State<EventEditInputScreen> {
                   ),
                 ],
                 contentAddButton(context,
-                  'PLACE\nSELECT'.tr,
+                  'SPOT\nSELECT'.tr,
                   icon: Icons.settings,
                   onPressed: (_) {
                     Map<String, PlaceModel> list = {};

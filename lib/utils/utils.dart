@@ -1659,7 +1659,8 @@ TextCheckBox(BuildContext context, String title, bool value,
 }
 
 // ignore: non_constant_identifier_names
-SubTitle(BuildContext context, String title, {Color? textColor, double height = 30, double topPadding = 0, double bottomPadding = 0, Widget? child}) {
+SubTitle(BuildContext context, String title,
+  {Color? textColor, double height = 30, double topPadding = 0, double bottomPadding = 0, Widget? child}) {
   return Container(
       height: height,
       alignment: Alignment.centerLeft,

@@ -8,68 +8,28 @@ import 'dart:developer';
 
 import '../data/app_data.dart';
 
-class AddressSearchDlg extends StatefulWidget {
+class AddressSearchDlg extends StatelessWidget {
   AddressSearchDlg(this.address,  this.onChanged, {Key? key, this.language = 'ko'}) : super(key: key);
 
   String address;
   String language;
   Function(Address)? onChanged;
 
-  // final geoMethods = GeoMethods(
-  //   googleApiKey: GOOGLE_API_KEY,
-  //   language: 'ko',
-  //   countryCodes: ['kr', 'us'],
-  //   country: '대한민국',
-  //   city: '서울',
-  //   mode: 'transit'
-  // );
-
-  @override
-  AddressSearchDlgState createState() => AddressSearchDlgState();
-}
-
-class AddressSearchDlgState extends State<AddressSearchDlg> {
-  final TextEditingController _controller = TextEditingController();
-
-  @override
-  void initState() {
-    _controller.text = widget.address;
-    super.initState();
-  }
+  late final TextEditingController _controller = TextEditingController(text: address);
 
   @override
   Widget build(BuildContext context) {
     LOG('--> CountryCodes[${AppData.currentCountry}] : ${CountryCodeSmall(AppData.currentCountry)}');
     late GeoMethods geoMethods = GeoMethods(
         googleApiKey: GOOGLE_MAP_KEY,
-        language: widget.language,
+        language: language,
         // country: AppData.currentCountry,
         // city: AppData.currentState,
-        countryCodes: [CountryCodeSmall(AppData.currentCountry)],
         // country: '대한민국',
         // city: '서울',
+        countryCodes: [CountryCodeSmall(AppData.currentCountry)],
         mode: DirectionsMode.transit
     );
-    // return AddressSearchDialog(
-    //     geoMethods: geoMethods,
-    //     builder: (
-    //         BuildContext context,
-    //         AsyncSnapshot<List<Address>> snapshot,
-    //         Future<void> Function() searchAddress,
-    //         Future<Address> Function(Address address) getGeometry,
-    //         void Function() dismiss,
-    //         ) {
-    //       return MyCustomWidget(
-    //         snapshot: snapshot,
-    //         searchAddress: searchAddress,
-    //         getGeometry: getGeometry,
-    //         dismiss: dismiss,
-    //         controller: _controller,
-    //         address: widget.address,
-    //       );
-    //     }
-    // );
-
     return AddressSearchDialog(
       geoMethods: geoMethods,
       controller: _controller,
@@ -80,12 +40,13 @@ class AddressSearchDlgState extends State<AddressSearchDlg> {
         continueText: 'OK'.tr,
       ),
       style: AddressDialogStyle(
-        backgroundColor: Theme.of(context).backgroundColor,
+        textColor: Theme.of(context).textTheme.bodyMedium!.color!,
+        backgroundColor: Theme.of(context).colorScheme.background,
       ),
       onDone: (address) {
         log("--> AddressSearchBuilder : ${address.reference}");
-        if (widget.onChanged != null) {
-          widget.onChanged!(address);
+        if (onChanged != null) {
+          onChanged!(address);
         }
       },
     );
@@ -93,14 +54,15 @@ class AddressSearchDlgState extends State<AddressSearchDlg> {
 }
 
 void showAddressSearchDialog(BuildContext context, String address, Function(Address) onChanged) {
-  showGeneralDialog(
-      barrierColor: Colors.black.withOpacity(0.5),
-      barrierDismissible: true,
-      barrierLabel: '',
-      context: context,
-      pageBuilder: (context, animation1, animation2) {
-        return AddressSearchDlg(address, onChanged);
-      });
+  showDialog(
+    context: context,
+    barrierColor: Colors.black.withOpacity(0.5),
+    barrierDismissible: true,
+    barrierLabel: '',
+    builder: (context) {
+      return AddressSearchDlg(address, onChanged);
+    }
+  );
 }
 
 void showAddressSearchDialog2(BuildContext context) {

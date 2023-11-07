@@ -61,6 +61,7 @@ dependencies:
   path: ^1.8.0
   path_provider: ^2.0.9
   provider: ^6.0.3
+  flutter_riverpod: ^1.0.4
   permission_handler: ^10.2.0
 
   # map..

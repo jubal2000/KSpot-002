@@ -58,7 +58,7 @@ class EventEditPlaceScreen extends StatelessWidget {
           ]
         ),
         showHorizontalDivider(Size(Get.width, 30)),
-        SubTitle(context, 'EVENT PLACE SELECT'.tr),
+        SubTitle(context, 'EVENT SPOT SELECT'.tr),
         Row(
           children: [
             if (_viewModel.placeInfo != null)...[
@@ -73,7 +73,7 @@ class EventEditPlaceScreen extends StatelessWidget {
               ),
             ],
             contentAddButton(context,
-                'PLACE\nSELECT'.tr,
+                'SPOT\nSELECT'.tr,
                 icon: Icons.settings,
                 onPressed: (_) {
                   Map<String, PlaceModel> list = {};

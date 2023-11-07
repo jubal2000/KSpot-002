@@ -12,6 +12,7 @@ import 'package:palette_generator/palette_generator.dart';
 import 'package:uuid/uuid.dart';
 
 import '../data/app_data.dart';
+import '../data/common_sizes.dart';
 import '../data/dialogs.dart';
 import '../data/style.dart';
 import '../data/theme_manager.dart';
@@ -20,14 +21,23 @@ import '../models/event_group_model.dart';
 import '../models/event_model.dart';
 import '../models/place_model.dart';
 import '../repository/event_repository.dart';
+import '../utils/address_utils.dart';
 import '../utils/utils.dart';
 import '../view/follow/follow_screen.dart';
 import '../view/profile/profile_screen.dart';
+import '../widget/csc_picker/csc_picker.dart';
 import '../widget/event_time_edit_widget.dart';
 import '../view/profile/profile_target_screen.dart';
 import '../widget/card_scroll_viewer.dart';
 import '../widget/edit/edit_list_widget.dart';
 import '../widget/event_group_dialog.dart';
+
+enum PlaceInputType {
+  address1,
+  address2,
+  email,
+  phone,
+}
 
 class PlaceEditViewModel extends ChangeNotifier {
   EventGroupModel?  groupInfo;
@@ -36,6 +46,7 @@ class PlaceEditViewModel extends ChangeNotifier {
   final userRepo  = UserRepository();
   final placeRepo = PlaceRepository();
   final titleN = ['Agree to Terms and Conditions', 'Spot group select', 'Spot edit'];
+  final _textController   = List<TextEditingController>.generate(PlaceInputType.values.length, (index) => TextEditingController());
 
   // for Edit..
   final _imageGalleryKey  = GlobalKey();
@@ -52,6 +63,12 @@ class PlaceEditViewModel extends ChangeNotifier {
   var isEdited = false;
   var isEditMode = false;
   var agreeChecked = false;
+
+  var _currentCountryFlag = '';
+  var _currentCountry = '';
+  var _currentState = '';
+  var _currentCity = '';
+  var _isEdited = false;
 
   get isNextEnable {
     switch(stepIndex) {
@@ -275,6 +292,119 @@ class PlaceEditViewModel extends ChangeNotifier {
             }
           }
         }
+    );
+  }
+
+  showCountrySelect(context) {
+    return Column(
+      children: [
+        SubTitle(context, 'COUNTRY / STATE, CITY *'.tr),
+        CSCPicker(
+          flagState: CountryFlag.ENABLE,
+          showCities: false,
+          // defaultCountry: DefaultCountry.Korea_South,
+          currentCountry: _currentCountryFlag,
+          currentState: _currentState,
+          disabledDropdownDecoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey))),
+          selectedItemStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          // dropdownItemStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          dropdownDecoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Theme
+                  .of(context)
+                  .primaryColor))),
+          onCountryChanged: (value) {
+            _currentCountryFlag = value;
+            _currentCountry = GET_COUNTRY_EXCEPT_FLAG(value);
+            LOG('--> country : [$_currentCountryFlag / $_currentCountry]');
+          },
+          onStateChanged: (value) {
+            _currentState = value ?? '';
+            LOG('--> state : $_currentState');
+          },
+          onCityChanged: (value) {
+            _currentCity = value ?? '';
+            LOG('--> city : $_currentCity');
+          },
+        ),
+      ]
+    );
+  }
+
+  showAddressInput(context) {
+    return Column(
+      children: [
+        SubTitle(context, 'ADDRESS *'.tr),
+        SizedBox(height: UI_LIST_TEXT_SPACE_S),
+        TextFormField(
+          controller: _textController[PlaceInputType.address1.index],
+          decoration: inputLabel(context, 'Address'.tr, ''),
+          keyboardType: TextInputType.text,
+          maxLines: 1,
+          readOnly: true,
+          validator: (value) {
+            if (value!.isNotEmpty) return null;
+            return 'Please enter your address'.tr;
+          },
+          onTap: () {
+            showAddressSearchDialog(context, STR(editItem!.address.address1), (address) {
+              LOG('--> address : $address');
+              if (address.placeId != null) {
+                editItem!.address.address1 = address.reference.toString();
+                editItem!.address.lat = address.coords!.latitude;
+                editItem!.address.lng = address.coords!.longitude;
+                _textController[PlaceInputType.address1.index].text = editItem!.address.address1;
+                _isEdited = true;
+              }
+            });
+          },
+        ),
+        SizedBox(height: UI_LIST_TEXT_SPACE_S),
+        TextFormField(
+          controller: _textController[PlaceInputType.address2.index],
+          decoration: inputLabel(context, 'Address detail'.tr, ''),
+          keyboardType: TextInputType.text,
+          maxLines: 1,
+          validator: (value) {
+            if (value!.isNotEmpty) return null;
+            return 'Please enter your detailed address'.tr;
+          },
+          onChanged: (value) {
+            editItem!.address.address2 = value;
+            _isEdited = true;
+          },
+        ),
+      ]
+    );
+  }
+
+  showContactInput(context) {
+    return Column(
+      children: [
+        SubTitle(context, 'CONTACT'.tr),
+        TextFormField(
+          controller: _textController[PlaceInputType.email.index],
+          decoration: inputLabel(context, 'Email'.tr, ''),
+          keyboardType: TextInputType.text,
+          maxLines: 1,
+          onChanged: (value) {
+            editItem!.email = value;
+            _isEdited = true;
+          },
+        ),
+        SizedBox(height: 20),
+        TextFormField(
+          controller: _textController[PlaceInputType.phone.index],
+          decoration: inputLabel(context, 'Phone'.tr, ''),
+          keyboardType: TextInputType.text,
+          maxLines: 1,
+          onChanged: (value) {
+            editItem!.phoneData ??= [];
+            editItem!.phoneData!.add(value);
+            _isEdited = true;
+          },
+        ),
+      ],
     );
   }
 

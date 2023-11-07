@@ -177,10 +177,10 @@ class BankData {
 
 @JsonSerializable()
 class AddressData {
-  String address1;
-  String address2;
-  double lat;
-  double lng;
+  String  address1;
+  String  address2;
+  double  lat;
+  double  lng;
   String? postCode;
   String? country;
   String? city;

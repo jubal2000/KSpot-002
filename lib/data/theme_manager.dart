@@ -292,7 +292,7 @@ TitleColor(BuildContext context) {
 }
 
 SubTitleColor(BuildContext context) {
-  return Theme.of(context).primaryColor.withOpacity(0.75);
+  return Theme.of(context).colorScheme.tertiary;
 }
 
 DescColor(BuildContext context) {

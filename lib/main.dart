@@ -7,6 +7,7 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dropdown_alert/dropdown_alert.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as river;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
@@ -68,7 +69,7 @@ Future<void> main() async {
         if (snapshot.hasData) {
           AppData.initStartInfo(snapshot.data as JSON);
           LOG('--> MyApp Start : ${AppData.userInfo.id}');
-          return MyApp();
+          return river.ProviderScope(child: MyApp());
         } else {
           return Container();
         }

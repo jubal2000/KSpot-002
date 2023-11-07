@@ -692,7 +692,7 @@ packages:
     source: hosted
     version: "3.0.0"
   flutter_riverpod:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_riverpod
       sha256: d84e180f039a6b963e610d2e4435641fdfe8f12437e8770e963632e05af16d80

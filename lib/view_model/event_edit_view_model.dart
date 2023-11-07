@@ -33,7 +33,7 @@ class EventEditViewModel extends ChangeNotifier {
   PlaceModel?   placeInfo;
   final userRepo  = UserRepository();
   final eventRepo = EventRepository();
-  final titleN = ['Agree to Terms and Conditions', 'Place Setting', 'Event Information'];
+  final titleN = ['Agree to Terms and Conditions', 'Spot Select', 'Event Edit'];
 
   // for Edit..
   final _imageGalleryKey  = GlobalKey();

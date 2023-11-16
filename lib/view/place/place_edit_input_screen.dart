@@ -93,6 +93,7 @@ class _PlaceEditInputScreenState extends State<PlaceEditInputScreen> {
                     LOG('--> EventGroupSelectDialog result : ${result.toJson()}');
                     _viewModel.setEventGroupInfo(result);
                   }
+                  _viewModel.refreshNext();
                 });
               }
             ),
@@ -107,6 +108,7 @@ class _PlaceEditInputScreenState extends State<PlaceEditInputScreen> {
             hint: 'Spot title *'.tr, maxLength: TITLE_LENGTH,
             maxLines: 1, keyboardType: TextInputType.multiline, onChanged: (value) {
               _viewModel.editItem!.title = value;
+              _viewModel.refreshNext();
             }),
         EditTextField(context, 'DESC'.tr, _viewModel.editItem!.desc,
             hint: 'Spot message'.tr, maxLength: DESC_LENGTH,
@@ -123,14 +125,17 @@ class _PlaceEditInputScreenState extends State<PlaceEditInputScreen> {
         SizedBox(height: UI_LIST_TEXT_SPACE),
         _viewModel.showContactInput(context),
         SizedBox(height: UI_LIST_TEXT_SPACE),
-        EditListWidget(_viewModel.editManagerToJSON, title:'MANAGER *', EditListType.manager, _viewModel.onItemAdd,
+        EditListWidget(_viewModel.editManagerToJSON, title:'MANAGER *',
+            EditListType.manager, _viewModel.onItemAdd,
             _viewModel.onItemSelected),
         SizedBox(height: UI_LIST_TEXT_SPACE),
-        EditSetupWidget('OPTIONS'.tr, _viewModel.editOptionToJSON, AppData.INFO_EVENT_OPTION,
+        EditSetupWidget('OPTIONS'.tr, _viewModel.editOptionToJSON,
+            AppData.INFO_EVENT_OPTION,
             key:_setupKey,
             customData: _viewModel.editCustomToJSON,
             showOption: [
-              {'showId': 'reserv' , 'value': _viewModel.checkCustomField('reserve', true)},
+              {'showId': 'reserv' ,
+                'value': _viewModel.checkCustomField('reserve', true)},
             ],
             onDataChanged: _viewModel.onSettingChanged),
         SizedBox(height: UI_LIST_TEXT_SPACE_L),

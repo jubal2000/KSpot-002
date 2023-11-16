@@ -410,7 +410,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
                 compassEnabled: false,
                 initialCameraPosition: CameraPosition( //innital position in map
                   target: showPos, //initial position
-                  zoom: 12.0, //initial zoom level
+                  zoom: 1.0, //initial zoom level
                 ),
                 markers: markers.toSet(),
                 polylines: Set<Polyline>.of(polylines.values),

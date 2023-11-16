@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
   final _fontSize = UI_FONT_SIZE_SS;
   final _radiusSize = 20.0;
 
-  List<Widget> _mainPages = [
+  final List<Widget> _mainPages = [
     EventScreen(),
     StoryScreen(),
     ChattingScreen(),
@@ -182,17 +182,18 @@ class HomeScreen extends StatelessWidget {
                         )
                       )
                     ),
-                    // BottomRightAlign(
-                    //   widthFactor: 7.2,
-                    //   heightFactor: 14,
-                    //   child: FloatingActionButton(
-                    //     onPressed: () {
-                    //       // sendFcmTestData();
-                    //       sendMultiFcmTestData();
-                    //     },
-                    //     child: Icon(Icons.send),
-                    //   ),
-                    // )
+                    BottomRightAlign(
+                      widthFactor: 7.2,
+                      heightFactor: 14,
+                      child: FloatingActionButton(
+                        onPressed: () {
+                          // sendFcmTestData();
+                          // sendMultiFcmTestData();
+                          theme.setFlexSchemeRotate();
+                        },
+                        child: Icon(Icons.color_lens_outlined),
+                      ),
+                    )
                   ]
                 ),
               )

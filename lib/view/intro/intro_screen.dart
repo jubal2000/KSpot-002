@@ -92,21 +92,21 @@ class IntroScreen extends StatelessWidget {
                                       )
                                     ),
                                   ),
-                                  SizedBox(height: UI_ITEM_SPACE_M),
-                                  Container(
-                                    width: Get.size.width,
-                                    height: UI_BUTTON_HEIGHT,
-                                    padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
-                                    child: ElevatedButton(
-                                        onPressed: () async {
-                                          await userRepo.startGuestUser();
-                                          Get.toNamed(Routes.HOME);
-                                        },
-                                        child: Text(
-                                          'GUEST START'.tr,
-                                        )
-                                    ),
-                                  ),
+                                  // SizedBox(height: UI_ITEM_SPACE_M),
+                                  // Container(
+                                  //   width: Get.size.width,
+                                  //   height: UI_BUTTON_HEIGHT,
+                                  //   padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE),
+                                  //   child: ElevatedButton(
+                                  //       onPressed: () async {
+                                  //         await userRepo.startGuestUser();
+                                  //         Get.toNamed(Routes.HOME);
+                                  //       },
+                                  //       child: Text(
+                                  //         'GUEST START'.tr,
+                                  //       )
+                                  //   ),
+                                  // ),
                                   SizedBox(height: UI_ITEM_SPACE_L * 1.5),
                                   GestureDetector(
                                     onTap: () async {

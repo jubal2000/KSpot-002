@@ -154,8 +154,8 @@ class EventViewModel extends ChangeNotifier {
             // LOG('--> setShowList placeInfo [${placeInfo.id}] : ${placeInfo.title}');
             item.value.placeInfo = placeInfo;
             final pos = LatLng(DBL(placeInfo.address.lat), DBL(placeInfo.address.lng));
-            // if (mapBounds !=  null) LOG('--> eventShowList add : ${mapBounds!.toJson()} / $pos');
-            if (eventListType == EventListType.map) {
+            if (eventListType.value == EventListType.map) {
+              // if (mapBounds !=  null) LOG('--> eventShowList add check : ${mapBounds!.toJson()} / $pos / ${mapBounds!.contains(pos)}');
               final timeData = item.value.getDateTimeData(AppData.currentDate, item.value.title);
               if (timeData != null && (mapBounds == null || mapBounds!.contains(pos))) {
                 item.value.timeRange = '${timeData.startTime} ~ ${timeData.endTime}';
@@ -218,6 +218,7 @@ class EventViewModel extends ChangeNotifier {
   }
 
   onMapRegionChanged(region) async {
+    LOG('--> mapBounds : $region');
     mapBounds = region;
     var tmpList = await setShowList();
     if (compareShowList(tmpList)) {
@@ -427,9 +428,9 @@ class EventViewModel extends ChangeNotifier {
     LOG('---> showEventMain');
     return Stack(
       children: [
-        if (eventListType == EventListType.map)
+        if (eventListType.value == EventListType.map)
             showMapList(),
-        if (eventListType == EventListType.list)
+        if (eventListType.value == EventListType.list)
             showMainList(),
         showDatePicker(),
       ]

@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/utils/utils.dart';
-import 'dart:developer';
 
 import '../data/app_data.dart';
 
@@ -43,8 +42,8 @@ class AddressSearchDlg extends StatelessWidget {
         textColor: Theme.of(context).textTheme.bodyMedium!.color!,
         backgroundColor: Theme.of(context).colorScheme.background,
       ),
-      onDone: (address) {
-        log("--> AddressSearchBuilder : ${address.reference}");
+      onDone: (address) async {
+        LOG("--> AddressSearchBuilder : $address");
         if (onChanged != null) {
           onChanged!(address);
         }

@@ -242,7 +242,7 @@ class EventModel {
         if (STR(item.endDate).isEmpty) item.endDate = startDate.add(Duration(days: 364)).toString();
         var endDate = DateTime.parse('${item.endDate!} 23:59:59.999');
         var duration  = endDate.difference(startDate).inDays + 1;
-        // LOG('--> Date Range : ${item.value['startDate']} ~ ${item.value['endDate']} => $duration / ${item.value['week']}');
+        // LOG('--> Date Range : ${item.title} -> ${item.startDate} ~ ${item.endDate} => $duration / ${item.week}');
         for (var i=0; i<duration; i++) {
           var day = startDate.add(Duration(days: i));
           var dayStr = day.toString().split(' ').first;

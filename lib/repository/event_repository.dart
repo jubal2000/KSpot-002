@@ -44,9 +44,9 @@ class EventRepository {
         cache.setEventItem(eventItem);
       }
     } catch (e) {
-      LOG('--> getEventListFromCountry error [$groupId] : $e');
+      LOG('--> repo getEventListFromCountry error [$groupId] : $e');
     }
-    LOG('--> getEventListFromCountry result : ${result.length}');
+    LOG('--> repo getEventListFromCountry result : ${result.length}');
     return result;
   }
 

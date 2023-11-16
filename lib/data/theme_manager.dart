@@ -132,74 +132,71 @@ class ThemeNotifier with ChangeNotifier {
   var themeMode  = false;
 
   ThemeNotifier() {
-    if (themeMode) {
-      _themeData = FlexThemeData.light(
-        scheme: schemeList[themeIndex],
-        surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
-        blendLevel: 15,
-        subThemesData: const FlexSubThemesData(
-          blendOnLevel: 30,
-        ),
-        keyColors: const FlexKeyColors(),
-        visualDensity: FlexColorScheme.comfortablePlatformDensity,
-        useMaterial3: true,
-        fontFamily: GoogleFonts
-            .notoSans()
-            .fontFamily,
-      );
-    } else {
-      _themeData = FlexThemeData.dark(
-        scheme: schemeList[themeIndex],
-        surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
-        blendLevel: 15,
-        subThemesData: const FlexSubThemesData(
-          blendOnLevel: 30,
-        ),
-        keyColors: const FlexKeyColors(),
-        visualDensity: FlexColorScheme.comfortablePlatformDensity,
-        useMaterial3: true,
-        fontFamily: GoogleFonts
-            .notoSans()
-            .fontFamily,
-      );
-    }
+    // if (themeMode) {
+    //   _themeData = FlexThemeData.light(
+    //     scheme: schemeList[themeIndex],
+    //     surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+    //     blendLevel: 15,
+    //     subThemesData: const FlexSubThemesData(
+    //       blendOnLevel: 30,
+    //     ),
+    //     keyColors: const FlexKeyColors(),
+    //     visualDensity: FlexColorScheme.comfortablePlatformDensity,
+    //     useMaterial3: true,
+    //     fontFamily: GoogleFonts
+    //         .notoSans()
+    //         .fontFamily,
+    //   );
+    // } else {
+    //   _themeData = FlexThemeData.dark(
+    //     scheme: schemeList[themeIndex],
+    //     surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+    //     blendLevel: 15,
+    //     subThemesData: const FlexSubThemesData(
+    //       blendOnLevel: 30,
+    //     ),
+    //     keyColors: const FlexKeyColors(),
+    //     visualDensity: FlexColorScheme.comfortablePlatformDensity,
+    //     useMaterial3: true,
+    //     fontFamily: GoogleFonts
+    //         .notoSans()
+    //         .fontFamily,
+    //   );
+    // }
     // notifyListeners();
-    // StorageManager.readData('themeIndex').then((value1) {
-    //   StorageManager.readData('themeMode').then((value2) {
-    //     LOG('--> local theme data : $value1 / $value2');
-    //     themeMode  = BOL(value2 ?? '1');
-    //     themeIndex = value1 ?? 0;
-    //     AppData.currentThemeMode  = themeMode;
-    //     AppData.currentThemeIndex = themeIndex;
-    //     notifyListeners();
-    //   });
-    // });
+    StorageManager.readData('themeIndex').then((value1) {
+      StorageManager.readData('themeMode').then((value2) {
+        LOG('--> local theme data : $value1 / $value2');
+        themeMode  = BOL(value2);
+        themeIndex = value1 ?? 0;
+        AppData.currentThemeMode  = themeMode;
+        AppData.currentThemeIndex = themeIndex;
+        refreshFlexScheme();
+      });
+    });
   }
 
   String setModeRotate(ThemeData currentTheme) {
-    var _themeList = [
+    var themeList = [
       lightTheme,
       darkTheme,
     ];
-    var _themeText = [
+    var themeText = [
       'LIGHT MODE',
       'DARK MODE'
     ];
-    var _saveText = [
-      'light',
-      'dark'
-    ];
-    var index = _themeList.indexOf(currentTheme);
-    if (++index >= _themeList.length) index = 0;
-    _themeData = _themeList[index];
+    var index = themeList.indexOf(currentTheme);
+    if (++index >= themeList.length) index = 0;
+    _themeData = themeList[index];
     AppData.currentThemeMode = index == 0;
-    StorageManager.saveData('SchemeMode', AppData.currentThemeMode ? '1' : '');
+    StorageManager.saveData('themeMode', AppData.currentThemeMode ? '1' : '');
     notifyListeners();
-    return _themeText[index];
+    return themeText[index];
   }
 
   String setFlexSchemeRotate() {
     if (++themeIndex >= schemeList.length) themeIndex = 0;
+    StorageManager.saveData('themeIndex', themeIndex);
     return refreshFlexScheme();
   }
 

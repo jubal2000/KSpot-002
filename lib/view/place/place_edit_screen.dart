@@ -96,7 +96,7 @@ class _PlaceEditScreenState extends State<PlaceEditScreen> {
                       ],
                       if (!viewModel.isShowOnly)...[
                         SizedBox(height: UI_LIST_TEXT_SPACE_S),
-                        BottomCenterAlign(
+                        Obx(() => BottomCenterAlign(
                           child: GestureDetector(
                             onTap: () {
                               // if (!viewModel.isNextEnable) return; // disabled for Dev..
@@ -105,13 +105,13 @@ class _PlaceEditScreenState extends State<PlaceEditScreen> {
                             child: Container(
                               width: double.infinity,
                               height: UI_BOTTOM_HEIGHT.w,
-                              color: viewModel.isNextEnable ? Theme.of(context).primaryColor : Colors.black45,
+                              color: viewModel.isNextEnable.value ? Theme.of(context).primaryColor : Colors.black45,
                               alignment: Alignment.center,
                               child: Text('Next'.tr, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w600,
                                   color: Theme.of(context).colorScheme.inversePrimary)),
                             )
                           )
-                        ),
+                        )),
                       ]
                     ],
                   )

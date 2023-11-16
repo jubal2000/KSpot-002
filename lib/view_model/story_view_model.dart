@@ -74,8 +74,8 @@ class StoryViewModel extends ChangeNotifier {
     // await cache.sortStoryDataCreateTimeDesc();
     List<Widget> showList = [];
     for (var item in cache.storyData.entries) {
-      LOG('--> refreshShowList : ${item.value.toJson()}');
       if (JSON_EMPTY(cache.reportData['report']) || !cache.reportData['report'].containsKey(item.key)) {
+        LOG('--> refreshShowList item : ${item.value.toJson()}');
         var addItem = cache.storyListItemData[item.key];
         addItem ??= MainStoryItem(
           item.value,

@@ -62,6 +62,7 @@ class PlaceEditViewModel extends ChangeNotifier {
   var isShowOnly = false;
   var isEdited = false;
   var isEditMode = false;
+  var isNextEnable = false.obs;
   var agreeChecked = false;
 
   var _currentCountryFlag = '';
@@ -70,12 +71,15 @@ class PlaceEditViewModel extends ChangeNotifier {
   var _currentCity = '';
   var _isEdited = false;
 
-  get isNextEnable {
+  refreshNext() {
     switch(stepIndex) {
-      case 0: return agreeChecked;
-      case 1: return editItem!.groupId.isNotEmpty;
+      case 0: isNextEnable.value = agreeChecked;
+        break;
+      case 1: isNextEnable.value = editItem!.groupId.isNotEmpty;
+        break;
+      default:
+        isNextEnable.value = checkEditDone(false);
     }
-    return checkEditDone(false);
   }
 
   get editManagerToJSON {
@@ -189,6 +193,7 @@ class PlaceEditViewModel extends ChangeNotifier {
         }
         break;
     }
+    refreshNext();
   }
 
   onItemChanged(EditListType type, JSON listData) {
@@ -291,6 +296,7 @@ class PlaceEditViewModel extends ChangeNotifier {
               titlePicKey = key;
             }
           }
+          refreshNext();
         }
     );
   }
@@ -316,10 +322,14 @@ class PlaceEditViewModel extends ChangeNotifier {
           onCountryChanged: (value) {
             _currentCountryFlag = value;
             _currentCountry = GET_COUNTRY_EXCEPT_FLAG(value);
+            editItem!.country = _currentCountry;
+            refreshNext();
             LOG('--> country : [$_currentCountryFlag / $_currentCountry]');
           },
           onStateChanged: (value) {
             _currentState = value ?? '';
+            editItem!.countryState = _currentState;
+            refreshNext();
             LOG('--> state : $_currentState');
           },
           onCityChanged: (value) {
@@ -355,6 +365,7 @@ class PlaceEditViewModel extends ChangeNotifier {
                 editItem!.address.lng = address.coords!.longitude;
                 _textController[PlaceInputType.address1.index].text = editItem!.address.address1;
                 _isEdited = true;
+                refreshNext();
               }
             });
           },
@@ -418,12 +429,20 @@ class PlaceEditViewModel extends ChangeNotifier {
       if (showAlert) showAlertDialog(Get.context!, 'Upload Failed'.tr, 'Please enter select picture..'.tr, '', 'OK'.tr);
       return false;
     }
+    if (editItem!.country.isEmpty) {
+      if (showAlert) showAlertDialog(Get.context!, 'Upload Failed'.tr, 'Please enter country..'.tr, '', 'OK'.tr);
+      return false;
+    }
+    if (editItem!.address.address1.isEmpty) {
+      if (showAlert) showAlertDialog(Get.context!, 'Upload Failed'.tr, 'Please enter address..'.tr, '', 'OK'.tr);
+      return false;
+    }
     if (editItem!.title.isEmpty) {
-      if (showAlert) showAlertDialog(Get.context!, 'Upload Failed'.tr, 'Please enter event title..'.tr, '', 'OK'.tr);
+      if (showAlert) showAlertDialog(Get.context!, 'Upload Failed'.tr, 'Please enter title..'.tr, '', 'OK'.tr);
       return false;
     }
     if (editItem!.managerData == null || editItem!.managerData!.isEmpty) {
-      if (showAlert) showAlertDialog(Get.context!, 'Upload Failed'.tr, 'Please enter select manager..'.tr, '', 'OK'.tr);
+      if (showAlert) showAlertDialog(Get.context!, 'Upload Failed'.tr, 'Please select manager..'.tr, '', 'OK'.tr);
       return false;
     }
     return true;
@@ -504,11 +523,11 @@ class PlaceEditViewModel extends ChangeNotifier {
     placeRepo.addPlaceItem(editItem!).then((result) {
       hideLoadingDialog();
       if (result != null) {
-        showAlertDialog(Get.context!, 'Upload'.tr, 'Event Upload Complete'.tr, '', 'OK'.tr).then((_) {
+        showAlertDialog(Get.context!, 'Spot create'.tr, 'Spot Upload Complete'.tr, '', 'OK'.tr).then((_) {
           Get.back(result: result);
         });
       } else {
-        showAlertDialog(Get.context!, 'Upload'.tr, 'Event Upload Failed'.tr, '', 'OK'.tr);
+        showAlertDialog(Get.context!, 'Spot create'.tr, 'Spot Upload Failed'.tr, '', 'OK'.tr);
       }
     });
   }

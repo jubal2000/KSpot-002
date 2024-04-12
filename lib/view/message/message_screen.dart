@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers/widgets/align.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/app_data.dart';

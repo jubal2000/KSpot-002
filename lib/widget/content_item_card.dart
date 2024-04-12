@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:helpers/helpers.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import 'package:kspot_002/widget/csc_picker/csc_picker.dart';
@@ -20,6 +19,7 @@ import 'dart:developer';
 
 import 'bookmark_widget.dart';
 import 'edit/edit_text_input_widget.dart';
+import 'helpers/helpers/widgets/align.dart';
 import 'like_widget.dart';
 
 enum GoodsItemCardType {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers/widgets/align.dart';
 
 import '../../data/app_data.dart';
 import '../../data/common_sizes.dart';
@@ -11,6 +10,7 @@ import '../../utils/utils.dart';
 import '../../view_model/place_edit_view_model.dart';
 import '../../widget/content_item_card.dart';
 import '../../widget/event_group_dialog.dart';
+import '../../widget/helpers/helpers/widgets/align.dart';
 
 class PlaceEditGroupSelectScreen extends StatefulWidget {
   PlaceEditGroupSelectScreen({super.key, this.parentViewModel});

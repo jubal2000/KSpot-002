@@ -180,7 +180,7 @@ class _PinFormState extends State<PinForm> {
         child: Container(
           child: TextButton(
               style: TextButton.styleFrom(
-                primary: NAVY,
+                backgroundColor: NAVY,
                 textStyle: keyboardTextStyle,
               ),
               onPressed: () {
@@ -209,7 +209,7 @@ class _PinFormState extends State<PinForm> {
         child: Container(
           child: TextButton(
               style: TextButton.styleFrom(
-                primary: NAVY,
+                backgroundColor: NAVY,
               ),
               onPressed: () {
                 removePin();

@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/models/message_model.dart';
 import 'package:kspot_002/view/message/message_talk_screen.dart';
 import 'package:kspot_002/view/message/message_group_item.dart';
@@ -18,7 +17,7 @@ import '../services/cache_service.dart';
 import '../utils/utils.dart';
 import '../view/home/home_top_menu.dart';
 import '../widget/user_item_widget.dart';
-import 'app_view_model.dart';
+import '../widget/helpers/helpers/widgets/align.dart';
 
 class MessageViewModel extends ChangeNotifier {
   final repo  = MessageRepository();
@@ -37,7 +36,7 @@ class MessageViewModel extends ChangeNotifier {
     JSON descList = {};
     JSON unOpenCount = {};
     JSON messageListItemData = {};
-    if (cache.messageData == null) return showList;
+    // if (cache.messageData == null) return showList;
     // get last message...
     for (var item in cache.messageData!.entries) {
       var targetId = item.value.senderId;

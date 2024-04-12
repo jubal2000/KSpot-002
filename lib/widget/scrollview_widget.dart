@@ -509,7 +509,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                 onSelected('', 1);
               },
               style: ElevatedButton.styleFrom(
-                primary: Theme.of(context).primaryColor.withOpacity(0.25),
+                backgroundColor: Theme.of(context).primaryColor.withOpacity(0.25),
                 minimumSize: Size.zero, // Set this
                 shadowColor: Colors.transparent,
                 shape: RoundedRectangleBorder(

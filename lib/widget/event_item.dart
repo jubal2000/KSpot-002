@@ -3,7 +3,6 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/data/dialogs.dart';
 import 'package:kspot_002/widget/bookmark_widget.dart';
 
@@ -16,9 +15,11 @@ import '../repository/event_repository.dart';
 import '../services/api_service.dart';
 import '../utils/utils.dart';
 import '../view_model/event_detail_view_model.dart';
+import '../view/event/event_edit_screen.dart';
 import 'like_widget.dart';
 import 'user_item_widget.dart';
-import '../view/event/event_edit_screen.dart';
+import 'helpers/helpers/widgets/align.dart';
+
 
 class EventCardItem extends StatefulWidget {
   EventCardItem(this.itemData,

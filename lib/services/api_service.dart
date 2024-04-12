@@ -997,6 +997,7 @@ class ApiService extends GetxService {
     var ref = firestore!.collection(StoryCollection);
     var query = ref
         .where('status', isEqualTo: 1)
+        .where('showStatus', isEqualTo: 1)
         .where('groupId', isEqualTo: groupId);
 
     if (country.isNotEmpty) {

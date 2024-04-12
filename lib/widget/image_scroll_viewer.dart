@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/data/theme_manager.dart';
 import 'package:kspot_002/widget/csc_picker/csc_picker.dart';
 import 'package:kspot_002/widget/page_dot_widget.dart';
@@ -15,6 +14,7 @@ import '../data/dialogs.dart';
 import '../data/style.dart';
 import '../utils/utils.dart';
 import 'card_scroll_viewer.dart';
+import 'helpers/helpers/widgets/align.dart';
 
 class ImageScrollViewer extends StatefulWidget {
   ImageScrollViewer(this.itemList, {Key? key,

@@ -331,7 +331,7 @@ class _EditListSortState extends State<EditListWidget> {
                 if (widget.onAddAction != null) widget.onAddAction!(widget.type, widget.listItem ?? {});
               },
               style: ElevatedButton.styleFrom(
-                primary: Theme.of(context).splashColor.withOpacity(0.1),
+                backgroundColor: Theme.of(context).splashColor.withOpacity(0.1),
                 shadowColor: Colors.transparent,
                 minimumSize: Size.zero, // Set this
                 padding: EdgeInsets.only(left: 5.w), // and this
@@ -571,7 +571,7 @@ Widget EditFileListSortWidget(BuildContext context, String title, JSON listItem,
             }
           },
           style: ElevatedButton.styleFrom(
-              primary: Colors.white,
+              backgroundColor: Colors.white,
               minimumSize: Size.zero, // Set this
               padding: EdgeInsets.only(left: 5), // and this
               shadowColor: Colors.transparent,

@@ -581,7 +581,7 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                     width: MediaQuery.of(context).size.width,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        primary: _selectTab == _tabText.first &&
+                          backgroundColor: _selectTab == _tabText.first &&
                           JSON_EMPTY(_timeData['day']) ? Colors.grey :
                           Theme.of(context).primaryColor,
                         shadowColor: Colors.transparent,

@@ -13,7 +13,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:helpers/helpers.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:intl/intl.dart';
 import 'package:kspot_002/data/theme_manager.dart';
@@ -37,6 +36,7 @@ import '../view_model/event_edit_view_model.dart';
 import '../widget/event_group_dialog.dart';
 import '../widget/dropdown_widget.dart';
 import '../widget/event_time_edit_widget.dart';
+import '../widget/helpers/helpers/widgets/align.dart';
 import '../widget/title_text_widget.dart';
 
 typedef JSON = Map<String, dynamic>;
@@ -1715,7 +1715,7 @@ RoundRectButton(String title, double? height, Function()? onPressed) {
       },
       child: Text(title, style: _titleStyle),
       style: ElevatedButton.styleFrom(
-          primary: Theme.of(Get.context!).primaryColor,
+          backgroundColor: Theme.of(Get.context!).primaryColor,
           minimumSize: Size.zero, // Set this
           padding: EdgeInsets.symmetric(horizontal: 15), // and this
           shadowColor: Colors.transparent,
@@ -1861,14 +1861,13 @@ class _Chip extends StatelessWidget {
         backgroundColor: Theme
             .of(context)
             .canvasColor,
-        useDeleteButtonTooltip: false,
         labelPadding: EdgeInsets.fromLTRB(5, 2, 0, 2),
         label: Text(label),
         deleteIcon: Icon(Icons.close, size: 18),
         deleteIconColor: Colors.grey,
         onDeleted: () {
           onDeleted(index);
-        },
+        }, deleteButtonTooltipMessage: '',
       );
     } else {
       return GestureDetector(
@@ -2216,7 +2215,7 @@ contentAddButton(context, title, {
           if (onPressed != null) onPressed(title);
         },
         style: ElevatedButton.styleFrom(
-            primary: Theme.of(context).primaryColor.withOpacity(0.25),
+            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.25),
             minimumSize: Size.zero, // Set this
             shadowColor: Colors.transparent,
             shape: RoundedRectangleBorder(
@@ -2364,7 +2363,7 @@ RoundRectIconTextButton(BuildContext context, String title, IconData icon, Funct
           minimumSize: Size.zero, // Set this
           padding: EdgeInsets.symmetric(horizontal: 15), // and this
           shadowColor: Colors.transparent,
-          primary: Theme.of(context).primaryColor.withOpacity(0.25),
+          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.25),
           alignment: Alignment.center,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -2390,7 +2389,7 @@ RoundColorRectIconButton(IconData icon, double height, Color color, double width
       child: Icon(icon, size: height * 0.8, color: color),
       style: ElevatedButton.styleFrom(
           elevation: 0,
-          primary: Colors.white,
+          backgroundColor: Colors.white,
           minimumSize: Size.zero, // Set this
           padding: EdgeInsets.symmetric(horizontal: 10), // and this
           shadowColor: Colors.transparent,

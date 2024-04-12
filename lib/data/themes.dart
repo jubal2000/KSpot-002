@@ -36,12 +36,12 @@ final ThemeData lightTheme = ThemeData(
           borderRadius: BorderRadius.all(Radius.circular(common_m_radius))),
     )),
     outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-      primary: NAVY,
-      elevation: 0,
-      side: BorderSide(color: NAVY, width: 1),
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(common_m_radius))),
+      style: OutlinedButton.styleFrom(
+        backgroundColor: NAVY,
+        elevation: 0,
+        side: BorderSide(color: NAVY, width: 1),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(common_m_radius))),
       // side: BorderSide(color: Colors.grey[800]!),
     )),
     inputDecorationTheme: InputDecorationTheme(
@@ -100,7 +100,7 @@ final ThemeData darkTheme = ThemeData(
         )),
     outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          primary: NAVY,
+          backgroundColor: NAVY,
           elevation: 0,
           side: BorderSide(color: NAVY, width: 1),
           shape: const RoundedRectangleBorder(

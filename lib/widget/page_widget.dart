@@ -31,7 +31,7 @@ ShowPageControlWidget(BuildContext context, int now, int max, Function(int)? onP
               },
               child: Icon(Icons.first_page, size: 24, color: now - 1 >= 0 ? _textActiveColor : _textDisableColor),
               style: ElevatedButton.styleFrom(
-                  primary: now - 1 >= 0 ? _btnActiveColor : _btnDisableColor,
+                  backgroundColor: now - 1 >= 0 ? _btnActiveColor : _btnDisableColor,
                   minimumSize: Size.zero, // Set this
                   padding: EdgeInsets.zero, // and this
                   shadowColor: Colors.transparent,
@@ -52,7 +52,7 @@ ShowPageControlWidget(BuildContext context, int now, int max, Function(int)? onP
               },
               child: Icon(Icons.chevron_left, size: 24, color: now - 1 >= 0 ? _textActiveColor : _textDisableColor),
               style: ElevatedButton.styleFrom(
-                  primary: now - 1 >= 0 ? _btnActiveColor : _btnDisableColor,
+                  backgroundColor: now - 1 >= 0 ? _btnActiveColor : _btnDisableColor,
                   minimumSize: Size.zero, // Set this
                   padding: EdgeInsets.zero, // and this
                   shadowColor: Colors.transparent,
@@ -109,7 +109,7 @@ ShowPageControlWidget(BuildContext context, int now, int max, Function(int)? onP
               },
               child: Icon(Icons.chevron_right, size: 24, color: now + 1 < max ? _textActiveColor : _textDisableColor),
               style: ElevatedButton.styleFrom(
-                  primary: now + 1 < max ? _btnActiveColor : _btnDisableColor,
+                  backgroundColor: now + 1 < max ? _btnActiveColor : _btnDisableColor,
                   minimumSize: Size.zero, // Set this
                   padding: EdgeInsets.zero, // and this
                   shadowColor: Colors.transparent,
@@ -129,7 +129,7 @@ ShowPageControlWidget(BuildContext context, int now, int max, Function(int)? onP
               },
               child: Icon(Icons.last_page, size: 24, color: now + 1 < max ? _textActiveColor : _textDisableColor),
               style: ElevatedButton.styleFrom(
-                  primary: now + 1 < max ? _btnActiveColor : _btnDisableColor,
+                  backgroundColor: now + 1 < max ? _btnActiveColor : _btnDisableColor,
                   minimumSize: Size.zero, // Set this
                   padding: EdgeInsets.zero, // and this
                   shadowColor: Colors.transparent,

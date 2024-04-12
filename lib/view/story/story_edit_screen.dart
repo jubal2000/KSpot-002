@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:helpers/helpers/widgets/align.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/repository/story_repository.dart';
@@ -17,6 +16,7 @@ import '../../models/event_model.dart';
 import '../../models/story_model.dart';
 import '../../utils/utils.dart';
 import '../../view_model/story_edit_view_model.dart';
+import '../../widget/helpers/helpers/widgets/align.dart';
 import '../../widget/page_dot_widget.dart';
 import '../../widget/title_text_widget.dart';
 

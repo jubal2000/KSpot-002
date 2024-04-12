@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points_plus/flutter_polyline_points_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:helpers/helpers.dart';
 import 'package:http/http.dart';
 import 'package:image_editor/image_editor.dart';
 import 'package:kspot_002/data/common_sizes.dart';
@@ -19,6 +18,7 @@ import 'package:kspot_002/models/event_model.dart';
 import 'package:location/location.dart' as loc;
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'dart:ui' as ui;
+import 'helpers/helpers/widgets/align.dart';
 
 import '../data/app_data.dart';
 import '../utils/local_utils.dart';

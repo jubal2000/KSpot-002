@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/models/etc_model.dart';
 import 'package:kspot_002/view/chatting/chatting_edit_screen.dart';
 import 'package:kspot_002/view/message/message_group_item.dart';
@@ -26,7 +25,7 @@ import '../view/chatting/chatting_group_item.dart';
 import '../view/chatting/chatting_talk_screen.dart';
 import '../view/home/home_top_menu.dart';
 import '../widget/user_item_widget.dart';
-import 'app_view_model.dart';
+import '../widget/helpers/helpers/widgets/align.dart';
 
 class ChatType {
   static int get public   => 0;

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/view/place/place_edit_group_screen.dart';
 import 'package:kspot_002/view_model/event_edit_view_model.dart';
@@ -10,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../models/event_model.dart';
 import '../../utils/utils.dart';
 import '../../view_model/place_edit_view_model.dart';
+import '../../widget/helpers/helpers/widgets/align.dart';
 import '../../widget/page_dot_widget.dart';
 import '../../widget/title_text_widget.dart';
 import '../../models/place_model.dart';

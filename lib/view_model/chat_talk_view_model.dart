@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/view/follow/follow_screen.dart';
@@ -30,6 +29,7 @@ import '../services/cache_service.dart';
 import '../utils/utils.dart';
 import '../widget/card_scroll_viewer.dart';
 import '../widget/chat_item.dart';
+import '../widget/helpers/helpers/widgets/align.dart';
 import 'chat_view_model.dart';
 
 class ChatTalkViewModel extends ChangeNotifier {

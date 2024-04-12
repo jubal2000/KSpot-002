@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/data/style.dart';
 import 'package:kspot_002/view/place/place_detail_screen.dart';
@@ -39,6 +38,7 @@ import '../widget/share_widget.dart';
 import '../widget/recommend_widget.dart';
 import '../widget/time_list_widget.dart';
 import '../widget/user_card_widget.dart';
+import '../widget/helpers/helpers/widgets/align.dart';
 
 class EventDetailViewModel extends ChangeNotifier {
   final scrollController = AutoScrollController();
@@ -185,20 +185,28 @@ class EventDetailViewModel extends ChangeNotifier {
       children: [
         ShareWidget(Get.context!, 'event', eventInfo!.toJson(), showTitle: true),
         Expanded(child: SizedBox(height: 1)),
-        BookmarkWidget(Get.context!, 'event', eventInfo!.toJson(), title:'BOOKMARK'.tr, iconSize: 22, isEnabled: AppData.IS_LOGIN),
+        BookmarkWidget(Get.context!, 'event', eventInfo!.toJson(),
+          title:'BOOKMARK'.tr, iconSize: 22, isEnabled: AppData.IS_LOGIN,
+          onChangeCount: (status){
+            eventInfo!.bookmarked = status;
+            updateEventInfo();
+        }),
         SizedBox(width: 10),
-        LikeWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
-          LOG('--> LikeWidget result : $count');
-          eventInfo!.likeCount = count;
-          updateEventInfo();
+        LikeWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true,
+          isEnabled: AppData.IS_LOGIN, onChangeCount: (count) {
+            LOG('--> LikeWidget result : $count');
+            eventInfo!.likeCount = count;
+            updateEventInfo();
         }),
         SizedBox(width: 5),
-        RecommendWidget(Get.context!, 'event', eventInfo!.toJson(), showCount: true, isEnabled: AppData.IS_LOGIN, onSelected: (recommendCount) {
-          showRecommendBox().then((result) {
-            if (result == 'recommend') {
-              startRecommend();
-            }
-          });
+        RecommendWidget(Get.context!, 'event', eventInfo!.toJson(),
+          showCount: true, isEnabled: AppData.IS_LOGIN,
+          onSelected: (recommendCount) {
+            showRecommendBox().then((result) {
+              if (result == 'recommend') {
+                startRecommend();
+              }
+            });
         }),
       ]
     );

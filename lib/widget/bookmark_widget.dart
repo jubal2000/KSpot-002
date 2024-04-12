@@ -9,8 +9,9 @@ import '../data/theme_manager.dart';
 import '../utils/utils.dart';
 
 Widget BookmarkSmallWidget(BuildContext context, String type, JSON targetInfo,
-    {double iconSize = 18, String title = '', Function(JSON)? onChangeCount}) {
-  return BookmarkWidget(context, type, targetInfo, iconSize: iconSize, title: title, onChangeCount: onChangeCount);
+    {double iconSize = 18, String title = '', Function(bool)? onChangeCount}) {
+  return BookmarkWidget(context, type, targetInfo, iconSize: iconSize,
+    title: title, onChangeCount: onChangeCount);
 }
 
 Widget BookmarkWidget(BuildContext context, String type, JSON targetInfo,
@@ -24,7 +25,7 @@ Widget BookmarkWidget(BuildContext context, String type, JSON targetInfo,
       Color? enableColor,
       Color? disableColor,
       EdgeInsets? padding,
-      Function(JSON)? onChangeCount
+      Function(bool)? onChangeCount
     }) {
   var iconColor0 = enableColor  ?? Theme.of(context).primaryColor;
   var iconColor1 = disableColor ?? Theme.of(context).disabledColor;
@@ -41,9 +42,11 @@ Widget BookmarkWidget(BuildContext context, String type, JSON targetInfo,
               var targetPic = STR(targetInfo['pic']);
               // LOG('--> ShowLikeWidget imageData [$type] : ${targetInfo['picData']}');
               if (targetPic.isEmpty && LIST_NOT_EMPTY(targetInfo['picData'])) {
-                targetPic = STR(targetInfo['picData'].first is JSON ? targetInfo['picData'].first['url'] : targetInfo['picData'].first);
+                targetPic = STR(targetInfo['picData'].first is JSON ?
+                targetInfo['picData'].first['url'] : targetInfo['picData'].first);
               }
-              var targetTitle = type == 'story' ? STR(targetInfo['desc']) : type == 'user' ? STR(targetInfo['nickName']) : STR(targetInfo['title']);
+              var targetTitle = type == 'story' ? STR(targetInfo['desc']) :
+              type == 'user' ? STR(targetInfo['nickName']) : STR(targetInfo['title']);
               // LOG('--> BookmarkWidget isOn [$targetTitle] : $isChecked / ${targetInfo['likeCount']}');
               return GestureDetector(
                 child: Container(
@@ -72,7 +75,7 @@ Widget BookmarkWidget(BuildContext context, String type, JSON targetInfo,
                       if (result != null) {
                         setState(() {
                         targetInfo = result;
-                        if (onChangeCount != null) onChangeCount(targetInfo);
+                        if (onChangeCount != null) onChangeCount(isChecked);
                         });
                       }
                   });

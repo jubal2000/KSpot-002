@@ -2,7 +2,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/data/dialogs.dart';
 import 'package:kspot_002/models/recommend_model.dart';
 

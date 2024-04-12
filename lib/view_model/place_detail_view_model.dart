@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers.dart';
 import 'package:kspot_002/services/cache_service.dart';
 import 'package:kspot_002/view/place/place_detail_screen.dart';
 import 'package:kspot_002/view/place/place_edit_screen.dart';
@@ -27,6 +26,7 @@ import '../widget/event_schedule_widget.dart';
 import '../widget/image_scroll_viewer.dart';
 import '../widget/like_widget.dart';
 import '../widget/share_widget.dart';
+import '../widget/helpers/helpers/widgets/align.dart';
 
 class PlaceDetailViewModel extends ChangeNotifier {
   final scrollController = AutoScrollController();

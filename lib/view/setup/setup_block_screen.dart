@@ -356,7 +356,7 @@ class UserListItemState extends State<UserListItem> {
         future: _userInit,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData || widget.type == UserListType.report) {
-            _userInfo = snapshot.data;
+            _userInfo = snapshot.data ?? {};
             return Row(
               children: [
                 if (widget.type == UserListType.block && widget.isSelectable)

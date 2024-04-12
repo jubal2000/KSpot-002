@@ -27,7 +27,7 @@ class LoadingButton extends StatelessWidget {
               ),
             )
           : child,
-      style: ElevatedButton.styleFrom(primary: primary),
+      style: ElevatedButton.styleFrom(backgroundColor: primary),
     );
   }
 }

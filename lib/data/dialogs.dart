@@ -12,7 +12,6 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:helpers/helpers.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
@@ -766,7 +765,7 @@ Future<String> showCustomFieldSelectDialog(BuildContext context) async {
                                           }
                                         },
                                         style: ElevatedButton.styleFrom(
-                                            primary: Theme.of(context).canvasColor,
+                                            backgroundColor: Theme.of(context).canvasColor,
                                             minimumSize: Size.zero, // Set this
                                             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5), // and this
                                             shadowColor: Colors.transparent,
@@ -1016,7 +1015,7 @@ Future<JSON>? showTitleOptionDialog(BuildContext context, JSON optionMain, JSON 
                                                       },
                                                       style: ElevatedButton.styleFrom(
                                                           elevation: 3,
-                                                          primary: Colors.white,
+                                                          backgroundColor: Colors.white,
                                                           shadowColor: Colors.grey,
                                                           shape: RoundedRectangleBorder(
                                                               borderRadius: BorderRadius.circular(8),

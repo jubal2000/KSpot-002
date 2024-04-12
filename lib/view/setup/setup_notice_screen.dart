@@ -19,7 +19,7 @@ class SetupNoticeState extends State<SetupNoticeScreen> {
 
   refreshList(BuildContext context) {
     itemList = [];
-    AppData.INFO_NOTICE = JSON_CREATE_TIME_SORT_DESC(AppData.INFO_NOTICE);
+    AppData.infoData['notice'] = JSON_CREATE_TIME_SORT_DESC(AppData.INFO_NOTICE);
 
     for (var item in AppData.INFO_NOTICE.entries) {
       itemList.add(

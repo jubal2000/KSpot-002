@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers.dart';
 import 'package:kspot_002/utils/utils.dart';
 import 'package:kspot_002/view_model/event_edit_view_model.dart';
 import 'package:kspot_002/widget/csc_picker/csc_picker.dart';

@@ -28,7 +28,7 @@ class SmallButton extends StatelessWidget {
             )
           : child,
       style:
-          ElevatedButton.styleFrom(primary: primary, fixedSize: Size(120, 0)),
+          ElevatedButton.styleFrom(backgroundColor: primary, fixedSize: Size(120, 0)),
     );
   }
 }

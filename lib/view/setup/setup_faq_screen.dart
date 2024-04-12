@@ -20,7 +20,7 @@ class SetupFaqState extends State<SetupFaqScreen> {
 
   refreshList(BuildContext context) {
     itemList = [];
-    AppData.INFO_FAQ = JSON_CREATE_TIME_SORT_DESC(AppData.INFO_FAQ);
+    AppData.infoData['faq'] = JSON_CREATE_TIME_SORT_DESC(AppData.INFO_FAQ);
 
     for (var item in AppData.INFO_FAQ.entries) {
       itemList.add(

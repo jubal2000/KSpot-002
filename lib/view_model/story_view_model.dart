@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/models/story_model.dart';
 
 import '../data/app_data.dart';
@@ -21,7 +20,7 @@ import '../utils/utils.dart';
 import '../view/home/home_top_menu.dart';
 import '../view/place/place_list_screen.dart';
 import '../view/story/story_item.dart';
-import 'app_view_model.dart';
+import '../widget/helpers/helpers/widgets/align.dart';
 
 enum StoryListType {
   grid,

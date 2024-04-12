@@ -5,7 +5,6 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/view/event/event_screen.dart';
 import 'package:kspot_002/view/story/story_screen.dart';
@@ -18,6 +17,7 @@ import '../../models/user_model.dart';
 import '../../utils/utils.dart';
 import '../../view_model/app_view_model.dart';
 import '../../widget/dropdown_widget.dart';
+import '../../widget/helpers/helpers/widgets/align.dart';
 import '../../widget/page_dot_widget.dart';
 import '../../widget/verify_phone_widget.dart';
 

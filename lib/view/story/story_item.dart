@@ -3,7 +3,6 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers/widgets/align.dart';
 import 'package:kspot_002/models/event_model.dart';
 import 'package:kspot_002/repository/event_repository.dart';
 import 'package:kspot_002/view/story/story_detail_screen.dart';
@@ -22,6 +21,7 @@ import '../../services/api_service.dart';
 import '../../services/cache_service.dart';
 import '../../utils/utils.dart';
 import '../../widget/comment_widget.dart';
+import '../../widget/helpers/helpers/widgets/align.dart';
 import '../../widget/image_scroll_viewer.dart';
 import '../../widget/like_widget.dart';
 import '../../widget/share_widget.dart';
@@ -29,7 +29,6 @@ import '../../widget/user_item_widget.dart';
 import '../event/event_detail_screen.dart';
 import '../place/place_detail_screen.dart';
 import '../profile/profile_screen.dart';
-import '../profile/profile_target_screen.dart';
 
 class MainStoryItem extends StatefulWidget {
   MainStoryItem(this.itemInfo, {Key? key,

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:helpers/helpers.dart';
 import 'package:kspot_002/models/place_model.dart';
 import 'package:kspot_002/repository/event_repository.dart';
 import 'package:kspot_002/view/place/place_detail_screen.dart';
@@ -24,7 +23,7 @@ import '../view/event/event_detail_screen.dart';
 import '../widget/content_item_card.dart';
 import '../widget/date_picker_timeline/date_picker_widget.dart';
 import '../widget/google_map_widget.dart';
-import 'app_view_model.dart';
+import '../widget/helpers/helpers/widgets/align.dart';
 
 class EventListType {
   static int get map      => 0;
@@ -347,12 +346,14 @@ class EventViewModel extends ChangeNotifier {
   showEventItemDetail(EventModel item) {
     Future.delayed(Duration(milliseconds: 500)).then((_) {
       Get.to(() => EventDetailScreen(item, item.placeInfo))!.then((eventInfo) {
+        LOG('--> event closed : $eventInfo');
         if (eventInfo != null) {
           isMapUpdate = true;
           showList.clear();
           cache.setEventItem(eventInfo!);
-          notifyListeners();
         }
+        isFirstShow = true;
+        notifyListeners();
       });
     });
   }

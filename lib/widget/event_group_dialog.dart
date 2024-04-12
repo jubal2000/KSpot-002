@@ -1,7 +1,6 @@
 // import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:helpers/helpers.dart';
 import 'package:get/get.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
@@ -13,6 +12,7 @@ import '../repository/event_repository.dart';
 import '../utils/local_utils.dart';
 import '../utils/utils.dart';
 import 'content_item_card.dart';
+import 'helpers/helpers/widgets/align.dart';
 
 Future<EventGroupModel?> EventGroupSelectDialog(
     BuildContext mainContext,

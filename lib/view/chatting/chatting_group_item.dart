@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
-import 'package:helpers/helpers/widgets/widgets.dart';
 import 'package:kspot_002/data/common_sizes.dart';
 import 'package:kspot_002/models/etc_model.dart';
 import 'package:kspot_002/services/cache_service.dart';
@@ -17,6 +16,7 @@ import '../../repository/user_repository.dart';
 import '../../services/api_service.dart';
 import '../../utils/utils.dart';
 import '../../view_model/chat_view_model.dart';
+import '../../widget/helpers/helpers/widgets/align.dart';
 import '../../widget/user_item_widget.dart';
 import '../profile/profile_target_screen.dart';
 

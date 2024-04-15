@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:kspot_002/models/place_model.dart';
+import 'package:uuid/uuid.dart';
 import '../utils/utils.dart';
 import '../widget/event_time_edit_widget.dart';
 import 'etc_model.dart';
@@ -89,7 +90,6 @@ class EventModel {
   String?               timeRange;
   String?               themeColor;       // 대표 컬러
 
-
   @JsonKey(includeFromJson: false)
   int sortIndex = 0;
 
@@ -132,6 +132,30 @@ class EventModel {
 
   factory EventModel.fromJson(JSON json) => _$EventModelFromJson(json);
   JSON toJson() => _$EventModelToJson(this);
+
+  static createFromPlace(PlaceModel place) {
+    return EventModel(
+      id: Uuid().v4(),
+      status: 1,
+      showStatus: 1,
+      type: 2,
+      title: place.title,
+      titleKr: place.titleKr ?? place.title,
+      desc: place.desc,
+      descKr: place.descKr ?? place.desc,
+      pic: place.pic,
+      groupId: place.groupId,
+      placeId: place.id,
+      country: place.country,
+      countryState: place.countryState,
+      userId: place.userId,
+      likeCount: 0,
+      voteCount: 0,
+      commentCount: 0,
+      updateTime: place.updateTime,
+      createTime: place.createTime
+    );
+  }
 
   //------------------------------------------------------------------------------------------------------
   //  PicData
@@ -234,15 +258,14 @@ class EventModel {
           var startDate = DateTime.parse(time);
           if (startDate.toString().split(' ').first == checkDate.toString().split(' ').first) return item;
         }
-        return null;
+        // return null;
       } else {
-        // LOG('--> Date Range init : ${item.value['startDate']} ~ ${item.value['endDate']}');
         if (STR(item.startDate).isEmpty) item.startDate = DateTime.now().toString();
-        var startDate = DateTime.parse('${item.startDate!} 00:00:00.000');
+        var startDate = DateTime.parse('${item.startDate!.split(' ').first} 00:00:00.000');
         if (STR(item.endDate).isEmpty) item.endDate = startDate.add(Duration(days: 364)).toString();
-        var endDate = DateTime.parse('${item.endDate!} 23:59:59.999');
+        var endDate = DateTime.parse('${item.endDate!.split(' ').first} 23:59:59.999');
         var duration  = endDate.difference(startDate).inDays + 1;
-        // LOG('--> Date Range : ${item.title} -> ${item.startDate} ~ ${item.endDate} => $duration / ${item.week}');
+        LOG('-------> Date Range : ${item.title} -> $startDate ~ $endDate => $duration / ${item.week}');
         for (var i=0; i<duration; i++) {
           var day = startDate.add(Duration(days: i));
           var dayStr = day.toString().split(' ').first;
@@ -262,6 +285,7 @@ class EventModel {
               // LOG('--> [$title] day.weekday : $wm / ${item.dayWeek} => ${isShow ? 'show' : 'hide'}');
             }
             if (isShow) {
+              LOG('-------> Date add : ${item.title}');
               return item;
             }
           }

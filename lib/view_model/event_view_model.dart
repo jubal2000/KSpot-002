@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kspot_002/models/place_model.dart';
 import 'package:kspot_002/repository/event_repository.dart';
@@ -146,6 +147,7 @@ class EventViewModel extends ChangeNotifier {
     if (JSON_NOT_EMPTY(cache.eventData)) {
       for (var item in cache.eventData.entries) {
         final isExpired = eventRepo.checkIsExpired(item.value, AppData.currentDate);
+        // if (isManagerMode || (!isExpired && item.value.status == 1)) {
         if (isManagerMode || (!isExpired && item.value.status == 1)) {
           var placeInfo = item.value.placeInfo;
           placeInfo ??= await placeRepo.getPlaceFromId(item.value.placeId);
@@ -154,7 +156,7 @@ class EventViewModel extends ChangeNotifier {
             item.value.placeInfo = placeInfo;
             final pos = LatLng(DBL(placeInfo.address.lat), DBL(placeInfo.address.lng));
             if (eventListType.value == EventListType.map) {
-              // if (mapBounds !=  null) LOG('--> eventShowList add check : ${mapBounds!.toJson()} / $pos / ${mapBounds!.contains(pos)}');
+              if (mapBounds !=  null) LOG('--> eventShowList add check : ${mapBounds!.toJson()} / $pos / ${mapBounds!.contains(pos)}');
               final timeData = item.value.getDateTimeData(AppData.currentDate, item.value.title);
               if (timeData != null && (mapBounds == null || mapBounds!.contains(pos))) {
                 item.value.timeRange = '${timeData.startTime} ~ ${timeData.endTime}';
@@ -172,6 +174,17 @@ class EventViewModel extends ChangeNotifier {
         }
       }
     }
+    // if (JSON_NOT_EMPTY(cache.placeData)) {
+    //   for (var item in cache.placeData.entries) {
+    //     if (item.value.status == 1) {
+    //       // LOG('--> setShowList placeInfo [${placeInfo.id}] : ${placeInfo.title}');
+    //       final placeInfo = EventModel.createFromPlace(item.value);
+    //       placeInfo.value.placeInfo = placeInfo;
+    //       result.add(placeInfo);
+    //       LOG('--> add place to eventList : ${item.value.title}');
+    //     }
+    //   }
+    // }
     LOG('--> eventShowList : ${result.length} / ${cache.eventData.length} / ${currentDateTime.toString()}');
     return result;
   }

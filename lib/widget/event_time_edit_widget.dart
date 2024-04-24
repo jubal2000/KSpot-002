@@ -459,7 +459,7 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                                 height: 40,
                                 padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                                 decoration: BoxDecoration(
-                                  color: _timeData['week'].contains(item) ? Theme.of(context).splashColor : Theme.of(context).backgroundColor,
+                                  color: _timeData['week'].contains(item) ? Theme.of(context).splashColor : Theme.of(context).colorScheme.surface,
                                   borderRadius: BorderRadius.all(Radius.circular(5)),
                                   border: Border.all(
                                       color: _timeData['week'].contains(item) ? Theme.of(context).primaryColor : Colors.grey, width: 1.0),
@@ -498,7 +498,7 @@ class _EventTimeSelectState extends State<EventTimeSelectWidget> {
                                   height: 40,
                                   padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 10.w),
                                   decoration: BoxDecoration(
-                                    color: _timeData['dayWeek'].contains(item) ? Theme.of(context).splashColor : Theme.of(context).backgroundColor,
+                                    color: _timeData['dayWeek'].contains(item) ? Theme.of(context).splashColor : Theme.of(context).colorScheme.surface,
                                     borderRadius: BorderRadius.all(Radius.circular(5)),
                                     border: Border.all(
                                         color: _timeData['dayWeek'].contains(item) ? Theme.of(context).primaryColor : Colors.grey, width: 1.0),

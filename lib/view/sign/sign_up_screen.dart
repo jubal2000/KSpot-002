@@ -249,7 +249,7 @@ class SignUpScreen extends StatelessWidget {
                       LOG('--> userValue.user!.uid : ${userValue.user!.uid}');
                       AppData.loginInfo.loginId = userValue.user!.uid;
                       AppData.loginInfo.loginType = 'phone';
-                      AppData.loginInfo.mobileVerifyTime = CURRENT_SERVER_TIME();
+                      AppData.loginInfo.mobileVerifyTime = CURRENT_SERVER_TIME().toString();
                       viewModel.isMobileVerified = true;
                       viewModel.notifyListeners();
                     }

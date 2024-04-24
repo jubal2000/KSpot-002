@@ -160,7 +160,7 @@ class MessageItemState extends State<MessageItem> {
                                               }
                                             },
                                             key: GlobalKey(),
-                                            child: Text(DESC(widget.messageItem['desc']), maxLines: null, style: Theme.of(context).textTheme.bodyText2),
+                                            child: Text(DESC(widget.messageItem['desc']), maxLines: null, style: Theme.of(context).textTheme.bodyMedium),
                                           ),
                                         ]
                                     )

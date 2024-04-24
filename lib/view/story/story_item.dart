@@ -262,12 +262,26 @@ class MainStoryItemState extends State<MainStoryItem> with AutomaticKeepAliveCli
                                           break;
                                       }
                                     },
-                                    itemHeight: 45,
-                                    dropdownWidth: 190,
-                                    buttonHeight: 22,
-                                    buttonWidth: 22,
-                                    itemPadding: const EdgeInsets.all(10),
-                                    offset: const Offset(0, 5),
+                                    buttonStyleData: ButtonStyleData(
+                                      padding: EdgeInsets.zero,
+                                      height: 22,
+                                      width: 22,
+                                    ),
+                                    dropdownStyleData: DropdownStyleData(
+                                        padding: EdgeInsets.zero,
+                                        width: 190,
+                                        offset: Offset(0, 5)
+                                    ),
+                                    menuItemStyleData: MenuItemStyleData(
+                                      height: 45,
+                                      padding: EdgeInsets.all(10),
+                                    ),
+                                    // itemHeight: 45,
+                                    // dropdownWidth: 190,
+                                    // buttonHeight: 22,
+                                    // buttonWidth: 22,
+                                    // itemPadding: const EdgeInsets.all(10),
+                                    // offset: const Offset(0, 5),
                                   ),
                                 ),
                                 Padding(
@@ -671,12 +685,26 @@ class StoryCardItemState extends State<StoryCardItem> {
                                                   break;
                                               }
                                             },
-                                            itemHeight: 45,
-                                            dropdownWidth: 190,
-                                            buttonHeight: 22,
-                                            buttonWidth: 22,
-                                            itemPadding: const EdgeInsets.all(10),
-                                            offset: const Offset(0, 5),
+                                            buttonStyleData: ButtonStyleData(
+                                              padding: EdgeInsets.zero,
+                                              height: 22,
+                                              width: 22,
+                                            ),
+                                            dropdownStyleData: DropdownStyleData(
+                                                padding: EdgeInsets.zero,
+                                                width: 190,
+                                                offset: Offset(0, 8)
+                                            ),
+                                            menuItemStyleData: MenuItemStyleData(
+                                              height: 45,
+                                              padding: EdgeInsets.all(10),
+                                            ),
+                                            // itemHeight: 45,
+                                            // dropdownWidth: 190,
+                                            // buttonHeight: 22,
+                                            // buttonWidth: 22,
+                                            // itemPadding: const EdgeInsets.all(10),
+                                            // offset: const Offset(0, 5),
                                           ),
                                         ),
                                       ]
@@ -918,12 +946,26 @@ class StoryVerCardItemState extends State<StoryVerCardItem> {
                               //   break;
                             }
                           },
-                          itemHeight: 45,
-                          dropdownWidth: 190,
-                          buttonHeight: 22,
-                          buttonWidth: 22,
-                          itemPadding: const EdgeInsets.all(10),
-                          offset: const Offset(0, 5),
+                          buttonStyleData: ButtonStyleData(
+                            padding: EdgeInsets.zero,
+                            height: 22,
+                            width: 22,
+                          ),
+                          dropdownStyleData: DropdownStyleData(
+                              padding: EdgeInsets.zero,
+                              width: 190,
+                              offset: Offset(0, 5)
+                          ),
+                          menuItemStyleData: MenuItemStyleData(
+                            height: 45,
+                            padding: EdgeInsets.all(10),
+                          ),
+                          // itemHeight: 45,
+                          // dropdownWidth: 190,
+                          // buttonHeight: 22,
+                          // buttonWidth: 22,
+                          // itemPadding: const EdgeInsets.all(10),
+                          // offset: const Offset(0, 5),
                         ),
                       ),
                     ),
@@ -1155,12 +1197,26 @@ class StoryVerImageState extends State<StoryVerImageItem> {
                           //   break;
                           }
                         },
-                        itemHeight: 45,
-                        dropdownWidth: 190,
-                        buttonHeight: 22,
-                        buttonWidth: 22,
-                        itemPadding: const EdgeInsets.all(10),
-                        offset: const Offset(0, 5),
+                        buttonStyleData: ButtonStyleData(
+                          padding: EdgeInsets.zero,
+                          height: 22,
+                          width: 22,
+                        ),
+                        dropdownStyleData: DropdownStyleData(
+                            padding: EdgeInsets.zero,
+                            width: 190,
+                            offset: Offset(0, 5)
+                        ),
+                        menuItemStyleData: MenuItemStyleData(
+                          height: 45,
+                          padding: EdgeInsets.all(10),
+                        ),
+                        // itemHeight: 45,
+                        // dropdownWidth: 190,
+                        // buttonHeight: 22,
+                        // buttonWidth: 22,
+                        // itemPadding: const EdgeInsets.all(10),
+                        // offset: const Offset(0, 5),
                       ),
                     ),
                   ),

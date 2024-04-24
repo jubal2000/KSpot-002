@@ -61,68 +61,6 @@ class ThemeNotifier with ChangeNotifier {
     textTheme: GoogleFonts.notoSansTextTheme(),
   );
 
-  final _darkTheme = ThemeData(
-    brightness: Brightness.dark,
-    primaryColor: Colors.black,
-    primarySwatch: Colors.grey,
-    dividerColor: Colors.black12,
-    backgroundColor: const Color(0xFF202020),
-    canvasColor: const Color(0xFF202020),
-    // selectedRowColor: Colors.grey,
-    hintColor: Colors.grey,
-    unselectedWidgetColor: Colors.grey,
-    toggleableActiveColor: Colors.deepPurple,
-    shadowColor: Colors.grey[800],
-    iconTheme: IconThemeData(color: Colors.white),
-    textTheme: TextTheme(
-      headline1: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.white70),
-      headline2: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.deepOrangeAccent),
-      headline3: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.white70),
-      headline4: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.white70,
-        shadows: outlinedText(strokeWidth: 1, strokeColor: Colors.grey),
-      ),
-      headline5: TextStyle(fontSize: 14.0, color: Colors.grey[200],
-        shadows: outlinedText(strokeWidth: 1, strokeColor: Colors.grey),
-      ),
-      headline6: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.white70),
-      subtitle1: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.white70),
-      subtitle2: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.deepOrangeAccent),
-      bodyText1: const TextStyle(fontSize: 12.0, fontWeight: FontWeight.normal, color: Colors.white70),
-      bodyText2: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.normal, color: Colors.white),
-    ),
-  );
-
-  final _lightTheme = ThemeData(
-    brightness: Brightness.dark,
-    primaryColor: Colors.white,
-    primarySwatch: Colors.grey,
-    dividerColor: Colors.grey,
-    backgroundColor: const Color(0xFFE5E5E5),
-    canvasColor: const Color(0xFFE5E5E5),
-    // selectedRowColor: Colors.white,
-    hintColor: Colors.black,
-    unselectedWidgetColor: Colors.grey,
-    toggleableActiveColor: Colors.deepPurple,
-    shadowColor: Colors.grey[800],
-    iconTheme: IconThemeData(color: Colors.grey),
-    textTheme: TextTheme(
-      headline1: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black87),
-      headline2: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.deepOrange),
-      headline3: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.black87),
-      headline4: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.black87,
-        shadows: outlinedText(strokeWidth: 1, strokeColor: Colors.grey),
-      ),
-      headline5: TextStyle(fontSize: 14.0, color: Colors.black54,
-        shadows: outlinedText(strokeWidth: 1, strokeColor: Colors.grey),
-      ),
-      headline6: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.black54),
-      subtitle1: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54),
-      subtitle2: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.deepOrange),
-      bodyText1: const TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black54),
-      bodyText2: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54),
-    ),
-  );
-
   var _themeData = ThemeData();
   ThemeData getTheme() => _themeData;
   int  getThemeIndex() => themeIndex;
@@ -355,7 +293,7 @@ DialogDescBoldStyle(BuildContext context) {
 }
 
 DialogDescErrorStyle(BuildContext context) {
-  return TextStyle(fontSize: 14, color: Theme.of(context).errorColor, fontWeight: FontWeight.w800);
+  return TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.error, fontWeight: FontWeight.w800);
 }
 
 DialogDescExStyle(BuildContext context) {
@@ -363,7 +301,7 @@ DialogDescExStyle(BuildContext context) {
 }
 
 DialogDescExErrorStyle(BuildContext context) {
-  return TextStyle(fontSize: 12, color: Theme.of(context).errorColor, fontWeight: FontWeight.w600);
+  return TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.error, fontWeight: FontWeight.w600);
 }
 
 DialogLoadingDescStyle(BuildContext context) {
@@ -466,7 +404,7 @@ ItemTitleHotStyle(BuildContext context) {
 }
 
 ItemTitleAlertStyle(BuildContext context) {
-  return TextStyle(fontSize: 14, color: Theme.of(context).errorColor, fontWeight: FontWeight.w600);
+  return TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.error, fontWeight: FontWeight.w600);
 }
 
 ItemTitleExStyle(BuildContext context) {
@@ -506,7 +444,7 @@ ItemDescSelectStyle(BuildContext context) {
 }
 
 ItemDescAlertStyle(BuildContext context) {
-  return TextStyle(fontSize: 14, color: Theme.of(context).errorColor);
+  return TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.error);
 }
 
 ItemChatNameStyle(BuildContext context, [bool isOwner = false]) {
@@ -523,7 +461,7 @@ ItemChatReadStyle(BuildContext context, [bool isOpened = true]) {
 }
 
 ItemDescAlertSmallStyle(BuildContext context) {
-  return TextStyle(fontSize: 12, color: Theme.of(context).errorColor);
+  return TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.error);
 }
 
 ItemDescHintStyle(BuildContext context) {
@@ -546,7 +484,7 @@ ItemDescExStyle(BuildContext context) {
 }
 
 ItemDescEx2Style(BuildContext context) {
-  return TextStyle(fontSize: 11, color: Theme.of(context).errorColor);
+  return TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.error);
 }
 
 ItemDescExInfoStyle(BuildContext context) {

@@ -141,9 +141,9 @@ class _EditListSortState extends State<EditListWidget> {
         return Container(
           key: GlobalKey(),
           margin: EdgeInsets.symmetric(vertical: 5),
-          // color: Theme.of(context).backgroundColor.withOpacity(0.25),
+          // color: Theme.of(context).colorScheme.surface.withOpacity(0.25),
             // decoration: BoxDecoration(
-            //   color: Theme.of(context).backgroundColor.withOpacity(0.25),
+            //   color: Theme.of(context).colorScheme.surface.withOpacity(0.25),
             //     border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 1.0),
             //     borderRadius: BorderRadius.all(Radius.circular(8))
             // ),

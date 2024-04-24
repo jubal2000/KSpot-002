@@ -48,9 +48,9 @@ class BuildColor {
   Color get scaffold => Theme.of(_context).scaffoldBackgroundColor;
 
   ///```dart
-  ///return Theme.of(context).bottomAppBarColor
+  ///return Theme.of(context).bottomAppBarTheme.color
   ///```
-  Color get bottomAppBar => Theme.of(_context).bottomAppBarColor;
+  Color get bottomAppBar => Theme.of(_context).bottomAppBarTheme.color ?? Colors.white;
 
   ///```dart
   ///return Theme.of(context).cardColor
@@ -114,9 +114,9 @@ class BuildColor {
   Color get secondaryHeader => Theme.of(_context).secondaryHeaderColor;
 
   ///```dart
-  ///return Theme.of(context).backgroundColor
+  ///return Theme.of(context).colorScheme.surface
   ///```
-  Color get background => Theme.of(_context).backgroundColor;
+  Color get background => Theme.of(_context).canvasColor;
 
   ///```dart
   ///return Theme.of(context).dialogBackgroundColor
@@ -134,12 +134,12 @@ class BuildColor {
   Color get hint => Theme.of(_context).hintColor;
 
   ///```dart
-  ///return Theme.of(context).errorColor
+  ///return Theme.of(context).colorScheme.error
   ///```
-  Color get error => Theme.of(_context).errorColor;
+  Color get error => Theme.of(_context).colorScheme.error;
 
   ///```dart
   ///return Theme.of(context).toggleableActiveColor
   ///```
-  Color get toggleableActive => Theme.of(_context).toggleableActiveColor;
+  Color get toggleableActive => Theme.of(_context).toggleButtonsTheme.color ?? Colors.white;
 }

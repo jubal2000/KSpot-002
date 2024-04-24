@@ -130,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               //         expandedHeight: expandHeight.w,
               //         toolbarHeight: 65.w,
               //         forceElevated: innerBoxIsScrolled,
-              //         backgroundColor: Theme.of(context).backgroundColor,
+              //         backgroundColor: Theme.of(context).colorScheme.surface,
               //         systemOverlayStyle: SystemUiOverlayStyle(
               //           statusBarColor: Colors.transparent,
               //           statusBarIconBrightness: Brightness.dark, // For Android (dark icons)

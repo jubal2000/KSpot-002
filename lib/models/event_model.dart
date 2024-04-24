@@ -253,9 +253,11 @@ class EventModel {
   TimeData? getDateTimeData(DateTime checkDate, [String title = '']) {
     if (timeData == null) return null;
     for (var item in timeData!) {
+      LOG('-------> timeData [$title}] : ${item.day}');
       if (LIST_NOT_EMPTY(item.day)) {
         for (var time in item.day!) {
           var startDate = DateTime.parse(time);
+          LOG('-------> Date Day : ${item.title} -> $startDate ~ $checkDate');
           if (startDate.toString().split(' ').first == checkDate.toString().split(' ').first) return item;
         }
         // return null;

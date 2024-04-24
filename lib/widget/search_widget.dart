@@ -242,7 +242,7 @@ class SearchWidgetState extends State<SearchWidget> {
                       Container(
                         margin: EdgeInsets.fromLTRB(20, 5, 20, 5),
                         alignment: Alignment.centerLeft,
-                        child: Text(_newHistoryList[index], style: Theme.of(context).textTheme.headline1),
+                        child: Text(_newHistoryList[index], style: Theme.of(context).textTheme.headlineMedium),
                       ),
                       if (index < _newHistoryList.length - 1)
                         showHorizontalDivider(Size(double.infinity, 10)),

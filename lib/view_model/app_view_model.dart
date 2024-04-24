@@ -344,11 +344,25 @@ class AppViewModel extends ChangeNotifier {
               break;
           }
         },
-        itemHeight: 45,
-        dropdownWidth: 150,
-        buttonHeight: iconSize,
-        buttonWidth: iconSize,
-        offset: const Offset(0, 5),
+        buttonStyleData: ButtonStyleData(
+          padding: EdgeInsets.zero,
+          height: 30,
+          width: 30,
+        ),
+        dropdownStyleData: DropdownStyleData(
+          padding: EdgeInsets.zero,
+          width: 150,
+          offset: Offset(0, 5)
+        ),
+        menuItemStyleData: MenuItemStyleData(
+          height: 45,
+          // padding: EdgeInsets.only(left: 16, right: 16),
+        ),
+        // itemHeight: 45,
+        // dropdownWidth: 150,
+        // buttonHeight: iconSize,
+        // buttonWidth: iconSize,
+        // offset: const Offset(0, 5),
       ),
     );
   }

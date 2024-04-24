@@ -39,7 +39,7 @@ class AddressSearchDlg extends StatelessWidget {
         continueText: 'OK'.tr,
       ),
       style: AddressDialogStyle(
-        textColor: Theme.of(context).textTheme.bodyMedium!.color!,
+        color: Theme.of(context).textTheme.bodyMedium!.color!,
         backgroundColor: Theme.of(context).colorScheme.background,
       ),
       onDone: (address) async {

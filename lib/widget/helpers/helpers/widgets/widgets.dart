@@ -10,7 +10,6 @@ export 'numeric_pad.dart';
 export 'scrollabe_table.dart';
 export 'sliding_bottom_sheet/sliding_bottom_sheet.dart';
 export 'slivers.dart';
-export 'text.dart';
 
 class DoubleColumn extends StatelessWidget {
   ///It's create a double column with a space beetween.

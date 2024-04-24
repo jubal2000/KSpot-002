@@ -97,11 +97,15 @@ class _EventDetailState extends State<EventDetailScreen> {
                       var selected = value as DropdownItem;
                       viewModel.onEventTopMenuAction(selected);
                     },
-                    // customItemsHeights: const [5],
-                    itemHeight: 45,
-                    dropdownWidth: 190,
-                    itemPadding: const EdgeInsets.all(10),
-                    offset: const Offset(0, 10),
+                    dropdownStyleData: DropdownStyleData(
+                        padding: EdgeInsets.zero,
+                        width: 190,
+                        offset: Offset(0, 10)
+                    ),
+                    menuItemStyleData: MenuItemStyleData(
+                      height: 45,
+                      padding: EdgeInsets.all(10),
+                    ),
                   ),
                 ),
               ],
@@ -140,11 +144,15 @@ class _EventDetailState extends State<EventDetailScreen> {
                       var selected = value as DropdownItem;
                       viewModel.onEventTopMenuAction(selected);
                     },
-                    // customItemsHeights: const [5],
-                    itemHeight: 45,
-                    dropdownWidth: 190,
-                    itemPadding: const EdgeInsets.all(10),
-                    offset: const Offset(0, 10),
+                    dropdownStyleData: DropdownStyleData(
+                        padding: EdgeInsets.zero,
+                        width: 190,
+                        offset: Offset(0, 10)
+                    ),
+                    menuItemStyleData: MenuItemStyleData(
+                      height: 45,
+                      padding: EdgeInsets.all(10),
+                    ),
                   ),
                 ),
               ],

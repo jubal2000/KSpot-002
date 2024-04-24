@@ -354,7 +354,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                               Container(
                                 height: widget.textHeight,
                                 padding: EdgeInsets.only(top: 5),
-                                child: Text(STR(item.value['title']), style: Theme.of(context).textTheme.headline5!, maxLines: null),
+                                child: Text(STR(item.value['title']), style: Theme.of(context).textTheme.headlineMedium!, maxLines: null),
                               )
                           ]
                         )
@@ -393,7 +393,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                                 if (item.value['nickName'] != null) ...[
                                   Padding(
                                     padding: EdgeInsets.only(left: 5, bottom: 5),
-                                    child: Text(STR(item.value['nickName']), style: Theme.of(context).textTheme.subtitle1, maxLines: 2),
+                                    child: Text(STR(item.value['nickName']), style: Theme.of(context).textTheme.titleMedium, maxLines: 2),
                                   )
                                 ],
                                 // if (item.value['name'] != null) ...[
@@ -427,7 +427,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                                   color: Colors.white,
                                 ),
                                 SizedBox(width: 5),
-                                Text(STR(item.value['linkTitle']), style:Theme.of(context).textTheme.bodyText1!, maxLines: 4),
+                                Text(STR(item.value['linkTitle']), style:Theme.of(context).textTheme.bodyMedium!, maxLines: 4),
                               ],
                             ),
                           ),
@@ -443,8 +443,8 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                                   Icon(Icons.settings_sharp, color: Colors.white, size: 24),
                                 ]
                               ),
-                              buttonPadding: EdgeInsets.zero,
-                              dropdownPadding: EdgeInsets.zero,
+                              // buttonPadding: EdgeInsets.zero,
+                              // dropdownPadding: EdgeInsets.zero,
                               items: [
                                 ...DropdownItems.bannerEditItems.map(
                                   (item) =>
@@ -483,12 +483,20 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                                     onSelected(item.key, 2);
                                 }
                               },
-                              itemHeight: 45,
-                              dropdownWidth: 140,
-                              buttonHeight: 30,
-                              buttonWidth: 30,
-                              itemPadding: const EdgeInsets.only(left: 16, right: 16),
-                              offset: const Offset(0, 8),
+                              buttonStyleData: ButtonStyleData(
+                                padding: EdgeInsets.zero,
+                                height: 30,
+                                width: 30,
+                              ),
+                              dropdownStyleData: DropdownStyleData(
+                                  padding: EdgeInsets.zero,
+                                  width: 140,
+                                  offset: Offset(0, 8)
+                              ),
+                              menuItemStyleData: MenuItemStyleData(
+                                height: 45,
+                                padding: EdgeInsets.only(left: 16, right: 16),
+                              ),
                             ),
                           ),
                         ),
@@ -727,7 +735,7 @@ class CardDataScrollViewerState extends State<CardDataScrollViewer> {
                                     Container(
                                       padding: EdgeInsets.only(left: 5, right: 10),
                                       child: Text(
-                                          userInfo['nickName'], style: Theme.of(context).textTheme.subtitle1,
+                                          userInfo['nickName'], style: Theme.of(context).textTheme.titleMedium,
                                           maxLines: 2),
                                     )
                                   ],

@@ -164,12 +164,12 @@ class PlaceDetailViewModel extends ChangeNotifier {
               Text(placeInfo!.address.address1, style: Theme
                   .of(Get.context!)
                   .textTheme
-                  .bodyText1),
+                  .bodyMedium),
               SizedBox(height: 2),
               Text(placeInfo!.address.address2, style: Theme
                   .of(Get.context!)
                   .textTheme
-                  .bodyText1),
+                  .bodyMedium),
               SizedBox(height: 15),
               Row(
                 children: [

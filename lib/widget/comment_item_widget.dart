@@ -150,7 +150,7 @@ class CommentListItemState extends State<CommentListItem> {
                           padding: EdgeInsets.symmetric(vertical: 10),
                           child: Row(
                             children: [
-                              Icon(Icons.lock, size: 20, color: Theme.of(context).errorColor),
+                              Icon(Icons.lock, size: 20, color: Theme.of(context).colorScheme.error),
                               SizedBox(width: 5),
                               Text('This is a secret...'.tr, style: _descStyle, maxLines: 1),
                             ],
@@ -389,7 +389,7 @@ class CommentListExItemState extends State<CommentListExItem> {
                         padding: EdgeInsets.symmetric(vertical: 8),
                         child: Row(
                           children: [
-                            Icon(Icons.lock, size: 20, color: Theme.of(context).errorColor),
+                            Icon(Icons.lock, size: 20, color: Theme.of(context).colorScheme.error),
                             SizedBox(width: 5),
                             Text('This is a secret...'.tr, style: _descStyle, maxLines: 1),
                           ],

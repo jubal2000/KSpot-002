@@ -306,7 +306,7 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                               color: Colors.white,
                             ),
                             SizedBox(width: 5),
-                            Text(STR(item.value['linkTitle']), style:Theme.of(context).textTheme.bodyText1!, maxLines: 4),
+                            Text(STR(item.value['linkTitle']), style:Theme.of(context).textTheme.bodyMedium!, maxLines: 4),
                           ],
                         ),
                       ),
@@ -322,8 +322,20 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                                 Icon(Icons.settings_sharp, color: Colors.white, size: 24),
                               ]
                           ),
-                          buttonPadding: EdgeInsets.zero,
-                          dropdownPadding: EdgeInsets.zero,
+                          buttonStyleData: ButtonStyleData(
+                            padding: EdgeInsets.zero,
+                            height: 30,
+                            width: 30,
+                          ),
+                          dropdownStyleData: DropdownStyleData(
+                            padding: EdgeInsets.zero,
+                            width: 140,
+                            offset: Offset(0, 8)
+                          ),
+                          menuItemStyleData: MenuItemStyleData(
+                            height: 45,
+                            padding: EdgeInsets.only(left: 16, right: 16),
+                          ),
                           items: [
                             ...DropdownItems.bannerEditItems.map(
                                   (item) =>
@@ -362,12 +374,6 @@ class CardScrollViewerState extends State<CardScrollViewer> {
                                 onSelected(item.key, 2);
                             }
                           },
-                          itemHeight: 45,
-                          dropdownWidth: 140,
-                          buttonHeight: 30,
-                          buttonWidth: 30,
-                          itemPadding: const EdgeInsets.only(left: 16, right: 16),
-                          offset: const Offset(0, 8),
                         ),
                       ),
                     ),

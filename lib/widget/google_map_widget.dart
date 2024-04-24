@@ -194,7 +194,7 @@ class GoogleMapState extends State<GoogleMapWidget> with AutomaticKeepAliveClien
               isMoveActive = true;
             });
           } else {
-            widget.mapController?.animateCamera(CameraUpdate.newLatLng(markers.first.position));
+            widget.mapController?.animateCamera(CameraUpdate.newLatLngZoom(markers.first.position, 13));
             Future.delayed(Duration(milliseconds: 200), () {
               isMoveActive = true;
             });

@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+// import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -42,7 +42,6 @@ class FirebaseService extends GetxService {
   FirebaseFirestore? firestore;
   FirebaseAuth? fireAuth;
   FirebaseMessaging? messaging;
-  PendingDynamicLinkData? initialLink;
 
   String? token;
   String? recommendCode;
@@ -69,7 +68,8 @@ class FirebaseService extends GetxService {
     if (isInit) return;
     isInit = true;
 
-    final result = await Firebase.initializeApp();
+    final result = await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform);
     LOG('--> initService: ${result.toString()}');
 
     firestore = FirebaseFirestore.instance;
@@ -101,8 +101,8 @@ class FirebaseService extends GetxService {
 
     await setupFlutterNotifications();
 
-    // dynamic link ready..
-    initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
+    // // dynamic link ready..
+    // initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
 
     messaging = FirebaseMessaging.instance;
 
@@ -121,16 +121,16 @@ class FirebaseService extends GetxService {
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (initialLink != null) {
-        deepLinkProcess(Get.context!, initialLink);
-      }
-      // when app running..
-      FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) {
-        deepLinkProcess(Get.context!, dynamicLinkData);
-      }).onError((error) {
-        // Handle errors
-        LOG('--> dynamicLinkData.link error : $error');
-      });
+      // if (initialLink != null) {
+      //   deepLinkProcess(Get.context!, initialLink);
+      // }
+      // // when app running..
+      // FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) {
+      //   deepLinkProcess(Get.context!, dynamicLinkData);
+      // }).onError((error) {
+      //   // Handle errors
+      //   LOG('--> dynamicLinkData.link error : $error');
+      // });
     });
 
     if (AppData.isDevMode) {

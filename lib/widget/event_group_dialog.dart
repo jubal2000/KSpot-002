@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
+import 'package:kspot_002/data/style.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../data/app_data.dart';
@@ -180,7 +181,7 @@ Future<EventGroupModel?> EventGroupSelectDialog(
         return PointerInterceptor(
           child: AlertDialog(
             title: Text('Spot group select'.tr),
-            titleTextStyle: Theme.of(context).textTheme.subtitle1,
+            titleTextStyle: itemSubTitleStyle,
             titlePadding: EdgeInsets.all(20),
             insetPadding: EdgeInsets.all(40),
             actionsPadding: EdgeInsets.all(10),

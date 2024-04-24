@@ -137,8 +137,6 @@ class ImageListViewerState extends State<ImageListViewer> {
                                       Icon(Icons.settings_sharp, color: Colors.white, size: 24),
                                     ]
                                 ),
-                                buttonPadding: EdgeInsets.zero,
-                                dropdownPadding: EdgeInsets.zero,
                                 items: [
                                   ...DropdownItems.bannerEditItems.map(
                                         (item) =>
@@ -157,12 +155,20 @@ class ImageListViewerState extends State<ImageListViewer> {
                                       onSelected(widget.itemList.indexOf(item), 2);
                                   }
                                 },
-                                itemHeight: 45,
-                                dropdownWidth: 140,
-                                buttonHeight: 30,
-                                buttonWidth: 30,
-                                itemPadding: const EdgeInsets.only(left: 16, right: 16),
-                                offset: const Offset(0, 8),
+                                buttonStyleData: ButtonStyleData(
+                                  padding: EdgeInsets.zero,
+                                  height: 30,
+                                  width: 30,
+                                ),
+                                dropdownStyleData: DropdownStyleData(
+                                  padding: EdgeInsets.zero,
+                                  width: 140,
+                                  offset: Offset(0, 8)
+                                ),
+                                menuItemStyleData: MenuItemStyleData(
+                                  height: 45,
+                                  padding: EdgeInsets.only(left: 16, right: 16),
+                                ),
                               ),
                             ),
                           ),

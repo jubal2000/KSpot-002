@@ -291,7 +291,7 @@ class FollowTabState extends State<FollowTab> {
               height: 40,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(8)),
-                color: Theme.of(context).errorColor.withOpacity(0.25),
+                color: Theme.of(context).colorScheme.error.withOpacity(0.25),
               ),
               child: Center(
                 child: Text(widget.selectMax == 1 ? 'Please select a target'.tr : 'Please select targets'.tr, style: ItemTitleAlertStyle(context)),
@@ -489,12 +489,20 @@ class FollowListItemState extends State<FollowListItem> {
           alignment: Alignment.centerRight,
           child: Icon(Icons.more_vert_outlined, size: 22, color: Colors.grey),
         ),
-        itemHeight: 45,
-        dropdownWidth: 160,
-        buttonHeight: 30,
-        buttonWidth: 30,
-        itemPadding: const EdgeInsets.only(left: 12, right: 12),
-        offset: const Offset(0, 8),
+        buttonStyleData: ButtonStyleData(
+          padding: EdgeInsets.zero,
+          height: 30,
+          width: 30,
+        ),
+        dropdownStyleData: DropdownStyleData(
+            padding: EdgeInsets.zero,
+            width: 160,
+            offset: Offset(0, 8)
+        ),
+        menuItemStyleData: MenuItemStyleData(
+          height: 45,
+          padding: EdgeInsets.only(left: 16, right: 16),
+        ),
         items: [
           if (widget.isShowMenu)
             ...UserMenuItems.followingMenu.map((item) => DropdownMenuItem<DropdownItem>(

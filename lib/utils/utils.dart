@@ -2739,7 +2739,7 @@ inputChatSuffix(BuildContext context) {
     ),
     errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(8.0)),
-      borderSide: BorderSide(color: Theme.of(context).errorColor),
+      borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
     ),
   );
 }

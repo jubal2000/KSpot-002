@@ -1202,12 +1202,20 @@ class GoodsItemCardState extends State<GoodsItemCard> {
               child: Icon(Icons.more_vert_outlined, size: 22, color: Colors.black),
             ),
             // customItemsHeights: const [3],
-            itemHeight: 45,
-            dropdownWidth: 160,
-            buttonHeight: 30,
-            buttonWidth: 30,
-            itemPadding: const EdgeInsets.only(left: 16, right: 16),
-            offset: Offset(0, 50),
+            buttonStyleData: ButtonStyleData(
+              padding: EdgeInsets.zero,
+              height: 30,
+              width: 30,
+            ),
+            dropdownStyleData: DropdownStyleData(
+              padding: EdgeInsets.zero,
+              width: 160,
+              offset: Offset(0, 8)
+            ),
+            menuItemStyleData: MenuItemStyleData(
+              height: 45,
+              padding: EdgeInsets.only(left: 16, right: 16),
+            ),
             items: [
               // if (_goodsItem['status'] == 1)
               //   ...GoodsMenuItems.myItems1.map((item) => DropdownMenuItem<DropdownItem>(

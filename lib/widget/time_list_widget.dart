@@ -68,7 +68,7 @@ class _ShowTimeListState extends State<ShowTimeList> {
                     margin: EdgeInsets.symmetric(vertical: 5),
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).backgroundColor.withOpacity(0.35),
+                      color: Theme.of(context).colorScheme.surface.withOpacity(0.35),
                       borderRadius: BorderRadius.all(Radius.circular(8)),
                       border: Border.all(
                         color: isAdd ? Theme.of(context).primaryColor : OutLineColor(context),

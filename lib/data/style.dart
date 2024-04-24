@@ -39,7 +39,7 @@ dialogDescTextExStyle(context) { return TextStyle(
     fontSize: dialog_desc_ex_font_size, color: Theme.of(context).hintColor, fontWeight: FontWeight.w400);
 }
 dialogDescTextErrorStyle(context) { return TextStyle(
-    fontSize: dialog_desc_font_size, color: Theme.of(context).errorColor, fontWeight: FontWeight.w400);
+    fontSize: dialog_desc_font_size, color: Theme.of(context).colorScheme.error, fontWeight: FontWeight.w400);
 }
 
 // item..

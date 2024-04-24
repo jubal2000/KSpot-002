@@ -166,12 +166,20 @@ class MessageGroupItemState extends State<MessageGroupItem> {
               ),
               // customItemsIndexes: const [1],
               // customItemsHeight: 6,
-              itemHeight: 45,
-              dropdownWidth: 160,
-              buttonHeight: 30,
-              buttonWidth: 30,
-              itemPadding: const EdgeInsets.only(left: 12, right: 12),
-              offset: const Offset(0, 8),
+              buttonStyleData: ButtonStyleData(
+                padding: EdgeInsets.zero,
+                height: 30,
+                width: 30,
+              ),
+              dropdownStyleData: DropdownStyleData(
+                  padding: EdgeInsets.zero,
+                  width: 160,
+                  offset: Offset(0, 8)
+              ),
+              menuItemStyleData: MenuItemStyleData(
+                height: 45,
+                padding: EdgeInsets.only(left: 12, right: 12),
+              ),
               items: [
                 ...UserMenuItems.messageMenu.map((item) => DropdownMenuItem<DropdownItem>(
                   value: item,

@@ -111,7 +111,7 @@ class HomeScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.only(
                                         topLeft:  Radius.circular(_radiusSize),
                                     ),
-                                    color: Theme.of(context).bottomAppBarColor,
+                                    color: Theme.of(context).secondaryHeaderColor,
                                   ),
                                   padding: EdgeInsets.only(left: UI_HORIZONTAL_SPACE, right: UI_HORIZONTAL_SPACE_ES),
                                   child: Row(
@@ -130,7 +130,7 @@ class HomeScreen extends StatelessWidget {
                                     child: Container(
                                       width: UI_MENU_BG_HEIGHT - 8,
                                       height: UI_MENU_HEIGHT,
-                                      color: Theme.of(context).bottomAppBarColor,
+                                      color: Theme.of(context).secondaryHeaderColor,
                                     ),
                                   ),
                                   GestureDetector(
@@ -142,8 +142,8 @@ class HomeScreen extends StatelessWidget {
                                       height: UI_MENU_BG_HEIGHT - 10,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.all(Radius.circular(80)),
-                                        border: Border.all(color: Theme.of(context).bottomAppBarColor, width: 5.0,),
-                                        color: Theme.of(context).bottomAppBarColor
+                                        border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                                        color: Theme.of(context).secondaryHeaderColor
                                       ),
                                       child: Stack(
                                         children: [
@@ -165,7 +165,7 @@ class HomeScreen extends StatelessWidget {
                                   height: UI_MENU_HEIGHT,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.only(topRight: Radius.circular(_radiusSize)),
-                                    color: Theme.of(context).bottomAppBarColor,
+                                    color: Theme.of(context).secondaryHeaderColor,
                                   ),
                                   padding: EdgeInsets.only(left: UI_HORIZONTAL_SPACE_ES, right: UI_HORIZONTAL_SPACE),
                                   child: Row(

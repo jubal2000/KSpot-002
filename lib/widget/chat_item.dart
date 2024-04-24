@@ -243,7 +243,7 @@ class ChatItemState extends State<ChatItem> {
                                     DESC(widget.messageItem['desc']), maxLines: null, style: Theme
                                     .of(context)
                                     .textTheme
-                                    .bodyText2),
+                                    .bodyMedium),
                               ),
                             ]
                           )

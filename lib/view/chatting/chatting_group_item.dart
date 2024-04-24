@@ -229,14 +229,20 @@ class ChatGroupItem extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: Icon(Icons.more_vert_outlined, size: 22, color: Theme.of(context).indicatorColor),
               ),
-              // customItemsIndexes: const [1],
-              // customItemsHeight: 6,
-              itemHeight: kMinInteractiveDimension,
-              dropdownWidth: 140,
-              buttonHeight: 30,
-              buttonWidth: 30,
-              itemPadding: const EdgeInsets.only(left: 12, right: 12),
-              offset: const Offset(0, 8),
+              buttonStyleData: ButtonStyleData(
+                padding: EdgeInsets.zero,
+                height: 30,
+                width: 30,
+              ),
+              dropdownStyleData: DropdownStyleData(
+                  padding: EdgeInsets.zero,
+                  width: 140,
+                  offset: Offset(0, 8)
+              ),
+              menuItemStyleData: MenuItemStyleData(
+                height: 45,
+                padding: EdgeInsets.only(left: 12, right: 12),
+              ),
               items: [
                 if (isBlocked)...[
                   DropdownMenuItem<DropdownItem>(value: userMenuMsgUnReport, child: DropdownItems.buildItem(context, userMenuMsgUnReport)),

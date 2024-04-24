@@ -8,7 +8,6 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -40,6 +39,8 @@ import '../widget/card_scroll_viewer.dart';
 import '../widget/csc_picker/csc_picker.dart';
 import '../widget/dropdown_widget.dart';
 import '../widget/edit/edit_text_input_widget.dart';
+import '../widget/flutter_colorpicker/flutter_colorpicker.dart';
+import '../widget/flutter_colorpicker/src/utils.dart';
 import '../widget/image_scroll_viewer.dart';
 import '../widget/vote_widget.dart';
 import 'app_data.dart';
@@ -578,7 +579,6 @@ showLoadingDialog(BuildContext context, String message) {
     barrierDismissible: false, // lock touched close..
     builder: (BuildContext context) {
       dialogContext = context;
-      LOG('--> show loading.. : $message');
       return Dialog(
           child: Container(
             padding: EdgeInsets.all(20),
@@ -727,7 +727,7 @@ Future<String> showCustomFieldSelectDialog(BuildContext context) async {
                 return AlertDialog(
                     title: Text('Custom field'.tr),
                     titlePadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
-                    titleTextStyle: Theme.of(context).textTheme.subtitle1!,
+                    titleTextStyle: Theme.of(context).textTheme.titleMedium,
                     insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 120),
                     contentPadding: EdgeInsets.symmetric(vertical: 5),
                     actionsPadding: EdgeInsets.fromLTRB(10, 0, 10, 10),
@@ -3901,7 +3901,7 @@ Future<String?> showJsonButtonSelectExDialog(BuildContext context, String title,
                                         children: [
                                           Row(
                                               children: [
-                                                Text(STR(item['title']).toString().tr, style: Theme.of(context).textTheme.subtitle1),
+                                                Text(STR(item['title']).toString().tr, style: Theme.of(context).textTheme.titleMedium),
                                                 if (BOL(item['disabled']))...[
                                                   SizedBox(width: 10),
                                                   Text('[${'Added'.tr}]', style: ItemDescAlertStyle(context)),

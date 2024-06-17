@@ -42,7 +42,8 @@ class ProfileTargetScreen extends StatelessWidget {
 }
 
 class ProfileScreen extends StatefulWidget {
-  ProfileScreen(this.userViewModel, { Key? key, this.isShowBack = false }) : super(key: key);
+  ProfileScreen(this.userViewModel,
+    { Key? key, this.isShowBack = false }) : super(key: key);
 
   UserViewModel userViewModel;
   bool isShowBack;
@@ -64,7 +65,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     _setupViewModel.init();
-    var expandHeight = UI_PROFILE_BACK_SIZE + UI_FACE_SIZE * 0.5 + 10;
     return SafeArea(
       top: false,
       child: ChangeNotifierProvider.value(
@@ -95,24 +95,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           if (APP_STORE_OPEN)...[
                             InkWell(
-                                onTap: () {
-                                },
-                                child: Icon(Icons.store_outlined, size: 24.sp)
+                              onTap: () {
+                              },
+                              child: Icon(Icons.store_outlined, size: 24.sp)
                             ),
                             SizedBox(width: 20.w),
                           ],
                           InkWell(
-                              onTap: () {
-                                Get.to(() => MessageScreen());
-                              },
-                              child: Icon(Icons.mail_outline, size: 24.sp)
+                            onTap: () {
+                              Get.to(() => MessageScreen());
+                            },
+                            child: Icon(Icons.mail_outline, size: 24.sp)
                           ),
                           SizedBox(width: 20.w),
                           InkWell(
-                              onTap: () {
-                                _key.currentState!.openEndDrawer();
-                              },
-                              child: Icon(Icons.menu, size: 24.sp)
+                            onTap: () {
+                              _key.currentState!.openEndDrawer();
+                            },
+                            child: Icon(Icons.menu, size: 24.sp)
                           ),
                           SizedBox(width: UI_HORIZONTAL_SPACE),
                         ],
@@ -121,188 +121,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   )
                 ],
               ),
-              // body: NestedScrollView(
-              //   headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-              //     return <Widget>[
-              //       SliverAppBar(
-              //         pinned: true,
-              //         stretch: true,
-              //         automaticallyImplyLeading: false,
-              //         expandedHeight: expandHeight.w,
-              //         toolbarHeight: 65.w,
-              //         forceElevated: innerBoxIsScrolled,
-              //         backgroundColor: Theme.of(context).colorScheme.surface,
-              //         systemOverlayStyle: SystemUiOverlayStyle(
-              //           statusBarColor: Colors.transparent,
-              //           statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
-              //           statusBarBrightness: Brightness.light, // For iOS (dark icons)
-              //         ),
-              //         leading: widget.isShowBack ? InkWell(
-              //             onTap: () {
-              //               Get.back();
-              //             },
-              //             child: Row(
-              //               children: [
-              //                 SizedBox(width: UI_HORIZONTAL_SPACE),
-              //                 OutlineIcon(Icons.arrow_back, 24.sp, Colors.white, shadowColor: Colors.black87)
-              //               ],
-              //             )
-              //         ) : null,
-              //         actions: [
-              //           Column(
-              //             mainAxisAlignment: MainAxisAlignment.center,
-              //             children: [
-              //               Row(
-              //                 children: [
-              //                   if (APP_STORE_OPEN)...[
-              //                     InkWell(
-              //                         onTap: () {
-              //                         },
-              //                         child: OutlineIcon(Icons.store_outlined, 24.sp, Colors.white, shadowColor: Colors.black87)
-              //                     ),
-              //                     SizedBox(width: 14.w),
-              //                   ],
-              //                   InkWell(
-              //                       onTap: () {
-              //                         Get.to(() => MessageScreen());
-              //                       },
-              //                       child: OutlineIcon(Icons.mail_outline, 24.sp, Colors.white, shadowColor: Colors.black87)
-              //                   ),
-              //                   SizedBox(width: 14.w),
-              //                   InkWell(
-              //                       onTap: () {
-              //                         _key.currentState!.openEndDrawer();
-              //                       },
-              //                       child: OutlineIcon(Icons.menu, 24.sp, Colors.white, shadowColor: Colors.black87)
-              //                   ),
-              //                   SizedBox(width: UI_HORIZONTAL_SPACE),
-              //                 ],
-              //               )
-              //             ],
-              //           )
-              //         ],
-              //         flexibleSpace: FlexibleSpaceBar(
-              //           expandedTitleScale: 1.0,
-              //           titlePadding: EdgeInsets.zero,
-              //           title: Stack(
-              //             children: [
-              //               Positioned(
-              //                 bottom: UI_PROFILE_BACK_SIZE.w - UI_FACE_SIZE.w,
-              //                 child: Container(
-              //                   width: Get.width,
-              //                   height: UI_PROFILE_BACK_SIZE.w - UI_FACE_SIZE.w,
-              //                     child: FittedBox(
-              //                     fit: BoxFit.fitWidth,
-              //                     child: userViewModel.showProfileUserBackground(),
-              //                   )
-              //                 )
-              //               ),
-              //               // Positioned(
-              //               //   top: 40.w,
-              //               //   right: UI_HORIZONTAL_SPACE.w,
-              //               //   child: Row(
-              //               //     children: [
-              //               //       if (APP_STORE_OPEN)...[
-              //               //         InkWell(
-              //               //           onTap: () {
-              //               //           },
-              //               //           child: OutlineIcon(Icons.store_outlined, 24, Colors.white, shadowColor: Colors.black87)
-              //               //         ),
-              //               //         SizedBox(width: 15.w),
-              //               //       ],
-              //               //       InkWell(
-              //               //         onTap: () {
-              //               //           Get.to(() => MessageScreen());
-              //               //         },
-              //               //         child: OutlineIcon(Icons.mail_outline, 24, Colors.white, shadowColor: Colors.black87)
-              //               //       ),
-              //               //       SizedBox(width: 15.w),
-              //               //       InkWell(
-              //               //         onTap: () {
-              //               //           _key.currentState!.openEndDrawer();
-              //               //         },
-              //               //         child: OutlineIcon(Icons.menu, 24, Colors.white, shadowColor: Colors.black87)
-              //               //       ),
-              //               //     ],
-              //               //   ),
-              //               // ),
-              //             ]
-              //           ),
-              //         ),
-              //         // bottom: PreferredSize(
-              //         //   preferredSize: Size.fromHeight(UI_FACE_SIZE.w),
-              //         //   child: Container(
-              //         //     width: Get.width,
-              //         //     child: Column(
-              //         //       mainAxisAlignment: MainAxisAlignment.center,
-              //         //       children: [
-              //         //         userViewModel.showProfileUserFace(),
-              //         //         SizedBox(height: 10.w),
-              //         //         Container(
-              //         //           height: UI_PROFILE_TEXT_SIZE.w,
-              //         //           child: Column(
-              //         //             mainAxisAlignment: MainAxisAlignment.center,
-              //         //             children: [
-              //         //               Text(userViewModel.userInfo!.nickName, style: AppBarTitleOutlineStyle(context, color: Colors.black, Colors.white30)),
-              //         //             ],
-              //         //           )
-              //         //         )
-              //         //       ]
-              //         //     )
-              //         //   ),
-              //         // ),
-              //       ),
-              //     ];
-              //   },
-                body: Container(
-                  padding: EdgeInsets.symmetric(horizontal: UI_HORIZONTAL_SPACE.w, vertical: 5.w),
-                  child: ListView(
-                    shrinkWrap: true,
-                    padding: EdgeInsets.zero,
-                    physics: NeverScrollableScrollPhysics(),
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 20.w),
-                          userViewModel.showProfileUserFace(),
-                          SizedBox(height: 10.w),
-                          SizedBox(
-                            height: UI_PROFILE_TEXT_SIZE.w,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(STR(userViewModel.userInfo?.nickName),
-                                  style: AppBarTitleOutlineStyle(context, color: Colors.black, Colors.white30)),
-                              ],
-                            )
-                          ),
-                          Text(DESC(userViewModel.userInfo?.message), style: ItemDescOutlineStyle(context), maxLines: 1),
-                          SizedBox(height: 10.w),
-                          Row(
+              body: Container(
+                padding: EdgeInsets.symmetric(
+                    horizontal: UI_HORIZONTAL_SPACE.w, vertical: 5.w),
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  physics: NeverScrollableScrollPhysics(),
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 20.w),
+                        userViewModel.showProfileUserFace(),
+                        SizedBox(height: 10.w),
+                        SizedBox(
+                          height: UI_PROFILE_TEXT_SIZE.w,
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              if (!userViewModel.isMyProfile)...[
-                                showSendMessageWidget(context, userViewModel.userInfo!, title: '1:1 TALK'.tr),
-                                SizedBox(width: 2),
-                              ],
-                              if (userViewModel.isMyProfile)...[
-                                CreditWidget(context, userViewModel.userInfo!.toJson()),
-                                SizedBox(width: 2),
-                              ],
-                              LikeWidget(context, 'user', userViewModel.userInfo!.toJson(), showCount: true, isEnabled: !userViewModel.isMyProfile),
+                              Text(STR(userViewModel.userInfo?.nickName),
+                                style: AppBarTitleOutlineStyle(context,
+                                    color: Colors.black, Colors.white30)),
                             ],
-                              // children: _shareLink,
-                          ),
-                          if (userViewModel.snsData.isNotEmpty)...[
-                            userViewModel.showSnsData(),
-                          ]
-                        ],
-                      ),
-                      userViewModel.showUserContentList(),
-                    ],
-                  )
-                // ) // show profile main..
+                          )
+                        ),
+                        Text(DESC(userViewModel.userInfo?.message),
+                            style: ItemDescOutlineStyle(context), maxLines: 1),
+                        SizedBox(height: 10.w),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (!userViewModel.isMyProfile)...[
+                              showSendMessageWidget(context,
+                                userViewModel.userInfo!, title: '1:1 TALK'.tr),
+                              SizedBox(width: 2),
+                            ],
+                            if (userViewModel.isMyProfile)...[
+                              CreditWidget(context,
+                                userViewModel.userInfo!.toJson()),
+                              SizedBox(width: 2),
+                            ],
+                            LikeWidget(context, 'user',
+                              userViewModel.userInfo!.toJson(),
+                              showCount: true,
+                              isEnabled: !userViewModel.isMyProfile),
+                          ],
+                            // children: _shareLink,
+                        ),
+                        if (userViewModel.snsData.isNotEmpty)...[
+                          userViewModel.showSnsData(),
+                        ]
+                      ],
+                    ),
+                    userViewModel.showUserContentList(),
+                  ],
+                )
               ),
               endDrawer: ChangeNotifierProvider.value(
                 value: _setupViewModel,
@@ -324,7 +198,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 SizedBox(width: 10.w),
                                 Icon(Icons.menu, size: 24.sp),
                                 SizedBox(width: 10.w),
-                                Text('User Menu'.tr, style: AppBarTitleStyle(context))
+                                Text('User Menu'.tr,
+                                  style: AppBarTitleStyle(context))
                               ],
                             ),
                           ),

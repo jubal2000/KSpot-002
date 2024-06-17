@@ -76,16 +76,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               key: _key,
               appBar: AppBar(
                 leading: widget.isShowBack ? InkWell(
-                    onTap: () {
-                      Get.back();
-                    },
-                    child: Row(
-                      children: [
-                        SizedBox(width: UI_HORIZONTAL_SPACE),
-                        Icon(Icons.arrow_back, size: 24.sp)
-                      ],
-                    )
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: Row(
+                    children: [
+                      SizedBox(width: UI_HORIZONTAL_SPACE),
+                      Icon(Icons.arrow_back, size: 24.sp)
+                    ],
+                  )
                 ) : null,
+                backgroundColor: Colors.transparent,
                 actions: [
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -266,16 +267,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           SizedBox(height: 20.w),
                           userViewModel.showProfileUserFace(),
                           SizedBox(height: 10.w),
-                          Container(
-                              height: UI_PROFILE_TEXT_SIZE.w,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(userViewModel.userInfo!.nickName, style: AppBarTitleOutlineStyle(context, color: Colors.black, Colors.white30)),
-                                ],
-                              )
+                          SizedBox(
+                            height: UI_PROFILE_TEXT_SIZE.w,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(STR(userViewModel.userInfo?.nickName),
+                                  style: AppBarTitleOutlineStyle(context, color: Colors.black, Colors.white30)),
+                              ],
+                            )
                           ),
-                          Text(DESC(userViewModel.userInfo!.message), style: ItemDescOutlineStyle(context), maxLines: 1),
+                          Text(DESC(userViewModel.userInfo?.message), style: ItemDescOutlineStyle(context), maxLines: 1),
                           SizedBox(height: 10.w),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,

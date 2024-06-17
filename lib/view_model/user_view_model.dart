@@ -269,7 +269,7 @@ class UserViewModel extends ChangeNotifier {
                 width: 2.0,
               ),
             ),
-            child: getCircleImage(userInfo!.pic, UI_FACE_SIZE.w),
+            child: getCircleImage(STR(userInfo?.pic), UI_FACE_SIZE.w),
           ),
           if (isMyProfile)
             Positioned(

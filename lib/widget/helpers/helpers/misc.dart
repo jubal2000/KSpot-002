@@ -129,10 +129,14 @@ class Misc {
       view: view,
       child: RenderPositionedBox(child: repaintBoundary),
       configuration: ViewConfiguration(
-        physicalConstraints: BoxConstraints(
-          maxWidth: logicalSize.width,
-          maxHeight: logicalSize.height
+        size: Size(
+          logicalSize.width,
+          logicalSize.height,
         ),
+        // physicalConstraints: BoxConstraints(
+        //   maxWidth: logicalSize.width,
+        //   maxHeight: logicalSize.height
+        // ),
         devicePixelRatio: pixelRatio ?? 1.0,
       ),
     );

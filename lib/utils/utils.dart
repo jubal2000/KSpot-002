@@ -828,12 +828,12 @@ NUMBER_K(int number) {
 
 Widget getCircleImage(String url, double size) {
   return SizedBox(
-      width: size,
-      height: size,
-      child: ClipRRect(
-          borderRadius: BorderRadius.circular(size),
-          child: showImageWidget(url, BoxFit.cover)
-      )
+    width: size,
+    height: size,
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(size),
+      child: showImageWidget(url, BoxFit.cover)
+    )
   );
 }
 
